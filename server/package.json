@@ -1,0 +1,23 @@
+{
+  "name": "career-copilot-server",
+  "version": "1.0.0",
+  "description": "Production API & AI Services for Career Copilot",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "multer": "^2.3.0",
+    "openai": "^4.56.0",
+    "pdf-parse": "^2.4.5",
+    "pg": "^8.12.0",
+    "uuid": "^9.0.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.4"
+  }
+}

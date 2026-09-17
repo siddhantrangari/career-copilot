@@ -1,0 +1,33 @@
+{
+  "name": "career-copilot",
+  "version": "1.0.0",
+  "private": true,
+  "description": "AI-Powered Job Search & Executive Career Accelerator SaaS (NxtJob Alternative)",
+  "workspaces": [
+    "server",
+    "client"
+  ],
+  "scripts": {
+    "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
+    "dev:server": "npm --prefix server run dev",
+    "dev:client": "npm --prefix client run dev",
+    "build": "npm --prefix client run build",
+    "start": "npm --prefix server start",
+    "docker:db:up": "docker compose up -d career-copilot-postgres",
+    "docker:db:down": "docker compose down",
+    "docker:db:logs": "docker compose logs -f career-copilot-postgres",
+    "install:all": "npm install && npm --prefix server install && npm --prefix client install"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  },
+  "keywords": [
+    "career-copilot",
+    "nxtjob-alternative",
+    "ai-job-search",
+    "ats-scanner",
+    "mock-interview"
+  ],
+  "author": "Siddhant Rangari",
+  "license": "MIT"
+}

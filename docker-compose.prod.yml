@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  career-copilot-postgres:
+    image: postgres:16-alpine
+    container_name: career-copilot-postgres
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:${CAREER_COPILOT_DB_PORT:-5438}:5432"
+    environment:
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-career_secret_2026}
+      POSTGRES_DB: ${DB_NAME:-career_copilot_db}
+    volumes:
+      - career_copilot_pgdata:/var/lib/postgresql/data
+      - ./docker/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    networks:
+      - career_copilot_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-postgres} -d ${DB_NAME:-career_copilot_db}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  career_copilot_pgdata:
+    name: career_copilot_pgdata
+
+networks:
+  career_copilot_network:
+    name: career_copilot_network

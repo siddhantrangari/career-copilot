@@ -1,0 +1,30 @@
+# Dependencies
+node_modules/
+**/node_modules/
+
+# Environment files (NEVER commit secrets)
+.env
+.env.local
+.env.*.local
+server/.env
+client/.env
+
+# Build outputs
+dist/
+build/
+*.log
+npm-debug.log*
+
+# OS / Editor
+.DS_Store
+**/.DS_Store
+.vscode/
+.idea/
+
+# Temp storage
+data/
+server/data/
+client/dist/
+dist/
+build/
+
