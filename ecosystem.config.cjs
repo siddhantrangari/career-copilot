@@ -1,20 +1,20 @@
 module.exports = {
   apps: [
     {
-      name: 'career-copilot-api',
+      name: 'career-copilot-os',
       script: 'server/src/index.js',
-      cwd: '/var/www/career-copilot',
+      cwd: '/var/www/career-copilot-os',
       instances: 1,
+      exec_mode: 'fork',
       autorestart: true,
       watch: false,
-      max_memory_restart: '1G',
+      max_memory_restart: '600M',
       env: {
         NODE_ENV: 'production',
-        PORT: 4005,
+        PORT: 4011,
       },
-      env_file: '/var/www/career-copilot/.env.production',
-      error_file: '/var/log/career-copilot-api-err.log',
-      out_file: '/var/log/career-copilot-api-out.log',
+      error_file: '/var/log/career-copilot-os-err.log',
+      out_file: '/var/log/career-copilot-os-out.log',
       log_date_format: 'YYYY-MM-DD HH:mm:ss Z',
     },
   ],

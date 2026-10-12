@@ -1,0 +1,400 @@
+[
+  {
+    "id": "philips-kafka-pipeline",
+    "title": "Real-Time Patient Dashboard Pipeline",
+    "company": "Philips Innovation Campus",
+    "period": "Sep 2021 – Feb 2024",
+    "challenge": "The patient monitoring dashboard was slow to load because real-time data streaming was tightly coupled to dashboard rendering. Clinicians could not get timely patient status updates.",
+    "action": "Designed and implemented a Kafka → AWS S3 decoupling pipeline that separated the streaming layer from the rendering layer. Built a Spring Boot microservice to consume Kafka topics, process and store data in S3, and serve it asynchronously to the React frontend.",
+    "result": "70% reduction in dashboard load time, sub-second latency for live vitals, and zero data loss during peak load.",
+    "metrics": [
+      "70% load time reduction",
+      "sub-second latency",
+      "zero data loss at peak"
+    ],
+    "skills": [
+      "Kafka",
+      "Spring Boot",
+      "AWS S3",
+      "React",
+      "Java"
+    ],
+    "usedFor": [
+      "performance",
+      "distributed-systems",
+      "real-time",
+      "healthcare"
+    ]
+  },
+  {
+    "id": "philips-camel-migration",
+    "title": "Apache Camel → Spring Boot Migration",
+    "company": "Philips Innovation Campus",
+    "period": "Sep 2021 – Feb 2024",
+    "challenge": "A legacy Apache Camel integration process was resource-intensive, hard to maintain, and bottlenecking several clinical data flows.",
+    "action": "Systematically mapped every Camel route and rebuilt them as Spring Boot microservices with clean REST APIs and a React frontend, adding proper error handling, logging and monitoring along the way.",
+    "result": "98% improvement in API efficiency, materially lower resource consumption, and a codebase the team could actually maintain.",
+    "metrics": [
+      "98% API efficiency improvement"
+    ],
+    "skills": [
+      "Apache Camel",
+      "Spring Boot",
+      "REST",
+      "React",
+      "Migration"
+    ],
+    "usedFor": [
+      "legacy-modernisation",
+      "performance",
+      "architecture"
+    ]
+  },
+  {
+    "id": "philips-observability",
+    "title": "End-to-End Observability Stack",
+    "company": "Philips Innovation Campus",
+    "period": "Sep 2021 – Feb 2024",
+    "challenge": "Production incidents took hours to diagnose — there was no centralised observability across the distributed clinical system.",
+    "action": "Stood up a full observability stack: Prometheus for metrics, Grafana dashboards, Loki for log aggregation, Tempo for distributed tracing, OpenTelemetry instrumentation and CloudWatch for AWS-level monitoring.",
+    "result": "30–40% reduction in Mean Time To Resolution. Incidents that previously took hours were identified in minutes.",
+    "metrics": [
+      "30–40% MTTR reduction"
+    ],
+    "skills": [
+      "Prometheus",
+      "Grafana",
+      "Loki",
+      "Tempo",
+      "OpenTelemetry",
+      "CloudWatch"
+    ],
+    "usedFor": [
+      "observability",
+      "reliability",
+      "devops"
+    ]
+  },
+  {
+    "id": "philips-mentoring",
+    "title": "Mentoring and Engineering Standards",
+    "company": "Philips Innovation Campus",
+    "period": "Sep 2021 – Feb 2024",
+    "challenge": "Junior developers were not following backend best practices, producing inconsistent code quality and longer delivery cycles.",
+    "action": "Wrote the team's coding standards, ran weekly code review sessions, introduced microservices design patterns, and paired with each junior developer on their first production feature.",
+    "result": "20% improvement in team delivery efficiency, measurably better code quality, and two juniors promoted to mid-level within six months.",
+    "metrics": [
+      "20% delivery efficiency improvement",
+      "2 promotions in 6 months"
+    ],
+    "skills": [
+      "Mentoring",
+      "Code Review",
+      "Design Patterns",
+      "Leadership"
+    ],
+    "usedFor": [
+      "leadership",
+      "mentoring",
+      "team-scaling"
+    ]
+  },
+  {
+    "id": "maf-llm-failover",
+    "title": "Complexity-Aware LLM Routing with Failover",
+    "company": "MyAgentFirm",
+    "period": "Mar 2026 – Aug 2026",
+    "challenge": "Every AI feature depended on external LLM providers. A single provider outage meant total service failure for paying users.",
+    "action": "Built a complexity-aware LLM routing layer that detects provider failure and falls over through a chain — DeepInfra → Groq → Together AI — picking model size per task complexity.",
+    "result": "Near-zero downtime on LLM-dependent features; 99%+ uptime maintained through multiple upstream provider outages.",
+    "metrics": [
+      "99%+ AI feature uptime",
+      "3-provider failover chain"
+    ],
+    "skills": [
+      "LLM Routing",
+      "Fastify",
+      "Node.js",
+      "Resilience Engineering"
+    ],
+    "usedFor": [
+      "ai",
+      "reliability",
+      "architecture",
+      "llm"
+    ]
+  },
+  {
+    "id": "maf-async-workers",
+    "title": "Async Worker Architecture on Postgres",
+    "company": "MyAgentFirm",
+    "period": "Mar 2026 – Aug 2026",
+    "challenge": "AI media generation tasks take 30–120 seconds. Running them synchronously would block API responses and wreck the user experience.",
+    "action": "Built six async background workers using PostgreSQL's FOR UPDATE SKIP LOCKED for job queuing — no Redis or RabbitMQ needed. Each worker owns a task type with its own fallback chain (e.g. Gathos → DeepInfra → Replicate for video).",
+    "result": "All long-running tasks became non-blocking with SSE progress tracking, and failed jobs auto-refund credits through atomic SQL transactions.",
+    "metrics": [
+      "6 concurrent workers",
+      "0 dedicated queue brokers"
+    ],
+    "skills": [
+      "PostgreSQL",
+      "Node.js",
+      "SSE",
+      "Queue Design",
+      "Fastify"
+    ],
+    "usedFor": [
+      "distributed-systems",
+      "architecture",
+      "ai",
+      "cost-reduction"
+    ]
+  },
+  {
+    "id": "maf-mcp-layer",
+    "title": "Model Context Protocol Integration Layer",
+    "company": "MyAgentFirm",
+    "period": "Mar 2026 – Aug 2026",
+    "challenge": "AI agents operated in isolation — they had no access to the user's real-world data, so responses were generic.",
+    "action": "Built a full MCP integration layer with per-user authenticated connections to Gmail, Google Calendar, GitHub, Notion, Slack and Postgres, so each user's agents run against their live data context.",
+    "result": "Agents became dramatically more useful — calendar-aware scheduling, inbox-aware communication, code-aware development assistance — and it became the platform's key differentiator.",
+    "metrics": [
+      "6 MCP integrations",
+      "per-user auth isolation"
+    ],
+    "skills": [
+      "MCP",
+      "OAuth",
+      "Node.js",
+      "Integrations",
+      "AI Agents"
+    ],
+    "usedFor": [
+      "ai",
+      "integrations",
+      "agents",
+      "product-differentiation"
+    ]
+  },
+  {
+    "id": "maf-credit-ledger",
+    "title": "Atomic Credit Ledger",
+    "company": "MyAgentFirm",
+    "period": "Mar 2026 – Aug 2026",
+    "challenge": "A multi-tenant SaaS with 11 feature pricing tiers needs a bulletproof credit system — any double-spend or unrefunded failed job costs money and trust.",
+    "action": "Built an atomic credit ledger on PostgreSQL transactions. Every debit and refund commits or rolls back as a unit; failed background jobs trigger a compensating refund transaction automatically.",
+    "result": "Zero double-spend incidents, automatic refunds within seconds of any job failure, and a full audit trail for every credit movement.",
+    "metrics": [
+      "0 double-spend incidents",
+      "11 pricing tiers"
+    ],
+    "skills": [
+      "PostgreSQL",
+      "Transactions",
+      "Razorpay",
+      "Billing"
+    ],
+    "usedFor": [
+      "payments",
+      "data-integrity",
+      "fintech",
+      "architecture"
+    ]
+  },
+  {
+    "id": "growlogic-aks",
+    "title": "Azure AKS Microservices Platform",
+    "company": "Growlogic Technologies (Eeko.ai)",
+    "period": "Apr 2024 – Jul 2025",
+    "challenge": "Eeko.ai needed to move from a monolith to a scalable microservices architecture on Azure to serve a growing SMB customer base across subscription plans.",
+    "action": "Designed and delivered six Spring Boot microservices (masterdata, design-processing, design-rendering, event-processing, subscription, notification) on Azure AKS with Azure MySQL and Blob Storage, plus a WhatsApp Business API notification pipeline built on Spring Batch.",
+    "result": "The platform handled concurrent design generation and notification delivery across customers, with zero-downtime deployments via an ArgoCD GitOps pipeline and ~200 paid customers per month at peak.",
+    "metrics": [
+      "6 microservices",
+      "~200 paid customers/month",
+      "zero-downtime deploys"
+    ],
+    "skills": [
+      "Spring Boot",
+      "Azure AKS",
+      "Kubernetes",
+      "ArgoCD",
+      "Spring Batch",
+      "WhatsApp Business API"
+    ],
+    "usedFor": [
+      "architecture",
+      "cloud",
+      "devops",
+      "saas"
+    ]
+  },
+  {
+    "id": "tradingos-timescale",
+    "title": "TimescaleDB Market Data Pipeline",
+    "company": "TradingOS",
+    "period": "Oct 2025 – Feb 2026",
+    "challenge": "Collecting real-time order book depth — thousands of price levels updated every second — needs specialised time-series infrastructure. Laptop storage ran out within weeks.",
+    "action": "Migrated collection to a VPS (Ubuntu 24.04, 8 cores, 31 GB RAM) on TimescaleDB with systemd-managed collectors for Databento (MES futures tick data) and Binance (crypto order book depth), solving the pg_dump hypertable chunk problem with a COPY-based workaround.",
+    "result": "Storage runway went from 3 months to 183 months, collectors survive reboots, and three instruments stream simultaneously with 275 GB free.",
+    "metrics": [
+      "3 → 183 months storage runway",
+      "3 instruments concurrent"
+    ],
+    "skills": [
+      "TimescaleDB",
+      "PostgreSQL",
+      "systemd",
+      "Databento",
+      "Time-Series"
+    ],
+    "usedFor": [
+      "data-engineering",
+      "performance",
+      "fintech",
+      "infrastructure"
+    ]
+  },
+  {
+    "id": "tradingos-backtester",
+    "title": "Custom ICT Backtesting Engine",
+    "company": "TradingOS",
+    "period": "Oct 2025 – Feb 2026",
+    "challenge": "Commercial backtesting tools do not support ICT methodology — no order flow, no volume profile, no position blocks with risk-reward visualisation.",
+    "action": "Built a backtesting engine on top of lightweight-charts with an absolute-positioned SVG overlay for drawing tools, custom hit-detection maths for interactive drawings, simulated order execution and equity curve tracking.",
+    "result": "The first backtesting tool that natively supports ICT methodology with full order flow visualisation, enabling proper pre- and post-trade analysis.",
+    "metrics": [
+      "10-module platform",
+      "custom SVG interaction layer"
+    ],
+    "skills": [
+      "React",
+      "TypeScript",
+      "SVG",
+      "lightweight-charts",
+      "Product Engineering"
+    ],
+    "usedFor": [
+      "frontend",
+      "product-engineering",
+      "fintech",
+      "data-viz"
+    ]
+  },
+  {
+    "id": "ge-hardware-integration",
+    "title": "Maternal-Fetal Monitoring Integration",
+    "company": "GE Healthcare",
+    "period": "Sep 2020 – Jun 2021",
+    "challenge": "Connecting proprietary maternal-fetal monitoring hardware to an EMR system and a clinical frontend required complex data transformation across multiple protocols.",
+    "action": "Built Java Spring Boot integration services bridging the hardware devices, the EMR system and the clinical dashboard — handling format transformation, real-time streaming and error recovery.",
+    "result": "Clinical staff monitored mother and baby vitals in real time with reliable data integrity, in hospital environments where accuracy is life-critical.",
+    "metrics": [
+      "life-critical data integrity",
+      "real-time vitals streaming"
+    ],
+    "skills": [
+      "Java",
+      "Spring Boot",
+      "EMR Integration",
+      "React",
+      "Healthcare"
+    ],
+    "usedFor": [
+      "integrations",
+      "healthcare",
+      "real-time",
+      "distributed-systems"
+    ]
+  },
+  {
+    "id": "annarakshak-adk-agents",
+    "title": "Human-in-the-Loop Multi-Agent Incident Response",
+    "company": "AnnaRakshak AI (Google Build with AI hackathon)",
+    "period": "Sep 2026",
+    "challenge": "District agriculture offices detect crop-price collapses manually, taking 85-170 minutes from anomaly to a verification-ready report — far too slow to protect farmers from a crash already underway.",
+    "action": "Built a deterministic anomaly detector over public AGMARKNET mandi prices (flagging moves of +/-40% against the median of the previous 30 prices), then layered three Gemini 2.5 Flash agents via Google ADK — investigation, evidence review, coordination — with read-only tools that draft case summaries, field-verification tasks and Marathi/English farmer notices but cannot change case state or send anything. Enforced role-based approvals, evidence-confirmed hypotheses, auto-superseded drafts, and an append-only audit log that records denied attempts.",
+    "result": "Cut detection-to-verification-ready-report from an estimated 85-170 minutes to about a minute, and caught a real -42.1% tomato price crash at APMC Nagpur on 16 Sep 2026.",
+    "metrics": [
+      "85-170 min to ~1 min",
+      "real -42.1% crash detected",
+      "3 agents, zero write access"
+    ],
+    "skills": [
+      "Google ADK",
+      "Gemini 2.5 Flash",
+      "Vertex AI",
+      "Python",
+      "FastAPI",
+      "Next.js",
+      "Cloud Run",
+      "Firestore",
+      "OpenTelemetry"
+    ],
+    "usedFor": [
+      "ai",
+      "agents",
+      "guardrails",
+      "human-in-the-loop",
+      "gcp",
+      "public-data"
+    ]
+  },
+  {
+    "id": "tradingos-zero-loss-migration",
+    "title": "Zero-Loss Market Data Migration",
+    "company": "TradingOS",
+    "period": "Feb 2026 - Apr 2026",
+    "challenge": "A production VPS migration had to move millions of tick-level market data rows without losing a single event — and pg_dump was silently dropping TimescaleDB hypertable chunks.",
+    "action": "Diagnosed the silent pg_dump hypertable bug, switched to a COPY-based transfer path, and migrated the full dataset with verification at each stage.",
+    "result": "Moved 221K+ bars, 1.78M flow events and 824K depth ticks with zero data loss.",
+    "metrics": [
+      "221K+ bars",
+      "1.78M flow events",
+      "824K depth ticks",
+      "zero data loss"
+    ],
+    "skills": [
+      "TimescaleDB",
+      "PostgreSQL",
+      "pg_dump",
+      "COPY",
+      "systemd",
+      "Databento",
+      "Binance"
+    ],
+    "usedFor": [
+      "data-engineering",
+      "debugging",
+      "migration",
+      "fintech",
+      "reliability"
+    ]
+  },
+  {
+    "id": "chalonline-security-remediation",
+    "title": "Production Database Exposure, Found and Fixed",
+    "company": "ChalOnline",
+    "period": "Jan 2026 - Feb 2026",
+    "challenge": "The production deployment had PostgreSQL and Redis ports bound to 0.0.0.0 — reachable from the public internet on a VPS with live customer data.",
+    "action": "Identified the exposure during a deployment review, documented the SSH-tunnel remediation path, rebound the services to localhost and hardened the deployment.",
+    "result": "Closed a live data-exposure path before any incident, and documented the fix so the pattern would not recur.",
+    "metrics": [
+      "public DB exposure closed",
+      "documented remediation"
+    ],
+    "skills": [
+      "PostgreSQL",
+      "Redis",
+      "VPS hardening",
+      "SSH tunneling",
+      "Security review"
+    ],
+    "usedFor": [
+      "security",
+      "infrastructure",
+      "ownership",
+      "incident-prevention"
+    ]
+  }
+]

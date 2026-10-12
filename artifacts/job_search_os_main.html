@@ -1,0 +1,3650 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Siddhant's Job Search OS</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+:root{--bg:#0f1117;--s1:#181c27;--s2:#1e2335;--bd:#2a3050;--ac:#4f8ef7;--g:#38d9a9;--y:#f7c948;--r:#ff6b6b;--p:#b57bee;--t:#e8eaf0;--t2:#8892b0;--t3:#4a5578}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);min-height:100vh;font-size:14px;line-height:1.5}
+.hdr{padding:12px 20px;border-bottom:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:var(--bg);z-index:90}
+.hdr h1{font-size:15px;font-weight:700}.hdr p{font-size:11px;color:var(--t2)}
+.stats{display:flex;gap:16px}
+.sn{font-size:17px;font-weight:700;font-family:'JetBrains Mono';text-align:center}
+.sl{font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:.5px;text-align:center}
+.tabs{display:flex;gap:2px;padding:10px 20px 0;border-bottom:1px solid var(--bd);overflow-x:auto}
+.tab{padding:7px 13px;border-radius:6px 6px 0 0;cursor:pointer;font-size:12px;font-weight:500;color:var(--t2);border:1px solid transparent;border-bottom:none;white-space:nowrap;transition:all .15s}
+.tab:hover{color:var(--t);background:var(--s1)}.tab.active{color:var(--ac);background:var(--s1);border-color:var(--bd)}
+.main{padding:14px 20px}.sec{display:none}.sec.active{display:block}
+.st{font-size:15px;font-weight:700;margin-bottom:3px}.ss{font-size:12px;color:var(--t2);margin-bottom:12px}
+/* BUTTONS */
+.btn{font-size:11px;padding:5px 11px;border-radius:5px;border:1px solid var(--bd);background:var(--s2);color:var(--t2);cursor:pointer;font-family:inherit;text-decoration:none;display:inline-flex;align-items:center;gap:4px;transition:all .15s;white-space:nowrap}
+.btn:hover,.btn.ac{border-color:var(--ac);color:var(--ac);background:rgba(79,142,247,.1)}
+.btn.grn{border-color:var(--g);color:var(--g);background:rgba(56,217,169,.1)}
+.btn.red{border-color:var(--r);color:var(--r);background:rgba(255,107,107,.1)}
+/* FILTERS */
+.frow{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+.fb{padding:4px 11px;border-radius:20px;border:1px solid var(--bd);background:var(--s1);color:var(--t2);font-size:11px;cursor:pointer;transition:all .15s;font-family:inherit}
+.fb.active,.fb:hover{border-color:var(--ac);color:var(--ac);background:rgba(79,142,247,.1)}
+/* COMPANY GRID */
+.cgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(285px,1fr));gap:10px}
+.cc{background:var(--s1);border:1px solid var(--bd);border-radius:10px;padding:13px 14px;transition:border-color .15s}
+.cc:hover{border-color:var(--ac)}.cc.eu{border-left:3px solid var(--ac)}.cc.gulf{border-left:3px solid var(--g)}.cc.global{border-left:3px solid var(--p)}.cc.global_onsite{border-left:3px solid #a29bfe}.cc.in_remote{border-left:3px solid #ff9f43}.cc.blr_onsite{border-left:3px solid #ff7675}.cc.blr_hybrid{border-left:3px solid #00cec9}
+.cn{font-size:14px;font-weight:700}.rb{font-size:10px;font-weight:600;padding:2px 7px;border-radius:10px;text-transform:uppercase}
+.rb.eu{background:rgba(79,142,247,.15);color:var(--ac)}.rb.gulf{background:rgba(56,217,169,.15);color:var(--g)}.rb.global{background:rgba(181,123,238,.15);color:var(--p)}.rb.global_onsite{background:rgba(162,155,254,.15);color:#a29bfe}.rb.in_remote{background:rgba(255,159,67,.15);color:#ff9f43}.rb.blr_onsite{background:rgba(255,118,117,.15);color:#ff7675}.rb.blr_hybrid{background:rgba(0,206,201,.15);color:#00cec9}
+.rtag{display:inline-block;font-size:10px;padding:2px 6px;border-radius:4px;margin-right:3px;margin-bottom:3px;font-weight:500}
+.t-fde{background:rgba(247,201,72,.15);color:var(--y)}.t-ai{background:rgba(255,107,107,.15);color:var(--r)}
+.t-fs{background:rgba(79,209,197,.15);color:#4fd1c5}.t-se{background:rgba(181,123,238,.15);color:var(--p)}
+.ndsa{font-size:10px;padding:2px 6px;border-radius:4px;background:rgba(56,217,169,.1);color:var(--g);font-weight:600}
+.cdesc{font-size:12px;color:var(--t2);margin:5px 0;line-height:1.5}
+.pay{font-family:'JetBrains Mono';font-size:11px;font-weight:600;color:var(--g);background:rgba(56,217,169,.1);padding:2px 7px;border-radius:4px}
+/* KANBAN */
+.kanban{display:grid;grid-template-columns:repeat(7,minmax(160px,1fr));gap:10px;overflow-x:auto;padding-bottom:10px}
+.kcol{background:var(--s1);border:1px solid var(--bd);border-radius:8px;min-height:300px}
+.khead{padding:10px 12px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--bd)}
+.kcards{padding:8px}
+.kcard{background:var(--s2);border:1px solid var(--bd);border-radius:6px;padding:9px 10px;margin-bottom:7px;cursor:pointer;transition:border-color .15s;font-size:12px}
+.kcard:hover{border-color:var(--ac)}
+.kcard-name{font-weight:600;color:var(--t);margin-bottom:3px}
+.kcard-meta{font-size:10px;color:var(--t3)}
+/* PIPELINE TABLE */
+.ptable{width:100%;border-collapse:collapse;font-size:12px}
+.ptable th{text-align:left;padding:8px 10px;color:var(--t3);font-size:10px;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--bd);font-weight:600}
+.ptable td{padding:8px 10px;border-bottom:1px solid var(--bd);vertical-align:top}
+.ptable tr:hover td{background:rgba(255,255,255,.02)}
+.stage{font-size:10px;font-weight:600;padding:2px 8px;border-radius:10px;white-space:nowrap}
+.s-new{background:rgba(79,142,247,.15);color:var(--ac)}.s-networking{background:rgba(247,201,72,.15);color:var(--y)}
+.s-call{background:rgba(181,123,238,.15);color:var(--p)}.s-win{background:rgba(56,217,169,.15);color:var(--g)}
+.s-interview{background:rgba(255,107,107,.15);color:var(--r)}.s-offer{background:rgba(56,217,169,.3);color:#fff}
+.s-failed{background:rgba(74,85,120,.3);color:var(--t3)}
+/* CONNECTIONS */
+.conn-item{background:var(--s2);border:1px solid var(--bd);border-radius:6px;padding:9px 11px;margin-bottom:6px;display:flex;align-items:center;gap:10px;font-size:12px}
+.conn-status{font-size:10px;padding:2px 7px;border-radius:10px;font-weight:600;white-space:nowrap;flex-shrink:0}
+.cs-req{background:rgba(79,142,247,.15);color:var(--ac)}.cs-dm{background:rgba(247,201,72,.15);color:var(--y)}
+.cs-reply{background:rgba(56,217,169,.15);color:var(--g)}.cs-fu{background:rgba(181,123,238,.15);color:var(--p)}
+.cs-win{background:rgba(255,107,107,.15);color:var(--r)}.cs-call{background:rgba(56,217,169,.3);color:#fff}
+.cs-ref{background:rgba(56,217,169,.5);color:#fff}.cs-ab{background:rgba(74,85,120,.3);color:var(--t3)}
+/* MODAL */
+.modal{display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.75);align-items:center;justify-content:center;padding:12px}
+.mbox{background:var(--s1);border:1px solid var(--bd);border-radius:12px;width:100%;max-width:560px;max-height:90vh;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,.6)}
+.mhdr{display:flex;justify-content:space-between;align-items:center;padding:13px 16px;border-bottom:1px solid var(--bd);flex-shrink:0}
+.mtitle{font-size:14px;font-weight:700}.msub{font-size:11px;color:var(--t3);margin-top:1px}
+.mbody{overflow-y:auto;padding:14px 16px;flex:1}
+.xbtn{background:none;border:1px solid var(--bd);color:var(--t2);font-size:13px;cursor:pointer;width:26px;height:26px;border-radius:5px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+/* FORM */
+.fr{display:flex;flex-direction:column;gap:3px;margin-bottom:10px}
+.fr label{font-size:10px;color:var(--t3);font-weight:600;text-transform:uppercase;letter-spacing:.4px}
+.fr input,.fr select,.fr textarea{background:var(--s2);border:1px solid var(--bd);border-radius:6px;padding:7px 10px;color:var(--t);font-size:12px;font-family:inherit;outline:none;transition:border-color .15s;width:100%}
+.fr input:focus,.fr select:focus,.fr textarea:focus{border-color:var(--ac)}
+.fr textarea{resize:vertical;min-height:60px}
+/* NET MODAL */
+.ni{background:var(--s2);border:1px solid var(--bd);border-radius:8px;padding:11px;margin-bottom:8px}
+.nl{font-size:13px;font-weight:700}.ns{font-size:11px;color:var(--t3);margin-top:1px}
+.msgbox{font-size:12px;color:var(--t2);background:var(--bg);border:1px solid var(--bd);border-radius:5px;padding:9px;line-height:1.6;white-space:pre-wrap;margin-top:7px}
+/* CARD */
+.card{background:var(--s1);border:1px solid var(--bd);border-radius:10px;padding:13px;margin-bottom:10px}
+/* VIEW TOGGLE */
+.vtog{display:flex;gap:4px;margin-left:auto}
+.vbtn{padding:4px 10px;border-radius:5px;border:1px solid var(--bd);background:transparent;color:var(--t2);font-size:11px;cursor:pointer;font-family:inherit;transition:all .15s}
+.vbtn.active{border-color:var(--ac);color:var(--ac);background:rgba(79,142,247,.1)}
+@media(max-width:600px){.cgrid{grid-template-columns:1fr}.kanban{grid-template-columns:repeat(7,minmax(150px,1fr))}}
+</style>
+</head>
+<body>
+<div class="hdr">
+  <div><h1>🎯 Siddhant's Job Search OS</h1><p>Senior Full-Stack · AI Engineer · Forward Deployed · Global Remote · <a href="https://claude.ai/artifact/XhhXf3yCW7GdiFfPfuVXmS" target="_blank" style="color:var(--ac)">→ Outreach & Resume Hub</a></p></div>
+  <div class="stats">
+    <div><div class="sn" id="sTotal" style="color:var(--ac)">45</div><div class="sl">Companies</div></div>
+    <div><div class="sn" id="sActive" style="color:var(--y)">0</div><div class="sl">Active</div></div>
+    <div><div class="sn" id="sInt" style="color:var(--r)">0</div><div class="sl">Interviews</div></div>
+    <div><div class="sn" id="sOffer" style="color:var(--g)">0</div><div class="sl">Offers</div></div>
+  </div>
+</div>
+<div class="tabs">
+  <div class="tab active" onclick="showTab('companies',this)">🏢 Companies</div>
+  <div class="tab" onclick="showTab('pipeline',this)">📊 Pipeline</div>
+  <div class="tab" onclick="showTab('discovery',this)">🔍 Job Discovery</div>
+</div>
+<div class="main">
+
+<!-- COMPANIES -->
+<div class="sec active" id="companies">
+  <div class="st">Target Companies</div>
+  <div class="ss">45 pre-loaded · No DSA/LeetCode · All pay well in EU + Gulf + Global Remote</div>
+  <div class="frow">
+    <button class="fb active" onclick="filterC('all',this)">All</button>
+    <button class="fb" onclick="filterC('eu',this)">🇪🇺 Europe</button>
+    <button class="fb" onclick="filterC('gulf',this)">🌙 Gulf</button>
+    <button class="fb" onclick="filterC('global',this)">🌐 Global Remote</button>
+    <button class="fb" onclick="filterC('in',this)">🇮🇳 India / BLR</button>
+    <button class="fb" onclick="filterC('fde',this)">⚡ FDE</button>
+    <button class="fb" onclick="filterC('ai',this)">🤖 AI Eng</button>
+    <button class="fb" onclick="filterC('fs',this)">💻 Full-Stack</button>
+    <button class="fb" id="openJobsToggle" onclick="toggleOpenJobsOnly(this)" style="border-color:#38d9a9;color:#38d9a9" title="Filter to companies that currently have matching open jobs">🟢 With Open Jobs</button>
+    <button class="fb" id="dismissedToggle" onclick="toggleShowDismissed(this)" style="color:var(--t3)" title="Show or hide dismissed companies">Show dismissed (<span id="dismissedCount">0</span>)</button>
+    <input type="search" id="coSearch" placeholder="🔎 Search companies…" oninput="searchCompanies(this.value)" style="background:var(--s2);border:1px solid var(--bd);border-radius:20px;padding:4px 11px;color:var(--t);font-size:11px;font-family:inherit;min-width:180px;outline:none">
+    <button class="btn grn" onclick="openM('addModal')" style="margin-left:auto">+ Add Company</button>
+  </div>
+  <div class="cgrid" id="cgrid"></div>
+</div>
+
+<!-- PIPELINE -->
+<div class="sec" id="pipeline">
+  <div class="st">Application Pipeline</div>
+  <div class="ss">Track connections, messages, WIN docs, interviews, offers per company</div>
+  <div class="frow">
+    <button class="btn ac" onclick="openM('addModal')">+ Add Company</button>
+    <select id="pf" onchange="renderPipeline()" style="background:var(--s2);border:1px solid var(--bd);border-radius:5px;padding:5px 8px;color:var(--t);font-size:12px;font-family:inherit">
+      <option value="all">All Stages</option>
+      <option value="new">New</option><option value="networking">Networking</option>
+      <option value="call">Call</option><option value="win">WIN Sent</option>
+      <option value="interview">Interview</option><option value="offer">Offer</option><option value="failed">Closed</option>
+    </select>
+    <div class="vtog">
+      <button class="vbtn" id="vtTable" onclick="setView('table',this)">📋 Table</button>
+      <button class="vbtn active" id="vtKanban" onclick="setView('kanban',this)">🗂 Kanban</button>
+    </div>
+  </div>
+  <div id="tableView" style="display:none"><div style="overflow-x:auto"><table class="ptable"><thead><tr>
+    <th>Company</th><th>Stage</th><th>Connections</th><th>Messages</th><th>WIN Doc</th><th>JD</th><th>Notes</th><th></th>
+  </tr></thead><tbody id="pBody"></tbody></table></div>
+  <div id="pEmpty" style="display:none;text-align:center;padding:40px;color:var(--t3)">No companies match this filter. Use + Add Company or Track from Companies tab.</div></div>
+  <div id="kanbanView" style="display:block"><div class="kanban" id="kanbanBoard"></div></div>
+</div>
+
+<!-- JOB DISCOVERY -->
+<div class="sec" id="discovery">
+  <div class="st">Job Discovery</div>
+  <div class="ss">Find live jobs — paste links you find, search with boolean strings, or use the research prompts below</div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px">
+    <div class="card">
+      <div style="font-size:12px;font-weight:700;color:var(--ac);margin-bottom:8px">🔍 Quick Job Search Links</div>
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <a href="https://www.linkedin.com/jobs/search/?keywords=Forward+Deployed+Engineer&location=Europe&f_WT=2" target="_blank" class="btn ac">LinkedIn — FDE Europe</a>
+        <a href="https://www.linkedin.com/jobs/search/?keywords=AI+Engineer&location=United+Arab+Emirates&f_WT=2" target="_blank" class="btn ac">LinkedIn — AI Engineer UAE</a>
+        <a href="https://www.linkedin.com/jobs/search/?keywords=Senior+AI+Engineer+LLM&f_WT=2&f_E=4" target="_blank" class="btn ac">LinkedIn — Senior AI Eng Remote</a>
+        <a href="https://www.linkedin.com/jobs/search/?keywords=Solutions+Engineer+AI&location=Europe&f_WT=2" target="_blank" class="btn ac">LinkedIn — Solutions Eng EU</a>
+        <a href="https://www.naukrigulf.com/senior-software-engineer-jobs-in-uae" target="_blank" class="btn grn">NaukriGulf — Senior SE UAE</a>
+        <a href="https://www.naukrigulf.com/ai-engineer-jobs" target="_blank" class="btn grn">NaukriGulf — AI Engineer</a>
+        <a href="https://www.bayt.com/en/international/jobs/senior-software-engineer-jobs/" target="_blank" class="btn grn">Bayt.com — Senior SE Gulf</a>
+        <a href="https://wellfound.com/role/r/forward-deployed-engineer" target="_blank" class="btn">Wellfound FDE</a>
+        <a href="https://www.fwddeploy.com/jobs" target="_blank" class="btn">FwdDeploy.com</a>
+        <a href="https://github.com/poteto/hiring-without-whiteboards" target="_blank" class="btn">No-Whiteboard Companies</a>
+      </div>
+    </div>
+    <div class="card">
+      <div style="font-size:12px;font-weight:700;color:var(--ac);margin-bottom:8px">📋 Skills × 1000 Jobs Worksheet</div>
+      <div style="font-size:11px;color:var(--t3);margin-bottom:10px">Fill this to find where your skills have most job demand globally</div>
+      <div class="fr"><label>Your Top 5 Skills (from LinkedIn Skills section)</label>
+        <input type="text" id="sk1" placeholder="Skill 1 — e.g. Java Spring Boot">
+        <input type="text" id="sk2" placeholder="Skill 2 — e.g. LLM / AI Engineering" style="margin-top:4px">
+        <input type="text" id="sk3" placeholder="Skill 3 — e.g. React / Node.js" style="margin-top:4px">
+        <input type="text" id="sk4" placeholder="Skill 4 — e.g. Docker / Kubernetes" style="margin-top:4px">
+        <input type="text" id="sk5" placeholder="Skill 5 — e.g. PostgreSQL / Kafka" style="margin-top:4px">
+      </div>
+      <div class="fr"><label>Target Region</label>
+        <select id="skRegion"><option>Europe</option><option>UAE / Gulf</option><option>Worldwide / Remote</option><option>UK</option><option>Germany</option><option>Netherlands</option></select>
+      </div>
+      <div class="fr"><label>Your Target Job Titles (comma separated)</label>
+        <input type="text" id="skTitles" placeholder="Forward Deployed Engineer, AI Engineer, Senior Full-Stack Engineer"></div>
+      <button class="btn ac" style="width:100%;justify-content:center" onclick="genSkillsSearch()">Generate LinkedIn Search Links for Each Skill</button>
+      <div id="skOut" style="margin-top:10px;display:none"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div style="font-size:12px;font-weight:700;color:var(--ac);margin-bottom:8px">🤖 Company Research Prompt (paste into Claude/GPT)</div>
+    <div style="font-size:11px;color:var(--t3);margin-bottom:8px">Use this to research any company before reaching out. Click Generate → copy → paste into Claude or ChatGPT.</div>
+    <div class="fr"><label>Company Name</label><input type="text" id="researchCo" placeholder="e.g. Palantir Technologies"></div>
+    <div class="fr"><label>Role You're Targeting</label><input type="text" id="researchRole" placeholder="e.g. Forward Deployed Engineer"></div>
+    <button class="btn ac" onclick="genResearchPrompt()">Generate Research Prompt</button>
+    <div id="researchOut" style="display:none;margin-top:10px">
+      <div style="font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:.4px;margin-bottom:5px">Copy this → paste into Claude:</div>
+      <div id="researchText" style="font-size:12px;color:var(--t2);background:var(--bg);border:1px solid var(--bd);border-radius:6px;padding:10px;line-height:1.7;white-space:pre-wrap;max-height:200px;overflow-y:auto"></div>
+      <button class="btn grn" style="margin-top:6px" onclick="cpEl('researchText',this)">Copy Prompt</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div style="font-size:12px;font-weight:700;color:var(--ac);margin-bottom:8px">📬 Cold Email Template (for Recruiters / HR direct)</div>
+    <div style="font-size:11px;color:var(--t3);margin-bottom:8px">Fill in and copy — send this directly to HR/recruiter email addresses you find</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div>
+        <div class="fr"><label>Recruiter Name</label><input type="text" id="ceRecruiter" placeholder="Sarah"></div>
+        <div class="fr"><label>Company Name</label><input type="text" id="ceCompany" placeholder="Palantir"></div>
+        <div class="fr"><label>Job Title Applying For</label><input type="text" id="ceRole" placeholder="Forward Deployed Engineer"></div>
+        <div class="fr"><label>Your Key Achievement (1 line)</label><input type="text" id="ceAchieve" placeholder="reduced dashboard load time by 70% at Philips via Kafka pipeline"></div>
+        <div class="fr"><label>Your Resume/CV Link</label><input type="text" id="ceResume" placeholder="https://drive.google.com/..."></div>
+        <button class="btn ac" style="width:100%;justify-content:center;margin-top:4px" onclick="genColdEmail()">Generate Email</button>
+      </div>
+      <div>
+        <div style="font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:.4px;margin-bottom:5px">Generated Email:</div>
+        <div id="ceOut" style="font-size:12px;color:var(--t2);background:var(--bg);border:1px solid var(--bd);border-radius:6px;padding:10px;line-height:1.7;white-space:pre-wrap;min-height:200px;max-height:280px;overflow-y:auto">Fill the form and click Generate...</div>
+        <button class="btn" style="margin-top:6px" onclick="cpEl('ceOut',this)">Copy Email</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div style="font-size:12px;font-weight:700;color:var(--ac);margin-bottom:8px">🌍 Find Similar Companies with Visa Sponsorship</div>
+    <div style="font-size:11px;color:var(--t3);margin-bottom:8px">Copy this prompt → paste into Claude → find EU companies that sponsor visas and hire engineers</div>
+    <div style="font-size:12px;color:var(--t2);background:var(--bg);border:1px solid var(--bd);border-radius:6px;padding:10px;line-height:1.7;white-space:pre-wrap;margin-bottom:8px" id="visaPrompt">Find 15 companies and 10 recruitment agencies in each country similar to Palantir, Grafana Labs, Elastic, and Weaviate that explicitly mention visa sponsorship, relocation support, or similar benefits on their website.
+
+These companies should:
+- Hire senior full-stack engineers, AI engineers, or forward deployed engineers
+- Have offices in Netherlands, Germany, UK, Ireland, or UAE
+- Actively hire internationally (India-friendly)
+- Pay market rate (€80k–€150k or equivalent)
+- NOT require LeetCode/algorithmic whiteboard interviews
+
+For each company provide: Company name, country, roles typically hired, visa sponsorship info, career page URL, and why they'd be a good fit for a senior Java/Node.js/AI engineer with 12 years experience.
+
+Format as a numbered table.</div>
+    <button class="btn grn" onclick="cpEl('visaPrompt',this)">Copy Prompt</button>
+  </div>
+</div>
+
+</div><!-- /main -->
+
+<!-- NET MODAL -->
+<div class="modal" id="netModal">
+  <div class="mbox">
+    <div class="mhdr"><div><div class="mtitle" id="netTitle"></div><div class="msub">Open LinkedIn → copy message → Connect → paste as note</div></div><button class="xbtn" onclick="closeM('netModal')">✕</button></div>
+    <div class="mbody" id="netBody"></div>
+  </div>
+</div>
+
+<!-- TRACK MODAL -->
+<div class="modal" id="trackModal">
+  <div class="mbox" style="max-width:640px">
+    <div class="mhdr"><div><div class="mtitle" id="trackTitle">Track Company</div><div class="msub">Log your activity and connections for this company</div></div><button class="xbtn" onclick="closeM('trackModal')">✕</button></div>
+    <div class="mbody">
+      <input type="hidden" id="trackId">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div class="fr"><label>Stage</label>
+          <select id="tStage">
+            <option value="new">New</option><option value="networking">Networking</option>
+            <option value="call">Call Scheduled/Done</option><option value="win">WIN Doc Sent</option>
+            <option value="interview">Interview</option><option value="offer">Offer 🎉</option><option value="failed">Closed</option>
+          </select>
+        </div>
+        <div class="fr"><label>Job Link (if found)</label><input type="text" id="tJD" placeholder="https://..."></div>
+        <div class="fr"><label>Messages Sent</label><input type="text" id="tMsgs" placeholder="e.g. 2 DMs sent, 1 replied"></div>
+        <div class="fr"><label>WIN Document</label>
+          <select id="tWin"><option value="none">Not started</option><option value="researching">Researching</option><option value="prepared">Prepared</option><option value="sent">Sent to HM</option><option value="discussed">Discussed on call</option></select>
+        </div>
+      </div>
+      <div class="fr"><label>Notes (calls, feedback, next steps)</label><textarea id="tNotes" rows="3" placeholder="What happened? What's next?"></textarea></div>
+
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;margin-top:4px">
+        <div style="font-size:12px;font-weight:600;color:var(--t)">🤝 Connections Made</div>
+        <button class="btn ac" onclick="addConn()" style="font-size:11px">+ Add Connection</button>
+      </div>
+      <div id="connList"></div>
+
+      <div style="display:flex;gap:8px;margin-top:12px">
+        <button class="btn ac" onclick="saveTrack()" style="flex:1;justify-content:center;padding:8px">Save</button>
+        <button class="btn red" onclick="delTrack()">Remove</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ADD CONNECTION MODAL -->
+<div class="modal" id="connModal">
+  <div class="mbox" style="max-width:480px">
+    <div class="mhdr"><div><div class="mtitle">Add Connection</div><div class="msub">Log someone you connected with at this company</div></div><button class="xbtn" onclick="closeM('connModal')">✕</button></div>
+    <div class="mbody">
+      <div class="fr"><label>Full Name</label><input type="text" id="cName" placeholder="e.g. Priya Sharma"></div>
+      <div class="fr"><label>Role / Title</label><input type="text" id="cRole" placeholder="e.g. Engineering Manager"></div>
+      <div class="fr"><label>Type</label>
+        <select id="cType"><option value="peer">👩‍💻 Peer (Same Role)</option><option value="hm">🏢 Hiring Manager</option><option value="hr">📋 HR / Recruiter</option><option value="indian">🇮🇳 Indian at Company</option><option value="other">Other</option></select>
+      </div>
+      <div class="fr"><label>LinkedIn Profile URL</label><input type="text" id="cLI" placeholder="https://linkedin.com/in/..."></div>
+      <div class="fr"><label>Status</label>
+        <select id="cStatus">
+          <option value="req">Connection Requested</option>
+          <option value="dm">DM Sent</option>
+          <option value="reply">Reply Received ✓</option>
+          <option value="fu1">Follow-up 1 Sent</option>
+          <option value="fu2">Follow-up 2 Sent</option>
+          <option value="fu3">Follow-up 3 Sent</option>
+          <option value="win">WIN Doc Shared</option>
+          <option value="call">Call Discussion Done</option>
+          <option value="ref">Referred 🎉</option>
+          <option value="ab">Abandoned</option>
+        </select>
+      </div>
+      <div class="fr"><label>Notes</label><textarea id="cNotes" rows="2" placeholder="What did you discuss? Any follow-up needed?"></textarea></div>
+      <button class="btn ac" onclick="saveConn()" style="width:100%;justify-content:center;padding:8px">Save Connection</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD COMPANY MODAL -->
+<div class="modal" id="addModal">
+  <div class="mbox" style="max-width:460px">
+    <div class="mhdr"><div><div class="mtitle">+ Add Company</div></div><button class="xbtn" onclick="closeM('addModal')">✕</button></div>
+    <div class="mbody">
+      <div class="fr"><label>Company Name *</label><input type="text" id="aN" placeholder="e.g. Stripe"></div>
+      <div class="fr"><label>Region</label><select id="aR">
+        <option value="eu">🇪🇺 Europe</option>
+        <option value="gulf">🌙 Gulf / UAE</option>
+        <option value="global">🌐 Global Remote</option>
+        <option value="global_onsite">🏢 Global On-site</option>
+        <option value="in_remote">🇮🇳 India Remote</option>
+        <option value="blr_onsite">🏢 Bangalore Full time 5 days</option>
+        <option value="blr_hybrid">🏙️ Bangalore Hybrid</option>
+      </select></div>
+      <div class="fr"><label>Role Types</label><select id="aRoles" multiple style="height:80px"><option value="fde">FDE</option><option value="ai">AI Engineer</option><option value="fs" selected>Full-Stack</option><option value="se">Solutions Engineer</option></select></div>
+      <div class="fr"><label>Pay Range</label><input type="text" id="aPay" placeholder="e.g. €90–€130k"></div>
+      <div class="fr"><label>Career Page / Job Link</label><input type="text" id="aUrl" placeholder="https://..."></div>
+      <div class="fr"><label>Why This Company</label><textarea id="aDesc" placeholder="What's interesting about them?"></textarea></div>
+      <button class="btn ac" onclick="addCo()" style="width:100%;justify-content:center;padding:8px">Add & Track</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const COS=[
+  {
+    "id": "ruyaai",
+    "name": "Ruya AI",
+    "region": "gulf",
+    "roles": [
+      "ai",
+      "fde"
+    ],
+    "pay": "$90–$140k tax-free",
+    "desc": "Dubai AI enterprise & agents startup. Open roles for AI Engineers & Data Backend.",
+    "apply": "https://job-boards.eu.greenhouse.io/ruyaai",
+    "dsa": false
+  },
+  {
+    "id": "ziina",
+    "name": "Ziina",
+    "region": "gulf",
+    "roles": [
+      "fs"
+    ],
+    "pay": "$90–$130k tax-free",
+    "desc": "Dubai fast-growing fintech unicorn. Senior Full-Stack & Payments Backend.",
+    "apply": "https://jobs.ashbyhq.com/ziina",
+    "dsa": false
+  },
+  {
+    "id": "lean_tech",
+    "name": "Lean Technologies",
+    "region": "gulf",
+    "roles": [
+      "fs",
+      "se"
+    ],
+    "pay": "$95–$140k tax-free",
+    "desc": "Riyadh & Dubai Open Banking & Payments infrastructure (Sequoia).",
+    "apply": "https://jobs.lever.co/leantech",
+    "dsa": false
+  },
+  {
+    "id": "huspy",
+    "name": "Huspy",
+    "region": "gulf",
+    "roles": [
+      "fs"
+    ],
+    "pay": "$90–$135k tax-free",
+    "desc": "Dubai proptech & mortgage fintech scaleup. Microservices + React.",
+    "apply": "https://jobs.lever.co/huspy",
+    "dsa": false
+  },
+  {
+    "id": "tabby",
+    "name": "Tabby",
+    "region": "gulf",
+    "roles": [
+      "fs",
+      "ai"
+    ],
+    "pay": "$100–$145k tax-free",
+    "desc": "Dubai & Riyadh BNPL unicorn (Series D). Fast-growing modern stack.",
+    "apply": "https://jobs.ashbyhq.com/tabby",
+    "dsa": false
+  },
+  {
+    "id": "tamara",
+    "name": "Tamara",
+    "region": "gulf",
+    "roles": [
+      "fs",
+      "ai"
+    ],
+    "pay": "$100–$150k tax-free",
+    "desc": "Riyadh Saudi BNPL unicorn (Series C). Practical engineering challenge.",
+    "apply": "https://jobs.ashbyhq.com/tamara",
+    "dsa": false
+  },
+  {
+    "id": "dapi",
+    "name": "Dapi",
+    "region": "gulf",
+    "roles": [
+      "fs",
+      "se"
+    ],
+    "pay": "$90–$130k tax-free",
+    "desc": "Dubai financial data & payment API infrastructure.",
+    "apply": "https://jobs.lever.co/dapi",
+    "dsa": false
+  },
+  {
+    "id": "sarwa",
+    "name": "Sarwa",
+    "region": "gulf",
+    "roles": [
+      "fs"
+    ],
+    "pay": "$85–$125k tax-free",
+    "desc": "Dubai wealthtech & automated investment platform.",
+    "apply": "https://jobs.lever.co/sarwa",
+    "dsa": false
+  },
+  {
+    "id": "baraka",
+    "name": "Baraka",
+    "region": "gulf",
+    "roles": [
+      "fs"
+    ],
+    "pay": "$85–$120k tax-free",
+    "desc": "Dubai stock trading and investment platform.",
+    "apply": "https://jobs.lever.co/getbaraka",
+    "dsa": false
+  },
+  {
+    "id": "pyypl",
+    "name": "Pyypl",
+    "region": "gulf",
+    "roles": [
+      "fs"
+    ],
+    "pay": "$90–$130k tax-free",
+    "desc": "Abu Dhabi & Dubai digital payment services. Java + Node.js.",
+    "apply": "https://jobs.lever.co/pyypl",
+    "dsa": false
+  },
+  {
+    "id": "yassir",
+    "name": "Yassir",
+    "region": "gulf",
+    "roles": [
+      "fs",
+      "ai"
+    ],
+    "pay": "$90–$135k tax-free",
+    "desc": "Super-app for on-demand services and payments in MEA (Y Combinator).",
+    "apply": "https://jobs.ashbyhq.com/yassir",
+    "dsa": false
+  },
+  {
+    "id": "bayzat",
+    "name": "Bayzat",
+    "region": "gulf",
+    "roles": [
+      "fs"
+    ],
+    "pay": "$85–$120k tax-free",
+    "desc": "Dubai HR & insurance SaaS platform. Java & React stack.",
+    "apply": "https://jobs.lever.co/bayzat",
+    "dsa": false
+  },
+  {
+    "id": "cartesia",
+    "name": "Cartesia",
+    "region": "global",
+    "roles": [
+      "fde",
+      "ai"
+    ],
+    "pay": "$125–$165k",
+    "desc": "Ultra-fast voice & real-time multimodal AI. FDE India/Bangalore & Remote.",
+    "apply": "https://jobs.ashbyhq.com/cartesia",
+    "dsa": false
+  },
+  {
+    "id": "togetherai",
+    "name": "Together AI",
+    "region": "global",
+    "roles": [
+      "ai",
+      "se"
+    ],
+    "pay": "$130–$180k",
+    "desc": "Inference & AI cloud platform. AI Infrastructure Systems Bangalore & Remote.",
+    "apply": "https://job-boards.greenhouse.io/togetherai",
+    "dsa": false
+  },
+  {
+    "id": "elevenlabs",
+    "name": "ElevenLabs",
+    "region": "global",
+    "roles": [
+      "fde",
+      "ai",
+      "se"
+    ],
+    "pay": "$130–$180k",
+    "desc": "AI audio research & deployment. Enterprise Solutions & Full-Stack.",
+    "apply": "https://jobs.ashbyhq.com/elevenlabs",
+    "dsa": false
+  },
+  {
+    "id": "sierra",
+    "name": "Sierra AI",
+    "region": "global",
+    "roles": [
+      "fde",
+      "ai"
+    ],
+    "pay": "$140–$190k",
+    "desc": "Enterprise conversational AI platform. Agent Orchestration & Platform.",
+    "apply": "https://jobs.ashbyhq.com/sierra",
+    "dsa": false
+  },
+  {
+    "id": "fireworks",
+    "name": "Fireworks AI",
+    "region": "global",
+    "roles": [
+      "ai",
+      "se"
+    ],
+    "pay": "$130–$175k",
+    "desc": "Ultra-fast generative AI inference and fine-tuning. AI Product Engineers.",
+    "apply": "https://jobs.ashbyhq.com/fireworks",
+    "dsa": false
+  },
+  {
+    "id": "decagon",
+    "name": "Decagon",
+    "region": "global",
+    "roles": [
+      "fde",
+      "ai",
+      "se"
+    ],
+    "pay": "$130–$180k",
+    "desc": "Autonomous AI customer support agents. Multi-agent workflows.",
+    "apply": "https://jobs.ashbyhq.com/decagon",
+    "dsa": false
+  },
+  {
+    "id": "harvey",
+    "name": "Harvey",
+    "region": "global",
+    "roles": [
+      "fde",
+      "ai"
+    ],
+    "pay": "$140–$190k",
+    "desc": "Legal AI platform backed by OpenAI & Sequoia. Core Infrastructure & Full-Stack.",
+    "apply": "https://jobs.ashbyhq.com/harvey",
+    "dsa": false
+  },
+  {
+    "id": "cursor",
+    "name": "Anysphere (Cursor)",
+    "region": "global",
+    "roles": [
+      "fs",
+      "ai"
+    ],
+    "pay": "$140–$200k",
+    "desc": "The AI code editor team. Infrastructure, Core Services & Growth Engineers.",
+    "apply": "https://jobs.ashbyhq.com/cursor",
+    "dsa": false
+  },
+  {
+    "id": "cognition",
+    "name": "Cognition (Devin)",
+    "region": "global",
+    "roles": [
+      "fde",
+      "ai"
+    ],
+    "pay": "$140–$200k",
+    "desc": "Creators of Devin AI Software Engineer. AI Support & Infrastructure.",
+    "apply": "https://jobs.ashbyhq.com/cognition",
+    "dsa": false
+  },
+  {
+    "id": "perplexity",
+    "name": "Perplexity",
+    "region": "global",
+    "roles": [
+      "fde",
+      "ai"
+    ],
+    "pay": "$140–$190k",
+    "desc": "AI conversational search engine. AI Inference & Full-Stack Product.",
+    "apply": "https://jobs.ashbyhq.com/perplexity",
+    "dsa": false
+  },
+  {
+    "id": "replit",
+    "name": "Replit",
+    "region": "global",
+    "roles": [
+      "fde",
+      "ai",
+      "fs"
+    ],
+    "pay": "$130–$180k",
+    "desc": "Cloud development environment & AI agents. Product & Platform Engineers.",
+    "apply": "https://jobs.ashbyhq.com/replit",
+    "dsa": false
+  },
+  {
+    "id": "langchain",
+    "name": "LangChain",
+    "region": "global",
+    "roles": [
+      "ai",
+      "fde"
+    ],
+    "pay": "$130–$175k",
+    "desc": "The framework you use daily. Forward Deployed & Solutions Engineers for LangGraph.",
+    "apply": "https://jobs.ashbyhq.com/langchain",
+    "dsa": false
+  },
+  {
+    "id": "llamaindex",
+    "name": "LlamaIndex",
+    "region": "global",
+    "roles": [
+      "ai",
+      "fde"
+    ],
+    "pay": "$130–$175k",
+    "desc": "Data framework for LLMs and agentic workflows. Backend & AI Engineers.",
+    "apply": "https://jobs.ashbyhq.com/llamaindex",
+    "dsa": false
+  },
+  {
+    "id": "tavily",
+    "name": "Tavily",
+    "region": "global",
+    "roles": [
+      "fde",
+      "ai"
+    ],
+    "pay": "$130–$175k",
+    "desc": "Search API & intelligence layer for AI agents & LLMs. Forward Deployed Engineers.",
+    "apply": "https://jobs.ashbyhq.com/tavily",
+    "dsa": false
+  },
+  {
+    "id": "livekit",
+    "name": "LiveKit",
+    "region": "global",
+    "roles": [
+      "ai",
+      "fs",
+      "se"
+    ],
+    "pay": "$130–$180k",
+    "desc": "Real-time multimodal AI & WebRTC infrastructure. Voice agent pipelines.",
+    "apply": "https://jobs.ashbyhq.com/livekit",
+    "dsa": false
+  },
+  {
+    "id": "vapi",
+    "name": "Vapi",
+    "region": "global",
+    "roles": [
+      "ai",
+      "fde",
+      "fs"
+    ],
+    "pay": "$130–$180k",
+    "desc": "Voice AI developer platform for telephony & conversational agents.",
+    "apply": "https://jobs.ashbyhq.com/vapi",
+    "dsa": false
+  },
+  {
+    "id": "baseten",
+    "name": "Baseten",
+    "region": "global",
+    "roles": [
+      "ai",
+      "se",
+      "fde"
+    ],
+    "pay": "$135–$185k",
+    "desc": "High-performance model inference and deployment cloud. Inference Engineers.",
+    "apply": "https://jobs.ashbyhq.com/baseten",
+    "dsa": false
+  },
+  {
+    "id": "unstructured",
+    "name": "Unstructured",
+    "region": "global",
+    "roles": [
+      "ai",
+      "fde",
+      "fs"
+    ],
+    "pay": "$125–$170k",
+    "desc": "ETL & ingestion pipeline for LLM / RAG data. Multimodal data pipelines.",
+    "apply": "https://jobs.ashbyhq.com/unstructured",
+    "dsa": false
+  },
+  {
+    "id": "cohere",
+    "name": "Cohere",
+    "region": "global",
+    "roles": [
+      "fde",
+      "ai"
+    ],
+    "pay": "$130–$170k",
+    "desc": "Enterprise LLMs & RAG platform. FDE & Applied AI agent workflows.",
+    "apply": "https://jobs.lever.co/cohere",
+    "dsa": false
+  },
+  {
+    "id": "langfuse",
+    "name": "Langfuse",
+    "region": "eu",
+    "roles": [
+      "ai",
+      "fs"
+    ],
+    "pay": "€90–€130k",
+    "desc": "Open source LLM engineering platform (observability, evaluations). Berlin / Remote.",
+    "apply": "https://jobs.ashbyhq.com/langfuse",
+    "dsa": false
+  },
+  {
+    "id": "portkey",
+    "name": "Portkey AI",
+    "region": "global",
+    "roles": [
+      "ai",
+      "fde",
+      "fs"
+    ],
+    "pay": "$120–$160k",
+    "desc": "AI Gateway and LLM routing & observability. Bangalore & Remote.",
+    "apply": "https://jobs.ashbyhq.com/portkey",
+    "dsa": false
+  },
+  {
+    "id": "helicone",
+    "name": "Helicone",
+    "region": "global",
+    "roles": [
+      "ai",
+      "fs"
+    ],
+    "pay": "$120–$165k",
+    "desc": "Open source LLM observability and gateway. Microservices + real-time telemetry.",
+    "apply": "https://jobs.ashbyhq.com/helicone",
+    "dsa": false
+  },
+  {
+    "id": "mem0",
+    "name": "Mem0 (Embedchain)",
+    "region": "global",
+    "roles": [
+      "ai",
+      "fs",
+      "fde"
+    ],
+    "pay": "$120–$165k",
+    "desc": "Universal memory layer for AI agents & personalized assistants.",
+    "apply": "https://jobs.ashbyhq.com/mem0",
+    "dsa": false
+  },
+  {
+    "id": "deepgram",
+    "name": "Deepgram",
+    "region": "global",
+    "roles": [
+      "ai",
+      "se",
+      "fs"
+    ],
+    "pay": "$130–$170k",
+    "desc": "Real-time speech-to-text and voice AI platform. Solutions Engineers.",
+    "apply": "https://job-boards.greenhouse.io/deepgram",
+    "dsa": false
+  },
+  {
+    "id": "assemblyai",
+    "name": "AssemblyAI",
+    "region": "global",
+    "roles": [
+      "ai",
+      "se",
+      "fs"
+    ],
+    "pay": "$130–$175k",
+    "desc": "AI audio models and speech intelligence APIs. Developer platform engineers.",
+    "apply": "https://jobs.ashbyhq.com/assemblyai",
+    "dsa": false
+  },
+  {
+    "id": "characterai",
+    "name": "Character.ai",
+    "region": "global",
+    "roles": [
+      "ai",
+      "fs"
+    ],
+    "pay": "$140–$190k",
+    "desc": "Conversational AI platform. ML Infrastructure & Backend platform.",
+    "apply": "https://jobs.ashbyhq.com/character",
+    "dsa": false
+  },
+  {
+    "id": "runway",
+    "name": "Runway ML",
+    "region": "global",
+    "roles": [
+      "ai",
+      "fs"
+    ],
+    "pay": "$140–$195k",
+    "desc": "Generative video & multimodal AI. Platform & Distributed Infrastructure.",
+    "apply": "https://jobs.ashbyhq.com/runway",
+    "dsa": false
+  },
+  {
+    "id": "pika",
+    "name": "Pika Labs",
+    "region": "global",
+    "roles": [
+      "ai",
+      "fs"
+    ],
+    "pay": "$135–$185k",
+    "desc": "Generative AI video creator. Senior/Staff Backend & Infrastructure.",
+    "apply": "https://jobs.ashbyhq.com/pika",
+    "dsa": false
+  },
+  {
+    "id": "dust",
+    "name": "Dust",
+    "region": "eu",
+    "roles": [
+      "ai",
+      "fs"
+    ],
+    "pay": "€90–€135k",
+    "desc": "European AI assistants and customized agent platform for enterprise. Paris / EU Remote.",
+    "apply": "https://jobs.ashbyhq.com/dust",
+    "dsa": false
+  },
+  {
+    "id": "photoroom",
+    "name": "PhotoRoom",
+    "region": "eu",
+    "roles": [
+      "ai",
+      "fs"
+    ],
+    "pay": "€90–€140k",
+    "desc": "AI photo & visual creation platform. Paris / Remote EMEA.",
+    "apply": "https://jobs.ashbyhq.com/photoroom",
+    "dsa": false
+  },
+  {
+    "id": "crewai",
+    "name": "CrewAI",
+    "region": "global",
+    "roles": [
+      "ai",
+      "fde"
+    ],
+    "pay": "$130–$180k",
+    "desc": "Leading multi-agent orchestration framework for autonomous AI teams.",
+    "apply": "https://jobs.ashbyhq.com/crewai",
+    "dsa": false
+  },
+  {
+    "id": "synthesia",
+    "name": "Synthesia",
+    "region": "eu",
+    "roles": [
+      "ai",
+      "fs"
+    ],
+    "pay": "€95–€145k",
+    "desc": "AI video generation platform for enterprise. London / Remote Europe.",
+    "apply": "https://jobs.ashbyhq.com/synthesia",
+    "dsa": false
+  },
+  {
+    "id": "speechify",
+    "name": "Speechify",
+    "region": "global",
+    "roles": [
+      "ai",
+      "fs"
+    ],
+    "pay": "$120–$165k",
+    "desc": "AI voice, text-to-speech & reading assistant. 100% Remote.",
+    "apply": "https://jobs.lever.co/speechify",
+    "dsa": false
+  },
+  {
+    "id": "writer",
+    "name": "Writer",
+    "region": "global",
+    "roles": [
+      "ai",
+      "fde",
+      "se"
+    ],
+    "pay": "$135–$185k",
+    "desc": "Enterprise generative AI platform & LLMs. Solutions Engineering & FDE.",
+    "apply": "https://job-boards.greenhouse.io/writer",
+    "dsa": false
+  },
+  {
+    "id": "cresta",
+    "name": "Cresta",
+    "region": "global",
+    "roles": [
+      "ai",
+      "se"
+    ],
+    "pay": "$130–$170k",
+    "desc": "Real-time AI for enterprise contact centers. Voice AI & Solutions Engineering.",
+    "apply": "https://job-boards.greenhouse.io/cresta",
+    "dsa": false
+  },
+  {
+    "id": "glean",
+    "name": "Glean",
+    "region": "global",
+    "roles": [
+      "fde",
+      "ai"
+    ],
+    "pay": "$140–$185k",
+    "desc": "Enterprise AI work assistant & knowledge search. Real-time RAG & Kafka.",
+    "apply": "https://job-boards.greenhouse.io/glean",
+    "dsa": false
+  },
+  {
+    "id": "augmentcode",
+    "name": "Augment Code",
+    "region": "global",
+    "roles": [
+      "ai",
+      "fs"
+    ],
+    "pay": "$140–$195k",
+    "desc": "AI developer platform & code intelligence engine for enterprise.",
+    "apply": "https://jobs.ashbyhq.com/augmentcode",
+    "dsa": false
+  },
+  {
+    "id": "magic",
+    "name": "Magic.dev",
+    "region": "global",
+    "roles": [
+      "ai",
+      "fs"
+    ],
+    "pay": "$140–$200k",
+    "desc": "Ultra-long context frontier models & AI software engineering.",
+    "apply": "https://jobs.ashbyhq.com/magic",
+    "dsa": false
+  },
+  {
+    "id": "poolside",
+    "name": "Poolside AI",
+    "region": "eu",
+    "roles": [
+      "ai",
+      "fs"
+    ],
+    "pay": "€100–€160k",
+    "desc": "European frontier AI for software development. Paris / Remote Europe.",
+    "apply": "https://jobs.ashbyhq.com/poolside",
+    "dsa": false
+  },
+  {
+    "id": "huggingface",
+    "name": "Hugging Face",
+    "region": "global",
+    "roles": [
+      "ai",
+      "se",
+      "fde"
+    ],
+    "pay": "$130–$175k",
+    "desc": "The home of open source AI. Solutions Engineers & ML infrastructure.",
+    "apply": "https://jobs.lever.co/huggingface",
+    "dsa": false
+  },
+  {
+    "id": "posthog",
+    "name": "PostHog",
+    "region": "global",
+    "roles": [
+      "fs",
+      "ai"
+    ],
+    "pay": "$120–$160k",
+    "desc": "All-in-one developer platform. Remote-first. 1-day paid practical work trial.",
+    "apply": "https://jobs.ashbyhq.com/posthog",
+    "dsa": false
+  },
+  {
+    "id": "supabase",
+    "name": "Supabase",
+    "region": "global",
+    "roles": [
+      "fs",
+      "ai"
+    ],
+    "pay": "$120–$160k",
+    "desc": "Open source Firebase alternative (PostgreSQL + pgvector). Real-time backend.",
+    "apply": "https://jobs.ashbyhq.com/supabase",
+    "dsa": false
+  },
+  {
+    "id": "vercel",
+    "name": "Vercel",
+    "region": "global",
+    "roles": [
+      "fs",
+      "ai"
+    ],
+    "pay": "$130–$175k",
+    "desc": "Frontend cloud & AI SDK company. Next.js, AI SDK, React platform engineering.",
+    "apply": "https://boards.greenhouse.io/vercel",
+    "dsa": false
+  },
+  {
+    "id": "linear",
+    "name": "Linear",
+    "region": "global",
+    "roles": [
+      "fs"
+    ],
+    "pay": "$130–$180k",
+    "desc": "Craft-focused issue tracker & engineering workflow tool. Europe / Remote.",
+    "apply": "https://jobs.ashbyhq.com/linear",
+    "dsa": false
+  },
+  {
+    "id": "sentry",
+    "name": "Sentry",
+    "region": "global",
+    "roles": [
+      "fs",
+      "se"
+    ],
+    "pay": "$120–$165k",
+    "desc": "Developer error tracking & telemetry. Observability stack.",
+    "apply": "https://jobs.ashbyhq.com/sentry",
+    "dsa": false
+  },
+  {
+    "id": "mattermost",
+    "name": "Mattermost",
+    "region": "global",
+    "roles": [
+      "fs"
+    ],
+    "pay": "$120–$160k",
+    "desc": "Open source secure collaboration platform. Senior & Staff Full Stack.",
+    "apply": "https://job-boards.greenhouse.io/mattermost",
+    "dsa": false
+  },
+  {
+    "id": "modal",
+    "name": "Modal",
+    "region": "global",
+    "roles": [
+      "ai",
+      "fs"
+    ],
+    "pay": "$140–$185k",
+    "desc": "Serverless cloud for AI & ML inference. Fast-growing platform.",
+    "apply": "https://jobs.ashbyhq.com/modal",
+    "dsa": false
+  },
+  {
+    "id": "neon",
+    "name": "Neon",
+    "region": "global",
+    "roles": [
+      "fs",
+      "se"
+    ],
+    "pay": "$120–$160k",
+    "desc": "Serverless Postgres with branching. Distributed systems + cloud databases.",
+    "apply": "https://jobs.lever.co/neon",
+    "dsa": false
+  },
+  {
+    "id": "triggerdev",
+    "name": "Trigger.dev",
+    "region": "eu",
+    "roles": [
+      "fs",
+      "ai"
+    ],
+    "pay": "€85–€120k",
+    "desc": "Background jobs & async queues orchestration platform. Remote UK/Europe.",
+    "apply": "https://jobs.ashbyhq.com/triggerdev",
+    "dsa": false
+  },
+  {
+    "id": "resend",
+    "name": "Resend",
+    "region": "global",
+    "roles": [
+      "fs"
+    ],
+    "pay": "$130–$175k",
+    "desc": "Developer-first email and transactional notification platform.",
+    "apply": "https://jobs.ashbyhq.com/resend",
+    "dsa": false
+  },
+  {
+    "id": "mintlify",
+    "name": "Mintlify",
+    "region": "global",
+    "roles": [
+      "fs",
+      "se"
+    ],
+    "pay": "$120–$165k",
+    "desc": "Modern AI-powered developer documentation platform. Solutions Engineers.",
+    "apply": "https://jobs.ashbyhq.com/mintlify",
+    "dsa": false
+  },
+  {
+    "id": "starburst",
+    "name": "Starburst",
+    "region": "global",
+    "roles": [
+      "fs",
+      "ai",
+      "se"
+    ],
+    "pay": "$130–$175k",
+    "desc": "Enterprise data & analytics engine (Trino). AI Agent Engineers.",
+    "apply": "https://job-boards.greenhouse.io/starburst",
+    "dsa": false
+  },
+  {
+    "id": "motherduck",
+    "name": "MotherDuck",
+    "region": "eu",
+    "roles": [
+      "fs",
+      "se"
+    ],
+    "pay": "€95–€140k",
+    "desc": "Cloud analytics platform powered by DuckDB. Amsterdam / Remote Europe.",
+    "apply": "https://jobs.ashbyhq.com/motherduck",
+    "dsa": false
+  },
+  {
+    "id": "stream",
+    "name": "GetStream",
+    "region": "eu",
+    "roles": [
+      "fs",
+      "se"
+    ],
+    "pay": "€90–€130k",
+    "desc": "Scalable in-app chat & real-time messaging APIs. Amsterdam / Remote EMEA.",
+    "apply": "https://jobs.ashbyhq.com/stream",
+    "dsa": false
+  },
+  {
+    "id": "clerk",
+    "name": "Clerk",
+    "region": "global",
+    "roles": [
+      "fs",
+      "ai"
+    ],
+    "pay": "$130–$175k",
+    "desc": "Authentication and user management for React & Next.js apps.",
+    "apply": "https://jobs.ashbyhq.com/clerk",
+    "dsa": false
+  },
+  {
+    "id": "inngest",
+    "name": "Inngest",
+    "region": "global",
+    "roles": [
+      "fs",
+      "se"
+    ],
+    "pay": "$125–$170k",
+    "desc": "Event-driven durable execution engine for background AI workflows.",
+    "apply": "https://jobs.ashbyhq.com/inngest",
+    "dsa": false
+  },
+  {
+    "id": "knock",
+    "name": "Knock",
+    "region": "global",
+    "roles": [
+      "fs",
+      "se"
+    ],
+    "pay": "$125–$165k",
+    "desc": "Flexible notification infrastructure for modern software products.",
+    "apply": "https://jobs.ashbyhq.com/knock",
+    "dsa": false
+  },
+  {
+    "id": "incidentio",
+    "name": "incident.io",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "€90–€135k",
+    "desc": "Modern incident management platform. London / Remote Europe.",
+    "apply": "https://jobs.ashbyhq.com/incident.io",
+    "dsa": false
+  },
+  {
+    "id": "calcom",
+    "name": "Cal.com",
+    "region": "global",
+    "roles": [
+      "fs"
+    ],
+    "pay": "$110–$150k",
+    "desc": "Open-source scheduling infrastructure. Remote-first team.",
+    "apply": "https://jobs.ashbyhq.com/calcom",
+    "dsa": false
+  },
+  {
+    "id": "loops",
+    "name": "Loops",
+    "region": "global",
+    "roles": [
+      "fs"
+    ],
+    "pay": "$120–$160k",
+    "desc": "Email platform for SaaS companies. React, Node.js & high-volume delivery.",
+    "apply": "https://jobs.ashbyhq.com/loops",
+    "dsa": false
+  },
+  {
+    "id": "prisma",
+    "name": "Prisma",
+    "region": "eu",
+    "roles": [
+      "fs",
+      "se"
+    ],
+    "pay": "€85–€125k",
+    "desc": "Next-gen ORM and database platform. Berlin / Remote Europe.",
+    "apply": "https://jobs.ashbyhq.com/prisma",
+    "dsa": false
+  },
+  {
+    "id": "planetscale",
+    "name": "PlanetScale",
+    "region": "global",
+    "roles": [
+      "fs"
+    ],
+    "pay": "$130–$175k",
+    "desc": "Serverless MySQL database platform (Vitess). Distributed data systems.",
+    "apply": "https://jobs.ashbyhq.com/planetscale",
+    "dsa": false
+  },
+  {
+    "id": "upstash",
+    "name": "Upstash",
+    "region": "global",
+    "roles": [
+      "fs",
+      "ai"
+    ],
+    "pay": "$120–$160k",
+    "desc": "Serverless data platform for Redis, Vector, and QStash messaging.",
+    "apply": "https://jobs.ashbyhq.com/upstash",
+    "dsa": false
+  },
+  {
+    "id": "sourcegraph",
+    "name": "Sourcegraph",
+    "region": "global",
+    "roles": [
+      "ai",
+      "fs"
+    ],
+    "pay": "$135–$180k",
+    "desc": "Code intelligence platform and Cody AI coding assistant.",
+    "apply": "https://job-boards.greenhouse.io/sourcegraph",
+    "dsa": false
+  },
+  {
+    "id": "grafana",
+    "name": "Grafana Labs",
+    "region": "eu",
+    "roles": [
+      "fs",
+      "ai"
+    ],
+    "pay": "€85–€120k",
+    "desc": "Remote observability. Prometheus + Grafana + OpenTelemetry telemetry.",
+    "apply": "https://grafana.com/about/careers/",
+    "dsa": false
+  },
+  {
+    "id": "elastic",
+    "name": "Elastic",
+    "region": "eu",
+    "roles": [
+      "fs",
+      "se"
+    ],
+    "pay": "€90–€130k",
+    "desc": "Search + observability + vector database. Remote EMEA.",
+    "apply": "https://www.elastic.co/about/careers",
+    "dsa": false
+  },
+  {
+    "id": "suno",
+    "name": "Suno",
+    "region": "global",
+    "roles": [
+      "fde",
+      "ai",
+      "fs"
+    ],
+    "pay": "$130–$180k",
+    "desc": "Generative AI music platform. Platform & product engineering.",
+    "apply": "https://jobs.ashbyhq.com/suno",
+    "dsa": false
+  },
+  {
+    "id": "automattic",
+    "name": "Automattic (WordPress)",
+    "region": "global",
+    "roles": [
+      "fs"
+    ],
+    "pay": "$120–$160k",
+    "desc": "100% remote pioneer. Famous for paid, real-world project trials.",
+    "apply": "https://automattic.com/work-with-us/",
+    "dsa": false
+  },
+  {
+    "id": "basecamp",
+    "name": "37signals (Basecamp)",
+    "region": "global",
+    "roles": [
+      "fs"
+    ],
+    "pay": "$130–$175k",
+    "desc": "Creators of Ruby on Rails & Basecamp. 100% no-DSA work sample evaluation.",
+    "apply": "https://37signals.com/jobs",
+    "dsa": false
+  },
+  {
+    "id": "ghost",
+    "name": "Ghost",
+    "region": "global",
+    "roles": [
+      "fs"
+    ],
+    "pay": "$110–$150k",
+    "desc": "Non-profit open source publishing platform. 100% remote.",
+    "apply": "https://ghost.org/careers/",
+    "dsa": false
+  },
+  {
+    "id": "gitlab",
+    "name": "GitLab",
+    "region": "global",
+    "roles": [
+      "fs"
+    ],
+    "pay": "$130–$170k",
+    "desc": "All-remote DevSecOps platform. Problem-based practical interviews, no LeetCode.",
+    "apply": "https://about.gitlab.com/jobs/",
+    "dsa": false
+  },
+  {
+    "id": "zapier",
+    "name": "Zapier",
+    "region": "global",
+    "roles": [
+      "fs",
+      "ai"
+    ],
+    "pay": "$130–$175k",
+    "desc": "Workflow automation platform. Integrations & full-stack engineering.",
+    "apply": "https://jobs.ashbyhq.com/zapier",
+    "dsa": false
+  },
+  {
+    "id": "retool",
+    "name": "Retool",
+    "region": "global",
+    "roles": [
+      "fde",
+      "se",
+      "fs"
+    ],
+    "pay": "$135–$185k",
+    "desc": "Internal tools & AI agent platform. Forward Deployed & Solutions Engineers.",
+    "apply": "https://job-boards.greenhouse.io/retool",
+    "dsa": false
+  },
+  {
+    "id": "clickhouse",
+    "name": "ClickHouse",
+    "region": "global",
+    "roles": [
+      "fs",
+      "se"
+    ],
+    "pay": "$135–$185k",
+    "desc": "Real-time analytical database. Cloud platform & Solutions Engineers.",
+    "apply": "https://job-boards.greenhouse.io/clickhouse",
+    "dsa": false
+  },
+  {
+    "id": "dbtlabs",
+    "name": "dbt Labs",
+    "region": "global",
+    "roles": [
+      "fs",
+      "se"
+    ],
+    "pay": "$130–$175k",
+    "desc": "Data transformation and analytics engineering platform. Remote.",
+    "apply": "https://job-boards.greenhouse.io/dbtlabs",
+    "dsa": false
+  },
+  {
+    "id": "postman",
+    "name": "Postman",
+    "region": "global",
+    "roles": [
+      "fs",
+      "se"
+    ],
+    "pay": "$120–$165k",
+    "desc": "API development & testing platform. Full-stack & Solutions Architecture.",
+    "apply": "https://job-boards.greenhouse.io/postman",
+    "dsa": false
+  },
+  {
+    "id": "hasura",
+    "name": "Hasura",
+    "region": "global",
+    "roles": [
+      "fs",
+      "se"
+    ],
+    "pay": "$120–$160k",
+    "desc": "Instant GraphQL & REST APIs on databases. Backend & Solutions Engineers.",
+    "apply": "https://jobs.lever.co/hasura",
+    "dsa": false
+  },
+  {
+    "id": "strapi",
+    "name": "Strapi",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "€85–€120k",
+    "desc": "Leading open-source headless CMS. Paris / Remote Europe. Node.js & React.",
+    "apply": "https://jobs.lever.co/strapi",
+    "dsa": false
+  },
+  {
+    "id": "medusa",
+    "name": "Medusa.js",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "€85–€125k",
+    "desc": "Open-source modular commerce infrastructure. Copenhagen / Remote EU.",
+    "apply": "https://jobs.ashbyhq.com/medusajs",
+    "dsa": false
+  },
+  {
+    "id": "appwrite",
+    "name": "Appwrite",
+    "region": "global",
+    "roles": [
+      "fs",
+      "se"
+    ],
+    "pay": "$115–$155k",
+    "desc": "Open-source backend-as-a-service platform for web and mobile apps.",
+    "apply": "https://jobs.lever.co/appwrite",
+    "dsa": false
+  },
+  {
+    "id": "novu",
+    "name": "Novu",
+    "region": "global",
+    "roles": [
+      "fs",
+      "se"
+    ],
+    "pay": "$115–$155k",
+    "desc": "Open source notification infrastructure and inbox component for React apps.",
+    "apply": "https://jobs.ashbyhq.com/novu",
+    "dsa": false
+  },
+  {
+    "id": "temporal",
+    "name": "Temporal.io",
+    "region": "global",
+    "roles": [
+      "fs",
+      "ai",
+      "se"
+    ],
+    "pay": "$140–$190k",
+    "desc": "Durable execution platform for mission-critical workflows and microservices.",
+    "apply": "https://job-boards.greenhouse.io/temporal",
+    "dsa": false
+  },
+  {
+    "id": "aiven",
+    "name": "Aiven",
+    "region": "eu",
+    "roles": [
+      "fs",
+      "se"
+    ],
+    "pay": "€85–€120k",
+    "desc": "Helsinki managed Kafka, PostgreSQL & Redis cloud. Solutions Engineers.",
+    "apply": "https://aiven.io/careers",
+    "dsa": false
+  },
+  {
+    "id": "redpanda",
+    "name": "Redpanda Data",
+    "region": "global",
+    "roles": [
+      "fs",
+      "se"
+    ],
+    "pay": "$135–$180k",
+    "desc": "High-performance Kafka-compatible streaming data platform.",
+    "apply": "https://job-boards.greenhouse.io/redpanda",
+    "dsa": false
+  },
+  {
+    "id": "kestra",
+    "name": "Kestra",
+    "region": "eu",
+    "roles": [
+      "fs",
+      "ai"
+    ],
+    "pay": "€85–€125k",
+    "desc": "Open-source declarative data and AI workflow orchestration platform.",
+    "apply": "https://jobs.ashbyhq.com/kestra",
+    "dsa": false
+  },
+  {
+    "id": "n8n",
+    "name": "n8n",
+    "region": "eu",
+    "roles": [
+      "ai",
+      "fs"
+    ],
+    "pay": "€80–€120k",
+    "desc": "Berlin AI agent and workflow automation platform. Node.js/TypeScript.",
+    "apply": "https://n8n.io/careers/",
+    "dsa": false
+  },
+  {
+    "id": "camunda",
+    "name": "Camunda",
+    "region": "eu",
+    "roles": [
+      "fs",
+      "se"
+    ],
+    "pay": "€85–€120k",
+    "desc": "Berlin process orchestration platform. Spring Boot microservices background.",
+    "apply": "https://camunda.com/about/careers/",
+    "dsa": false
+  },
+  {
+    "id": "pleo",
+    "name": "Pleo",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "€90–€135k",
+    "desc": "Copenhagen business spending and smart cards platform. Remote Europe.",
+    "apply": "https://job-boards.greenhouse.io/pleo",
+    "dsa": false
+  },
+  {
+    "id": "wise",
+    "name": "Wise",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "€95–€140k",
+    "desc": "Global money transfer & cross-border payments. Java/Spring Boot & microservices.",
+    "apply": "https://job-boards.greenhouse.io/wise",
+    "dsa": false
+  },
+  {
+    "id": "mollie",
+    "name": "Mollie",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "€85–€125k",
+    "desc": "Amsterdam payment processor. Strong Java & practical system design culture.",
+    "apply": "https://jobs.mollie.com/",
+    "dsa": false
+  },
+  {
+    "id": "bird",
+    "name": "MessageBird / Bird",
+    "region": "eu",
+    "roles": [
+      "fs",
+      "ai"
+    ],
+    "pay": "€90–€130k",
+    "desc": "Amsterdam omnichannel comms & WhatsApp API platform. Spring Boot & Node.js.",
+    "apply": "https://bird.com/careers",
+    "dsa": false
+  },
+  {
+    "id": "remote_com",
+    "name": "Remote.com",
+    "region": "global",
+    "roles": [
+      "fde",
+      "fs",
+      "ai"
+    ],
+    "pay": "$125–$165k",
+    "desc": "Global HR and international payroll platform. FDE (AI) & Full-Stack.",
+    "apply": "https://job-boards.greenhouse.io/remotereferralboardinternaluseonly",
+    "dsa": false
+  },
+  {
+    "id": "deel",
+    "name": "Deel",
+    "region": "global",
+    "roles": [
+      "fs",
+      "ai"
+    ],
+    "pay": "$120–$165k",
+    "desc": "Global compliance and payroll infrastructure. Remote worldwide.",
+    "apply": "https://jobs.ashbyhq.com/deel",
+    "dsa": false
+  },
+  {
+    "id": "oyster",
+    "name": "Oyster HR",
+    "region": "global",
+    "roles": [
+      "fs"
+    ],
+    "pay": "$115–$155k",
+    "desc": "Global employment platform. 100% remote-first engineering.",
+    "apply": "https://jobs.ashbyhq.com/oyster",
+    "dsa": false
+  },
+  {
+    "id": "noon",
+    "name": "Noon",
+    "region": "gulf",
+    "roles": [
+      "fs"
+    ],
+    "pay": "$90–$135k tax-free",
+    "desc": "Middle East e-commerce & fintech giant. Java, Spring Boot & microservices at scale.",
+    "apply": "https://jobs.lever.co/noon",
+    "dsa": false
+  },
+  {
+    "id": "floward",
+    "name": "Floward",
+    "region": "gulf",
+    "roles": [
+      "fs"
+    ],
+    "pay": "$85–$120k tax-free",
+    "desc": "Fast-growing GCC e-commerce & gifting platform. Riyadh & Dubai.",
+    "apply": "https://jobs.ashbyhq.com/floward",
+    "dsa": false
+  },
+  {
+    "id": "trukker",
+    "name": "Trukker",
+    "region": "gulf",
+    "roles": [
+      "fs"
+    ],
+    "pay": "$85–$125k tax-free",
+    "desc": "Digital freight network & logistics platform in MENA. Microservices architecture.",
+    "apply": "https://jobs.lever.co/trukker",
+    "dsa": false
+  },
+  {
+    "id": "jahez",
+    "name": "Jahez",
+    "region": "gulf",
+    "roles": [
+      "fs"
+    ],
+    "pay": "$95–$140k tax-free",
+    "desc": "Leading Saudi food & logistics platform. Riyadh on-site.",
+    "apply": "https://jobs.lever.co/jahez",
+    "dsa": false
+  },
+  {
+    "id": "nana",
+    "name": "Nana",
+    "region": "gulf",
+    "roles": [
+      "fs"
+    ],
+    "pay": "$90–$130k tax-free",
+    "desc": "Saudi grocery delivery & fintech app. Riyadh on-site & hybrid.",
+    "apply": "https://jobs.lever.co/nana",
+    "dsa": false
+  },
+  {
+    "id": "dubizzle",
+    "name": "Dubizzle Group",
+    "region": "gulf",
+    "roles": [
+      "fs"
+    ],
+    "pay": "$90–$130k tax-free",
+    "desc": "UAE classifieds & marketplace unicorn (Bayut & Dubizzle). Dubai.",
+    "apply": "https://jobs.lever.co/dubizzlegroup",
+    "dsa": false
+  },
+  {
+    "id": "wego",
+    "name": "Wego",
+    "region": "gulf",
+    "roles": [
+      "fs"
+    ],
+    "pay": "$85–$120k tax-free",
+    "desc": "Dubai travel marketplace & fintech services. Java & React.",
+    "apply": "https://jobs.lever.co/wego",
+    "dsa": false
+  },
+  {
+    "id": "swvl",
+    "name": "Swvl",
+    "region": "gulf",
+    "roles": [
+      "fs"
+    ],
+    "pay": "$85–$125k tax-free",
+    "desc": "Tech-enabled mass transit & mobility platform in Dubai.",
+    "apply": "https://jobs.lever.co/swvl",
+    "dsa": false
+  },
+  {
+    "id": "tamara_jobs",
+    "name": "Tamara Careers",
+    "region": "gulf",
+    "roles": [
+      "fs",
+      "ai"
+    ],
+    "pay": "$100–$150k tax-free",
+    "desc": "Riyadh Saudi BNPL unicorn. Engineering & platform teams.",
+    "apply": "https://job-boards.greenhouse.io/tamara",
+    "dsa": false
+  },
+  {
+    "id": "gitpod",
+    "name": "Gitpod",
+    "region": "eu",
+    "roles": [
+      "fs",
+      "ai"
+    ],
+    "pay": "€90–€135k",
+    "desc": "Cloud developer environments & automated dev workflows. Remote Europe.",
+    "apply": "https://jobs.ashbyhq.com/gitpod",
+    "dsa": false
+  },
+  {
+    "id": "raycast",
+    "name": "Raycast",
+    "region": "eu",
+    "roles": [
+      "fs",
+      "ai"
+    ],
+    "pay": "€95–€140k",
+    "desc": "Fast launcher with AI extensions for macOS & Windows. London / Remote EU.",
+    "apply": "https://jobs.ashbyhq.com/raycast",
+    "dsa": false
+  },
+  {
+    "id": "deepl",
+    "name": "DeepL",
+    "region": "eu",
+    "roles": [
+      "ai",
+      "fs"
+    ],
+    "pay": "€100–€150k",
+    "desc": "World leading AI translation & communication. Cologne, London & Remote EU.",
+    "apply": "https://jobs.lever.co/deepl",
+    "dsa": false
+  },
+  {
+    "id": "miro",
+    "name": "Miro",
+    "region": "eu",
+    "roles": [
+      "fs",
+      "ai"
+    ],
+    "pay": "€95–€140k",
+    "desc": "Visual collaboration & AI canvas. Amsterdam, Berlin, London & Remote.",
+    "apply": "https://jobs.ashbyhq.com/miro",
+    "dsa": false
+  },
+  {
+    "id": "meilisearch",
+    "name": "Meilisearch",
+    "region": "eu",
+    "roles": [
+      "fs",
+      "ai"
+    ],
+    "pay": "€80–€120k",
+    "desc": "Open-source fast search engine. Paris / 100% Remote Europe.",
+    "apply": "https://jobs.lever.co/meilisearch",
+    "dsa": false
+  },
+  {
+    "id": "qdrant_jobs",
+    "name": "Qdrant Vector DB",
+    "region": "eu",
+    "roles": [
+      "ai",
+      "se",
+      "fs"
+    ],
+    "pay": "€90–€135k",
+    "desc": "Open-source vector search database for AI & RAG. Berlin & Remote.",
+    "apply": "https://jobs.ashbyhq.com/qdrant",
+    "dsa": false
+  },
+  {
+    "id": "weaviate_jobs",
+    "name": "Weaviate Vector DB",
+    "region": "eu",
+    "roles": [
+      "ai",
+      "se",
+      "fs"
+    ],
+    "pay": "€90–€135k",
+    "desc": "Open-source vector database & AI search. Amsterdam & Remote.",
+    "apply": "https://jobs.ashbyhq.com/weaviate",
+    "dsa": false
+  },
+  {
+    "id": "kestra_app",
+    "name": "Kestra Orchestration",
+    "region": "eu",
+    "roles": [
+      "fs",
+      "ai"
+    ],
+    "pay": "€85–€125k",
+    "desc": "Declarative orchestrator for data, microservices & AI workflows. Remote EU.",
+    "apply": "https://jobs.ashbyhq.com/kestra",
+    "dsa": false
+  },
+  {
+    "id": "dataiku",
+    "name": "Dataiku",
+    "region": "eu",
+    "roles": [
+      "ai",
+      "se",
+      "fs"
+    ],
+    "pay": "€95–€145k",
+    "desc": "Enterprise AI & generative AI platform. Paris, London & Remote EU.",
+    "apply": "https://jobs.lever.co/dataiku",
+    "dsa": false
+  },
+  {
+    "id": "pigment",
+    "name": "Pigment",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "€95–€145k",
+    "desc": "Business planning & data visualization platform. Paris, London & Remote.",
+    "apply": "https://jobs.ashbyhq.com/pigment",
+    "dsa": false
+  },
+  {
+    "id": "alan",
+    "name": "Alan",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "€90–€140k",
+    "desc": "Healthcare super-app & insurance tech. Paris, Madrid & Remote Europe.",
+    "apply": "https://jobs.lever.co/alan",
+    "dsa": false
+  },
+  {
+    "id": "swile",
+    "name": "Swile",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "€85–€125k",
+    "desc": "Employee benefits & smart fintech cards. Paris & Remote Europe.",
+    "apply": "https://jobs.lever.co/swile",
+    "dsa": false
+  },
+  {
+    "id": "pennylane",
+    "name": "Pennylane",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "€85–€130k",
+    "desc": "Financial management & accounting SaaS. Paris & Remote Europe.",
+    "apply": "https://jobs.lever.co/pennylane",
+    "dsa": false
+  },
+  {
+    "id": "front",
+    "name": "Front",
+    "region": "eu",
+    "roles": [
+      "fs",
+      "se"
+    ],
+    "pay": "€95–€140k",
+    "desc": "Customer operations & collaborative inbox. Paris, London & Remote.",
+    "apply": "https://jobs.lever.co/front",
+    "dsa": false
+  },
+  {
+    "id": "brevo",
+    "name": "Brevo (Sendinblue)",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "€85–€125k",
+    "desc": "CRM & marketing automation platform. Paris, Berlin & Remote.",
+    "apply": "https://jobs.lever.co/brevo",
+    "dsa": false
+  },
+  {
+    "id": "personio_jobs",
+    "name": "Personio",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "€90–€135k",
+    "desc": "European HR software leader. Munich, Madrid, Amsterdam & Remote.",
+    "apply": "https://jobs.ashbyhq.com/personio",
+    "dsa": false
+  },
+  {
+    "id": "contentful_jobs",
+    "name": "Contentful",
+    "region": "eu",
+    "roles": [
+      "fs",
+      "se"
+    ],
+    "pay": "€90–€130k",
+    "desc": "Composable content platform for enterprise. Berlin & Remote.",
+    "apply": "https://job-boards.greenhouse.io/contentful",
+    "dsa": false
+  },
+  {
+    "id": "trade_republic",
+    "name": "Trade Republic",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "€95–€145k",
+    "desc": "European wealth and investing platform. Berlin on-site & hybrid.",
+    "apply": "https://jobs.ashbyhq.com/traderepublic",
+    "dsa": false
+  },
+  {
+    "id": "n26",
+    "name": "N26",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "€90–€135k",
+    "desc": "Mobile banking pioneer. Berlin, Vienna, Barcelona & Remote.",
+    "apply": "https://jobs.lever.co/n26",
+    "dsa": false
+  },
+  {
+    "id": "bolt",
+    "name": "Bolt",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "€90–€140k",
+    "desc": "Super-app for mobility, food, and delivery. Tallinn, London & Remote EU.",
+    "apply": "https://jobs.ashbyhq.com/bolt",
+    "dsa": false
+  },
+  {
+    "id": "wolt",
+    "name": "Wolt (DoorDash)",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "€95–€140k",
+    "desc": "Food & retail delivery tech. Helsinki, Berlin & Remote EU.",
+    "apply": "https://jobs.ashbyhq.com/wolt",
+    "dsa": false
+  },
+  {
+    "id": "delivery_hero",
+    "name": "Delivery Hero",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "€90–€135k",
+    "desc": "Global local delivery network. Berlin on-site & hybrid.",
+    "apply": "https://jobs.lever.co/deliveryhero",
+    "dsa": false
+  },
+  {
+    "id": "duckduckgo",
+    "name": "DuckDuckGo",
+    "region": "global",
+    "roles": [
+      "fs",
+      "ai"
+    ],
+    "pay": "$130–$175k",
+    "desc": "Privacy-focused search engine & browser. 100% Remote worldwide. No DSA whiteboard.",
+    "apply": "https://jobs.lever.co/duckduckgo",
+    "dsa": false
+  },
+  {
+    "id": "buffer",
+    "name": "Buffer",
+    "region": "global",
+    "roles": [
+      "fs"
+    ],
+    "pay": "$120–$160k",
+    "desc": "Social media management toolkit. 100% remote pioneer with transparent salaries.",
+    "apply": "https://jobs.lever.co/buffer",
+    "dsa": false
+  },
+  {
+    "id": "doist",
+    "name": "Doist (Todoist)",
+    "region": "global",
+    "roles": [
+      "fs"
+    ],
+    "pay": "$120–$160k",
+    "desc": "Productivity tools for async work. 100% remote-first team worldwide.",
+    "apply": "https://jobs.lever.co/doist",
+    "dsa": false
+  },
+  {
+    "id": "webflow",
+    "name": "Webflow",
+    "region": "global",
+    "roles": [
+      "fs",
+      "ai"
+    ],
+    "pay": "$135–$180k",
+    "desc": "Visual web development & CMS platform. Full-stack & AI engineering.",
+    "apply": "https://job-boards.greenhouse.io/webflow",
+    "dsa": false
+  },
+  {
+    "id": "notion",
+    "name": "Notion",
+    "region": "global",
+    "roles": [
+      "fs",
+      "ai"
+    ],
+    "pay": "$140–$195k",
+    "desc": "Connected workspace & AI tools. System design & real product code walkthrough.",
+    "apply": "https://job-boards.greenhouse.io/notion",
+    "dsa": false
+  },
+  {
+    "id": "airtable",
+    "name": "Airtable",
+    "region": "global",
+    "roles": [
+      "fs",
+      "ai",
+      "se"
+    ],
+    "pay": "$140–$190k",
+    "desc": "Low-code application & database platform. Solutions engineering & full-stack.",
+    "apply": "https://job-boards.greenhouse.io/airtable",
+    "dsa": false
+  },
+  {
+    "id": "make",
+    "name": "Make.com (Integromat)",
+    "region": "eu",
+    "roles": [
+      "fs",
+      "se"
+    ],
+    "pay": "€90–€130k",
+    "desc": "Visual automation and integration platform. Prague & Remote Europe.",
+    "apply": "https://jobs.lever.co/make",
+    "dsa": false
+  },
+  {
+    "id": "workato",
+    "name": "Workato",
+    "region": "global",
+    "roles": [
+      "fs",
+      "se",
+      "fde"
+    ],
+    "pay": "$130–$175k",
+    "desc": "Enterprise automation & AI orchestration platform. Solutions Architecture.",
+    "apply": "https://job-boards.greenhouse.io/workato",
+    "dsa": false
+  },
+  {
+    "id": "langflow",
+    "name": "Langflow (DataStax)",
+    "region": "global",
+    "roles": [
+      "ai",
+      "fs"
+    ],
+    "pay": "$130–$175k",
+    "desc": "Visual framework for building multi-agent AI and RAG applications.",
+    "apply": "https://job-boards.greenhouse.io/datastax",
+    "dsa": false
+  },
+  {
+    "id": "arize",
+    "name": "Arize AI (Phoenix)",
+    "region": "global",
+    "roles": [
+      "ai",
+      "fs",
+      "se"
+    ],
+    "pay": "$130–$175k",
+    "desc": "LLM observability & evaluation platform. RAG and agent tracing.",
+    "apply": "https://jobs.ashbyhq.com/arize",
+    "dsa": false
+  },
+  {
+    "id": "openpipe",
+    "name": "OpenPipe",
+    "region": "global",
+    "roles": [
+      "ai",
+      "fs"
+    ],
+    "pay": "$135–$180k",
+    "desc": "Fine-tuning & model distillation infrastructure for LLMs.",
+    "apply": "https://jobs.ashbyhq.com/openpipe",
+    "dsa": false
+  },
+  {
+    "id": "promptfoo",
+    "name": "Promptfoo",
+    "region": "global",
+    "roles": [
+      "ai",
+      "fs"
+    ],
+    "pay": "$130–$175k",
+    "desc": "Open-source LLM evaluation, security testing & red-teaming tool.",
+    "apply": "https://jobs.ashbyhq.com/promptfoo",
+    "dsa": false
+  },
+  {
+    "id": "agentops",
+    "name": "AgentOps",
+    "region": "global",
+    "roles": [
+      "ai",
+      "fs"
+    ],
+    "pay": "$125–$170k",
+    "desc": "Observability and session replays for autonomous AI agents.",
+    "apply": "https://jobs.ashbyhq.com/agentops",
+    "dsa": false
+  },
+  {
+    "id": "chroma",
+    "name": "Chroma DB",
+    "region": "global",
+    "roles": [
+      "ai",
+      "fs"
+    ],
+    "pay": "$135–$185k",
+    "desc": "Open-source AI application database & embeddings store.",
+    "apply": "https://jobs.ashbyhq.com/chroma",
+    "dsa": false
+  },
+  {
+    "id": "zilliz",
+    "name": "Zilliz (Milvus)",
+    "region": "global",
+    "roles": [
+      "ai",
+      "se",
+      "fs"
+    ],
+    "pay": "$130–$175k",
+    "desc": "Cloud vector database built for massive scale AI inference.",
+    "apply": "https://job-boards.greenhouse.io/zilliz",
+    "dsa": false
+  },
+  {
+    "id": "singlestore",
+    "name": "SingleStore",
+    "region": "global",
+    "roles": [
+      "fs",
+      "se"
+    ],
+    "pay": "$135–$180k",
+    "desc": "Real-time distributed SQL database with vector search.",
+    "apply": "https://job-boards.greenhouse.io/singlestore",
+    "dsa": false
+  },
+  {
+    "id": "cockroachlabs",
+    "name": "Cockroach Labs",
+    "region": "global",
+    "roles": [
+      "fs",
+      "se"
+    ],
+    "pay": "$140–$185k",
+    "desc": "Distributed SQL database architected for resilience.",
+    "apply": "https://job-boards.greenhouse.io/cockroachlabs",
+    "dsa": false
+  },
+  {
+    "id": "yugabyte",
+    "name": "Yugabyte",
+    "region": "global",
+    "roles": [
+      "fs",
+      "se"
+    ],
+    "pay": "$130–$175k",
+    "desc": "Open-source distributed PostgreSQL database for global applications.",
+    "apply": "https://job-boards.greenhouse.io/yugabyte",
+    "dsa": false
+  },
+  {
+    "id": "timescale",
+    "name": "Timescale",
+    "region": "global",
+    "roles": [
+      "fs",
+      "se"
+    ],
+    "pay": "$130–$175k",
+    "desc": "PostgreSQL platform for time-series, analytics & pgvector AI.",
+    "apply": "https://jobs.ashbyhq.com/timescale",
+    "dsa": false
+  },
+  {
+    "id": "scylladb",
+    "name": "ScyllaDB",
+    "region": "global",
+    "roles": [
+      "fs",
+      "se"
+    ],
+    "pay": "$130–$175k",
+    "desc": "Ultra-high throughput distributed database for real-time scale.",
+    "apply": "https://jobs.lever.co/scylladb",
+    "dsa": false
+  },
+  {
+    "id": "turso",
+    "name": "Turso (ChiselStrike)",
+    "region": "global",
+    "roles": [
+      "fs"
+    ],
+    "pay": "$125–$170k",
+    "desc": "Edge-hosted distributed SQLite database powered by LibSQL.",
+    "apply": "https://jobs.ashbyhq.com/turso",
+    "dsa": false
+  },
+  {
+    "id": "deno",
+    "name": "Deno",
+    "region": "global",
+    "roles": [
+      "fs"
+    ],
+    "pay": "$130–$175k",
+    "desc": "Next-generation JavaScript/TypeScript runtime & serverless cloud.",
+    "apply": "https://jobs.ashbyhq.com/deno",
+    "dsa": false
+  },
+  {
+    "id": "cloudflare_jobs",
+    "name": "Cloudflare",
+    "region": "global",
+    "roles": [
+      "fs",
+      "ai",
+      "se"
+    ],
+    "pay": "$140–$185k",
+    "desc": "Global cloud network, edge compute (Workers) & AI inference.",
+    "apply": "https://job-boards.greenhouse.io/cloudflare",
+    "dsa": false
+  },
+  {
+    "id": "flyio",
+    "name": "Fly.io",
+    "region": "global",
+    "roles": [
+      "fs",
+      "se"
+    ],
+    "pay": "$135–$180k",
+    "desc": "Run full-stack apps and microVMs close to users worldwide. No whiteboard DSA.",
+    "apply": "https://jobs.ashbyhq.com/flyio",
+    "dsa": false
+  },
+  {
+    "id": "railway",
+    "name": "Railway",
+    "region": "global",
+    "roles": [
+      "fs"
+    ],
+    "pay": "$130–$180k",
+    "desc": "Instant cloud deployment infrastructure for developers and teams.",
+    "apply": "https://jobs.ashbyhq.com/railway",
+    "dsa": false
+  },
+  {
+    "id": "render_cloud",
+    "name": "Render",
+    "region": "global",
+    "roles": [
+      "fs",
+      "se"
+    ],
+    "pay": "$130–$175k",
+    "desc": "Zero-DevOps cloud platform for web apps, databases, and cron workers.",
+    "apply": "https://job-boards.greenhouse.io/render",
+    "dsa": false
+  },
+  {
+    "id": "koyeb",
+    "name": "Koyeb",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "€85–€125k",
+    "desc": "Serverless platform for running full-stack applications and AI APIs worldwide.",
+    "apply": "https://jobs.ashbyhq.com/koyeb",
+    "dsa": false
+  },
+  {
+    "id": "northflank",
+    "name": "Northflank",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "€85–€125k",
+    "desc": "Developer platform for microservices, jobs, and databases on Kubernetes.",
+    "apply": "https://jobs.ashbyhq.com/northflank",
+    "dsa": false
+  },
+  {
+    "id": "runpod",
+    "name": "RunPod",
+    "region": "global",
+    "roles": [
+      "ai",
+      "fs"
+    ],
+    "pay": "$130–$180k",
+    "desc": "GPU cloud infrastructure for serverless AI inference and fine-tuning.",
+    "apply": "https://jobs.ashbyhq.com/runpod",
+    "dsa": false
+  },
+  {
+    "id": "lambda_labs",
+    "name": "Lambda Labs",
+    "region": "global",
+    "roles": [
+      "ai",
+      "fs",
+      "se"
+    ],
+    "pay": "$135–$185k",
+    "desc": "Deep learning GPU compute cloud and AI systems engineering.",
+    "apply": "https://job-boards.greenhouse.io/lambdalabs",
+    "dsa": false
+  },
+  {
+    "id": "anyscale",
+    "name": "Anyscale (Ray)",
+    "region": "global",
+    "roles": [
+      "ai",
+      "se",
+      "fs"
+    ],
+    "pay": "$140–$190k",
+    "desc": "Distributed computing platform for AI & LLMs founded by Ray creators.",
+    "apply": "https://job-boards.greenhouse.io/anyscale",
+    "dsa": false
+  },
+  {
+    "id": "predibase",
+    "name": "Predibase",
+    "region": "global",
+    "roles": [
+      "ai",
+      "se"
+    ],
+    "pay": "$130–$175k",
+    "desc": "Developer platform for fine-tuning and serving specialized LLMs.",
+    "apply": "https://jobs.ashbyhq.com/predibase",
+    "dsa": false
+  },
+  {
+    "id": "octoai",
+    "name": "OctoAI",
+    "region": "global",
+    "roles": [
+      "ai",
+      "se"
+    ],
+    "pay": "$130–$175k",
+    "desc": "Fast compute service for production generative AI applications.",
+    "apply": "https://job-boards.greenhouse.io/octoai",
+    "dsa": false
+  },
+  {
+    "id": "groq_cloud",
+    "name": "Groq",
+    "region": "global",
+    "roles": [
+      "ai",
+      "se",
+      "fde"
+    ],
+    "pay": "$140–$195k",
+    "desc": "LPU inference engine delivering world-record LLM token generation speeds.",
+    "apply": "https://job-boards.greenhouse.io/groq",
+    "dsa": false
+  },
+  {
+    "id": "wandb_jobs",
+    "name": "Weights & Biases",
+    "region": "global",
+    "roles": [
+      "ai",
+      "se"
+    ],
+    "pay": "$130–$175k",
+    "desc": "Developer platform for ML experiment tracking and LLM evaluation.",
+    "apply": "https://job-boards.greenhouse.io/wandb",
+    "dsa": false
+  },
+  {
+    "id": "cometml",
+    "name": "Comet ML",
+    "region": "global",
+    "roles": [
+      "ai",
+      "se",
+      "fs"
+    ],
+    "pay": "$125–$165k",
+    "desc": "MLOps platform for model tracking, monitoring, and production LLMs.",
+    "apply": "https://jobs.ashbyhq.com/comet",
+    "dsa": false
+  },
+  {
+    "id": "honeycomb",
+    "name": "Honeycomb.io",
+    "region": "global",
+    "roles": [
+      "fs",
+      "se"
+    ],
+    "pay": "$135–$180k",
+    "desc": "Fast observability platform for distributed microservices & OpenTelemetry.",
+    "apply": "https://job-boards.greenhouse.io/honeycomb",
+    "dsa": false
+  },
+  {
+    "id": "betterstack",
+    "name": "Better Stack",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "€90–€135k",
+    "desc": "Modern observability, uptime monitoring & log management platform.",
+    "apply": "https://jobs.ashbyhq.com/betterstack",
+    "dsa": false
+  },
+  {
+    "id": "axiom",
+    "name": "Axiom",
+    "region": "global",
+    "roles": [
+      "fs",
+      "se"
+    ],
+    "pay": "$130–$175k",
+    "desc": "Serverless log analytics and telemetry platform for modern software.",
+    "apply": "https://jobs.ashbyhq.com/axiom",
+    "dsa": false
+  },
+  {
+    "id": "highlightio",
+    "name": "Highlight.io",
+    "region": "global",
+    "roles": [
+      "fs"
+    ],
+    "pay": "$125–$165k",
+    "desc": "Open-source full-stack monitoring and session replay platform.",
+    "apply": "https://jobs.ashbyhq.com/highlight",
+    "dsa": false
+  },
+  {
+    "id": "logfire",
+    "name": "Pydantic (Logfire)",
+    "region": "global",
+    "roles": [
+      "fs",
+      "ai"
+    ],
+    "pay": "$130–$180k",
+    "desc": "Creators of Pydantic. Building Logfire observability for Python & AI.",
+    "apply": "https://jobs.ashbyhq.com/pydantic",
+    "dsa": false
+  },
+  {
+    "id": "cursor_app",
+    "name": "Cursor AI",
+    "region": "global",
+    "roles": [
+      "fs",
+      "ai"
+    ],
+    "pay": "$140–$200k",
+    "desc": "AI code editor. Infrastructure & developer tooling.",
+    "apply": "https://jobs.ashbyhq.com/cursor",
+    "dsa": false
+  },
+  {
+    "id": "cline",
+    "name": "Cline (Claude Dev)",
+    "region": "global",
+    "roles": [
+      "ai",
+      "fs"
+    ],
+    "pay": "$130–$180k",
+    "desc": "Autonomous AI coding agent extension. TypeScript, Node.js, MCP.",
+    "apply": "https://jobs.ashbyhq.com/cline",
+    "dsa": false
+  },
+  {
+    "id": "continue_dev",
+    "name": "Continue.dev",
+    "region": "global",
+    "roles": [
+      "ai",
+      "fs"
+    ],
+    "pay": "$125–$175k",
+    "desc": "Open-source AI code assistant for VS Code & JetBrains.",
+    "apply": "https://jobs.ashbyhq.com/continue",
+    "dsa": false
+  },
+  {
+    "id": "sweep_ai",
+    "name": "Sweep AI",
+    "region": "global",
+    "roles": [
+      "ai",
+      "fs"
+    ],
+    "pay": "$130–$175k",
+    "desc": "AI junior developer that turns GitHub issues into PRs.",
+    "apply": "https://jobs.ashbyhq.com/sweep",
+    "dsa": false
+  },
+  {
+    "id": "v0_dev",
+    "name": "v0 by Vercel",
+    "region": "global",
+    "roles": [
+      "fs",
+      "ai"
+    ],
+    "pay": "$135–$185k",
+    "desc": "Generative UI system & React generation platform.",
+    "apply": "https://boards.greenhouse.io/vercel",
+    "dsa": false
+  },
+  {
+    "id": "bolt_new",
+    "name": "StackBlitz (Bolt.new)",
+    "region": "global",
+    "roles": [
+      "fs",
+      "ai"
+    ],
+    "pay": "$135–$185k",
+    "desc": "In-browser WebContainers & full-stack AI development platform.",
+    "apply": "https://jobs.lever.co/stackblitz",
+    "dsa": false
+  },
+  {
+    "id": "lovable",
+    "name": "Lovable.dev",
+    "region": "eu",
+    "roles": [
+      "ai",
+      "fs"
+    ],
+    "pay": "€95–€150k",
+    "desc": "Full-stack AI app builder. Stockholm & Remote Europe.",
+    "apply": "https://jobs.ashbyhq.com/lovable",
+    "dsa": false
+  },
+  {
+    "id": "warp",
+    "name": "Warp Terminal",
+    "region": "global",
+    "roles": [
+      "fs",
+      "ai"
+    ],
+    "pay": "$140–$190k",
+    "desc": "Modern AI-integrated terminal built in Rust & TypeScript.",
+    "apply": "https://jobs.ashbyhq.com/warp",
+    "dsa": false
+  },
+  {
+    "id": "zed",
+    "name": "Zed Industries",
+    "region": "global",
+    "roles": [
+      "fs",
+      "ai"
+    ],
+    "pay": "$140–$190k",
+    "desc": "High-performance multiplayer code editor with AI integration.",
+    "apply": "https://jobs.ashbyhq.com/zed",
+    "dsa": false
+  },
+  {
+    "id": "convex",
+    "name": "Convex",
+    "region": "global",
+    "roles": [
+      "fs"
+    ],
+    "pay": "$135–$185k",
+    "desc": "Reactive backend application platform for TypeScript & full-stack apps.",
+    "apply": "https://jobs.ashbyhq.com/convex",
+    "dsa": false
+  },
+  {
+    "id": "trigger_jobs",
+    "name": "Trigger.dev Cloud",
+    "region": "eu",
+    "roles": [
+      "fs",
+      "ai"
+    ],
+    "pay": "€85–€125k",
+    "desc": "Durable background execution for AI workflows. Remote UK/EU.",
+    "apply": "https://jobs.ashbyhq.com/triggerdev",
+    "dsa": false
+  },
+  {
+    "id": "livekit_agents",
+    "name": "LiveKit Agents",
+    "region": "global",
+    "roles": [
+      "ai",
+      "fs",
+      "se"
+    ],
+    "pay": "$135–$185k",
+    "desc": "Real-time multimodal speech & agent infrastructure.",
+    "apply": "https://jobs.ashbyhq.com/livekit",
+    "dsa": false
+  },
+  {
+    "id": "cartesia_voice",
+    "name": "Cartesia Sonic",
+    "region": "global",
+    "roles": [
+      "fde",
+      "ai"
+    ],
+    "pay": "$130–$175k",
+    "desc": "Real-time generative voice & low-latency audio intelligence.",
+    "apply": "https://jobs.ashbyhq.com/cartesia",
+    "dsa": false
+  },
+  {
+    "id": "elevenlabs_ai",
+    "name": "ElevenLabs Voice",
+    "region": "global",
+    "roles": [
+      "fde",
+      "ai",
+      "se"
+    ],
+    "pay": "$135–$185k",
+    "desc": "Conversational voice agents and enterprise solutions.",
+    "apply": "https://jobs.ashbyhq.com/elevenlabs",
+    "dsa": false
+  },
+  {
+    "id": "together_ai_infra",
+    "name": "Together AI Systems",
+    "region": "global",
+    "roles": [
+      "ai",
+      "se"
+    ],
+    "pay": "$135–$185k",
+    "desc": "AI infrastructure and high-throughput inference systems.",
+    "apply": "https://job-boards.greenhouse.io/togetherai",
+    "dsa": false
+  },
+  {
+    "id": "fireworks_nexus",
+    "name": "Fireworks Nexus",
+    "region": "global",
+    "roles": [
+      "ai",
+      "se"
+    ],
+    "pay": "$135–$180k",
+    "desc": "Ultra-fast compound AI systems & model serving.",
+    "apply": "https://jobs.ashbyhq.com/fireworks",
+    "dsa": false
+  },
+  {
+    "id": "sierra_agent",
+    "name": "Sierra Agents",
+    "region": "global",
+    "roles": [
+      "fde",
+      "ai"
+    ],
+    "pay": "$140–$190k",
+    "desc": "Enterprise AI agent deployment and conversational workflows.",
+    "apply": "https://jobs.ashbyhq.com/sierra",
+    "dsa": false
+  },
+  {
+    "id": "decagon_support",
+    "name": "Decagon Support AI",
+    "region": "global",
+    "roles": [
+      "fde",
+      "ai",
+      "se"
+    ],
+    "pay": "$130–$180k",
+    "desc": "Autonomous customer engineering & multi-agent systems.",
+    "apply": "https://jobs.ashbyhq.com/decagon",
+    "dsa": false
+  },
+  {
+    "id": "harvey_legal",
+    "name": "Harvey Platform",
+    "region": "global",
+    "roles": [
+      "fde",
+      "ai"
+    ],
+    "pay": "$140–$190k",
+    "desc": "Enterprise knowledge graphs, RAG & domain LLMs.",
+    "apply": "https://jobs.ashbyhq.com/harvey",
+    "dsa": false
+  },
+  {
+    "id": "cognition_devin",
+    "name": "Cognition Devin",
+    "region": "global",
+    "roles": [
+      "fde",
+      "ai"
+    ],
+    "pay": "$140–$200k",
+    "desc": "Autonomous AI software engineer deployment.",
+    "apply": "https://jobs.ashbyhq.com/cognition",
+    "dsa": false
+  },
+  {
+    "id": "replit_agents",
+    "name": "Replit Core",
+    "region": "global",
+    "roles": [
+      "fde",
+      "ai",
+      "fs"
+    ],
+    "pay": "$130–$180k",
+    "desc": "Cloud computing & AI agent orchestration environments.",
+    "apply": "https://jobs.ashbyhq.com/replit",
+    "dsa": false
+  },
+  {
+    "id": "langchain_graph",
+    "name": "LangGraph",
+    "region": "global",
+    "roles": [
+      "ai",
+      "fde"
+    ],
+    "pay": "$130–$175k",
+    "desc": "Cyclic multi-agent architecture and production workflows.",
+    "apply": "https://jobs.ashbyhq.com/langchain",
+    "dsa": false
+  },
+  {
+    "id": "llamaindex_ai",
+    "name": "LlamaIndex Platform",
+    "region": "global",
+    "roles": [
+      "ai",
+      "fde"
+    ],
+    "pay": "$130–$175k",
+    "desc": "Context augmentation and structured data retrieval for LLMs.",
+    "apply": "https://jobs.ashbyhq.com/llamaindex",
+    "dsa": false
+  },
+  {
+    "id": "tavily_search",
+    "name": "Tavily AI Search",
+    "region": "global",
+    "roles": [
+      "fde",
+      "ai"
+    ],
+    "pay": "$130–$175k",
+    "desc": "Real-time factual research API for autonomous agents.",
+    "apply": "https://jobs.ashbyhq.com/tavily",
+    "dsa": false
+  },
+  {
+    "id": "unstructured_rag",
+    "name": "Unstructured Data",
+    "region": "global",
+    "roles": [
+      "ai",
+      "fde",
+      "fs"
+    ],
+    "pay": "$125–$170k",
+    "desc": "Document ingestion & ETL for multimodal enterprise AI.",
+    "apply": "https://jobs.ashbyhq.com/unstructured",
+    "dsa": false
+  },
+  {
+    "id": "baseten_infra",
+    "name": "Baseten Cloud",
+    "region": "global",
+    "roles": [
+      "ai",
+      "se",
+      "fde"
+    ],
+    "pay": "$135–$185k",
+    "desc": "Serverless inference for open-source AI models.",
+    "apply": "https://jobs.ashbyhq.com/baseten",
+    "dsa": false
+  },
+  {
+    "id": "posthog_app",
+    "name": "PostHog Platform",
+    "region": "global",
+    "roles": [
+      "fs",
+      "ai"
+    ],
+    "pay": "$120–$160k",
+    "desc": "Product analytics, session replays, and LLM telemetry.",
+    "apply": "https://jobs.ashbyhq.com/posthog",
+    "dsa": false
+  },
+  {
+    "id": "supabase_db",
+    "name": "Supabase Platform",
+    "region": "global",
+    "roles": [
+      "fs",
+      "ai"
+    ],
+    "pay": "$120–$160k",
+    "desc": "PostgreSQL, Realtime, Auth, Storage, Edge Functions & pgvector.",
+    "apply": "https://jobs.ashbyhq.com/supabase",
+    "dsa": false
+  },
+  {
+    "id": "vercel_cloud",
+    "name": "Vercel AI Cloud",
+    "region": "global",
+    "roles": [
+      "fs",
+      "ai"
+    ],
+    "pay": "$130–$175k",
+    "desc": "Frontend cloud, AI SDK, and serverless compute infrastructure.",
+    "apply": "https://boards.greenhouse.io/vercel",
+    "dsa": false
+  },
+  {
+    "id": "sentry_telemetry",
+    "name": "Sentry Observability",
+    "region": "global",
+    "roles": [
+      "fs",
+      "se"
+    ],
+    "pay": "$120–$165k",
+    "desc": "Error monitoring, tracing, and OpenTelemetry instrumentation.",
+    "apply": "https://jobs.ashbyhq.com/sentry",
+    "dsa": false
+  },
+  {
+    "id": "modal_serverless",
+    "name": "Modal Compute",
+    "region": "global",
+    "roles": [
+      "ai",
+      "fs"
+    ],
+    "pay": "$140–$185k",
+    "desc": "Serverless Python infrastructure for AI/ML workloads.",
+    "apply": "https://jobs.ashbyhq.com/modal",
+    "dsa": false
+  },
+  {
+    "id": "neon_postgres",
+    "name": "Neon Serverless",
+    "region": "global",
+    "roles": [
+      "fs",
+      "se"
+    ],
+    "pay": "$120–$160k",
+    "desc": "Cloud-native serverless PostgreSQL architecture.",
+    "apply": "https://jobs.lever.co/neon",
+    "dsa": false
+  }
+];
+const RL={fde:'FDE',ai:'AI Eng',fs:'Full-Stack',se:'Solutions Eng'};
+const SC={new:'s-new',networking:'s-networking',call:'s-call',win:'s-win',interview:'s-interview',offer:'s-offer',failed:'s-failed'};
+const SL={new:'New',networking:'Networking',call:'Call',win:'WIN Sent',interview:'Interview',offer:'Offer 🎉',failed:'Closed'};
+const CONN_STATUS={req:'Connection Req',dm:'DM Sent',reply:'Reply ✓',fu1:'Follow-up 1',fu2:'Follow-up 2',fu3:'Follow-up 3',win:'WIN Shared',call:'Call Done',ref:'Referred 🎉',ab:'Abandoned'};
+const CONN_CSS={req:'cs-req',dm:'cs-dm',reply:'cs-reply',fu1:'cs-fu',fu2:'cs-fu',fu3:'cs-fu',win:'cs-win',call:'cs-call',ref:'cs-ref',ab:'cs-ab'};
+
+function ld(k){try{return JSON.parse(localStorage.getItem(k)||'null')}catch{return null}}
+function sv(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch{}}
+let tracked=ld('sr_tracked')||{};
+let custom=ld('sr_custom')||[];
+let currentView='kanban';
+let editConnIdx=null;
+
+function allCos(){return[...COS,...custom];}
+function saveTr(){sv('sr_tracked',tracked);}
+function saveCu(){sv('sr_custom',custom);}
+
+function showTab(id,el){
+  const sec = document.getElementById(id);
+  if (!sec) return;
+  document.querySelectorAll('.sec').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  sec.classList.add('active');
+  const tabBtn = el || document.querySelector(`.tab[onclick*="showTab('${id}'"]`);
+  if (tabBtn) tabBtn.classList.add('active');
+  try {
+    localStorage.setItem('cc_active_tab', id);
+    const u = new URL(window.location.href);
+    u.searchParams.set('tab', id);
+    window.history.replaceState(null, '', u.toString());
+  } catch(e) {}
+  if(id==='pipeline') renderPipeline();
+  else if(id==='companies') renderCards();
+  updateStats();
+}
+
+function updateStats(){
+  const t=Object.values(tracked);
+  document.getElementById('sTotal').textContent=allCos().length;
+  document.getElementById('sActive').textContent=t.filter(x=>x.stage&&x.stage!=='new'&&x.stage!=='failed').length;
+  document.getElementById('sInt').textContent=t.filter(x=>x.stage==='interview').length;
+  document.getElementById('sOffer').textContent=t.filter(x=>x.stage==='offer').length;
+}
+
+// FILTER & RENDER COMPANIES
+window.__CC_CURRENT_FILTER__ = "all";
+window.__CC_ONLY_OPEN_JOBS__ = true;
+window.__CC_SHOW_DISMISSED__ = false;
+window.__CC_SEARCH_QUERY__ = "";
+
+function searchCompanies(val) {
+  window.__CC_SEARCH_QUERY__ = (val || "").trim().toLowerCase();
+  renderCards();
+}
+
+function updateDismissedCount() {
+  const dSet = window.__CC_DISMISSED__ || new Set();
+  const el = document.getElementById("dismissedCount");
+  if(el) el.textContent = dSet.size;
+}
+
+function filterC(type, btn) {
+  document.querySelectorAll(".fb").forEach(b => {
+    if (b.id !== "openJobsToggle" && b.id !== "dismissedToggle") b.classList.remove("active");
+  });
+  if (btn) btn.classList.add("active");
+  window.__CC_CURRENT_FILTER__ = type;
+  renderCards(type);
+}
+
+function toggleOpenJobsOnly(btn) {
+  window.__CC_ONLY_OPEN_JOBS__ = !window.__CC_ONLY_OPEN_JOBS__;
+  if(btn) {
+    if(window.__CC_ONLY_OPEN_JOBS__) {
+      btn.classList.add("active");
+      btn.style.background = "rgba(56,217,169,.2)";
+    } else {
+      btn.classList.remove("active");
+      btn.style.background = "";
+    }
+  }
+  renderCards(window.__CC_CURRENT_FILTER__ || "all");
+}
+
+function toggleShowDismissed(btn) {
+  window.__CC_SHOW_DISMISSED__ = !window.__CC_SHOW_DISMISSED__;
+  if(btn) {
+    if(window.__CC_SHOW_DISMISSED__) {
+      btn.classList.add("active");
+      btn.style.borderColor = "var(--ac)";
+      btn.style.color = "var(--ac)";
+    } else {
+      btn.classList.remove("active");
+      btn.style.borderColor = "";
+      btn.style.color = "var(--t3)";
+    }
+  }
+  renderCards(window.__CC_CURRENT_FILTER__ || "all");
+}
+
+function formatRegionBadge(r) {
+  if (r === 'eu') return '🇪🇺 EU';
+  if (r === 'gulf') return '🌙 Gulf';
+  if (r === 'global_onsite') return '🏢 Global On-site';
+  if (r === 'in_remote') return '🇮🇳 India Remote';
+  if (r === 'blr_onsite') return '🏢 Bangalore 5D';
+  if (r === 'blr_hybrid') return '🏙️ Bangalore Hybrid';
+  return '🌐 Remote';
+}
+function formatRegionName(r) {
+  if (r === 'eu') return 'EU';
+  if (r === 'gulf') return 'GULF';
+  if (r === 'global_onsite') return 'GLOBAL ON-SITE';
+  if (r === 'in_remote') return 'INDIA REMOTE';
+  if (r === 'blr_onsite') return 'BANGALORE 5D';
+  if (r === 'blr_hybrid') return 'BANGALORE HYBRID';
+  return (r || 'REMOTE').toUpperCase();
+}
+
+function renderCards(filter) {
+  if (filter) window.__CC_CURRENT_FILTER__ = filter;
+  const currentF = window.__CC_CURRENT_FILTER__ || "all";
+  const grid = document.getElementById("cgrid");
+  if (!grid) return;
+
+  const cache = window.__CC_BADGE_CACHE__ || {};
+  const dismissedSet = window.__CC_DISMISSED__ || new Set();
+  updateDismissedCount();
+
+  const sq = window.__CC_SEARCH_QUERY__ || "";
+  const all = allCos();
+  const list = all.filter(c => {
+    const isDismissed = Boolean(c.dismissed || dismissedSet.has(c.id));
+    if (isDismissed && !window.__CC_SHOW_DISMISSED__) return false;
+
+    const info = cache[c.id];
+    const hasOpenJobs = Boolean(info && info.open_jobs && info.open_jobs > 0);
+    if (window.__CC_ONLY_OPEN_JOBS__ && !hasOpenJobs) return false;
+
+    if (sq) {
+      const match = (c.name || '').toLowerCase().includes(sq) ||
+                    (c.desc || '').toLowerCase().includes(sq) ||
+                    (c.pay || '').toLowerCase().includes(sq) ||
+                    (c.region || '').toLowerCase().includes(sq) ||
+                    (c.roles || []).some(r => (RL[r] || r).toLowerCase().includes(sq));
+      if (!match) return false;
+    }
+
+    if (currentF === "all") return true;
+    if (currentF === "gulf") {
+      if (c.region === "gulf") return true;
+      if (info && info.jobs && info.jobs.some(j => /(dubai|uae|riyadh|saudi|abu dhabi|qatar|doha)/i.test(j.location || ""))) return true;
+      return false;
+    }
+    if (currentF === "in") {
+      if (["in_remote", "blr_onsite", "blr_hybrid", "india"].includes(c.region)) return true;
+      if (info && info.jobs && info.jobs.some(j => /(bangalore|bengaluru|india|mumbai|delhi|hyderabad|pune)/i.test(j.location || ""))) return true;
+      return false;
+    }
+    if (["eu", "global", "global_onsite", "in_remote", "blr_onsite", "blr_hybrid"].includes(currentF)) return c.region === currentF;
+    return (c.roles || []).includes(currentF);
+  });
+
+  if (!list.length) {
+    grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:40px 20px;color:var(--t2);background:var(--s1);border:1px solid var(--bd);border-radius:10px">
+      <div style="font-size:16px;font-weight:600;color:var(--t);margin-bottom:6px">${sq ? `No companies match "${sq}"` : 'No companies match this filter'}</div>
+      <div style="font-size:12px;color:var(--t3);max-width:440px;margin:0 auto">
+        ${sq ? 'Try clearing the search box or selecting another filter.' : window.__CC_ONLY_OPEN_JOBS__ ? "None of the companies under this filter currently have open scraped roles on file. Turn off \"With Open Jobs\" to view target networking companies, or switch filters." : "Try selecting another region or role filter."}
+      </div>
+    </div>`;
+    updateStats();
+    return;
+  }
+
+  grid.innerHTML = list.map(c => {
+    const tr = tracked[c.id];
+    const badge = tr && tr.stage ? `<span class="stage ${SC[tr.stage] || "s-new"}" style="margin-left:4px;font-size:9px">${SL[tr.stage] || ""}</span>` : "";
+    const connCount = tr && tr.connections ? tr.connections.length : 0;
+    const isDismissed = Boolean(c.dismissed || dismissedSet.has(c.id));
+    const info = cache[c.id];
+    const openJobs = info ? Number(info.open_jobs || 0) : 0;
+    const directJobs = (info && info.jobs) ? info.jobs : [];
+    const topJobUrl = directJobs.length ? directJobs[0].url : c.apply;
+
+    return `<div class="cc ${c.region}" data-company="${c.id}" style="${isDismissed ? "opacity:0.42;border-style:dashed;" : ""}">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px">
+        <div class="cn">${c.name}${badge}${isDismissed ? " <span style=\"font-size:9px;color:var(--r);font-weight:normal\">[Not Interested]</span>" : ""}</div>
+        <span class="rb ${c.region}">${formatRegionBadge(c.region)}</span>
+      </div>
+      <div style="margin-bottom:5px">${(c.roles || []).map(r => `<span class="rtag t-${r}">${RL[r] || r}</span>`).join("")}${c.dsa ? '<span style="font-size:10px;padding:2px 6px;border-radius:4px;background:rgba(255,107,107,.12);color:#ff8787;font-weight:600">⚠️ DSA Required</span>' : '<span class="ndsa">✓ No DSA</span>'}</div>
+      <div class="cdesc">${c.desc}</div>
+      <div style="margin:5px 0;display:flex;align-items:center;gap:8px">
+        <span class="pay">${c.pay}</span>
+        ${connCount > 0 ? `<span style="font-size:10px;color:var(--t3)">🤝 ${connCount} connection${connCount > 1 ? "s" : ""}</span>` : ""}
+      </div>
+
+      ${openJobs > 0 ? `
+        <div style="margin:6px 0">
+          <div class="cc-jobbadge" style="font-size:11px;font-weight:600;display:inline-flex;gap:6px;align-items:center;padding:3px 9px;border-radius:999px;background:rgba(61,220,132,.12);border:1px solid rgba(61,220,132,.35);color:#7ee0a8">
+            🟢 ${openJobs} active matching role${openJobs > 1 ? "s" : ""}
+          </div>
+          ${directJobs.length ? `
+            <div style="margin-top:6px;padding:6px 8px;background:rgba(0,0,0,.25);border:1px solid var(--bd);border-radius:6px;font-size:11px">
+              <div style="font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px;font-weight:600">Direct Openings:</div>
+              ${directJobs.slice(0, 3).map(j => `
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:3px 0;border-bottom:1px solid rgba(255,255,255,.05);gap:6px">
+                  <div style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1">
+                    <span style="color:var(--t);font-weight:500">${j.title}</span>
+                    <span style="color:var(--t3);font-size:10px"> · ${j.location || "Remote"}</span>
+                  </div>
+                  <a href="${j.url}" target="_blank" rel="noopener" class="btn ac" style="font-size:10px;padding:2px 7px;flex-shrink:0">Apply Direct ↗</a>
+                </div>
+              `).join("")}
+            </div>
+          ` : ""}
+        </div>
+      ` : `
+        <div style="margin:5px 0;font-size:10px;color:var(--t3);background:rgba(255,255,255,.02);border:1px dashed var(--bd);border-radius:4px;padding:3px 7px">
+          ⚠️ 0 active roles on file · Target for direct outreach / networking
+        </div>
+      `}
+
+      <div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:8px">
+        <a href="${topJobUrl}" target="_blank" rel="noopener" class="btn ac" title="${directJobs.length ? "Direct link to top matched opening" : "Company career portal"}">${directJobs.length ? "Apply to Role ↗" : "Portal ↗"}</a>
+        <button class="btn" onclick="openNet('${c.id}')">🤝 Network</button>
+        <button class="btn grn" onclick="openTrack('${c.id}')">📊 Track</button>
+        <button class="btn cc-co-dismiss" type="button" data-company="${c.id}" style="font-size:10px;color:${isDismissed ? "#7ee0a8" : "#ff8787"};border-color:rgba(255,107,107,.25)" title="${isDismissed ? "Restore company to active list" : "Mark company as not interested / hide"}">${isDismissed ? "↩ Restore" : "✕ Not for me"}</button>
+        <button class="btn cc-co-delete" type="button" data-company="${c.id}" data-company-name="${c.name}" style="font-size:10px;color:var(--t3);border-color:var(--bd)" title="Delete company permanently">🗑 Delete</button>
+      </div>
+    </div>`;
+  }).join("");
+  updateStats();
+}
+
+// PIPELINE
+function setView(v,btn){
+  currentView=v;
+  document.querySelectorAll('.vbtn').forEach(b=>b.classList.remove('active'));
+  const btnEl = btn || document.getElementById(v==='table'?'vtTable':'vtKanban');
+  if (btnEl) btnEl.classList.add('active');
+  document.getElementById('tableView').style.display=v==='table'?'block':'none';
+  document.getElementById('kanbanView').style.display=v==='kanban'?'block':'none';
+  try {
+    localStorage.setItem('cc_pipeline_view', v);
+    const u = new URL(window.location.href);
+    u.searchParams.set('view', v);
+    window.history.replaceState(null, '', u.toString());
+  } catch(e) {}
+  renderPipeline();
+}
+
+function renderPipeline(){
+  const filter=document.getElementById('pf').value;
+  const all=allCos();
+  if(currentView==='table') renderTable(all,filter);
+  else renderKanban(all,filter);
+  updateStats();
+}
+
+function renderTable(all,filter){
+  const tbody=document.getElementById('pBody');
+  const empty=document.getElementById('pEmpty');
+  const wl={none:'—',researching:'🔍 Researching',prepared:'📝 Ready',sent:'📤 Sent',discussed:'💬 Discussed'};
+  const rows=all.filter(c=>{
+    const tr=tracked[c.id];const stage=tr?tr.stage:'new';
+    return filter==='all'||stage===filter;
+  });
+  if(!rows.length){tbody.innerHTML='';empty.style.display='block';return;}
+  empty.style.display='none';
+  tbody.innerHTML=rows.map(c=>{
+    const tr=tracked[c.id]||{};const stage=tr.stage||'new';
+    const conns=tr.connections||[];
+    const connSummary=conns.length?conns.map(cn=>`<div style="font-size:10px;color:var(--t2)">${cn.name} <span class="conn-status ${CONN_CSS[cn.status]||'cs-req'}" style="font-size:9px">${CONN_STATUS[cn.status]||cn.status}</span></div>`).join(''):'—';
+    return`<tr>
+      <td><div style="font-weight:600;font-size:12px">${c.name}</div><div style="font-size:10px;color:var(--t3)">${formatRegionName(c.region)} · ${c.pay}</div></td>
+      <td><span class="stage ${SC[stage]}">${SL[stage]||stage}</span></td>
+      <td style="min-width:130px">${connSummary}</td>
+      <td style="color:var(--t2);font-size:11px">${tr.msgs||'—'}</td>
+      <td style="color:var(--t2);font-size:11px">${wl[tr.win||'none']}</td>
+      <td>${tr.jd?`<a href="${tr.jd}" target="_blank" class="btn" style="font-size:10px">View JD ↗</a>`:'—'}</td>
+      <td style="color:var(--t2);font-size:11px;max-width:160px">${tr.notes||'—'}</td>
+      <td><button class="btn" onclick="openTrack('${c.id}')">Update</button></td>
+    </tr>`;
+  }).join('');
+}
+
+function renderKanban(all,filter){
+  const stages=['new','networking','call','win','interview','offer','failed'];
+  const colors={new:'var(--ac)',networking:'var(--y)',call:'var(--p)',win:'var(--g)',interview:'var(--r)',offer:'var(--g)',failed:'var(--t3)'};
+  const board=document.getElementById('kanbanBoard');
+  board.innerHTML=stages.map(s=>{
+    const cards=all.filter(c=>{
+      const tr=tracked[c.id];const stage=tr?tr.stage:'new';
+      return stage===s&&(filter==='all'||stage===filter);
+    });
+    return`<div class="kcol">
+      <div class="khead" style="color:${colors[s]}">${SL[s]} <span style="background:rgba(255,255,255,.1);padding:1px 6px;border-radius:10px;font-size:10px;margin-left:4px">${cards.length}</span></div>
+      <div class="kcards">${cards.map(c=>`<div class="kcard" onclick="openTrack('${c.id}')">
+        <div class="kcard-name">${c.name}</div>
+        <div class="kcard-meta">${c.pay}</div>
+        ${(tracked[c.id]?.connections||[]).length?`<div class="kcard-meta" style="margin-top:3px">🤝 ${tracked[c.id].connections.length} connections</div>`:''}
+      </div>`).join('')}</div>
+    </div>`;
+  }).join('');
+}
+
+// NETWORK MODAL
+function openNet(id){
+  const c=allCos().find(x=>x.id===id);if(!c)return;
+  const gG='102713980,105756358',gE='100565514,102890719,101165590,105015875',gI='102257491';
+  const isIndia=['in_remote','blr_onsite','blr_hybrid','india'].includes(c.region);
+  const lg=c.region==='gulf'?gG:c.region==='eu'?gE:isIndia?gI:'';
+  const ll=c.region==='gulf'?'🌙 UAE/Gulf':c.region==='eu'?'🇪🇺 Europe':isIndia?'🇮🇳 India':'🌐 Global';
+  function liU(kw,geo){
+    let u=`https://www.linkedin.com/search/results/people/?keywords=${encodeURIComponent(kw)}&currentCompany=%5B%22${encodeURIComponent(c.name)}%22%5D`;
+    if(geo)u+=`&geoUrn=%5B${geo.split(',').map(g=>`%22${g}%22`).join('%2C')}%5D`;
+    return u;
+  }
+  const searches=[
+    {e:'👩‍💻',l:'Peers — Same Role',s:'Senior Engineer · AI Engineer · FDE · Solutions Engineer',url:liU('Senior Engineer OR "AI Engineer" OR "Forward Deployed" OR "Solutions Engineer" OR "Full Stack"',lg),msg:`Hi [Name] — I came across your profile while researching ${c.name}'s engineering team. I'm a senior full-stack + AI engineer (ex-Philips, 12 years) exploring senior roles globally. Would love to connect and hear about your experience at ${c.name}.`},
+    {e:'🏢',l:'Hiring Managers',s:'Engineering Manager · VP Eng · Head of Engineering · CTO',url:liU('"Engineering Manager" OR "Head of Engineering" OR "VP Engineering" OR CTO OR "Director of Engineering"',lg),msg:`Hi [Name] — I've been following ${c.name}'s work and came across something interesting about [specific challenge from your research]. I'm a senior full-stack + AI engineer (ex-Philips) — would love to connect and share a quick perspective.`},
+    {e:'📋',l:'Recruiters & HR',s:'Technical Recruiter · Talent Acquisition · People Partner',url:liU('"Technical Recruiter" OR "Talent Acquisition" OR Recruiter OR "People Partner"',lg),msg:`Hi [Name] — I'm a senior full-stack + AI engineer with 12+ years (ex-Philips Innovation Campus) actively exploring opportunities at ${c.name}. Would love to connect and learn about any upcoming roles.`},
+    {e:'🇮🇳',l:'Indians at this company',s:'Easiest warm referral — fellow Indians always reply faster',url:`https://www.linkedin.com/search/results/people/?keywords=${encodeURIComponent(c.name)}&currentCompany=%5B%22${encodeURIComponent(c.name)}%22%5D&geoUrn=%5B%22${gI}%22%5D`,msg:`Hi [Name] — noticed you're at ${c.name} and thought I'd reach out. I'm a senior full-stack + AI engineer from Mumbai (ex-Philips) exploring global roles. Would love to hear about your experience there — happy to keep it to 15 minutes!`},
+  ];
+  document.getElementById('netTitle').textContent=`Network at ${c.name} · ${ll}`;
+  document.getElementById('netBody').innerHTML=searches.map((s,i)=>`
+    <div class="ni">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div><div class="nl">${s.e} ${s.l}</div><div class="ns">${s.s}</div></div>
+        <a href="${s.url}" target="_blank" class="btn ac" style="flex-shrink:0;margin-left:8px">Open LinkedIn ↗</a>
+      </div>
+      <div style="font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:.4px;margin:7px 0 3px">📋 Copy → LinkedIn → Connect → paste as note (300 char limit):</div>
+      <div class="msgbox" id="nm${i}">${s.msg}</div>
+      <div style="display:flex;gap:6px;margin-top:6px">
+        <button class="btn" onclick="cpEl('nm${i}',this)">Copy Message</button>
+        <button class="btn grn" onclick="quickAddConn('${id}','${s.l.replace(/'/g,"\\'")}')">+ Log This Connection</button>
+      </div>
+    </div>`).join('');
+  openM('netModal');
+}
+
+function quickAddConn(id,type){
+  closeM('netModal');openTrack(id);
+  setTimeout(()=>addConn(),300);
+}
+
+// TRACK MODAL
+function openTrack(id){
+  const c=allCos().find(x=>x.id===id);if(!c)return;
+  const tr=tracked[id]||{};
+  document.getElementById('trackTitle').textContent=`Track: ${c.name}`;
+  document.getElementById('trackId').value=id;
+  document.getElementById('tStage').value=tr.stage||'new';
+  document.getElementById('tMsgs').value=tr.msgs||'';
+  document.getElementById('tWin').value=tr.win||'none';
+  document.getElementById('tJD').value=tr.jd||'';
+  document.getElementById('tNotes').value=tr.notes||'';
+  renderConnList(tr.connections||[]);
+  openM('trackModal');
+}
+
+function renderConnList(conns){
+  document.getElementById('connList').innerHTML=conns.length?conns.map((cn,i)=>`
+    <div class="conn-item">
+      <div style="flex:1;min-width:0">
+        <div style="font-weight:600;font-size:12px">${cn.name} <span style="font-size:10px;color:var(--t3)">· ${cn.role||''}</span></div>
+        <div style="font-size:10px;color:var(--t3);margin-top:1px">${cn.type||''} ${cn.li?`· <a href="${cn.li}" target="_blank" style="color:var(--ac)">LinkedIn ↗</a>`:''}</div>
+        ${cn.notes?`<div style="font-size:11px;color:var(--t2);margin-top:2px">${cn.notes}</div>`:''}
+      </div>
+      <span class="conn-status ${CONN_CSS[cn.status]||'cs-req'}">${CONN_STATUS[cn.status]||cn.status}</span>
+      <button class="btn" onclick="editConn(${i})" style="font-size:10px;padding:3px 7px">Edit</button>
+    </div>`).join(''):'<div style="font-size:12px;color:var(--t3);padding:8px 0">No connections logged yet. Click + Add Connection above.</div>';
+}
+
+function addConn(){editConnIdx=null;clearConnForm();openM('connModal');}
+function editConn(i){
+  const id=document.getElementById('trackId').value;
+  const tr=tracked[id]||{};const cn=(tr.connections||[])[i];
+  if(!cn)return;
+  editConnIdx=i;
+  document.getElementById('cName').value=cn.name||'';
+  document.getElementById('cRole').value=cn.role||'';
+  document.getElementById('cType').value=cn.type||'peer';
+  document.getElementById('cLI').value=cn.li||'';
+  document.getElementById('cStatus').value=cn.status||'req';
+  document.getElementById('cNotes').value=cn.notes||'';
+  openM('connModal');
+}
+function clearConnForm(){
+  ['cName','cRole','cLI','cNotes'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('cType').value='peer';
+  document.getElementById('cStatus').value='req';
+}
+function saveConn(){
+  const id=document.getElementById('trackId').value;
+  if(!tracked[id])tracked[id]={stage:'networking',connections:[],msgs:'',win:'none',notes:'',jd:''};
+  if(!tracked[id].connections)tracked[id].connections=[];
+  const cn={name:document.getElementById('cName').value,role:document.getElementById('cRole').value,type:document.getElementById('cType').value,li:document.getElementById('cLI').value,status:document.getElementById('cStatus').value,notes:document.getElementById('cNotes').value};
+  if(editConnIdx!==null)tracked[id].connections[editConnIdx]=cn;
+  else tracked[id].connections.push(cn);
+  saveTr();renderConnList(tracked[id].connections);closeM('connModal');
+}
+
+function saveTrack(){
+  const id=document.getElementById('trackId').value;
+  if(!tracked[id])tracked[id]={connections:[]};
+  tracked[id].stage=document.getElementById('tStage').value;
+  tracked[id].msgs=document.getElementById('tMsgs').value;
+  tracked[id].win=document.getElementById('tWin').value;
+  tracked[id].jd=document.getElementById('tJD').value;
+  tracked[id].notes=document.getElementById('tNotes').value;
+  tracked[id].updated=new Date().toLocaleDateString();
+  saveTr();closeM('trackModal');renderCards();renderPipeline();updateStats();
+  if (window.__CC__ && typeof window.__CC__.pushState === 'function') {
+    window.__CC__.pushState();
+  }
+}
+function delTrack(){
+  const id=document.getElementById('trackId').value;
+  delete tracked[id];saveTr();closeM('trackModal');renderCards();renderPipeline();updateStats();
+  if (window.__CC__ && typeof window.__CC__.pushState === 'function') {
+    window.__CC__.pushState();
+  }
+}
+
+// ADD COMPANY
+function addCo(){
+  const name=document.getElementById('aN').value.trim();if(!name){alert('Name required');return;}
+  const sel=document.getElementById('aRoles');
+  const roles=[...sel.selectedOptions].map(o=>o.value);
+  const id='c_'+Date.now();
+  const c={id,name,region:document.getElementById('aR').value,roles:roles.length?roles:['fs'],pay:document.getElementById('aPay').value||'Market rate',desc:document.getElementById('aDesc').value||'Custom company.',apply:document.getElementById('aUrl').value||'#',custom:true};
+  custom.push(c);saveCu();
+  tracked[id]={stage:'new',connections:[],msgs:'',win:'none',notes:'',jd:'',updated:new Date().toLocaleDateString()};
+  saveTr();closeM('addModal');
+  ['aN','aPay','aUrl','aDesc'].forEach(i=>document.getElementById(i).value='');
+  renderCards();
+  renderPipeline();
+  updateStats();
+
+  const pipeSearch = document.getElementById('cc-pipe-search');
+  if (pipeSearch && pipeSearch.value) {
+    if (!name.toLowerCase().includes(pipeSearch.value.trim().toLowerCase())) {
+      pipeSearch.value = '';
+      const clearBtn = pipeSearch.nextElementSibling;
+      if (clearBtn && clearBtn.tagName === 'BUTTON') clearBtn.style.display = 'none';
+      if (typeof window.__CC_APPLY_PIPE_FILTER__ === 'function') window.__CC_APPLY_PIPE_FILTER__();
+    }
+  }
+
+  if (window.__CC__ && typeof window.__CC__.api === 'function') {
+    window.__CC__.api('/companies', { method: 'POST', body: c }).catch(console.error);
+    if (typeof window.__CC__.pushState === 'function') window.__CC__.pushState();
+  }
+}
+
+// DISCOVERY
+function genSkillsSearch(){
+  const skills=[1,2,3,4,5].map(i=>document.getElementById('sk'+i).value.trim()).filter(Boolean);
+  const region=document.getElementById('skRegion').value;
+  const titles=document.getElementById('skTitles').value.split(',').map(t=>t.trim()).filter(Boolean);
+  const out=document.getElementById('skOut');
+  if(!skills.length){alert('Please enter at least one skill');return;}
+  const locMap={'Europe':'Europe','UAE / Gulf':'United Arab Emirates','Worldwide / Remote':'Worldwide','UK':'United Kingdom','Germany':'Germany','Netherlands':'Netherlands'};
+  const loc=locMap[region]||region;
+  let html='<div style="font-size:11px;color:var(--t3);margin-bottom:8px;font-weight:600">Click each link → note the job count → fill the numbers below to calculate your total market</div>';
+  skills.forEach((sk,i)=>{
+    const url=`https://www.linkedin.com/jobs/search/?keywords=${encodeURIComponent(sk)}&location=${encodeURIComponent(loc)}&f_WT=2`;
+    html+=`<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px"><a href="${url}" target="_blank" class="btn ac">Skill ${i+1}: ${sk} ↗</a><span style="font-size:12px;color:var(--t2)">→</span><input type="number" placeholder="# jobs found" style="width:100px;background:var(--s2);border:1px solid var(--bd);border-radius:5px;padding:4px 8px;color:var(--t);font-size:12px;font-family:inherit" id="sk_count_${i}" onchange="calcTotal()"></div>`;
+  });
+  if(titles.length){html+='<div style="margin-top:8px;font-size:11px;color:var(--t3);font-weight:600;margin-bottom:6px">Job titles:</div>';
+  titles.forEach((t,i)=>{const url=`https://www.linkedin.com/jobs/search/?keywords=${encodeURIComponent('"'+t+'"')}&location=${encodeURIComponent(loc)}&f_WT=2`;html+=`<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px"><a href="${url}" target="_blank" class="btn">Title: ${t} ↗</a><span style="font-size:12px;color:var(--t2)">→</span><input type="number" placeholder="# jobs" style="width:100px;background:var(--s2);border:1px solid var(--bd);border-radius:5px;padding:4px 8px;color:var(--t);font-size:12px;font-family:inherit" id="tk_count_${i}" onchange="calcTotal()"></div>`;});}
+  html+=`<div style="margin-top:10px;padding:10px;background:var(--s2);border-radius:6px;font-size:13px;font-weight:600;color:var(--t)">Total jobs available: <span id="skTotal" style="color:var(--g);font-family:'JetBrains Mono'">—</span></div>`;
+  out.innerHTML=html;out.style.display='block';
+}
+function calcTotal(){
+  const inputs=document.querySelectorAll('[id^="sk_count_"],[id^="tk_count_"]');
+  let t=0;inputs.forEach(i=>{t+=parseInt(i.value)||0;});
+  const el=document.getElementById('skTotal');if(el)el.textContent=t.toLocaleString();
+}
+
+function genResearchPrompt(){
+  const co=document.getElementById('researchCo').value.trim();
+  const role=document.getElementById('researchRole').value.trim();
+  if(!co){alert('Enter company name');return;}
+  const txt=`Research ${co} thoroughly for a ${role||'senior engineer'} outreach approach.
+
+Please provide:
+1. COMPANY OVERVIEW — what they do, their product, target customers, business model, stage (Series/public)
+2. RECENT NEWS — last 3–6 months: funding, launches, expansions, leadership changes, acquisitions
+3. ENGINEERING BLOG / TECH STACK — what technologies they use, what engineering challenges they write about
+4. TOP 3–5 CHALLENGES — specific technical or business problems they are likely facing RIGHT NOW based on their JDs, blog posts, news, LinkedIn posts, Glassdoor reviews. For each: challenge + evidence (source + date) + why it matters to engineering
+5. CURIOSITY HOOK — one sentence I can use in a LinkedIn connection request that references a real specific problem and makes the person want to reply. NOT a job application tone — a peer who noticed something interesting.
+6. CONVERSATION STARTER — one paragraph I can use as the first DM after they accept my connection. References the specific problem, mentions my relevant experience briefly, ends with a question.
+
+My background for context: 12+ years full-stack + AI engineering. Built real-time Kafka patient monitoring at Philips (70% load reduction), multi-tenant AI agent platform (MyAgentFirm) with LLM failover + MCP integration, Azure AKS microservices architecture for Eeko.ai. Stack: Java Spring Boot, Node.js/Fastify, React, Python, LangChain, Docker, Kubernetes, Kafka, PostgreSQL.`;
+  document.getElementById('researchText').textContent=txt;
+  document.getElementById('researchOut').style.display='block';
+}
+
+function genColdEmail(){
+  const rec=document.getElementById('ceRecruiter').value||'[Recruiter Name]';
+  const co=document.getElementById('ceCompany').value||'[Company]';
+  const role=document.getElementById('ceRole').value||'[Role]';
+  const ach=document.getElementById('ceAchieve').value||'reduced dashboard load time by 70% at Philips using Kafka and AWS';
+  const resume=document.getElementById('ceResume').value||'[Resume Link]';
+  const email=`Subject: Application for ${role} – Siddhant Rangari
+
+Hi ${rec},
+
+I know you're busy, so I'll keep this under 60 seconds.
+
+I'm Siddhant Rangari, a Senior Full-Stack + AI Engineer with 12+ years of experience in building scalable distributed systems and production AI agent platforms.
+
+At Philips Innovation Campus, I ${ach}. More recently I architected a multi-tenant AI agent platform (MyAgentFirm) from scratch — 24 API routes, LLM failover routing across 3 providers, 12+ external integrations.
+
+I'd love to bring the same ownership and impact to ${co}.
+
+If you're hiring for ${role} or a similar role, I'd be happy to connect.
+Here's my resume and portfolio: ${resume}
+
+Thanks for your time — looking forward to hearing from you.
+
+Best regards,
+Siddhant Rangari
+📞 [Your Phone]
+📧 siddhantrangari@gmail.com
+🌐 linkedin.com/in/siddhantrangari`;
+  document.getElementById('ceOut').textContent=email;
+}
+
+// UTILS
+function openM(id){document.getElementById(id).style.display='flex';document.body.style.overflow='hidden';}
+function closeM(id){document.getElementById(id).style.display='none';document.body.style.overflow='';}
+function cpEl(id,btn){
+  navigator.clipboard.writeText(document.getElementById(id).textContent).then(()=>{
+    const orig=btn.textContent;btn.textContent='✓ Copied!';btn.style.color='var(--g)';btn.style.borderColor='var(--g)';
+    setTimeout(()=>{btn.textContent=orig;btn.style.color='';btn.style.borderColor='';},2000);
+  });
+}
+document.querySelectorAll('.modal').forEach(m=>{m.addEventListener('click',e=>{if(e.target===m)closeM(m.id);});});
+
+function initTabsAndView(){
+  try {
+    const u = new URL(window.location.href);
+    const tabParam = u.searchParams.get('tab') || (window.location.hash ? window.location.hash.replace(/^#/,'').split('&')[0] : null);
+    const savedTab = tabParam || localStorage.getItem('cc_active_tab') || 'companies';
+    const viewParam = u.searchParams.get('view') || (window.location.hash.includes('view=') ? window.location.hash.split('view=')[1].split('&')[0] : null);
+    const savedView = viewParam || localStorage.getItem('cc_pipeline_view') || 'kanban';
+
+    if (savedView === 'table') {
+      setView('table', document.getElementById('vtTable'));
+    } else {
+      setView('kanban', document.getElementById('vtKanban'));
+    }
+
+    if (savedTab && document.getElementById(savedTab)) {
+      showTab(savedTab, document.querySelector(`.tab[onclick*="showTab('${savedTab}'"]`));
+    } else {
+      renderCards('all');
+    }
+  } catch(e) {
+    renderCards('all');
+  }
+  updateStats();
+}
+
+window.addEventListener('popstate', () => {
+  try {
+    const u = new URL(window.location.href);
+    const t = u.searchParams.get('tab') || 'companies';
+    const v = u.searchParams.get('view') || 'kanban';
+    if (document.getElementById(t)) {
+      showTab(t, document.querySelector(`.tab[onclick*="showTab('${t}'"]`));
+    }
+    setView(v, document.getElementById(v==='table'?'vtTable':'vtKanban'));
+  } catch(e) {}
+});
+
+initTabsAndView();
+</script>
+</body>
+</html>

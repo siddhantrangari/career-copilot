@@ -1,0 +1,2716 @@
+[
+  {
+    "id": "ruyaai",
+    "name": "Ruya AI",
+    "region": "gulf",
+    "roles": [
+      "ai",
+      "fde"
+    ],
+    "pay": "$90–$140k tax-free",
+    "desc": "Dubai AI enterprise & agents startup. Open roles for AI Engineers & Data Backend.",
+    "apply": "https://job-boards.eu.greenhouse.io/ruyaai",
+    "dsa": false
+  },
+  {
+    "id": "ziina",
+    "name": "Ziina",
+    "region": "gulf",
+    "roles": [
+      "fs"
+    ],
+    "pay": "$90–$130k tax-free",
+    "desc": "Dubai fast-growing fintech unicorn. Senior Full-Stack & Payments Backend.",
+    "apply": "https://jobs.ashbyhq.com/ziina",
+    "dsa": false
+  },
+  {
+    "id": "lean_tech",
+    "name": "Lean Technologies",
+    "region": "gulf",
+    "roles": [
+      "fs",
+      "se"
+    ],
+    "pay": "$95–$140k tax-free",
+    "desc": "Riyadh & Dubai Open Banking & Payments infrastructure (Sequoia).",
+    "apply": "https://jobs.lever.co/leantech",
+    "dsa": false
+  },
+  {
+    "id": "huspy",
+    "name": "Huspy",
+    "region": "gulf",
+    "roles": [
+      "fs"
+    ],
+    "pay": "$90–$135k tax-free",
+    "desc": "Dubai proptech & mortgage fintech scaleup. Microservices + React.",
+    "apply": "https://jobs.lever.co/huspy",
+    "dsa": false
+  },
+  {
+    "id": "tabby",
+    "name": "Tabby",
+    "region": "gulf",
+    "roles": [
+      "fs",
+      "ai"
+    ],
+    "pay": "$100–$145k tax-free",
+    "desc": "Dubai & Riyadh BNPL unicorn (Series D). Fast-growing modern stack.",
+    "apply": "https://jobs.ashbyhq.com/tabby",
+    "dsa": false
+  },
+  {
+    "id": "tamara",
+    "name": "Tamara",
+    "region": "gulf",
+    "roles": [
+      "fs",
+      "ai"
+    ],
+    "pay": "$100–$150k tax-free",
+    "desc": "Riyadh Saudi BNPL unicorn (Series C). Practical engineering challenge.",
+    "apply": "https://jobs.ashbyhq.com/tamara",
+    "dsa": false
+  },
+  {
+    "id": "dapi",
+    "name": "Dapi",
+    "region": "gulf",
+    "roles": [
+      "fs",
+      "se"
+    ],
+    "pay": "$90–$130k tax-free",
+    "desc": "Dubai financial data & payment API infrastructure.",
+    "apply": "https://jobs.lever.co/dapi",
+    "dsa": false
+  },
+  {
+    "id": "sarwa",
+    "name": "Sarwa",
+    "region": "gulf",
+    "roles": [
+      "fs"
+    ],
+    "pay": "$85–$125k tax-free",
+    "desc": "Dubai wealthtech & automated investment platform.",
+    "apply": "https://jobs.lever.co/sarwa",
+    "dsa": false
+  },
+  {
+    "id": "baraka",
+    "name": "Baraka",
+    "region": "gulf",
+    "roles": [
+      "fs"
+    ],
+    "pay": "$85–$120k tax-free",
+    "desc": "Dubai stock trading and investment platform.",
+    "apply": "https://jobs.lever.co/getbaraka",
+    "dsa": false
+  },
+  {
+    "id": "pyypl",
+    "name": "Pyypl",
+    "region": "gulf",
+    "roles": [
+      "fs"
+    ],
+    "pay": "$90–$130k tax-free",
+    "desc": "Abu Dhabi & Dubai digital payment services. Java + Node.js.",
+    "apply": "https://jobs.lever.co/pyypl",
+    "dsa": false
+  },
+  {
+    "id": "yassir",
+    "name": "Yassir",
+    "region": "gulf",
+    "roles": [
+      "fs",
+      "ai"
+    ],
+    "pay": "$90–$135k tax-free",
+    "desc": "Super-app for on-demand services and payments in MEA (Y Combinator).",
+    "apply": "https://jobs.ashbyhq.com/yassir",
+    "dsa": false
+  },
+  {
+    "id": "bayzat",
+    "name": "Bayzat",
+    "region": "gulf",
+    "roles": [
+      "fs"
+    ],
+    "pay": "$85–$120k tax-free",
+    "desc": "Dubai HR & insurance SaaS platform. Java & React stack.",
+    "apply": "https://jobs.lever.co/bayzat",
+    "dsa": false
+  },
+  {
+    "id": "cartesia",
+    "name": "Cartesia",
+    "region": "global",
+    "roles": [
+      "fde",
+      "ai"
+    ],
+    "pay": "$125–$165k",
+    "desc": "Ultra-fast voice & real-time multimodal AI. FDE India/Bangalore & Remote.",
+    "apply": "https://jobs.ashbyhq.com/cartesia",
+    "dsa": false
+  },
+  {
+    "id": "togetherai",
+    "name": "Together AI",
+    "region": "global",
+    "roles": [
+      "ai",
+      "se"
+    ],
+    "pay": "$130–$180k",
+    "desc": "Inference & AI cloud platform. AI Infrastructure Systems Bangalore & Remote.",
+    "apply": "https://job-boards.greenhouse.io/togetherai",
+    "dsa": false
+  },
+  {
+    "id": "elevenlabs",
+    "name": "ElevenLabs",
+    "region": "global",
+    "roles": [
+      "fde",
+      "ai",
+      "se"
+    ],
+    "pay": "$130–$180k",
+    "desc": "AI audio research & deployment. Enterprise Solutions & Full-Stack.",
+    "apply": "https://jobs.ashbyhq.com/elevenlabs",
+    "dsa": false
+  },
+  {
+    "id": "sierra",
+    "name": "Sierra AI",
+    "region": "global",
+    "roles": [
+      "fde",
+      "ai"
+    ],
+    "pay": "$140–$190k",
+    "desc": "Enterprise conversational AI platform. Agent Orchestration & Platform.",
+    "apply": "https://jobs.ashbyhq.com/sierra",
+    "dsa": false
+  },
+  {
+    "id": "fireworks",
+    "name": "Fireworks AI",
+    "region": "global",
+    "roles": [
+      "ai",
+      "se"
+    ],
+    "pay": "$130–$175k",
+    "desc": "Ultra-fast generative AI inference and fine-tuning. AI Product Engineers.",
+    "apply": "https://jobs.ashbyhq.com/fireworks",
+    "dsa": false
+  },
+  {
+    "id": "decagon",
+    "name": "Decagon",
+    "region": "global",
+    "roles": [
+      "fde",
+      "ai",
+      "se"
+    ],
+    "pay": "$130–$180k",
+    "desc": "Autonomous AI customer support agents. Multi-agent workflows.",
+    "apply": "https://jobs.ashbyhq.com/decagon",
+    "dsa": false
+  },
+  {
+    "id": "harvey",
+    "name": "Harvey",
+    "region": "global",
+    "roles": [
+      "fde",
+      "ai"
+    ],
+    "pay": "$140–$190k",
+    "desc": "Legal AI platform backed by OpenAI & Sequoia. Core Infrastructure & Full-Stack.",
+    "apply": "https://jobs.ashbyhq.com/harvey",
+    "dsa": false
+  },
+  {
+    "id": "cursor",
+    "name": "Anysphere (Cursor)",
+    "region": "global",
+    "roles": [
+      "fs",
+      "ai"
+    ],
+    "pay": "$140–$200k",
+    "desc": "The AI code editor team. Infrastructure, Core Services & Growth Engineers.",
+    "apply": "https://jobs.ashbyhq.com/cursor",
+    "dsa": false
+  },
+  {
+    "id": "cognition",
+    "name": "Cognition (Devin)",
+    "region": "global",
+    "roles": [
+      "fde",
+      "ai"
+    ],
+    "pay": "$140–$200k",
+    "desc": "Creators of Devin AI Software Engineer. AI Support & Infrastructure.",
+    "apply": "https://jobs.ashbyhq.com/cognition",
+    "dsa": false
+  },
+  {
+    "id": "perplexity",
+    "name": "Perplexity",
+    "region": "global",
+    "roles": [
+      "fde",
+      "ai"
+    ],
+    "pay": "$140–$190k",
+    "desc": "AI conversational search engine. AI Inference & Full-Stack Product.",
+    "apply": "https://jobs.ashbyhq.com/perplexity",
+    "dsa": false
+  },
+  {
+    "id": "replit",
+    "name": "Replit",
+    "region": "global",
+    "roles": [
+      "fde",
+      "ai",
+      "fs"
+    ],
+    "pay": "$130–$180k",
+    "desc": "Cloud development environment & AI agents. Product & Platform Engineers.",
+    "apply": "https://jobs.ashbyhq.com/replit",
+    "dsa": false
+  },
+  {
+    "id": "langchain",
+    "name": "LangChain",
+    "region": "global",
+    "roles": [
+      "ai",
+      "fde"
+    ],
+    "pay": "$130–$175k",
+    "desc": "The framework you use daily. Forward Deployed & Solutions Engineers for LangGraph.",
+    "apply": "https://jobs.ashbyhq.com/langchain",
+    "dsa": false
+  },
+  {
+    "id": "llamaindex",
+    "name": "LlamaIndex",
+    "region": "global",
+    "roles": [
+      "ai",
+      "fde"
+    ],
+    "pay": "$130–$175k",
+    "desc": "Data framework for LLMs and agentic workflows. Backend & AI Engineers.",
+    "apply": "https://jobs.ashbyhq.com/llamaindex",
+    "dsa": false
+  },
+  {
+    "id": "tavily",
+    "name": "Tavily",
+    "region": "global",
+    "roles": [
+      "fde",
+      "ai"
+    ],
+    "pay": "$130–$175k",
+    "desc": "Search API & intelligence layer for AI agents & LLMs. Forward Deployed Engineers.",
+    "apply": "https://jobs.ashbyhq.com/tavily",
+    "dsa": false
+  },
+  {
+    "id": "livekit",
+    "name": "LiveKit",
+    "region": "global",
+    "roles": [
+      "ai",
+      "fs",
+      "se"
+    ],
+    "pay": "$130–$180k",
+    "desc": "Real-time multimodal AI & WebRTC infrastructure. Voice agent pipelines.",
+    "apply": "https://jobs.ashbyhq.com/livekit",
+    "dsa": false
+  },
+  {
+    "id": "vapi",
+    "name": "Vapi",
+    "region": "global",
+    "roles": [
+      "ai",
+      "fde",
+      "fs"
+    ],
+    "pay": "$130–$180k",
+    "desc": "Voice AI developer platform for telephony & conversational agents.",
+    "apply": "https://jobs.ashbyhq.com/vapi",
+    "dsa": false
+  },
+  {
+    "id": "baseten",
+    "name": "Baseten",
+    "region": "global",
+    "roles": [
+      "ai",
+      "se",
+      "fde"
+    ],
+    "pay": "$135–$185k",
+    "desc": "High-performance model inference and deployment cloud. Inference Engineers.",
+    "apply": "https://jobs.ashbyhq.com/baseten",
+    "dsa": false
+  },
+  {
+    "id": "unstructured",
+    "name": "Unstructured",
+    "region": "global",
+    "roles": [
+      "ai",
+      "fde",
+      "fs"
+    ],
+    "pay": "$125–$170k",
+    "desc": "ETL & ingestion pipeline for LLM / RAG data. Multimodal data pipelines.",
+    "apply": "https://jobs.ashbyhq.com/unstructured",
+    "dsa": false
+  },
+  {
+    "id": "cohere",
+    "name": "Cohere",
+    "region": "global",
+    "roles": [
+      "fde",
+      "ai"
+    ],
+    "pay": "$130–$170k",
+    "desc": "Enterprise LLMs & RAG platform. FDE & Applied AI agent workflows.",
+    "apply": "https://jobs.lever.co/cohere",
+    "dsa": false
+  },
+  {
+    "id": "langfuse",
+    "name": "Langfuse",
+    "region": "eu",
+    "roles": [
+      "ai",
+      "fs"
+    ],
+    "pay": "€90–€130k",
+    "desc": "Open source LLM engineering platform (observability, evaluations). Berlin / Remote.",
+    "apply": "https://jobs.ashbyhq.com/langfuse",
+    "dsa": false
+  },
+  {
+    "id": "portkey",
+    "name": "Portkey AI",
+    "region": "global",
+    "roles": [
+      "ai",
+      "fde",
+      "fs"
+    ],
+    "pay": "$120–$160k",
+    "desc": "AI Gateway and LLM routing & observability. Bangalore & Remote.",
+    "apply": "https://jobs.ashbyhq.com/portkey",
+    "dsa": false
+  },
+  {
+    "id": "helicone",
+    "name": "Helicone",
+    "region": "global",
+    "roles": [
+      "ai",
+      "fs"
+    ],
+    "pay": "$120–$165k",
+    "desc": "Open source LLM observability and gateway. Microservices + real-time telemetry.",
+    "apply": "https://jobs.ashbyhq.com/helicone",
+    "dsa": false
+  },
+  {
+    "id": "mem0",
+    "name": "Mem0 (Embedchain)",
+    "region": "global",
+    "roles": [
+      "ai",
+      "fs",
+      "fde"
+    ],
+    "pay": "$120–$165k",
+    "desc": "Universal memory layer for AI agents & personalized assistants.",
+    "apply": "https://jobs.ashbyhq.com/mem0",
+    "dsa": false
+  },
+  {
+    "id": "deepgram",
+    "name": "Deepgram",
+    "region": "global",
+    "roles": [
+      "ai",
+      "se",
+      "fs"
+    ],
+    "pay": "$130–$170k",
+    "desc": "Real-time speech-to-text and voice AI platform. Solutions Engineers.",
+    "apply": "https://job-boards.greenhouse.io/deepgram",
+    "dsa": false
+  },
+  {
+    "id": "assemblyai",
+    "name": "AssemblyAI",
+    "region": "global",
+    "roles": [
+      "ai",
+      "se",
+      "fs"
+    ],
+    "pay": "$130–$175k",
+    "desc": "AI audio models and speech intelligence APIs. Developer platform engineers.",
+    "apply": "https://jobs.ashbyhq.com/assemblyai",
+    "dsa": false
+  },
+  {
+    "id": "characterai",
+    "name": "Character.ai",
+    "region": "global",
+    "roles": [
+      "ai",
+      "fs"
+    ],
+    "pay": "$140–$190k",
+    "desc": "Conversational AI platform. ML Infrastructure & Backend platform.",
+    "apply": "https://jobs.ashbyhq.com/character",
+    "dsa": false
+  },
+  {
+    "id": "runway",
+    "name": "Runway ML",
+    "region": "global",
+    "roles": [
+      "ai",
+      "fs"
+    ],
+    "pay": "$140–$195k",
+    "desc": "Generative video & multimodal AI. Platform & Distributed Infrastructure.",
+    "apply": "https://jobs.ashbyhq.com/runway",
+    "dsa": false
+  },
+  {
+    "id": "pika",
+    "name": "Pika Labs",
+    "region": "global",
+    "roles": [
+      "ai",
+      "fs"
+    ],
+    "pay": "$135–$185k",
+    "desc": "Generative AI video creator. Senior/Staff Backend & Infrastructure.",
+    "apply": "https://jobs.ashbyhq.com/pika",
+    "dsa": false
+  },
+  {
+    "id": "dust",
+    "name": "Dust",
+    "region": "eu",
+    "roles": [
+      "ai",
+      "fs"
+    ],
+    "pay": "€90–€135k",
+    "desc": "European AI assistants and customized agent platform for enterprise. Paris / EU Remote.",
+    "apply": "https://jobs.ashbyhq.com/dust",
+    "dsa": false
+  },
+  {
+    "id": "photoroom",
+    "name": "PhotoRoom",
+    "region": "eu",
+    "roles": [
+      "ai",
+      "fs"
+    ],
+    "pay": "€90–€140k",
+    "desc": "AI photo & visual creation platform. Paris / Remote EMEA.",
+    "apply": "https://jobs.ashbyhq.com/photoroom",
+    "dsa": false
+  },
+  {
+    "id": "crewai",
+    "name": "CrewAI",
+    "region": "global",
+    "roles": [
+      "ai",
+      "fde"
+    ],
+    "pay": "$130–$180k",
+    "desc": "Leading multi-agent orchestration framework for autonomous AI teams.",
+    "apply": "https://jobs.ashbyhq.com/crewai",
+    "dsa": false
+  },
+  {
+    "id": "synthesia",
+    "name": "Synthesia",
+    "region": "eu",
+    "roles": [
+      "ai",
+      "fs"
+    ],
+    "pay": "€95–€145k",
+    "desc": "AI video generation platform for enterprise. London / Remote Europe.",
+    "apply": "https://jobs.ashbyhq.com/synthesia",
+    "dsa": false
+  },
+  {
+    "id": "speechify",
+    "name": "Speechify",
+    "region": "global",
+    "roles": [
+      "ai",
+      "fs"
+    ],
+    "pay": "$120–$165k",
+    "desc": "AI voice, text-to-speech & reading assistant. 100% Remote.",
+    "apply": "https://jobs.lever.co/speechify",
+    "dsa": false
+  },
+  {
+    "id": "writer",
+    "name": "Writer",
+    "region": "global",
+    "roles": [
+      "ai",
+      "fde",
+      "se"
+    ],
+    "pay": "$135–$185k",
+    "desc": "Enterprise generative AI platform & LLMs. Solutions Engineering & FDE.",
+    "apply": "https://job-boards.greenhouse.io/writer",
+    "dsa": false
+  },
+  {
+    "id": "cresta",
+    "name": "Cresta",
+    "region": "global",
+    "roles": [
+      "ai",
+      "se"
+    ],
+    "pay": "$130–$170k",
+    "desc": "Real-time AI for enterprise contact centers. Voice AI & Solutions Engineering.",
+    "apply": "https://job-boards.greenhouse.io/cresta",
+    "dsa": false
+  },
+  {
+    "id": "glean",
+    "name": "Glean",
+    "region": "global",
+    "roles": [
+      "fde",
+      "ai"
+    ],
+    "pay": "$140–$185k",
+    "desc": "Enterprise AI work assistant & knowledge search. Real-time RAG & Kafka.",
+    "apply": "https://job-boards.greenhouse.io/glean",
+    "dsa": false
+  },
+  {
+    "id": "augmentcode",
+    "name": "Augment Code",
+    "region": "global",
+    "roles": [
+      "ai",
+      "fs"
+    ],
+    "pay": "$140–$195k",
+    "desc": "AI developer platform & code intelligence engine for enterprise.",
+    "apply": "https://jobs.ashbyhq.com/augmentcode",
+    "dsa": false
+  },
+  {
+    "id": "magic",
+    "name": "Magic.dev",
+    "region": "global",
+    "roles": [
+      "ai",
+      "fs"
+    ],
+    "pay": "$140–$200k",
+    "desc": "Ultra-long context frontier models & AI software engineering.",
+    "apply": "https://jobs.ashbyhq.com/magic",
+    "dsa": false
+  },
+  {
+    "id": "poolside",
+    "name": "Poolside AI",
+    "region": "eu",
+    "roles": [
+      "ai",
+      "fs"
+    ],
+    "pay": "€100–€160k",
+    "desc": "European frontier AI for software development. Paris / Remote Europe.",
+    "apply": "https://jobs.ashbyhq.com/poolside",
+    "dsa": false
+  },
+  {
+    "id": "huggingface",
+    "name": "Hugging Face",
+    "region": "global",
+    "roles": [
+      "ai",
+      "se",
+      "fde"
+    ],
+    "pay": "$130–$175k",
+    "desc": "The home of open source AI. Solutions Engineers & ML infrastructure.",
+    "apply": "https://jobs.lever.co/huggingface",
+    "dsa": false
+  },
+  {
+    "id": "posthog",
+    "name": "PostHog",
+    "region": "global",
+    "roles": [
+      "fs",
+      "ai"
+    ],
+    "pay": "$120–$160k",
+    "desc": "All-in-one developer platform. Remote-first. 1-day paid practical work trial.",
+    "apply": "https://jobs.ashbyhq.com/posthog",
+    "dsa": false
+  },
+  {
+    "id": "supabase",
+    "name": "Supabase",
+    "region": "global",
+    "roles": [
+      "fs",
+      "ai"
+    ],
+    "pay": "$120–$160k",
+    "desc": "Open source Firebase alternative (PostgreSQL + pgvector). Real-time backend.",
+    "apply": "https://jobs.ashbyhq.com/supabase",
+    "dsa": false
+  },
+  {
+    "id": "vercel",
+    "name": "Vercel",
+    "region": "global",
+    "roles": [
+      "fs",
+      "ai"
+    ],
+    "pay": "$130–$175k",
+    "desc": "Frontend cloud & AI SDK company. Next.js, AI SDK, React platform engineering.",
+    "apply": "https://boards.greenhouse.io/vercel",
+    "dsa": false
+  },
+  {
+    "id": "linear",
+    "name": "Linear",
+    "region": "global",
+    "roles": [
+      "fs"
+    ],
+    "pay": "$130–$180k",
+    "desc": "Craft-focused issue tracker & engineering workflow tool. Europe / Remote.",
+    "apply": "https://jobs.ashbyhq.com/linear",
+    "dsa": false
+  },
+  {
+    "id": "sentry",
+    "name": "Sentry",
+    "region": "global",
+    "roles": [
+      "fs",
+      "se"
+    ],
+    "pay": "$120–$165k",
+    "desc": "Developer error tracking & telemetry. Observability stack.",
+    "apply": "https://jobs.ashbyhq.com/sentry",
+    "dsa": false
+  },
+  {
+    "id": "mattermost",
+    "name": "Mattermost",
+    "region": "global",
+    "roles": [
+      "fs"
+    ],
+    "pay": "$120–$160k",
+    "desc": "Open source secure collaboration platform. Senior & Staff Full Stack.",
+    "apply": "https://job-boards.greenhouse.io/mattermost",
+    "dsa": false
+  },
+  {
+    "id": "modal",
+    "name": "Modal",
+    "region": "global",
+    "roles": [
+      "ai",
+      "fs"
+    ],
+    "pay": "$140–$185k",
+    "desc": "Serverless cloud for AI & ML inference. Fast-growing platform.",
+    "apply": "https://jobs.ashbyhq.com/modal",
+    "dsa": false
+  },
+  {
+    "id": "neon",
+    "name": "Neon",
+    "region": "global",
+    "roles": [
+      "fs",
+      "se"
+    ],
+    "pay": "$120–$160k",
+    "desc": "Serverless Postgres with branching. Distributed systems + cloud databases.",
+    "apply": "https://jobs.lever.co/neon",
+    "dsa": false
+  },
+  {
+    "id": "triggerdev",
+    "name": "Trigger.dev",
+    "region": "eu",
+    "roles": [
+      "fs",
+      "ai"
+    ],
+    "pay": "€85–€120k",
+    "desc": "Background jobs & async queues orchestration platform. Remote UK/Europe.",
+    "apply": "https://jobs.ashbyhq.com/triggerdev",
+    "dsa": false
+  },
+  {
+    "id": "resend",
+    "name": "Resend",
+    "region": "global",
+    "roles": [
+      "fs"
+    ],
+    "pay": "$130–$175k",
+    "desc": "Developer-first email and transactional notification platform.",
+    "apply": "https://jobs.ashbyhq.com/resend",
+    "dsa": false
+  },
+  {
+    "id": "mintlify",
+    "name": "Mintlify",
+    "region": "global",
+    "roles": [
+      "fs",
+      "se"
+    ],
+    "pay": "$120–$165k",
+    "desc": "Modern AI-powered developer documentation platform. Solutions Engineers.",
+    "apply": "https://jobs.ashbyhq.com/mintlify",
+    "dsa": false
+  },
+  {
+    "id": "starburst",
+    "name": "Starburst",
+    "region": "global",
+    "roles": [
+      "fs",
+      "ai",
+      "se"
+    ],
+    "pay": "$130–$175k",
+    "desc": "Enterprise data & analytics engine (Trino). AI Agent Engineers.",
+    "apply": "https://job-boards.greenhouse.io/starburst",
+    "dsa": false
+  },
+  {
+    "id": "motherduck",
+    "name": "MotherDuck",
+    "region": "eu",
+    "roles": [
+      "fs",
+      "se"
+    ],
+    "pay": "€95–€140k",
+    "desc": "Cloud analytics platform powered by DuckDB. Amsterdam / Remote Europe.",
+    "apply": "https://jobs.ashbyhq.com/motherduck",
+    "dsa": false
+  },
+  {
+    "id": "stream",
+    "name": "GetStream",
+    "region": "eu",
+    "roles": [
+      "fs",
+      "se"
+    ],
+    "pay": "€90–€130k",
+    "desc": "Scalable in-app chat & real-time messaging APIs. Amsterdam / Remote EMEA.",
+    "apply": "https://jobs.ashbyhq.com/stream",
+    "dsa": false
+  },
+  {
+    "id": "clerk",
+    "name": "Clerk",
+    "region": "global",
+    "roles": [
+      "fs",
+      "ai"
+    ],
+    "pay": "$130–$175k",
+    "desc": "Authentication and user management for React & Next.js apps.",
+    "apply": "https://jobs.ashbyhq.com/clerk",
+    "dsa": false
+  },
+  {
+    "id": "inngest",
+    "name": "Inngest",
+    "region": "global",
+    "roles": [
+      "fs",
+      "se"
+    ],
+    "pay": "$125–$170k",
+    "desc": "Event-driven durable execution engine for background AI workflows.",
+    "apply": "https://jobs.ashbyhq.com/inngest",
+    "dsa": false
+  },
+  {
+    "id": "knock",
+    "name": "Knock",
+    "region": "global",
+    "roles": [
+      "fs",
+      "se"
+    ],
+    "pay": "$125–$165k",
+    "desc": "Flexible notification infrastructure for modern software products.",
+    "apply": "https://jobs.ashbyhq.com/knock",
+    "dsa": false
+  },
+  {
+    "id": "incidentio",
+    "name": "incident.io",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "€90–€135k",
+    "desc": "Modern incident management platform. London / Remote Europe.",
+    "apply": "https://jobs.ashbyhq.com/incident.io",
+    "dsa": false
+  },
+  {
+    "id": "calcom",
+    "name": "Cal.com",
+    "region": "global",
+    "roles": [
+      "fs"
+    ],
+    "pay": "$110–$150k",
+    "desc": "Open-source scheduling infrastructure. Remote-first team.",
+    "apply": "https://jobs.ashbyhq.com/calcom",
+    "dsa": false
+  },
+  {
+    "id": "loops",
+    "name": "Loops",
+    "region": "global",
+    "roles": [
+      "fs"
+    ],
+    "pay": "$120–$160k",
+    "desc": "Email platform for SaaS companies. React, Node.js & high-volume delivery.",
+    "apply": "https://jobs.ashbyhq.com/loops",
+    "dsa": false
+  },
+  {
+    "id": "prisma",
+    "name": "Prisma",
+    "region": "eu",
+    "roles": [
+      "fs",
+      "se"
+    ],
+    "pay": "€85–€125k",
+    "desc": "Next-gen ORM and database platform. Berlin / Remote Europe.",
+    "apply": "https://jobs.ashbyhq.com/prisma",
+    "dsa": false
+  },
+  {
+    "id": "planetscale",
+    "name": "PlanetScale",
+    "region": "global",
+    "roles": [
+      "fs"
+    ],
+    "pay": "$130–$175k",
+    "desc": "Serverless MySQL database platform (Vitess). Distributed data systems.",
+    "apply": "https://jobs.ashbyhq.com/planetscale",
+    "dsa": false
+  },
+  {
+    "id": "upstash",
+    "name": "Upstash",
+    "region": "global",
+    "roles": [
+      "fs",
+      "ai"
+    ],
+    "pay": "$120–$160k",
+    "desc": "Serverless data platform for Redis, Vector, and QStash messaging.",
+    "apply": "https://jobs.ashbyhq.com/upstash",
+    "dsa": false
+  },
+  {
+    "id": "sourcegraph",
+    "name": "Sourcegraph",
+    "region": "global",
+    "roles": [
+      "ai",
+      "fs"
+    ],
+    "pay": "$135–$180k",
+    "desc": "Code intelligence platform and Cody AI coding assistant.",
+    "apply": "https://job-boards.greenhouse.io/sourcegraph",
+    "dsa": false
+  },
+  {
+    "id": "grafana",
+    "name": "Grafana Labs",
+    "region": "eu",
+    "roles": [
+      "fs",
+      "ai"
+    ],
+    "pay": "€85–€120k",
+    "desc": "Remote observability. Prometheus + Grafana + OpenTelemetry telemetry.",
+    "apply": "https://grafana.com/about/careers/",
+    "dsa": false
+  },
+  {
+    "id": "elastic",
+    "name": "Elastic",
+    "region": "eu",
+    "roles": [
+      "fs",
+      "se"
+    ],
+    "pay": "€90–€130k",
+    "desc": "Search + observability + vector database. Remote EMEA.",
+    "apply": "https://www.elastic.co/about/careers",
+    "dsa": false
+  },
+  {
+    "id": "suno",
+    "name": "Suno",
+    "region": "global",
+    "roles": [
+      "fde",
+      "ai",
+      "fs"
+    ],
+    "pay": "$130–$180k",
+    "desc": "Generative AI music platform. Platform & product engineering.",
+    "apply": "https://jobs.ashbyhq.com/suno",
+    "dsa": false
+  },
+  {
+    "id": "automattic",
+    "name": "Automattic (WordPress)",
+    "region": "global",
+    "roles": [
+      "fs"
+    ],
+    "pay": "$120–$160k",
+    "desc": "100% remote pioneer. Famous for paid, real-world project trials.",
+    "apply": "https://automattic.com/work-with-us/",
+    "dsa": false
+  },
+  {
+    "id": "basecamp",
+    "name": "37signals (Basecamp)",
+    "region": "global",
+    "roles": [
+      "fs"
+    ],
+    "pay": "$130–$175k",
+    "desc": "Creators of Ruby on Rails & Basecamp. 100% no-DSA work sample evaluation.",
+    "apply": "https://37signals.com/jobs",
+    "dsa": false
+  },
+  {
+    "id": "ghost",
+    "name": "Ghost",
+    "region": "global",
+    "roles": [
+      "fs"
+    ],
+    "pay": "$110–$150k",
+    "desc": "Non-profit open source publishing platform. 100% remote.",
+    "apply": "https://ghost.org/careers/",
+    "dsa": false
+  },
+  {
+    "id": "gitlab",
+    "name": "GitLab",
+    "region": "global",
+    "roles": [
+      "fs"
+    ],
+    "pay": "$130–$170k",
+    "desc": "All-remote DevSecOps platform. Problem-based practical interviews, no LeetCode.",
+    "apply": "https://about.gitlab.com/jobs/",
+    "dsa": false
+  },
+  {
+    "id": "zapier",
+    "name": "Zapier",
+    "region": "global",
+    "roles": [
+      "fs",
+      "ai"
+    ],
+    "pay": "$130–$175k",
+    "desc": "Workflow automation platform. Integrations & full-stack engineering.",
+    "apply": "https://jobs.ashbyhq.com/zapier",
+    "dsa": false
+  },
+  {
+    "id": "retool",
+    "name": "Retool",
+    "region": "global",
+    "roles": [
+      "fde",
+      "se",
+      "fs"
+    ],
+    "pay": "$135–$185k",
+    "desc": "Internal tools & AI agent platform. Forward Deployed & Solutions Engineers.",
+    "apply": "https://job-boards.greenhouse.io/retool",
+    "dsa": false
+  },
+  {
+    "id": "clickhouse",
+    "name": "ClickHouse",
+    "region": "global",
+    "roles": [
+      "fs",
+      "se"
+    ],
+    "pay": "$135–$185k",
+    "desc": "Real-time analytical database. Cloud platform & Solutions Engineers.",
+    "apply": "https://job-boards.greenhouse.io/clickhouse",
+    "dsa": false
+  },
+  {
+    "id": "dbtlabs",
+    "name": "dbt Labs",
+    "region": "global",
+    "roles": [
+      "fs",
+      "se"
+    ],
+    "pay": "$130–$175k",
+    "desc": "Data transformation and analytics engineering platform. Remote.",
+    "apply": "https://job-boards.greenhouse.io/dbtlabs",
+    "dsa": false
+  },
+  {
+    "id": "postman",
+    "name": "Postman",
+    "region": "global",
+    "roles": [
+      "fs",
+      "se"
+    ],
+    "pay": "$120–$165k",
+    "desc": "API development & testing platform. Full-stack & Solutions Architecture.",
+    "apply": "https://job-boards.greenhouse.io/postman",
+    "dsa": false
+  },
+  {
+    "id": "hasura",
+    "name": "Hasura",
+    "region": "global",
+    "roles": [
+      "fs",
+      "se"
+    ],
+    "pay": "$120–$160k",
+    "desc": "Instant GraphQL & REST APIs on databases. Backend & Solutions Engineers.",
+    "apply": "https://jobs.lever.co/hasura",
+    "dsa": false
+  },
+  {
+    "id": "strapi",
+    "name": "Strapi",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "€85–€120k",
+    "desc": "Leading open-source headless CMS. Paris / Remote Europe. Node.js & React.",
+    "apply": "https://jobs.lever.co/strapi",
+    "dsa": false
+  },
+  {
+    "id": "medusa",
+    "name": "Medusa.js",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "€85–€125k",
+    "desc": "Open-source modular commerce infrastructure. Copenhagen / Remote EU.",
+    "apply": "https://jobs.ashbyhq.com/medusajs",
+    "dsa": false
+  },
+  {
+    "id": "appwrite",
+    "name": "Appwrite",
+    "region": "global",
+    "roles": [
+      "fs",
+      "se"
+    ],
+    "pay": "$115–$155k",
+    "desc": "Open-source backend-as-a-service platform for web and mobile apps.",
+    "apply": "https://jobs.lever.co/appwrite",
+    "dsa": false
+  },
+  {
+    "id": "novu",
+    "name": "Novu",
+    "region": "global",
+    "roles": [
+      "fs",
+      "se"
+    ],
+    "pay": "$115–$155k",
+    "desc": "Open source notification infrastructure and inbox component for React apps.",
+    "apply": "https://jobs.ashbyhq.com/novu",
+    "dsa": false
+  },
+  {
+    "id": "temporal",
+    "name": "Temporal.io",
+    "region": "global",
+    "roles": [
+      "fs",
+      "ai",
+      "se"
+    ],
+    "pay": "$140–$190k",
+    "desc": "Durable execution platform for mission-critical workflows and microservices.",
+    "apply": "https://job-boards.greenhouse.io/temporal",
+    "dsa": false
+  },
+  {
+    "id": "aiven",
+    "name": "Aiven",
+    "region": "eu",
+    "roles": [
+      "fs",
+      "se"
+    ],
+    "pay": "€85–€120k",
+    "desc": "Helsinki managed Kafka, PostgreSQL & Redis cloud. Solutions Engineers.",
+    "apply": "https://aiven.io/careers",
+    "dsa": false
+  },
+  {
+    "id": "redpanda",
+    "name": "Redpanda Data",
+    "region": "global",
+    "roles": [
+      "fs",
+      "se"
+    ],
+    "pay": "$135–$180k",
+    "desc": "High-performance Kafka-compatible streaming data platform.",
+    "apply": "https://job-boards.greenhouse.io/redpanda",
+    "dsa": false
+  },
+  {
+    "id": "kestra",
+    "name": "Kestra",
+    "region": "eu",
+    "roles": [
+      "fs",
+      "ai"
+    ],
+    "pay": "€85–€125k",
+    "desc": "Open-source declarative data and AI workflow orchestration platform.",
+    "apply": "https://jobs.ashbyhq.com/kestra",
+    "dsa": false
+  },
+  {
+    "id": "n8n",
+    "name": "n8n",
+    "region": "eu",
+    "roles": [
+      "ai",
+      "fs"
+    ],
+    "pay": "€80–€120k",
+    "desc": "Berlin AI agent and workflow automation platform. Node.js/TypeScript.",
+    "apply": "https://n8n.io/careers/",
+    "dsa": false
+  },
+  {
+    "id": "camunda",
+    "name": "Camunda",
+    "region": "eu",
+    "roles": [
+      "fs",
+      "se"
+    ],
+    "pay": "€85–€120k",
+    "desc": "Berlin process orchestration platform. Spring Boot microservices background.",
+    "apply": "https://camunda.com/about/careers/",
+    "dsa": false
+  },
+  {
+    "id": "pleo",
+    "name": "Pleo",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "€90–€135k",
+    "desc": "Copenhagen business spending and smart cards platform. Remote Europe.",
+    "apply": "https://job-boards.greenhouse.io/pleo",
+    "dsa": false
+  },
+  {
+    "id": "wise",
+    "name": "Wise",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "€95–€140k",
+    "desc": "Global money transfer & cross-border payments. Java/Spring Boot & microservices.",
+    "apply": "https://job-boards.greenhouse.io/wise",
+    "dsa": false
+  },
+  {
+    "id": "mollie",
+    "name": "Mollie",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "€85–€125k",
+    "desc": "Amsterdam payment processor. Strong Java & practical system design culture.",
+    "apply": "https://jobs.mollie.com/",
+    "dsa": false
+  },
+  {
+    "id": "bird",
+    "name": "MessageBird / Bird",
+    "region": "eu",
+    "roles": [
+      "fs",
+      "ai"
+    ],
+    "pay": "€90–€130k",
+    "desc": "Amsterdam omnichannel comms & WhatsApp API platform. Spring Boot & Node.js.",
+    "apply": "https://bird.com/careers",
+    "dsa": false
+  },
+  {
+    "id": "remote_com",
+    "name": "Remote.com",
+    "region": "global",
+    "roles": [
+      "fde",
+      "fs",
+      "ai"
+    ],
+    "pay": "$125–$165k",
+    "desc": "Global HR and international payroll platform. FDE (AI) & Full-Stack.",
+    "apply": "https://job-boards.greenhouse.io/remotereferralboardinternaluseonly",
+    "dsa": false
+  },
+  {
+    "id": "deel",
+    "name": "Deel",
+    "region": "global",
+    "roles": [
+      "fs",
+      "ai"
+    ],
+    "pay": "$120–$165k",
+    "desc": "Global compliance and payroll infrastructure. Remote worldwide.",
+    "apply": "https://jobs.ashbyhq.com/deel",
+    "dsa": false
+  },
+  {
+    "id": "oyster",
+    "name": "Oyster HR",
+    "region": "global",
+    "roles": [
+      "fs"
+    ],
+    "pay": "$115–$155k",
+    "desc": "Global employment platform. 100% remote-first engineering.",
+    "apply": "https://jobs.ashbyhq.com/oyster",
+    "dsa": false
+  },
+  {
+    "id": "noon",
+    "name": "Noon",
+    "region": "gulf",
+    "roles": [
+      "fs"
+    ],
+    "pay": "$90–$135k tax-free",
+    "desc": "Middle East e-commerce & fintech giant. Java, Spring Boot & microservices at scale.",
+    "apply": "https://jobs.lever.co/noon",
+    "dsa": false
+  },
+  {
+    "id": "floward",
+    "name": "Floward",
+    "region": "gulf",
+    "roles": [
+      "fs"
+    ],
+    "pay": "$85–$120k tax-free",
+    "desc": "Fast-growing GCC e-commerce & gifting platform. Riyadh & Dubai.",
+    "apply": "https://jobs.ashbyhq.com/floward",
+    "dsa": false
+  },
+  {
+    "id": "trukker",
+    "name": "Trukker",
+    "region": "gulf",
+    "roles": [
+      "fs"
+    ],
+    "pay": "$85–$125k tax-free",
+    "desc": "Digital freight network & logistics platform in MENA. Microservices architecture.",
+    "apply": "https://jobs.lever.co/trukker",
+    "dsa": false
+  },
+  {
+    "id": "jahez",
+    "name": "Jahez",
+    "region": "gulf",
+    "roles": [
+      "fs"
+    ],
+    "pay": "$95–$140k tax-free",
+    "desc": "Leading Saudi food & logistics platform. Riyadh on-site.",
+    "apply": "https://jobs.lever.co/jahez",
+    "dsa": false
+  },
+  {
+    "id": "nana",
+    "name": "Nana",
+    "region": "gulf",
+    "roles": [
+      "fs"
+    ],
+    "pay": "$90–$130k tax-free",
+    "desc": "Saudi grocery delivery & fintech app. Riyadh on-site & hybrid.",
+    "apply": "https://jobs.lever.co/nana",
+    "dsa": false
+  },
+  {
+    "id": "dubizzle",
+    "name": "Dubizzle Group",
+    "region": "gulf",
+    "roles": [
+      "fs"
+    ],
+    "pay": "$90–$130k tax-free",
+    "desc": "UAE classifieds & marketplace unicorn (Bayut & Dubizzle). Dubai.",
+    "apply": "https://jobs.lever.co/dubizzlegroup",
+    "dsa": false
+  },
+  {
+    "id": "wego",
+    "name": "Wego",
+    "region": "gulf",
+    "roles": [
+      "fs"
+    ],
+    "pay": "$85–$120k tax-free",
+    "desc": "Dubai travel marketplace & fintech services. Java & React.",
+    "apply": "https://jobs.lever.co/wego",
+    "dsa": false
+  },
+  {
+    "id": "swvl",
+    "name": "Swvl",
+    "region": "gulf",
+    "roles": [
+      "fs"
+    ],
+    "pay": "$85–$125k tax-free",
+    "desc": "Tech-enabled mass transit & mobility platform in Dubai.",
+    "apply": "https://jobs.lever.co/swvl",
+    "dsa": false
+  },
+  {
+    "id": "tamara_jobs",
+    "name": "Tamara Careers",
+    "region": "gulf",
+    "roles": [
+      "fs",
+      "ai"
+    ],
+    "pay": "$100–$150k tax-free",
+    "desc": "Riyadh Saudi BNPL unicorn. Engineering & platform teams.",
+    "apply": "https://job-boards.greenhouse.io/tamara",
+    "dsa": false
+  },
+  {
+    "id": "gitpod",
+    "name": "Gitpod",
+    "region": "eu",
+    "roles": [
+      "fs",
+      "ai"
+    ],
+    "pay": "€90–€135k",
+    "desc": "Cloud developer environments & automated dev workflows. Remote Europe.",
+    "apply": "https://jobs.ashbyhq.com/gitpod",
+    "dsa": false
+  },
+  {
+    "id": "raycast",
+    "name": "Raycast",
+    "region": "eu",
+    "roles": [
+      "fs",
+      "ai"
+    ],
+    "pay": "€95–€140k",
+    "desc": "Fast launcher with AI extensions for macOS & Windows. London / Remote EU.",
+    "apply": "https://jobs.ashbyhq.com/raycast",
+    "dsa": false
+  },
+  {
+    "id": "deepl",
+    "name": "DeepL",
+    "region": "eu",
+    "roles": [
+      "ai",
+      "fs"
+    ],
+    "pay": "€100–€150k",
+    "desc": "World leading AI translation & communication. Cologne, London & Remote EU.",
+    "apply": "https://jobs.lever.co/deepl",
+    "dsa": false
+  },
+  {
+    "id": "miro",
+    "name": "Miro",
+    "region": "eu",
+    "roles": [
+      "fs",
+      "ai"
+    ],
+    "pay": "€95–€140k",
+    "desc": "Visual collaboration & AI canvas. Amsterdam, Berlin, London & Remote.",
+    "apply": "https://jobs.ashbyhq.com/miro",
+    "dsa": false
+  },
+  {
+    "id": "meilisearch",
+    "name": "Meilisearch",
+    "region": "eu",
+    "roles": [
+      "fs",
+      "ai"
+    ],
+    "pay": "€80–€120k",
+    "desc": "Open-source fast search engine. Paris / 100% Remote Europe.",
+    "apply": "https://jobs.lever.co/meilisearch",
+    "dsa": false
+  },
+  {
+    "id": "qdrant_jobs",
+    "name": "Qdrant Vector DB",
+    "region": "eu",
+    "roles": [
+      "ai",
+      "se",
+      "fs"
+    ],
+    "pay": "€90–€135k",
+    "desc": "Open-source vector search database for AI & RAG. Berlin & Remote.",
+    "apply": "https://jobs.ashbyhq.com/qdrant",
+    "dsa": false
+  },
+  {
+    "id": "weaviate_jobs",
+    "name": "Weaviate Vector DB",
+    "region": "eu",
+    "roles": [
+      "ai",
+      "se",
+      "fs"
+    ],
+    "pay": "€90–€135k",
+    "desc": "Open-source vector database & AI search. Amsterdam & Remote.",
+    "apply": "https://jobs.ashbyhq.com/weaviate",
+    "dsa": false
+  },
+  {
+    "id": "kestra_app",
+    "name": "Kestra Orchestration",
+    "region": "eu",
+    "roles": [
+      "fs",
+      "ai"
+    ],
+    "pay": "€85–€125k",
+    "desc": "Declarative orchestrator for data, microservices & AI workflows. Remote EU.",
+    "apply": "https://jobs.ashbyhq.com/kestra",
+    "dsa": false
+  },
+  {
+    "id": "dataiku",
+    "name": "Dataiku",
+    "region": "eu",
+    "roles": [
+      "ai",
+      "se",
+      "fs"
+    ],
+    "pay": "€95–€145k",
+    "desc": "Enterprise AI & generative AI platform. Paris, London & Remote EU.",
+    "apply": "https://jobs.lever.co/dataiku",
+    "dsa": false
+  },
+  {
+    "id": "pigment",
+    "name": "Pigment",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "€95–€145k",
+    "desc": "Business planning & data visualization platform. Paris, London & Remote.",
+    "apply": "https://jobs.ashbyhq.com/pigment",
+    "dsa": false
+  },
+  {
+    "id": "alan",
+    "name": "Alan",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "€90–€140k",
+    "desc": "Healthcare super-app & insurance tech. Paris, Madrid & Remote Europe.",
+    "apply": "https://jobs.lever.co/alan",
+    "dsa": false
+  },
+  {
+    "id": "swile",
+    "name": "Swile",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "€85–€125k",
+    "desc": "Employee benefits & smart fintech cards. Paris & Remote Europe.",
+    "apply": "https://jobs.lever.co/swile",
+    "dsa": false
+  },
+  {
+    "id": "pennylane",
+    "name": "Pennylane",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "€85–€130k",
+    "desc": "Financial management & accounting SaaS. Paris & Remote Europe.",
+    "apply": "https://jobs.lever.co/pennylane",
+    "dsa": false
+  },
+  {
+    "id": "front",
+    "name": "Front",
+    "region": "eu",
+    "roles": [
+      "fs",
+      "se"
+    ],
+    "pay": "€95–€140k",
+    "desc": "Customer operations & collaborative inbox. Paris, London & Remote.",
+    "apply": "https://jobs.lever.co/front",
+    "dsa": false
+  },
+  {
+    "id": "brevo",
+    "name": "Brevo (Sendinblue)",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "€85–€125k",
+    "desc": "CRM & marketing automation platform. Paris, Berlin & Remote.",
+    "apply": "https://jobs.lever.co/brevo",
+    "dsa": false
+  },
+  {
+    "id": "personio_jobs",
+    "name": "Personio",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "€90–€135k",
+    "desc": "European HR software leader. Munich, Madrid, Amsterdam & Remote.",
+    "apply": "https://jobs.ashbyhq.com/personio",
+    "dsa": false
+  },
+  {
+    "id": "contentful_jobs",
+    "name": "Contentful",
+    "region": "eu",
+    "roles": [
+      "fs",
+      "se"
+    ],
+    "pay": "€90–€130k",
+    "desc": "Composable content platform for enterprise. Berlin & Remote.",
+    "apply": "https://job-boards.greenhouse.io/contentful",
+    "dsa": false
+  },
+  {
+    "id": "trade_republic",
+    "name": "Trade Republic",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "€95–€145k",
+    "desc": "European wealth and investing platform. Berlin on-site & hybrid.",
+    "apply": "https://jobs.ashbyhq.com/traderepublic",
+    "dsa": false
+  },
+  {
+    "id": "n26",
+    "name": "N26",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "€90–€135k",
+    "desc": "Mobile banking pioneer. Berlin, Vienna, Barcelona & Remote.",
+    "apply": "https://jobs.lever.co/n26",
+    "dsa": false
+  },
+  {
+    "id": "bolt",
+    "name": "Bolt",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "€90–€140k",
+    "desc": "Super-app for mobility, food, and delivery. Tallinn, London & Remote EU.",
+    "apply": "https://jobs.ashbyhq.com/bolt",
+    "dsa": false
+  },
+  {
+    "id": "wolt",
+    "name": "Wolt (DoorDash)",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "€95–€140k",
+    "desc": "Food & retail delivery tech. Helsinki, Berlin & Remote EU.",
+    "apply": "https://jobs.ashbyhq.com/wolt",
+    "dsa": false
+  },
+  {
+    "id": "delivery_hero",
+    "name": "Delivery Hero",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "€90–€135k",
+    "desc": "Global local delivery network. Berlin on-site & hybrid.",
+    "apply": "https://jobs.lever.co/deliveryhero",
+    "dsa": false
+  },
+  {
+    "id": "duckduckgo",
+    "name": "DuckDuckGo",
+    "region": "global",
+    "roles": [
+      "fs",
+      "ai"
+    ],
+    "pay": "$130–$175k",
+    "desc": "Privacy-focused search engine & browser. 100% Remote worldwide. No DSA whiteboard.",
+    "apply": "https://jobs.lever.co/duckduckgo",
+    "dsa": false
+  },
+  {
+    "id": "buffer",
+    "name": "Buffer",
+    "region": "global",
+    "roles": [
+      "fs"
+    ],
+    "pay": "$120–$160k",
+    "desc": "Social media management toolkit. 100% remote pioneer with transparent salaries.",
+    "apply": "https://jobs.lever.co/buffer",
+    "dsa": false
+  },
+  {
+    "id": "doist",
+    "name": "Doist (Todoist)",
+    "region": "global",
+    "roles": [
+      "fs"
+    ],
+    "pay": "$120–$160k",
+    "desc": "Productivity tools for async work. 100% remote-first team worldwide.",
+    "apply": "https://jobs.lever.co/doist",
+    "dsa": false
+  },
+  {
+    "id": "webflow",
+    "name": "Webflow",
+    "region": "global",
+    "roles": [
+      "fs",
+      "ai"
+    ],
+    "pay": "$135–$180k",
+    "desc": "Visual web development & CMS platform. Full-stack & AI engineering.",
+    "apply": "https://job-boards.greenhouse.io/webflow",
+    "dsa": false
+  },
+  {
+    "id": "notion",
+    "name": "Notion",
+    "region": "global",
+    "roles": [
+      "fs",
+      "ai"
+    ],
+    "pay": "$140–$195k",
+    "desc": "Connected workspace & AI tools. System design & real product code walkthrough.",
+    "apply": "https://job-boards.greenhouse.io/notion",
+    "dsa": false
+  },
+  {
+    "id": "airtable",
+    "name": "Airtable",
+    "region": "global",
+    "roles": [
+      "fs",
+      "ai",
+      "se"
+    ],
+    "pay": "$140–$190k",
+    "desc": "Low-code application & database platform. Solutions engineering & full-stack.",
+    "apply": "https://job-boards.greenhouse.io/airtable",
+    "dsa": false
+  },
+  {
+    "id": "make",
+    "name": "Make.com (Integromat)",
+    "region": "eu",
+    "roles": [
+      "fs",
+      "se"
+    ],
+    "pay": "€90–€130k",
+    "desc": "Visual automation and integration platform. Prague & Remote Europe.",
+    "apply": "https://jobs.lever.co/make",
+    "dsa": false
+  },
+  {
+    "id": "workato",
+    "name": "Workato",
+    "region": "global",
+    "roles": [
+      "fs",
+      "se",
+      "fde"
+    ],
+    "pay": "$130–$175k",
+    "desc": "Enterprise automation & AI orchestration platform. Solutions Architecture.",
+    "apply": "https://job-boards.greenhouse.io/workato",
+    "dsa": false
+  },
+  {
+    "id": "langflow",
+    "name": "Langflow (DataStax)",
+    "region": "global",
+    "roles": [
+      "ai",
+      "fs"
+    ],
+    "pay": "$130–$175k",
+    "desc": "Visual framework for building multi-agent AI and RAG applications.",
+    "apply": "https://job-boards.greenhouse.io/datastax",
+    "dsa": false
+  },
+  {
+    "id": "arize",
+    "name": "Arize AI (Phoenix)",
+    "region": "global",
+    "roles": [
+      "ai",
+      "fs",
+      "se"
+    ],
+    "pay": "$130–$175k",
+    "desc": "LLM observability & evaluation platform. RAG and agent tracing.",
+    "apply": "https://jobs.ashbyhq.com/arize",
+    "dsa": false
+  },
+  {
+    "id": "openpipe",
+    "name": "OpenPipe",
+    "region": "global",
+    "roles": [
+      "ai",
+      "fs"
+    ],
+    "pay": "$135–$180k",
+    "desc": "Fine-tuning & model distillation infrastructure for LLMs.",
+    "apply": "https://jobs.ashbyhq.com/openpipe",
+    "dsa": false
+  },
+  {
+    "id": "promptfoo",
+    "name": "Promptfoo",
+    "region": "global",
+    "roles": [
+      "ai",
+      "fs"
+    ],
+    "pay": "$130–$175k",
+    "desc": "Open-source LLM evaluation, security testing & red-teaming tool.",
+    "apply": "https://jobs.ashbyhq.com/promptfoo",
+    "dsa": false
+  },
+  {
+    "id": "agentops",
+    "name": "AgentOps",
+    "region": "global",
+    "roles": [
+      "ai",
+      "fs"
+    ],
+    "pay": "$125–$170k",
+    "desc": "Observability and session replays for autonomous AI agents.",
+    "apply": "https://jobs.ashbyhq.com/agentops",
+    "dsa": false
+  },
+  {
+    "id": "chroma",
+    "name": "Chroma DB",
+    "region": "global",
+    "roles": [
+      "ai",
+      "fs"
+    ],
+    "pay": "$135–$185k",
+    "desc": "Open-source AI application database & embeddings store.",
+    "apply": "https://jobs.ashbyhq.com/chroma",
+    "dsa": false
+  },
+  {
+    "id": "zilliz",
+    "name": "Zilliz (Milvus)",
+    "region": "global",
+    "roles": [
+      "ai",
+      "se",
+      "fs"
+    ],
+    "pay": "$130–$175k",
+    "desc": "Cloud vector database built for massive scale AI inference.",
+    "apply": "https://job-boards.greenhouse.io/zilliz",
+    "dsa": false
+  },
+  {
+    "id": "singlestore",
+    "name": "SingleStore",
+    "region": "global",
+    "roles": [
+      "fs",
+      "se"
+    ],
+    "pay": "$135–$180k",
+    "desc": "Real-time distributed SQL database with vector search.",
+    "apply": "https://job-boards.greenhouse.io/singlestore",
+    "dsa": false
+  },
+  {
+    "id": "cockroachlabs",
+    "name": "Cockroach Labs",
+    "region": "global",
+    "roles": [
+      "fs",
+      "se"
+    ],
+    "pay": "$140–$185k",
+    "desc": "Distributed SQL database architected for resilience.",
+    "apply": "https://job-boards.greenhouse.io/cockroachlabs",
+    "dsa": false
+  },
+  {
+    "id": "yugabyte",
+    "name": "Yugabyte",
+    "region": "global",
+    "roles": [
+      "fs",
+      "se"
+    ],
+    "pay": "$130–$175k",
+    "desc": "Open-source distributed PostgreSQL database for global applications.",
+    "apply": "https://job-boards.greenhouse.io/yugabyte",
+    "dsa": false
+  },
+  {
+    "id": "timescale",
+    "name": "Timescale",
+    "region": "global",
+    "roles": [
+      "fs",
+      "se"
+    ],
+    "pay": "$130–$175k",
+    "desc": "PostgreSQL platform for time-series, analytics & pgvector AI.",
+    "apply": "https://jobs.ashbyhq.com/timescale",
+    "dsa": false
+  },
+  {
+    "id": "scylladb",
+    "name": "ScyllaDB",
+    "region": "global",
+    "roles": [
+      "fs",
+      "se"
+    ],
+    "pay": "$130–$175k",
+    "desc": "Ultra-high throughput distributed database for real-time scale.",
+    "apply": "https://jobs.lever.co/scylladb",
+    "dsa": false
+  },
+  {
+    "id": "turso",
+    "name": "Turso (ChiselStrike)",
+    "region": "global",
+    "roles": [
+      "fs"
+    ],
+    "pay": "$125–$170k",
+    "desc": "Edge-hosted distributed SQLite database powered by LibSQL.",
+    "apply": "https://jobs.ashbyhq.com/turso",
+    "dsa": false
+  },
+  {
+    "id": "deno",
+    "name": "Deno",
+    "region": "global",
+    "roles": [
+      "fs"
+    ],
+    "pay": "$130–$175k",
+    "desc": "Next-generation JavaScript/TypeScript runtime & serverless cloud.",
+    "apply": "https://jobs.ashbyhq.com/deno",
+    "dsa": false
+  },
+  {
+    "id": "cloudflare_jobs",
+    "name": "Cloudflare",
+    "region": "global",
+    "roles": [
+      "fs",
+      "ai",
+      "se"
+    ],
+    "pay": "$140–$185k",
+    "desc": "Global cloud network, edge compute (Workers) & AI inference.",
+    "apply": "https://job-boards.greenhouse.io/cloudflare",
+    "dsa": false
+  },
+  {
+    "id": "flyio",
+    "name": "Fly.io",
+    "region": "global",
+    "roles": [
+      "fs",
+      "se"
+    ],
+    "pay": "$135–$180k",
+    "desc": "Run full-stack apps and microVMs close to users worldwide. No whiteboard DSA.",
+    "apply": "https://jobs.ashbyhq.com/flyio",
+    "dsa": false
+  },
+  {
+    "id": "railway",
+    "name": "Railway",
+    "region": "global",
+    "roles": [
+      "fs"
+    ],
+    "pay": "$130–$180k",
+    "desc": "Instant cloud deployment infrastructure for developers and teams.",
+    "apply": "https://jobs.ashbyhq.com/railway",
+    "dsa": false
+  },
+  {
+    "id": "render_cloud",
+    "name": "Render",
+    "region": "global",
+    "roles": [
+      "fs",
+      "se"
+    ],
+    "pay": "$130–$175k",
+    "desc": "Zero-DevOps cloud platform for web apps, databases, and cron workers.",
+    "apply": "https://job-boards.greenhouse.io/render",
+    "dsa": false
+  },
+  {
+    "id": "koyeb",
+    "name": "Koyeb",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "€85–€125k",
+    "desc": "Serverless platform for running full-stack applications and AI APIs worldwide.",
+    "apply": "https://jobs.ashbyhq.com/koyeb",
+    "dsa": false
+  },
+  {
+    "id": "northflank",
+    "name": "Northflank",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "€85–€125k",
+    "desc": "Developer platform for microservices, jobs, and databases on Kubernetes.",
+    "apply": "https://jobs.ashbyhq.com/northflank",
+    "dsa": false
+  },
+  {
+    "id": "runpod",
+    "name": "RunPod",
+    "region": "global",
+    "roles": [
+      "ai",
+      "fs"
+    ],
+    "pay": "$130–$180k",
+    "desc": "GPU cloud infrastructure for serverless AI inference and fine-tuning.",
+    "apply": "https://jobs.ashbyhq.com/runpod",
+    "dsa": false
+  },
+  {
+    "id": "lambda_labs",
+    "name": "Lambda Labs",
+    "region": "global",
+    "roles": [
+      "ai",
+      "fs",
+      "se"
+    ],
+    "pay": "$135–$185k",
+    "desc": "Deep learning GPU compute cloud and AI systems engineering.",
+    "apply": "https://job-boards.greenhouse.io/lambdalabs",
+    "dsa": false
+  },
+  {
+    "id": "anyscale",
+    "name": "Anyscale (Ray)",
+    "region": "global",
+    "roles": [
+      "ai",
+      "se",
+      "fs"
+    ],
+    "pay": "$140–$190k",
+    "desc": "Distributed computing platform for AI & LLMs founded by Ray creators.",
+    "apply": "https://job-boards.greenhouse.io/anyscale",
+    "dsa": false
+  },
+  {
+    "id": "predibase",
+    "name": "Predibase",
+    "region": "global",
+    "roles": [
+      "ai",
+      "se"
+    ],
+    "pay": "$130–$175k",
+    "desc": "Developer platform for fine-tuning and serving specialized LLMs.",
+    "apply": "https://jobs.ashbyhq.com/predibase",
+    "dsa": false
+  },
+  {
+    "id": "octoai",
+    "name": "OctoAI",
+    "region": "global",
+    "roles": [
+      "ai",
+      "se"
+    ],
+    "pay": "$130–$175k",
+    "desc": "Fast compute service for production generative AI applications.",
+    "apply": "https://job-boards.greenhouse.io/octoai",
+    "dsa": false
+  },
+  {
+    "id": "groq_cloud",
+    "name": "Groq",
+    "region": "global",
+    "roles": [
+      "ai",
+      "se",
+      "fde"
+    ],
+    "pay": "$140–$195k",
+    "desc": "LPU inference engine delivering world-record LLM token generation speeds.",
+    "apply": "https://job-boards.greenhouse.io/groq",
+    "dsa": false
+  },
+  {
+    "id": "wandb_jobs",
+    "name": "Weights & Biases",
+    "region": "global",
+    "roles": [
+      "ai",
+      "se"
+    ],
+    "pay": "$130–$175k",
+    "desc": "Developer platform for ML experiment tracking and LLM evaluation.",
+    "apply": "https://job-boards.greenhouse.io/wandb",
+    "dsa": false
+  },
+  {
+    "id": "cometml",
+    "name": "Comet ML",
+    "region": "global",
+    "roles": [
+      "ai",
+      "se",
+      "fs"
+    ],
+    "pay": "$125–$165k",
+    "desc": "MLOps platform for model tracking, monitoring, and production LLMs.",
+    "apply": "https://jobs.ashbyhq.com/comet",
+    "dsa": false
+  },
+  {
+    "id": "honeycomb",
+    "name": "Honeycomb.io",
+    "region": "global",
+    "roles": [
+      "fs",
+      "se"
+    ],
+    "pay": "$135–$180k",
+    "desc": "Fast observability platform for distributed microservices & OpenTelemetry.",
+    "apply": "https://job-boards.greenhouse.io/honeycomb",
+    "dsa": false
+  },
+  {
+    "id": "betterstack",
+    "name": "Better Stack",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "€90–€135k",
+    "desc": "Modern observability, uptime monitoring & log management platform.",
+    "apply": "https://jobs.ashbyhq.com/betterstack",
+    "dsa": false
+  },
+  {
+    "id": "axiom",
+    "name": "Axiom",
+    "region": "global",
+    "roles": [
+      "fs",
+      "se"
+    ],
+    "pay": "$130–$175k",
+    "desc": "Serverless log analytics and telemetry platform for modern software.",
+    "apply": "https://jobs.ashbyhq.com/axiom",
+    "dsa": false
+  },
+  {
+    "id": "highlightio",
+    "name": "Highlight.io",
+    "region": "global",
+    "roles": [
+      "fs"
+    ],
+    "pay": "$125–$165k",
+    "desc": "Open-source full-stack monitoring and session replay platform.",
+    "apply": "https://jobs.ashbyhq.com/highlight",
+    "dsa": false
+  },
+  {
+    "id": "logfire",
+    "name": "Pydantic (Logfire)",
+    "region": "global",
+    "roles": [
+      "fs",
+      "ai"
+    ],
+    "pay": "$130–$180k",
+    "desc": "Creators of Pydantic. Building Logfire observability for Python & AI.",
+    "apply": "https://jobs.ashbyhq.com/pydantic",
+    "dsa": false
+  },
+  {
+    "id": "cursor_app",
+    "name": "Cursor AI",
+    "region": "global",
+    "roles": [
+      "fs",
+      "ai"
+    ],
+    "pay": "$140–$200k",
+    "desc": "AI code editor. Infrastructure & developer tooling.",
+    "apply": "https://jobs.ashbyhq.com/cursor",
+    "dsa": false
+  },
+  {
+    "id": "cline",
+    "name": "Cline (Claude Dev)",
+    "region": "global",
+    "roles": [
+      "ai",
+      "fs"
+    ],
+    "pay": "$130–$180k",
+    "desc": "Autonomous AI coding agent extension. TypeScript, Node.js, MCP.",
+    "apply": "https://jobs.ashbyhq.com/cline",
+    "dsa": false
+  },
+  {
+    "id": "continue_dev",
+    "name": "Continue.dev",
+    "region": "global",
+    "roles": [
+      "ai",
+      "fs"
+    ],
+    "pay": "$125–$175k",
+    "desc": "Open-source AI code assistant for VS Code & JetBrains.",
+    "apply": "https://jobs.ashbyhq.com/continue",
+    "dsa": false
+  },
+  {
+    "id": "sweep_ai",
+    "name": "Sweep AI",
+    "region": "global",
+    "roles": [
+      "ai",
+      "fs"
+    ],
+    "pay": "$130–$175k",
+    "desc": "AI junior developer that turns GitHub issues into PRs.",
+    "apply": "https://jobs.ashbyhq.com/sweep",
+    "dsa": false
+  },
+  {
+    "id": "v0_dev",
+    "name": "v0 by Vercel",
+    "region": "global",
+    "roles": [
+      "fs",
+      "ai"
+    ],
+    "pay": "$135–$185k",
+    "desc": "Generative UI system & React generation platform.",
+    "apply": "https://boards.greenhouse.io/vercel",
+    "dsa": false
+  },
+  {
+    "id": "bolt_new",
+    "name": "StackBlitz (Bolt.new)",
+    "region": "global",
+    "roles": [
+      "fs",
+      "ai"
+    ],
+    "pay": "$135–$185k",
+    "desc": "In-browser WebContainers & full-stack AI development platform.",
+    "apply": "https://jobs.lever.co/stackblitz",
+    "dsa": false
+  },
+  {
+    "id": "lovable",
+    "name": "Lovable.dev",
+    "region": "eu",
+    "roles": [
+      "ai",
+      "fs"
+    ],
+    "pay": "€95–€150k",
+    "desc": "Full-stack AI app builder. Stockholm & Remote Europe.",
+    "apply": "https://jobs.ashbyhq.com/lovable",
+    "dsa": false
+  },
+  {
+    "id": "warp",
+    "name": "Warp Terminal",
+    "region": "global",
+    "roles": [
+      "fs",
+      "ai"
+    ],
+    "pay": "$140–$190k",
+    "desc": "Modern AI-integrated terminal built in Rust & TypeScript.",
+    "apply": "https://jobs.ashbyhq.com/warp",
+    "dsa": false
+  },
+  {
+    "id": "zed",
+    "name": "Zed Industries",
+    "region": "global",
+    "roles": [
+      "fs",
+      "ai"
+    ],
+    "pay": "$140–$190k",
+    "desc": "High-performance multiplayer code editor with AI integration.",
+    "apply": "https://jobs.ashbyhq.com/zed",
+    "dsa": false
+  },
+  {
+    "id": "convex",
+    "name": "Convex",
+    "region": "global",
+    "roles": [
+      "fs"
+    ],
+    "pay": "$135–$185k",
+    "desc": "Reactive backend application platform for TypeScript & full-stack apps.",
+    "apply": "https://jobs.ashbyhq.com/convex",
+    "dsa": false
+  },
+  {
+    "id": "trigger_jobs",
+    "name": "Trigger.dev Cloud",
+    "region": "eu",
+    "roles": [
+      "fs",
+      "ai"
+    ],
+    "pay": "€85–€125k",
+    "desc": "Durable background execution for AI workflows. Remote UK/EU.",
+    "apply": "https://jobs.ashbyhq.com/triggerdev",
+    "dsa": false
+  },
+  {
+    "id": "livekit_agents",
+    "name": "LiveKit Agents",
+    "region": "global",
+    "roles": [
+      "ai",
+      "fs",
+      "se"
+    ],
+    "pay": "$135–$185k",
+    "desc": "Real-time multimodal speech & agent infrastructure.",
+    "apply": "https://jobs.ashbyhq.com/livekit",
+    "dsa": false
+  },
+  {
+    "id": "cartesia_voice",
+    "name": "Cartesia Sonic",
+    "region": "global",
+    "roles": [
+      "fde",
+      "ai"
+    ],
+    "pay": "$130–$175k",
+    "desc": "Real-time generative voice & low-latency audio intelligence.",
+    "apply": "https://jobs.ashbyhq.com/cartesia",
+    "dsa": false
+  },
+  {
+    "id": "elevenlabs_ai",
+    "name": "ElevenLabs Voice",
+    "region": "global",
+    "roles": [
+      "fde",
+      "ai",
+      "se"
+    ],
+    "pay": "$135–$185k",
+    "desc": "Conversational voice agents and enterprise solutions.",
+    "apply": "https://jobs.ashbyhq.com/elevenlabs",
+    "dsa": false
+  },
+  {
+    "id": "together_ai_infra",
+    "name": "Together AI Systems",
+    "region": "global",
+    "roles": [
+      "ai",
+      "se"
+    ],
+    "pay": "$135–$185k",
+    "desc": "AI infrastructure and high-throughput inference systems.",
+    "apply": "https://job-boards.greenhouse.io/togetherai",
+    "dsa": false
+  },
+  {
+    "id": "fireworks_nexus",
+    "name": "Fireworks Nexus",
+    "region": "global",
+    "roles": [
+      "ai",
+      "se"
+    ],
+    "pay": "$135–$180k",
+    "desc": "Ultra-fast compound AI systems & model serving.",
+    "apply": "https://jobs.ashbyhq.com/fireworks",
+    "dsa": false
+  },
+  {
+    "id": "sierra_agent",
+    "name": "Sierra Agents",
+    "region": "global",
+    "roles": [
+      "fde",
+      "ai"
+    ],
+    "pay": "$140–$190k",
+    "desc": "Enterprise AI agent deployment and conversational workflows.",
+    "apply": "https://jobs.ashbyhq.com/sierra",
+    "dsa": false
+  },
+  {
+    "id": "decagon_support",
+    "name": "Decagon Support AI",
+    "region": "global",
+    "roles": [
+      "fde",
+      "ai",
+      "se"
+    ],
+    "pay": "$130–$180k",
+    "desc": "Autonomous customer engineering & multi-agent systems.",
+    "apply": "https://jobs.ashbyhq.com/decagon",
+    "dsa": false
+  },
+  {
+    "id": "harvey_legal",
+    "name": "Harvey Platform",
+    "region": "global",
+    "roles": [
+      "fde",
+      "ai"
+    ],
+    "pay": "$140–$190k",
+    "desc": "Enterprise knowledge graphs, RAG & domain LLMs.",
+    "apply": "https://jobs.ashbyhq.com/harvey",
+    "dsa": false
+  },
+  {
+    "id": "cognition_devin",
+    "name": "Cognition Devin",
+    "region": "global",
+    "roles": [
+      "fde",
+      "ai"
+    ],
+    "pay": "$140–$200k",
+    "desc": "Autonomous AI software engineer deployment.",
+    "apply": "https://jobs.ashbyhq.com/cognition",
+    "dsa": false
+  },
+  {
+    "id": "replit_agents",
+    "name": "Replit Core",
+    "region": "global",
+    "roles": [
+      "fde",
+      "ai",
+      "fs"
+    ],
+    "pay": "$130–$180k",
+    "desc": "Cloud computing & AI agent orchestration environments.",
+    "apply": "https://jobs.ashbyhq.com/replit",
+    "dsa": false
+  },
+  {
+    "id": "langchain_graph",
+    "name": "LangGraph",
+    "region": "global",
+    "roles": [
+      "ai",
+      "fde"
+    ],
+    "pay": "$130–$175k",
+    "desc": "Cyclic multi-agent architecture and production workflows.",
+    "apply": "https://jobs.ashbyhq.com/langchain",
+    "dsa": false
+  },
+  {
+    "id": "llamaindex_ai",
+    "name": "LlamaIndex Platform",
+    "region": "global",
+    "roles": [
+      "ai",
+      "fde"
+    ],
+    "pay": "$130–$175k",
+    "desc": "Context augmentation and structured data retrieval for LLMs.",
+    "apply": "https://jobs.ashbyhq.com/llamaindex",
+    "dsa": false
+  },
+  {
+    "id": "tavily_search",
+    "name": "Tavily AI Search",
+    "region": "global",
+    "roles": [
+      "fde",
+      "ai"
+    ],
+    "pay": "$130–$175k",
+    "desc": "Real-time factual research API for autonomous agents.",
+    "apply": "https://jobs.ashbyhq.com/tavily",
+    "dsa": false
+  },
+  {
+    "id": "unstructured_rag",
+    "name": "Unstructured Data",
+    "region": "global",
+    "roles": [
+      "ai",
+      "fde",
+      "fs"
+    ],
+    "pay": "$125–$170k",
+    "desc": "Document ingestion & ETL for multimodal enterprise AI.",
+    "apply": "https://jobs.ashbyhq.com/unstructured",
+    "dsa": false
+  },
+  {
+    "id": "baseten_infra",
+    "name": "Baseten Cloud",
+    "region": "global",
+    "roles": [
+      "ai",
+      "se",
+      "fde"
+    ],
+    "pay": "$135–$185k",
+    "desc": "Serverless inference for open-source AI models.",
+    "apply": "https://jobs.ashbyhq.com/baseten",
+    "dsa": false
+  },
+  {
+    "id": "posthog_app",
+    "name": "PostHog Platform",
+    "region": "global",
+    "roles": [
+      "fs",
+      "ai"
+    ],
+    "pay": "$120–$160k",
+    "desc": "Product analytics, session replays, and LLM telemetry.",
+    "apply": "https://jobs.ashbyhq.com/posthog",
+    "dsa": false
+  },
+  {
+    "id": "supabase_db",
+    "name": "Supabase Platform",
+    "region": "global",
+    "roles": [
+      "fs",
+      "ai"
+    ],
+    "pay": "$120–$160k",
+    "desc": "PostgreSQL, Realtime, Auth, Storage, Edge Functions & pgvector.",
+    "apply": "https://jobs.ashbyhq.com/supabase",
+    "dsa": false
+  },
+  {
+    "id": "vercel_cloud",
+    "name": "Vercel AI Cloud",
+    "region": "global",
+    "roles": [
+      "fs",
+      "ai"
+    ],
+    "pay": "$130–$175k",
+    "desc": "Frontend cloud, AI SDK, and serverless compute infrastructure.",
+    "apply": "https://boards.greenhouse.io/vercel",
+    "dsa": false
+  },
+  {
+    "id": "sentry_telemetry",
+    "name": "Sentry Observability",
+    "region": "global",
+    "roles": [
+      "fs",
+      "se"
+    ],
+    "pay": "$120–$165k",
+    "desc": "Error monitoring, tracing, and OpenTelemetry instrumentation.",
+    "apply": "https://jobs.ashbyhq.com/sentry",
+    "dsa": false
+  },
+  {
+    "id": "modal_serverless",
+    "name": "Modal Compute",
+    "region": "global",
+    "roles": [
+      "ai",
+      "fs"
+    ],
+    "pay": "$140–$185k",
+    "desc": "Serverless Python infrastructure for AI/ML workloads.",
+    "apply": "https://jobs.ashbyhq.com/modal",
+    "dsa": false
+  },
+  {
+    "id": "neon_postgres",
+    "name": "Neon Serverless",
+    "region": "global",
+    "roles": [
+      "fs",
+      "se"
+    ],
+    "pay": "$120–$160k",
+    "desc": "Cloud-native serverless PostgreSQL architecture.",
+    "apply": "https://jobs.lever.co/neon",
+    "dsa": false
+  }
+]

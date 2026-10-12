@@ -1,0 +1,963 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Siddhant's Job Search OS</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+:root{--bg:#0f1117;--s1:#181c27;--s2:#1e2335;--bd:#2a3050;--ac:#4f8ef7;--g:#38d9a9;--y:#f7c948;--r:#ff6b6b;--p:#b57bee;--t:#e8eaf0;--t2:#8892b0;--t3:#4a5578;font-size:14px}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);min-height:100vh;line-height:1.5}
+/* HEADER */
+.hdr{padding:14px 20px;border-bottom:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:var(--bg);z-index:90}
+.hdr h1{font-size:16px;font-weight:700}.hdr p{font-size:11px;color:var(--t2);margin-top:1px}
+.stats{display:flex;gap:18px}.stat-n{font-size:18px;font-weight:700;color:var(--ac);font-family:'JetBrains Mono',monospace;text-align:center}
+.stat-l{font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:.5px;text-align:center}
+/* TABS */
+.tabs{display:flex;gap:2px;padding:10px 20px 0;border-bottom:1px solid var(--bd);overflow-x:auto}
+.tab{padding:7px 14px;border-radius:6px 6px 0 0;cursor:pointer;font-size:12px;font-weight:500;color:var(--t2);border:1px solid transparent;border-bottom:none;white-space:nowrap;transition:all .15s}
+.tab:hover{color:var(--t);background:var(--s1)}.tab.active{color:var(--ac);background:var(--s1);border-color:var(--bd)}
+/* MAIN */
+.main{padding:16px 20px}.sec{display:none}.sec.active{display:block}
+.sec-title{font-size:15px;font-weight:700;margin-bottom:3px}.sec-sub{font-size:12px;color:var(--t2);margin-bottom:14px}
+/* CARDS */
+.card{background:var(--s1);border:1px solid var(--bd);border-radius:10px;padding:14px;margin-bottom:10px}
+.card:hover{border-color:var(--ac)}
+/* COMPANY GRID */
+.cgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:10px}
+.cc{background:var(--s1);border:1px solid var(--bd);border-radius:10px;padding:13px 14px;transition:border-color .15s}
+.cc:hover{border-color:var(--ac)}.cc.eu{border-left:3px solid var(--ac)}.cc.gulf{border-left:3px solid var(--g)}.cc.global{border-left:3px solid var(--p)}.cc.global_onsite{border-left:3px solid #a29bfe}.cc.in_remote{border-left:3px solid #ff9f43}.cc.blr_onsite{border-left:3px solid #ff7675}.cc.blr_hybrid{border-left:3px solid #00cec9}
+.cn{font-size:14px;font-weight:700}.rb{font-size:10px;font-weight:600;padding:2px 7px;border-radius:10px;text-transform:uppercase}
+.rb.eu{background:rgba(79,142,247,.15);color:var(--ac)}.rb.gulf{background:rgba(56,217,169,.15);color:var(--g)}.rb.global{background:rgba(181,123,238,.15);color:var(--p)}.rb.global_onsite{background:rgba(162,155,254,.15);color:#a29bfe}.rb.in_remote{background:rgba(255,159,67,.15);color:#ff9f43}.rb.blr_onsite{background:rgba(255,118,117,.15);color:#ff7675}.rb.blr_hybrid{background:rgba(0,206,201,.15);color:#00cec9}
+.rtag{display:inline-block;font-size:10px;padding:2px 6px;border-radius:4px;margin-right:3px;margin-bottom:3px;font-weight:500}
+.t-fde{background:rgba(247,201,72,.15);color:var(--y)}.t-ai{background:rgba(255,107,107,.15);color:var(--r)}
+.t-fs{background:rgba(79,209,197,.15);color:#4fd1c5}.t-se{background:rgba(181,123,238,.15);color:var(--p)}
+.ndsa{font-size:10px;padding:2px 6px;border-radius:4px;background:rgba(56,217,169,.1);color:var(--g);font-weight:600}
+.cdesc{font-size:12px;color:var(--t2);margin:6px 0;line-height:1.5}
+.pay{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;color:var(--g);background:rgba(56,217,169,.1);padding:2px 7px;border-radius:4px}
+.btn{font-size:11px;padding:4px 10px;border-radius:5px;border:1px solid var(--bd);background:var(--s2);color:var(--t2);cursor:pointer;font-family:inherit;text-decoration:none;display:inline-flex;align-items:center;gap:4px;transition:all .15s}
+.btn:hover{border-color:var(--ac);color:var(--ac)}.btn.pri{border-color:var(--ac);color:var(--ac);background:rgba(79,142,247,.1)}
+.btn.grn{border-color:var(--g);color:var(--g);background:rgba(56,217,169,.1)}
+/* FILTERS */
+.filters{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap;align-items:center}
+.fb{padding:4px 11px;border-radius:20px;border:1px solid var(--bd);background:var(--s1);color:var(--t2);font-size:11px;cursor:pointer;transition:all .15s;font-family:inherit}
+.fb.active,.fb:hover{border-color:var(--ac);color:var(--ac);background:rgba(79,142,247,.1)}
+/* PIPELINE */
+.pipe-table{width:100%;border-collapse:collapse;font-size:12px}
+.pipe-table th{text-align:left;padding:8px 10px;color:var(--t3);font-size:10px;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--bd);font-weight:600}
+.pipe-table td{padding:9px 10px;border-bottom:1px solid var(--bd);vertical-align:middle}
+.pipe-table tr:hover td{background:rgba(255,255,255,.02)}
+.stage{font-size:10px;font-weight:600;padding:2px 8px;border-radius:10px;white-space:nowrap}
+.s-new{background:rgba(79,142,247,.15);color:var(--ac)}.s-net{background:rgba(247,201,72,.15);color:var(--y)}
+.s-call{background:rgba(181,123,238,.15);color:var(--p)}.s-win{background:rgba(56,217,169,.15);color:var(--g)}
+.s-int{background:rgba(255,107,107,.15);color:var(--r)}.s-off{background:rgba(56,217,169,.3);color:#fff}
+.s-fail{background:rgba(74,85,120,.3);color:var(--t3)}
+/* SCRIPTS */
+.stitle{font-size:13px;font-weight:600;color:var(--ac);margin-bottom:6px}
+.sbody{font-size:12px;color:var(--t2);line-height:1.7;background:var(--s2);border-radius:6px;padding:11px;border-left:3px solid var(--ac);white-space:pre-wrap;margin-bottom:6px}
+.step-flow{display:grid;grid-template-columns:repeat(5,1fr);gap:0;margin-bottom:18px;border:1px solid var(--bd);border-radius:10px;overflow:hidden}
+.step-box{background:var(--s1);padding:11px;text-align:center;border-right:1px solid var(--bd)}.step-box:last-child{border-right:none}
+/* RESUME */
+.res-block{background:var(--s2);border:1px solid var(--bd);border-radius:8px;padding:14px;margin-bottom:10px;white-space:pre-wrap;font-size:12px;color:var(--t2);line-height:1.7;max-height:300px;overflow-y:auto}
+/* MODAL */
+.modal{display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.7);align-items:center;justify-content:center;padding:16px}
+.modal-box{background:var(--s1);border:1px solid var(--bd);border-radius:14px;width:100%;max-width:580px;max-height:88vh;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,.6)}
+.modal-hdr{display:flex;justify-content:space-between;align-items:center;padding:14px 18px;border-bottom:1px solid var(--bd);flex-shrink:0}
+.modal-body{overflow-y:auto;padding:16px 18px;flex:1}
+.modal-title{font-size:14px;font-weight:700}.modal-sub{font-size:11px;color:var(--t3);margin-top:2px}
+.xbtn{background:none;border:1px solid var(--bd);color:var(--t2);font-size:14px;cursor:pointer;width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+/* FORM */
+.form-row{display:flex;flex-direction:column;gap:4px;margin-bottom:12px}
+.form-row label{font-size:11px;color:var(--t3);font-weight:600;text-transform:uppercase;letter-spacing:.4px}
+.form-row input,.form-row select,.form-row textarea{background:var(--s2);border:1px solid var(--bd);border-radius:6px;padding:8px 10px;color:var(--t);font-size:12px;font-family:inherit;outline:none;transition:border-color .15s}
+.form-row input:focus,.form-row select:focus,.form-row textarea:focus{border-color:var(--ac)}
+.form-row textarea{resize:vertical;min-height:70px}
+/* NET MODAL */
+.net-item{background:var(--s2);border:1px solid var(--bd);border-radius:8px;padding:12px;margin-bottom:8px}
+.net-label{font-size:13px;font-weight:700;color:var(--t)}.net-sub{font-size:11px;color:var(--t3);margin-top:1px}
+.msg-box{font-size:12px;color:var(--t2);background:var(--bg);border:1px solid var(--bd);border-radius:6px;padding:9px;line-height:1.6;white-space:pre-wrap;margin-top:8px}
+/* TRACKER */
+.track-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:600px){.track-grid{grid-template-columns:1fr}.cgrid{grid-template-columns:1fr}}
+.trow{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--bd);font-size:12px}
+.trow:last-child{border-bottom:none}
+.cl{list-style:none}.cl li{display:flex;align-items:flex-start;gap:8px;padding:6px 0;border-bottom:1px solid var(--bd);font-size:12px;color:var(--t2)}.cl li:last-child{border-bottom:none}
+.dot{width:15px;height:15px;border-radius:50%;border:1.5px solid var(--bd);flex-shrink:0;margin-top:1px;cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center}
+.dot.done{background:var(--g);border-color:var(--g)}.dot.done::after{content:'✓';font-size:8px;color:#0f1117;font-weight:700}
+/* BOOL */
+.bool-card{background:var(--s1);border:1px solid var(--bd);border-radius:10px;padding:14px;margin-bottom:10px}
+.bool-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--t3);margin-bottom:7px}
+.bool-text{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--g);background:var(--s2);border-radius:6px;padding:9px 11px;line-height:1.6;word-break:break-all}
+input[type=text],input[type=url]{width:100%}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div><h1>🎯 Siddhant's Job Search OS</h1><p>Senior Full-Stack · AI Engineer · Forward Deployed · Global Remote</p></div>
+  <div class="stats">
+    <div><div class="stat-n" id="statTotal">45</div><div class="stat-l">Companies</div></div>
+    <div><div class="stat-n" style="color:var(--y)" id="statActive">0</div><div class="stat-l">In Progress</div></div>
+    <div><div class="stat-n" style="color:var(--g)" id="statInterviews">0</div><div class="stat-l">Interviews</div></div>
+    <div><div class="stat-n" style="color:var(--r)" id="statOffers">0</div><div class="stat-l">Offers</div></div>
+  </div>
+</div>
+
+<div class="tabs">
+  <div class="tab active" onclick="showTab('companies',this)">🏢 Companies</div>
+  <div class="tab" onclick="showTab('pipeline',this)">📊 Pipeline</div>
+  <div class="tab" onclick="showTab('outreach',this)">🚀 Outreach System</div>
+  <div class="tab" onclick="showTab('resume',this)">📄 Resume</div>
+  <div class="tab" onclick="showTab('search',this)">🔍 Job Search</div>
+  <div class="tab" onclick="showTab('daily',this)">📅 Daily System</div>
+</div>
+
+<div class="main">
+
+<!-- COMPANIES -->
+<div class="sec active" id="companies">
+  <div class="sec-title">Target Companies</div>
+  <div class="sec-sub">45 pre-loaded · No DSA/LeetCode · Click + Add Company to track any new one</div>
+  <div class="filters">
+    <span style="font-size:11px;color:var(--t3)">Filter:</span>
+    <button class="fb active" onclick="filterC('all',this)">All</button>
+    <button class="fb" onclick="filterC('eu',this)">🇪🇺 Europe</button>
+    <button class="fb" onclick="filterC('gulf',this)">🌙 Gulf</button>
+    <button class="fb" onclick="filterC('global',this)">🌐 Global Remote</button>
+    <button class="fb" onclick="filterC('in',this)">🇮🇳 India / BLR</button>
+    <button class="fb" onclick="filterC('fde',this)">⚡ FDE</button>
+    <button class="fb" onclick="filterC('ai',this)">🤖 AI Eng</button>
+    <button class="btn grn" onclick="openAddModal()" style="margin-left:auto">+ Add Company</button>
+  </div>
+  <div class="cgrid" id="cgrid"></div>
+</div>
+
+<!-- PIPELINE -->
+<div class="sec" id="pipeline">
+  <div class="sec-title">Application Pipeline</div>
+  <div class="sec-sub">Track every company — connections, messages, WIN docs, interviews, offers. Click any row to update.</div>
+  <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">
+    <button class="btn pri" onclick="openAddModal()">+ Add Company</button>
+    <select id="pipeFilter" onchange="renderPipeline()" style="background:var(--s2);border:1px solid var(--bd);border-radius:6px;padding:5px 10px;color:var(--t);font-size:12px;font-family:inherit">
+      <option value="all">All Stages</option>
+      <option value="new">New</option>
+      <option value="networking">Networking</option>
+      <option value="call">Call Scheduled</option>
+      <option value="win">WIN Doc Sent</option>
+      <option value="interview">Interview</option>
+      <option value="offer">Offer</option>
+      <option value="failed">Closed</option>
+    </select>
+  </div>
+  <div style="overflow-x:auto">
+    <table class="pipe-table">
+      <thead><tr>
+        <th>Company</th><th>Role Target</th><th>Stage</th>
+        <th>Connections</th><th>Messages</th><th>WIN Doc</th><th>Notes</th><th></th>
+      </tr></thead>
+      <tbody id="pipeBody"></tbody>
+    </table>
+    <div id="pipeEmpty" style="text-align:center;padding:40px;color:var(--t3);display:none">
+      No companies tracked yet. Click a company card and hit "Track" to start.
+    </div>
+  </div>
+</div>
+
+<!-- OUTREACH -->
+<div class="sec" id="outreach">
+  <div class="sec-title">Outreach System — The NxtJob Method</div>
+  <div class="sec-sub">Research first. Curiosity hook. 15-min call. WIN document. That's the sequence.</div>
+
+  <div class="step-flow">
+    <div class="step-box"><div style="font-size:18px;margin-bottom:3px">🔍</div><div style="font-size:10px;font-weight:700;color:var(--ac)">STEP 1</div><div style="font-size:10px;color:var(--t2);margin-top:3px">Research problems with AI</div></div>
+    <div class="step-box"><div style="font-size:18px;margin-bottom:3px">💬</div><div style="font-size:10px;font-weight:700;color:var(--ac)">STEP 2</div><div style="font-size:10px;color:var(--t2);margin-top:3px">Curiosity hook message</div></div>
+    <div class="step-box"><div style="font-size:18px;margin-bottom:3px">📞</div><div style="font-size:10px;font-weight:700;color:var(--ac)">STEP 3</div><div style="font-size:10px;color:var(--t2);margin-top:3px">15-min validation call</div></div>
+    <div class="step-box"><div style="font-size:18px;margin-bottom:3px">📊</div><div style="font-size:10px;font-weight:700;color:var(--ac)">STEP 4</div><div style="font-size:10px;color:var(--t2);margin-top:3px">Build & send WIN doc</div></div>
+    <div class="step-box"><div style="font-size:18px;margin-bottom:3px">🎯</div><div style="font-size:10px;font-weight:700;color:var(--g)">RESULT</div><div style="font-size:10px;color:var(--t2);margin-top:3px">Interview / referral</div></div>
+  </div>
+
+  <div class="card">
+    <div class="stitle">STEP 1 — Research Prompt (paste into Claude before contacting anyone)</div>
+    <div class="sbody">I want to reach out to [Engineering Manager / CTO] at [COMPANY]. Research them thoroughly — website, blog, recent news, job postings, Glassdoor.
+
+Identify 3–5 pressing technical challenges they face RIGHT NOW in engineering, AI, or product delivery.
+
+For each: (1) The challenge — specific not generic. (2) Evidence with source + date. (3) One sharp insight I can use to start a conversation.
+
+Then give me a one-line curiosity hook for a LinkedIn DM — something referencing a real problem that makes them want to reply. NOT a job application tone. A peer who noticed something interesting.</div>
+    <button class="btn" onclick="copyP(this)">Copy Prompt</button>
+  </div>
+
+  <div class="card">
+    <div class="stitle">STEP 2A — Connection Request (300 chars max — send FIRST)</div>
+    <div class="sbody">Hi [Name] — I came across [Company]'s work on [specific thing from research]. I have an interesting perspective on [the problem area]. Would love to connect.</div>
+    <button class="btn" onclick="copyP(this)">Copy</button>
+  </div>
+
+  <div class="card">
+    <div class="stitle">STEP 2B — First DM after they accept (within 24hrs)</div>
+    <div class="sbody">Hi [Name], thanks for connecting.
+
+I was going through [specific article/blog/job posting] and noticed [Company] seems to be focused on [specific challenge]. I've spent the last few years working on exactly this — at Philips I built real-time Kafka pipelines for clinical data at sub-second latency, and recently I architected a multi-agent AI platform with LLM failover and 12+ external integrations.
+
+Is [specific challenge] something your team is actively working through? Would love to hear your perspective — happy to jump on a 15-minute call if useful.</div>
+    <button class="btn" onclick="copyP(this)">Copy</button>
+  </div>
+
+  <div class="card">
+    <div class="stitle">STEP 2C — Peer / Referral DM (Indian engineers at target company)</div>
+    <div class="sbody">Hi [Name], I came across your profile while researching [Company]'s engineering team — [genuine observation about their work].
+
+I'm a senior full-stack + AI engineer from Mumbai (ex-Philips Innovation Campus, 12 years) exploring global roles. [Company] is high on my list. Would love to hear about your experience there — what the engineering culture is like, what kind of problems the team is solving.
+
+Open to a 15-minute chat? No agenda, genuinely just want to learn from someone on the inside.</div>
+    <button class="btn" onclick="copyP(this)">Copy</button>
+  </div>
+
+  <div class="card">
+    <div class="stitle">STEP 2D — Follow-up Day 4 (if no reply — ONE follow-up only)</div>
+    <div class="sbody">Hi [Name] — following up on my message from [day].
+
+Came across [another specific article/news about Company] since then — [one new observation that adds value].
+
+Still curious about your take on [the challenge]. Happy to keep it to 10 minutes — whatever works for you.</div>
+    <button class="btn" onclick="copyP(this)">Copy</button>
+  </div>
+
+  <div class="card">
+    <div class="stitle">STEP 3 — The 15-Min Call Script</div>
+    <div class="sbody">OPENING: "Thanks for the time. I'll keep this to 15 min. I've been researching [Company] and had hypotheses about [area] — wanted to validate them with someone on the inside."
+
+QUESTIONS (pick 2–3):
+→ "It looks like [challenge from research] — is that something your team is actively working on?"
+→ "What's the biggest technical problem you're solving in the next 6 months?"
+→ "What engineer profile is hardest to hire for right now?"
+→ "If you were building your ideal candidate, what must they have?"
+→ "Are there any internal roles not posted yet that might be relevant?"
+
+CLOSING: "This was really insightful. Based on what you shared about [problem], I'd love to put together a quick 2-page doc with thoughts on how I'd approach it. Can I send that across?"
+
+NOTES AFTER CALL — write immediately:
+• 2–3 real problems they confirmed (in their exact words)
+• Whether a role exists or is upcoming
+• Who else to talk to</div>
+    <button class="btn" onclick="copyP(this)">Copy</button>
+  </div>
+
+  <div class="card">
+    <div class="stitle">STEP 4 — WIN Document Builder Prompt (paste into Claude after your call)</div>
+    <div class="sbody">I spoke to [Name], [Title] at [Company]. They confirmed:
+PROBLEM 1: [their exact words]
+PROBLEM 2: [their exact words]
+PROBLEM 3: [their exact words]
+
+My background:
+- Philips: real-time Kafka→AWS S3 patient monitoring (70% load reduction, sub-second latency, 30-40% MTTR improvement)
+- MyAgentFirm: multi-tenant AI agent platform — 24 API routes, 6 async workers, LLM failover (DeepInfra→Groq→Together AI), 12+ integrations
+- Growlogic/Eeko.ai: Azure AKS microservices (6 Spring Boot services, WhatsApp API, ArgoCD GitOps)
+- Stack: Java Spring Boot, Node.js/Fastify, React, Python, Docker, Kubernetes, Kafka, PostgreSQL, LangChain, RAG, MCP
+
+Build a 2-page WIN document:
+1. THEIR 3 PROBLEMS — clearly stated with evidence
+2. MY SOLUTIONS — consultant-grade, specific and actionable per problem
+3. WHY ME — which of my real projects proves I can solve each (CAR format: Challenge→Action→Result)
+4. 30-DAY PLAN — what I do in my first month
+5. CLOSING — one sentence inviting a follow-up call
+
+Tone: consultant presenting a proposal, not a job seeker. Format for slide deck export.</div>
+    <button class="btn" onclick="copyP(this)">Copy Prompt</button>
+  </div>
+
+  <div class="card">
+    <div class="stitle">STEP 4B — Send WIN Doc Message</div>
+    <div class="sbody">Hi [Name], really enjoyed our conversation on [day].
+
+Based on what you shared about [specific problem], I put together a short 2-page doc with thoughts on how I'd approach it — and how my experience maps directly to what you're solving.
+
+Happy to walk you through it on a quick call, or feel free to share it with whoever's relevant.
+
+[Attach WIN doc as PDF]</div>
+    <button class="btn" onclick="copyP(this)">Copy</button>
+  </div>
+
+  <div class="card">
+    <div class="stitle">LinkedIn "Open to Work" Post — Publish Today</div>
+    <div class="sbody">I built a multi-agent AI platform from scratch over the last 6 months.
+
+24 API routes. 6 async workers. LLM failover across 3 providers. Meta Ads automation, Twilio voice calls, WhatsApp, brand kit generation — all in one platform.
+
+Before that: real-time patient monitoring at Philips. Sub-second latency. Kafka + AWS. 70% load reduction. 30–40% MTTR improvement.
+
+Now I'm looking for my next challenge.
+
+Senior Full-Stack + AI Engineer · 12+ years · Immediately available
+→ Forward Deployed Engineer
+→ Senior AI / Applied AI Engineer
+→ Staff Full-Stack Engineer
+
+Remote-first. Open to EU, Gulf, global.
+
+If you're building something interesting or know someone who is — let's talk.
+
+#OpenToWork #AIEngineer #FullStackEngineer #ForwardDeployedEngineer #LLM #MultiAgent</div>
+    <button class="btn" onclick="copyP(this)">Copy</button>
+  </div>
+
+  <div class="card">
+    <div class="stitle">Interview — Gap Answer (40 seconds, confident, no apology)</div>
+    <div class="sbody">After Philips I took a deliberate two-month break — got married, travelled, reset. Then I took a freelance architecture engagement with Growlogic, designing and delivering their full Azure AKS microservices platform for their AI SaaS product.
+
+After that engagement ended, I spent a year building three production software products independently — going deep on LLM engineering, multi-agent systems, and full product ownership from architecture to deployment.
+
+Now with family settled and a year of intensive AI engineering behind me, I'm ready to bring all of that into a senior role at scale. The time building solo made me stronger — I own every layer, ship in production, and know what it takes to make AI work in the real world, not just demos.</div>
+    <button class="btn" onclick="copyP(this)">Copy</button>
+  </div>
+</div>
+
+<!-- RESUME -->
+<div class="sec" id="resume">
+  <div class="sec-title">Resume Hub</div>
+  <div class="sec-sub">Your master resume + tailored resume generator. Paste a JD below to get a tailored version.</div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+    <div>
+      <div class="card" style="margin-bottom:0">
+        <div class="stitle" style="margin-bottom:8px">📄 Master Resume Summary</div>
+        <div style="font-size:12px;color:var(--t2);line-height:1.7">
+          <div style="margin-bottom:6px"><span style="color:var(--ac);font-weight:600">Name:</span> Siddhant Rangari</div>
+          <div style="margin-bottom:6px"><span style="color:var(--ac);font-weight:600">Title:</span> Senior Full-Stack Engineer · AI/Agent Platform Builder · Forward Deployed Engineer</div>
+          <div style="margin-bottom:6px"><span style="color:var(--ac);font-weight:600">Contact:</span> siddhantrangari@gmail.com · siddhantrangari.com · Mumbai · Open to relocation</div>
+          <div style="margin-bottom:10px"><span style="color:var(--ac);font-weight:600">Stack:</span> Java Spring Boot · Node.js/Fastify · React 18 · Python · TypeScript · LangChain · RAG · MCP · Docker · Kubernetes · Kafka · PostgreSQL · Redis · AWS · Azure</div>
+          <div style="font-size:11px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px">Timeline</div>
+          <div style="font-size:11px;line-height:1.9;color:var(--t2)">
+            <div>Sep 2021–Feb 2024 · <span style="color:var(--t)">Philips Innovation Campus</span> — Full-Stack Engineer</div>
+            <div>Feb–Apr 2024 · <span style="color:var(--t3)">Career Break</span> — Travel & personal</div>
+            <div>Apr 2024–Jul 2025 · <span style="color:var(--t)">Growlogic/Eeko.ai</span> — Freelance Solutions Architect</div>
+            <div>Aug–Sep 2025 · <span style="color:var(--t)">ChalOnline</span> — Independent project</div>
+            <div>Oct 2025–Feb 2026 · <span style="color:var(--t)">TradingOS</span> — Independent project</div>
+            <div>Mar–Aug 2026 · <span style="color:var(--t)">MyAgentFirm</span> — Independent project</div>
+            <div>Sep 2026 · <span style="color:var(--g)">Actively job hunting</span></div>
+          </div>
+        </div>
+        <div style="margin-top:12px;display:flex;gap:6px;flex-wrap:wrap">
+          <a href="https://claude.ai" target="_blank" class="btn pri">📥 Download Resume (ask Claude)</a>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="card" style="margin-bottom:0">
+        <div class="stitle" style="margin-bottom:8px">✂️ Tailored Resume Generator</div>
+        <div style="font-size:11px;color:var(--t3);margin-bottom:10px">Paste a JD below → copy the prompt → paste into Claude → get a tailored resume in 30 seconds</div>
+        <div class="form-row">
+          <label>Company Name</label>
+          <input type="text" id="tailorCompany" placeholder="e.g. Palantir">
+        </div>
+        <div class="form-row">
+          <label>Role Title</label>
+          <input type="text" id="tailorRole" placeholder="e.g. Forward Deployed Engineer">
+        </div>
+        <div class="form-row">
+          <label>Job Description (paste full JD)</label>
+          <textarea id="tailorJD" rows="5" placeholder="Paste the full job description here..."></textarea>
+        </div>
+        <button class="btn pri" onclick="genTailorPrompt()" style="width:100%;justify-content:center;padding:8px">Generate Tailored Resume Prompt</button>
+        <div id="tailorOut" style="display:none;margin-top:10px">
+          <div style="font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:.4px;margin-bottom:5px">Copy this prompt → paste into Claude:</div>
+          <div id="tailorText" class="sbody" style="max-height:200px;overflow-y:auto"></div>
+          <button class="btn grn" onclick="copyTailor()" style="margin-top:6px">Copy Prompt</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:14px">
+    <div class="stitle" style="margin-bottom:8px">🏆 Key Achievement Bank (use in interviews + WIN docs)</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:12px">
+      <div style="background:var(--s2);border-radius:6px;padding:10px;border-left:3px solid var(--ac)">
+        <div style="font-weight:600;color:var(--t);margin-bottom:4px">Philips — Patient Dashboard</div>
+        <div style="color:var(--t2);line-height:1.6">Kafka→AWS S3 pipeline · 70% load reduction · Sub-second latency · 98% API efficiency improvement · 30-40% MTTR reduction · Mentored 5+ devs · 20% delivery improvement</div>
+      </div>
+      <div style="background:var(--s2);border-radius:6px;padding:10px;border-left:3px solid var(--r)">
+        <div style="font-weight:600;color:var(--t);margin-bottom:4px">MyAgentFirm — AI Agent Platform</div>
+        <div style="color:var(--t2);line-height:1.6">24 API routes · 6 async workers · LLM failover (3 providers) · 12+ integrations · 23 DB migrations · MCP integration · Atomic credit ledger · Full solo build</div>
+      </div>
+      <div style="background:var(--s2);border-radius:6px;padding:10px;border-left:3px solid var(--g)">
+        <div style="font-weight:600;color:var(--t);margin-bottom:4px">Growlogic/Eeko.ai — Azure AKS</div>
+        <div style="color:var(--t2);line-height:1.6">6 Spring Boot microservices · Azure AKS deployment · ArgoCD GitOps · WhatsApp Business API · Spring Batch scheduler · Zero-downtime rollouts</div>
+      </div>
+      <div style="background:var(--s2);border-radius:6px;padding:10px;border-left:3px solid var(--y)">
+        <div style="font-weight:600;color:var(--t);margin-bottom:4px">TradingOS — Full Platform</div>
+        <div style="color:var(--t2);line-height:1.6">TimescaleDB market data pipeline · Custom backtesting engine · SVG drawing tools · LLaMA 3 AI coach with live context · 10-module platform · Gamification XP system</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- JOB SEARCH -->
+<div class="sec" id="search">
+  <div class="sec-title">Job Search — Boolean Strings</div>
+  <div class="sec-sub">Copy → paste into Google → find jobs on ATS boards before they appear on LinkedIn.</div>
+  <div class="bool-card"><div class="bool-label">Forward Deployed Engineer — Global Remote</div>
+    <div class="bool-text">(site:greenhouse.io OR site:lever.co OR site:ashbyhq.com OR site:jobs.ashbyhq.com) ("forward deployed engineer" OR "forward deployed software engineer") (remote OR EMEA OR Europe OR UAE)</div>
+    <button class="btn" style="margin-top:8px" onclick="copyP(this)">Copy & Google</button></div>
+  <div class="bool-card"><div class="bool-label">AI / LLM Engineer — EU + Gulf</div>
+    <div class="bool-text">(site:greenhouse.io OR site:lever.co OR site:ashbyhq.com OR site:workable.com) ("AI engineer" OR "LLM engineer" OR "applied AI engineer" OR "AI platform engineer") (remote OR Europe OR UAE OR Germany OR Dubai)</div>
+    <button class="btn" style="margin-top:8px" onclick="copyP(this)">Copy & Google</button></div>
+  <div class="bool-card"><div class="bool-label">Solutions Engineer — EU Remote</div>
+    <div class="bool-text">(site:greenhouse.io OR site:lever.co OR site:ashbyhq.com) ("solutions engineer" OR "technical solutions engineer") ("LLM" OR "AI" OR "agent" OR "Spring Boot" OR "Node.js") (remote OR Europe OR EMEA)</div>
+    <button class="btn" style="margin-top:8px" onclick="copyP(this)">Copy & Google</button></div>
+  <div class="bool-card"><div class="bool-label">Senior Full-Stack + AI Platform — Remote</div>
+    <div class="bool-text">(site:greenhouse.io OR site:lever.co OR site:ashbyhq.com) ("senior full stack engineer" OR "senior software engineer") ("LLM" OR "AI agent" OR "multi-agent" OR "RAG" OR "LangChain") (remote OR EMEA OR Europe)</div>
+    <button class="btn" style="margin-top:8px" onclick="copyP(this)">Copy & Google</button></div>
+  <div class="bool-card">
+    <div class="bool-label">Top Job Boards — Check Daily</div>
+    <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px">
+      <a href="https://www.fwddeploy.com/jobs" target="_blank" class="btn pri">fwddeploy.com — FDE jobs</a>
+      <a href="https://fdepulse.com/jobs/" target="_blank" class="btn pri">fdepulse.com</a>
+      <a href="https://wellfound.com/role/r/forward-deployed-engineer" target="_blank" class="btn">Wellfound FDE</a>
+      <a href="https://www.remoterocketship.com/country/europe/jobs/ai-engineer/" target="_blank" class="btn">RemoteRocketship EU AI</a>
+      <a href="https://nextleveljobs.eu/remote" target="_blank" class="btn">NextLevelJobs EU €100k+</a>
+      <a href="https://startup.jobs/roles/forward-deployed-engineer" target="_blank" class="btn">Startup.jobs FDE</a>
+      <a href="https://github.com/poteto/hiring-without-whiteboards" target="_blank" class="btn">No-Whiteboard List</a>
+    </div>
+  </div>
+</div>
+
+<!-- DAILY SYSTEM -->
+<div class="sec" id="daily">
+  <div class="sec-title">Daily Job Search System</div>
+  <div class="sec-sub">Run this every weekday. Volume + consistency = 5–8 calls/week within 2–3 weeks.</div>
+  <div class="track-grid">
+    <div class="card">
+      <div class="stitle" style="margin-bottom:10px">📊 Daily Targets</div>
+      <div class="trow"><span style="color:var(--t2)">LinkedIn connections sent</span><span style="font-family:'JetBrains Mono';font-weight:700;color:var(--ac)">50/day</span></div>
+      <div class="trow"><span style="color:var(--t2)">DMs to HMs / Peers</span><span style="font-family:'JetBrains Mono';font-weight:700;color:var(--ac)">10/day</span></div>
+      <div class="trow"><span style="color:var(--t2)">Job applications</span><span style="font-family:'JetBrains Mono';font-weight:700;color:var(--ac)">5/day</span></div>
+      <div class="trow"><span style="color:var(--t2)">LinkedIn posts</span><span style="font-family:'JetBrains Mono';font-weight:700;color:var(--ac)">1/day</span></div>
+      <div class="trow"><span style="color:var(--t2)">Referral asks</span><span style="font-family:'JetBrains Mono';font-weight:700;color:var(--ac)">3/day</span></div>
+      <div class="trow"><span style="color:var(--t2)">Target calls/week</span><span style="font-family:'JetBrains Mono';font-weight:700;color:var(--g)">5–8</span></div>
+    </div>
+    <div class="card">
+      <div class="stitle" style="margin-bottom:10px">✅ Today's Checklist</div>
+      <ul class="cl">
+        <li><span class="dot" onclick="this.classList.toggle('done')"></span>Send 50 connection requests to engineers/EMs at target companies</li>
+        <li><span class="dot" onclick="this.classList.toggle('done')"></span>Send 10 personalised DMs to hiring managers (use Outreach System tab)</li>
+        <li><span class="dot" onclick="this.classList.toggle('done')"></span>Apply to 5 roles — use Resume tab to tailor per JD</li>
+        <li><span class="dot" onclick="this.classList.toggle('done')"></span>Publish 1 LinkedIn post (AI insight, agent building, product story)</li>
+        <li><span class="dot" onclick="this.classList.toggle('done')"></span>Follow up on DMs sent 4 days ago (one follow-up per person)</li>
+        <li><span class="dot" onclick="this.classList.toggle('done')"></span>Research 2 new companies — read their engineering blog</li>
+        <li><span class="dot" onclick="this.classList.toggle('done')"></span>Prepare 1 WIN Document for a company you had a call with</li>
+      </ul>
+    </div>
+    <div class="card" style="grid-column:1/-1">
+      <div class="stitle" style="margin-bottom:10px">🎯 Who to Connect With on LinkedIn</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;font-size:12px">
+        <div><div style="font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px">People to target</div><ul class="cl"><li><span class="dot" onclick="this.classList.toggle('done')"></span>Engineering Managers at target companies</li><li><span class="dot" onclick="this.classList.toggle('done')"></span>CTOs / VPs Eng at Series B–D startups</li><li><span class="dot" onclick="this.classList.toggle('done')"></span>Technical Recruiters at EU/Gulf companies</li><li><span class="dot" onclick="this.classList.toggle('done')"></span>Indians working at EU/Gulf tech companies</li></ul></div>
+        <div><div style="font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px">LinkedIn search tips</div><ul class="cl"><li><span class="dot" onclick="this.classList.toggle('done')"></span>"Engineering Manager" + company name filter</li><li><span class="dot" onclick="this.classList.toggle('done')"></span>"Forward Deployed" — connect with all results</li><li><span class="dot" onclick="this.classList.toggle('done')"></span>Location: Germany/Netherlands/UAE + 2nd degree</li><li><span class="dot" onclick="this.classList.toggle('done')"></span>Philips/GE alumni — warm connections, easy referral asks</li></ul></div>
+        <div><div style="font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px">Content to post (rotate)</div><ul class="cl"><li><span class="dot" onclick="this.classList.toggle('done')"></span>How you built LLM failover routing in MyAgentFirm</li><li><span class="dot" onclick="this.classList.toggle('done')"></span>Lessons from building a multi-agent platform solo</li><li><span class="dot" onclick="this.classList.toggle('done')"></span>MCP integration patterns you discovered</li><li><span class="dot" onclick="this.classList.toggle('done')"></span>What Philips taught you about real-time data systems</li></ul></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /main -->
+
+<!-- NETWORK MODAL -->
+<div class="modal" id="netModal">
+  <div class="modal-box">
+    <div class="modal-hdr">
+      <div><div class="modal-title" id="netTitle"></div><div class="modal-sub">Open LinkedIn → find people → copy message → Connect</div></div>
+      <button class="xbtn" onclick="closeModal('netModal')">✕</button>
+    </div>
+    <div class="modal-body" id="netBody"></div>
+  </div>
+</div>
+
+<!-- ADD COMPANY MODAL -->
+<div class="modal" id="addModal">
+  <div class="modal-box">
+    <div class="modal-hdr">
+      <div><div class="modal-title">+ Add Company to Track</div><div class="modal-sub">Add any company not in the list</div></div>
+      <button class="xbtn" onclick="closeModal('addModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row"><label>Company Name *</label><input type="text" id="addName" placeholder="e.g. Stripe"></div>
+      <div class="form-row"><label>Region</label>
+        <select id="addRegion">
+          <option value="eu">🇪🇺 Europe</option>
+          <option value="gulf">🌙 Gulf / UAE</option>
+          <option value="global">🌐 Global Remote</option>
+          <option value="global_onsite">🏢 Global On-site</option>
+          <option value="in_remote">🇮🇳 India Remote</option>
+          <option value="blr_onsite">🏢 Bangalore Full time 5 days</option>
+          <option value="blr_hybrid">🏙️ Bangalore Hybrid</option>
+        </select>
+      </div>
+      <div class="form-row"><label>Target Role</label><input type="text" id="addRole" placeholder="e.g. Senior AI Engineer"></div>
+      <div class="form-row"><label>Apply / Career Page URL</label><input type="text" id="addUrl" placeholder="https://..."></div>
+      <div class="form-row"><label>Pay Range</label><input type="text" id="addPay" placeholder="e.g. €90–€130k"></div>
+      <div class="form-row"><label>Notes</label><textarea id="addNotes" placeholder="Why this company? What's interesting about them?"></textarea></div>
+      <button class="btn pri" onclick="addCompany()" style="width:100%;justify-content:center;padding:8px">Add & Track Company</button>
+    </div>
+  </div>
+</div>
+
+<!-- UPDATE PIPELINE MODAL -->
+<div class="modal" id="updateModal">
+  <div class="modal-box">
+    <div class="modal-hdr">
+      <div><div class="modal-title" id="updateTitle">Update Progress</div><div class="modal-sub">Track your activity for this company</div></div>
+      <button class="xbtn" onclick="closeModal('updateModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="updateId">
+      <div class="form-row"><label>Stage</label>
+        <select id="updateStage">
+          <option value="new">New — Added to list</option>
+          <option value="networking">Networking — Connected with people</option>
+          <option value="call">Call Scheduled / Had call</option>
+          <option value="win">WIN Doc Prepared & Sent</option>
+          <option value="interview">Interview Scheduled / In Progress</option>
+          <option value="offer">Offer Received 🎉</option>
+          <option value="failed">Closed — Not progressing</option>
+        </select>
+      </div>
+      <div class="form-row"><label>Connections Made (peers / HMs / HRs)</label><input type="text" id="updateConns" placeholder="e.g. 2 peers, 1 EM, 1 recruiter"></div>
+      <div class="form-row"><label>Messages / Discussions Sent</label><input type="text" id="updateMsgs" placeholder="e.g. 3 DMs sent, 1 replied"></div>
+      <div class="form-row"><label>WIN Document</label>
+        <select id="updateWin">
+          <option value="none">Not started</option>
+          <option value="researching">Researching company problems</option>
+          <option value="prepared">Prepared</option>
+          <option value="sent">Sent to HM</option>
+          <option value="discussed">Discussed on call</option>
+        </select>
+      </div>
+      <div class="form-row"><label>Role / JD URL</label><input type="text" id="updateJD" placeholder="https://..."></div>
+      <div class="form-row"><label>Notes (calls, feedback, next steps)</label><textarea id="updateNotes" rows="4" placeholder="What happened? What's next?"></textarea></div>
+      <div style="display:flex;gap:8px">
+        <button class="btn pri" onclick="saveUpdate()" style="flex:1;justify-content:center;padding:8px">Save Update</button>
+        <button class="btn" onclick="deleteTracked()" style="color:var(--r);border-color:var(--r)">Remove</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── DATA ──
+const COMPANIES = [
+  {id:'remote',name:'Remote.com',region:'global',roles:['fde'],pay:'$120–$160k',desc:'Hiring FDE (AI) to build AI-powered workflows. Your multi-tenant SaaS + MCP experience is a direct match.',apply:'https://job-boards.greenhouse.io/remotereferralboardinternaluseonly/jobs/7788661003'},
+  {id:'palantir',name:'Palantir Technologies',region:'eu',roles:['fde','ai'],pay:'€90–€140k',desc:'The original FDE company. EU offices in London, Munich, Paris. No LeetCode — they test problem solving and ownership.',apply:'https://jobs.lever.co/palantir'},
+  {id:'cohere',name:'Cohere',region:'global',roles:['fde','ai'],pay:'$130–$170k',desc:'Forward Deployed Engineer on Agentic Platform — enterprise LLM deployments. Your agent architecture + RAG is highly relevant.',apply:'https://www.linkedin.com/jobs/view/forward-deployed-engineer-agentic-platform-at-cohere-4418823250'},
+  {id:'glean',name:'Glean',region:'global',roles:['fde','ai'],pay:'$140–$180k',desc:'Enterprise AI search and agent platform. FDE roles deploying AI across large enterprises. Kafka + real-time + LLM background fits.',apply:'https://www.glean.com/careers'},
+  {id:'natera',name:'Natera',region:'global',roles:['fde'],pay:'$120–$160k',desc:'Staff Forward Deployed AI Solutions Engineer — LLM/agent platforms (LangChain, MCP, CrewAI). Exactly your stack.',apply:'https://job-boards.greenhouse.io/natera/jobs/6115020004'},
+  {id:'cresta',name:'Cresta',region:'global',roles:['ai','se'],pay:'$130–$165k',desc:'AI Solutions Engineer — Conversational AI agents. Your Twilio voice + multi-agent experience is directly applicable.',apply:'https://job-boards.greenhouse.io/cresta/jobs/5397262008'},
+  {id:'grafana',name:'Grafana Labs',region:'eu',roles:['fs','ai'],pay:'€85–€120k',desc:'Remote-first observability platform. Your Prometheus + Grafana + OpenTelemetry from Philips is a direct credential.',apply:'https://grafana.com/about/careers/'},
+  {id:'elastic',name:'Elastic',region:'eu',roles:['fs','se'],pay:'€90–€130k',desc:'Search + observability + AI platform. Remote EMEA. ELK stack + Java + distributed systems background is relevant.',apply:'https://www.elastic.co/about/careers'},
+  {id:'weaviate',name:'Weaviate',region:'eu',roles:['ai','se'],pay:'€80–€120k',desc:'Amsterdam-based vector database. AI Solutions Engineer — helping customers build RAG pipelines. Series B, fast-growing.',apply:'https://weaviate.io/company/careers'},
+  {id:'aiven',name:'Aiven',region:'eu',roles:['fs','se'],pay:'€85–€115k',desc:'Helsinki-based managed Kafka, PostgreSQL, Redis. Your exact stack as a service. Solutions Engineer roles.',apply:'https://aiven.io/careers'},
+  {id:'temporal',name:'Temporal.io',region:'eu',roles:['fs','ai'],pay:'€90–€130k',desc:'Workflow orchestration for distributed systems. Your async workers and background job systems experience is directly relevant.',apply:'https://temporal.io/careers'},
+  {id:'contentful',name:'Contentful',region:'eu',roles:['fs','se'],pay:'€80–€110k',desc:'Berlin-based headless CMS. Remote EMEA. Solutions Engineer roles — full stack with clients.',apply:'https://www.contentful.com/careers/'},
+  {id:'personio',name:'Personio',region:'eu',roles:['fs'],pay:'€85–€120k',desc:'Munich HR SaaS, Series E. Strong Java/Spring Boot culture. Home assignment + system design — no LeetCode.',apply:'https://www.personio.com/about-personio/careers/'},
+  {id:'adyen',name:'Adyen',region:'eu',roles:['fs'],pay:'€90–€130k',desc:'Amsterdam fintech. Full-stack Java. System design + take-home — no LeetCode. Very strong pay.',apply:'https://careers.adyen.com/'},
+  {id:'mollie',name:'Mollie',region:'eu',roles:['fs'],pay:'€80–€115k',desc:'Amsterdam payments. Strong Java backend culture. Practical coding + system design interview.',apply:'https://jobs.mollie.com/'},
+  {id:'messagebird',name:'MessageBird / Bird',region:'eu',roles:['fs','ai'],pay:'€85–€120k',desc:'Amsterdam comms platform (WhatsApp, SMS, email APIs). Your WhatsApp Business API + Twilio + notification pipeline is a direct match.',apply:'https://bird.com/careers'},
+  {id:'camunda',name:'Camunda',region:'eu',roles:['fs','se'],pay:'€80–€115k',desc:'Berlin process automation. Spring Boot microservices + async processing background fits. Remote-first.',apply:'https://camunda.com/about/careers/'},
+  {id:'n8n',name:'n8n',region:'eu',roles:['ai','fs'],pay:'€75–€110k',desc:'Berlin workflow automation (open-source). AI agent integrations, TypeScript/Node.js. Your automation pipeline work is relevant.',apply:'https://n8n.io/careers/'},
+  {id:'langchain',name:'LangChain',region:'global',roles:['ai','fde'],pay:'$130–$170k',desc:'The framework you use daily. FDE and Solutions Engineers help enterprises build agent applications. Hands-on LangChain + RAG + MCP is rare.',apply:'https://www.langchain.com/careers'},
+  {id:'humanloop',name:'Humanloop',region:'eu',roles:['ai','fde'],pay:'€90–€130k',desc:'London AI evaluation and prompt management. FDE roles helping enterprises build reliable LLM systems. Your LLM router experience is relevant.',apply:'https://humanloop.com/careers'},
+  {id:'wandb',name:'Weights & Biases',region:'global',roles:['ai','se'],pay:'$120–$160k',desc:'ML experiment tracking + AI platform. Your MLOps + observability (Prometheus/Grafana) + LLM background maps well.',apply:'https://wandb.ai/careers'},
+  {id:'qdrant',name:'Qdrant',region:'eu',roles:['ai','se'],pay:'€80–€120k',desc:'Berlin vector database. Solutions Engineer helping customers build RAG and agent applications.',apply:'https://qdrant.tech/careers/'},
+  {id:'pinecone',name:'Pinecone',region:'global',roles:['ai','se'],pay:'$120–$160k',desc:'Vector database for AI. Solutions Engineer — your RAG pipelines + agent work is directly relevant.',apply:'https://www.pinecone.io/careers/'},
+  {id:'careem',name:'Careem',region:'gulf',roles:['fs','ai'],pay:'$90–$130k tax-free',desc:'Dubai super app. Strong engineering culture, Java + microservices stack. System design focused, no LeetCode.',apply:'https://careers.careem.com/'},
+  {id:'noon',name:'Noon',region:'gulf',roles:['fs'],pay:'$85–$120k tax-free',desc:'Dubai e-commerce. Large engineering team, Java + Spring Boot backend. Practical coding + system design.',apply:'https://www.noon.com/uae-en/careers/'},
+  {id:'tabby',name:'Tabby',region:'gulf',roles:['fs','ai'],pay:'$90–$130k tax-free',desc:'Dubai BNPL fintech, Series D. Fast-growing, modern stack. Take-home + technical interview — no LeetCode.',apply:'https://tabby.ai/en-AE/careers'},
+  {id:'tamara',name:'Tamara',region:'gulf',roles:['fs'],pay:'$85–$120k tax-free',desc:'Riyadh BNPL, Series C. Saudi\'s fastest-growing fintech. Engineering roles, no whiteboard interviews.',apply:'https://tamara.co/en/careers'},
+  {id:'bayzat',name:'Bayzat',region:'gulf',roles:['fs'],pay:'$85–$115k tax-free',desc:'Dubai HR & insurance SaaS. Full-stack roles, Java/Spring Boot + React. Code review interviews, no LeetCode.',apply:'https://www.bayzat.com/careers/'},
+  {id:'kitopi',name:'Kitopi',region:'gulf',roles:['fs','ai'],pay:'$85–$120k tax-free',desc:'Dubai cloud kitchen tech. AI for operations automation. Full-stack + AI automation fit.',apply:'https://kitopi.com/careers'},
+  {id:'propfinder',name:'Property Finder',region:'gulf',roles:['fs'],pay:'$80–$115k tax-free',desc:'Dubai proptech leader. Strong engineering culture, microservices + Java. Practical interviews, no algorithmic whiteboard.',apply:'https://www.propertyfinder.ae/en/careers'},
+  {id:'maftech',name:'MAF Technology',region:'gulf',roles:['fs','ai'],pay:'$90–$130k tax-free',desc:'Dubai conglomerate tech division. Senior AI + data engineering roles. Healthcare adjacent.',apply:'https://careers.majidalfuttaim.com/'},
+  {id:'talabat',name:'Talabat',region:'gulf',roles:['fs'],pay:'$85–$120k tax-free',desc:'Dubai food delivery. Large backend engineering team, Kafka + microservices. Technical design interviews.',apply:'https://jobs.talabat.com/'},
+  {id:'servicenow',name:'ServiceNow Dubai',region:'gulf',roles:['se','ai'],pay:'$100–$140k tax-free',desc:'Solutions Consultant / AI Solutions Engineer. Spring Boot + AI agent + enterprise integration is a strong match.',apply:'https://careers.servicenow.com/'},
+  {id:'salesforce',name:'Salesforce Dubai',region:'gulf',roles:['se','ai'],pay:'$100–$145k tax-free',desc:'Senior AI Solutions Engineer — Salesforce Einstein AI. Multi-agent + API integration background applies directly.',apply:'https://careers.salesforce.com/'},
+  {id:'sap',name:'SAP UAE / Riyadh',region:'gulf',roles:['fs','se'],pay:'$90–$130k tax-free',desc:'Large GCC presence. Solutions Engineer / Developer. Java + enterprise integration. Practical interviews.',apply:'https://jobs.sap.com/'},
+  {id:'gitlab',name:'GitLab',region:'global',roles:['fs'],pay:'$130–$170k',desc:'Fully remote. Senior Full-Stack roles, strong engineering culture. No LeetCode — problem-based practical interviews.',apply:'https://about.gitlab.com/jobs/'},
+  {id:'cloudflare',name:'Cloudflare',region:'global',roles:['fs','ai'],pay:'$140–$180k',desc:'Remote EMEA. Your Nginx, Cloudflare R2, distributed systems background is directly relevant. Practical coding interviews.',apply:'https://www.cloudflare.com/careers/jobs/'},
+  {id:'datadog',name:'Datadog',region:'global',roles:['fs','se'],pay:'$130–$170k',desc:'Remote EMEA. Your Prometheus + Grafana + ELK + OpenTelemetry expertise is a direct match. Solutions Engineer in high demand.',apply:'https://careers.datadoghq.com/'},
+  {id:'twilio',name:'Twilio',region:'global',roles:['se','ai'],pay:'$120–$160k',desc:'You integrate Twilio deeply in MyAgentFirm. Solutions Engineer — you know their product better than most candidates.',apply:'https://careers.twilio.com/'},
+  {id:'chainguard',name:'Chainguard',region:'global',roles:['ai','se'],pay:'$120–$160k',desc:'AI Solutions Engineer — Claude Code, MCP, LLM APIs, agent frameworks. This JD reads like your exact tech stack.',apply:'https://job-boards.greenhouse.io/chainguard/jobs/4687328006'},
+  {id:'affirm',name:'Affirm',region:'global',roles:['ai','se'],pay:'$120–$160k',desc:'AI Solutions Engineer — LLM reliability infrastructure, fallback chains, structured output validation. Directly maps to your LLM router work.',apply:'https://job-boards.greenhouse.io/affirm/jobs/7778204003'},
+  {id:'paddle',name:'Paddle',region:'eu',roles:['ai','fs'],pay:'£80–£110k',desc:'London payments + GTM automation SaaS. Building production AI systems. Remote-friendly UK.',apply:'https://jobs.paddle.com/'},
+  {id:'hashicorp',name:'HashiCorp / IBM',region:'global',roles:['fs'],pay:'$130–$165k',desc:'Remote EMEA. Your Docker, Kubernetes background maps well. No whiteboard LeetCode.',apply:'https://www.hashicorp.com/careers'},
+  {id:'maze',name:'Maze',region:'global',roles:['fs'],pay:'€80–€110k',desc:'Remote-first product research SaaS. React + Node.js. Practical code review + system design — no LeetCode.',apply:'https://maze.co/careers/'},
+  {id:'n8n2',name:'n8n (Solutions)',region:'eu',roles:['se','ai'],pay:'€80–€110k',desc:'Solutions Engineering track at n8n — helping enterprise customers automate with AI. Your workflow automation + LLM work is directly relevant.',apply:'https://n8n.io/careers/'},
+];
+
+const ROLE_LABELS = {fde:'FDE',ai:'AI Eng',fs:'Full-Stack',se:'Solutions Eng'};
+const STAGE_CSS = {new:'s-new',networking:'s-net',call:'s-call',win:'s-win',interview:'s-int',offer:'s-off',failed:'s-fail'};
+const STAGE_LABELS = {new:'New',networking:'Networking',call:'Call',win:'WIN Sent',interview:'Interview',offer:'Offer 🎉',failed:'Closed'};
+
+// ── STORAGE ──
+function load(k){try{return JSON.parse(localStorage.getItem(k)||'null')}catch{return null}}
+function save(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch{}}
+
+let tracked = load('sr_tracked') || {};
+let customCompanies = load('sr_custom') || [];
+
+function saveTracked(){save('sr_tracked',tracked);}
+function saveCustom(){save('sr_custom',customCompanies);}
+
+// ── TABS ──
+function showTab(id,el){
+  const sec = document.getElementById(id);
+  if (!sec) return;
+  document.querySelectorAll('.sec').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  sec.classList.add('active');
+  const tabBtn = el || document.querySelector(`.tab[onclick*="showTab('${id}'"]`);
+  if (tabBtn) tabBtn.classList.add('active');
+  try {
+    localStorage.setItem('cc_active_tab_outreach', id);
+    const u = new URL(window.location.href);
+    u.searchParams.set('tab', id);
+    window.history.replaceState(null, '', u.toString());
+  } catch(e) {}
+  if(id==='pipeline') renderPipeline();
+  else if(id==='companies') renderCards();
+}
+
+// ── HEADER STATS ──
+function updateStats(){
+  const t=Object.values(tracked);
+  document.getElementById('statTotal').textContent = COMPANIES.length + customCompanies.length;
+  document.getElementById('statActive').textContent = t.filter(x=>x.stage&&x.stage!=='new'&&x.stage!=='failed').length;
+  document.getElementById('statInterviews').textContent = t.filter(x=>x.stage==='interview').length;
+  document.getElementById('statOffers').textContent = t.filter(x=>x.stage==='offer').length;
+}
+
+// ── COMPANY CARDS ──
+function allCompanies(){return [...COMPANIES,...customCompanies];}
+
+function filterC(type,btn){
+  document.querySelectorAll('.fb').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderCards(type);
+}
+
+function formatRegionBadge(r) {
+  if (r === 'eu') return '🇪🇺 EU';
+  if (r === 'gulf') return '🌙 Gulf';
+  if (r === 'global_onsite') return '🏢 Global On-site';
+  if (r === 'in_remote') return '🇮🇳 India Remote';
+  if (r === 'blr_onsite') return '🏢 Bangalore 5D';
+  if (r === 'blr_hybrid') return '🏙️ Bangalore Hybrid';
+  return '🌐 Remote';
+}
+function formatRegionName(r) {
+  if (r === 'eu') return 'EU';
+  if (r === 'gulf') return 'GULF';
+  if (r === 'global_onsite') return 'GLOBAL ON-SITE';
+  if (r === 'in_remote') return 'INDIA REMOTE';
+  if (r === 'blr_onsite') return 'BANGALORE 5D';
+  if (r === 'blr_hybrid') return 'BANGALORE HYBRID';
+  return (r || 'REMOTE').toUpperCase();
+}
+
+function renderCards(filter='all'){
+  const grid=document.getElementById('cgrid');
+  const all=allCompanies();
+  const filtered=all.filter(c=>{
+    if(filter==='all') return true;
+    if(filter==='in') return ['in_remote','blr_onsite','blr_hybrid','india'].includes(c.region);
+    if(['eu','gulf','global','global_onsite','in_remote','blr_onsite','blr_hybrid'].includes(filter)) return c.region===filter;
+    if(filter==='fde') return c.roles.includes('fde');
+    if(filter==='ai') return c.roles.includes('ai');
+    return true;
+  });
+  grid.innerHTML=filtered.map(c=>{
+    const tr=tracked[c.id];
+    const stageHtml=tr&&tr.stage?`<span class="stage ${STAGE_CSS[tr.stage]||'s-new'}" style="margin-left:4px">${STAGE_LABELS[tr.stage]||tr.stage}</span>`:'';
+    const rbCls=c.region;
+    const rbLabel=formatRegionBadge(c.region);
+    return `<div class="cc ${c.region}">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:5px">
+        <div class="cn">${c.name}${stageHtml}</div>
+        <span class="rb ${rbCls}">${rbLabel}</span>
+      </div>
+      <div style="margin-bottom:6px">${(c.roles||[]).map(r=>`<span class="rtag t-${r}">${ROLE_LABELS[r]||r}</span>`).join('')}${c.dsa ? '<span style="font-size:10px;padding:2px 6px;border-radius:4px;background:rgba(255,107,107,.12);color:#ff8787;font-weight:600">⚠️ DSA Required</span>' : '<span class="ndsa">✓ No DSA</span>'}</div>
+      <div class="cdesc">${c.desc}</div>
+      <div style="margin:6px 0"><span class="pay">${c.pay}</span></div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">
+        <a href="${c.apply}" target="_blank" class="btn pri">Apply ↗</a>
+        <button class="btn" onclick="openNet('${c.id}')">🤝 Network</button>
+        <button class="btn grn" onclick="openUpdate('${c.id}')">📊 Track</button>
+      </div>
+    </div>`;
+  }).join('');
+  updateStats();
+}
+
+// ── NETWORK MODAL ──
+function openNet(id){
+  const c=allCompanies().find(x=>x.id===id);
+  if(!c) return;
+  const geoGulf='102713980,105756358';
+  const geoEU='100565514,102890719,101165590,105015875';
+  const geoIndia='102257491';
+  const isIndia=['in_remote','blr_onsite','blr_hybrid','india'].includes(c.region);
+  const locGeo=c.region==='gulf'?geoGulf:c.region==='eu'?geoEU:isIndia?geoIndia:'';
+  const locLabel=c.region==='gulf'?'🌙 UAE/Gulf':c.region==='eu'?'🇪🇺 Europe':isIndia?'🇮🇳 India':'🌐 Global';
+
+  function liUrl(kw,geo,company){
+    let u=`https://www.linkedin.com/search/results/people/?keywords=${encodeURIComponent(kw)}&currentCompany=%5B%22${encodeURIComponent(company)}%22%5D`;
+    if(geo) u+=`&geoUrn=%5B${geo.split(',').map(g=>`%22${g}%22`).join('%2C')}%5D`;
+    return u;
+  }
+
+  const searches=[
+    {e:'👩‍💻',label:'Peers — Same Role',sub:'Senior Engineer · AI Engineer · FDE · Solutions Engineer',
+     url:liUrl('Senior Engineer OR "AI Engineer" OR "Forward Deployed" OR "Solutions Engineer" OR "Full Stack"',locGeo,c.name),
+     msg:`Hi [Name] — I came across your profile while researching ${c.name}'s engineering team. I'm a senior full-stack + AI engineer (ex-Philips, 12 years) exploring senior roles. Would love to connect and hear about your experience at ${c.name}.`},
+    {e:'🏢',label:'Hiring Managers',sub:'Engineering Manager · VP Eng · Head of Engineering · CTO',
+     url:liUrl('"Engineering Manager" OR "Head of Engineering" OR "VP Engineering" OR CTO OR "Director of Engineering"',locGeo,c.name),
+     msg:`Hi [Name] — I've been following ${c.name}'s work and came across an interesting angle on [challenge from your research]. Would love to connect and share a quick perspective.`},
+    {e:'📋',label:'Recruiters & HR',sub:'Technical Recruiter · Talent Acquisition · People Partner',
+     url:liUrl('"Technical Recruiter" OR "Talent Acquisition" OR Recruiter OR "People Partner"',locGeo,c.name),
+     msg:`Hi [Name] — I'm a senior full-stack + AI engineer (ex-Philips, 12+ years) actively exploring opportunities at ${c.name}. Would love to connect and learn about any upcoming roles.`},
+    {e:'🇮🇳',label:'Indians at this company',sub:'Easiest warm referral — fellow Indians always reply faster',
+     url:`https://www.linkedin.com/search/results/people/?keywords=${encodeURIComponent(c.name)}&currentCompany=%5B%22${encodeURIComponent(c.name)}%22%5D&geoUrn=%5B%22${geoIndia}%22%5D`,
+     msg:`Hi [Name] — noticed you're at ${c.name} and thought I'd reach out. I'm a senior full-stack + AI engineer from Mumbai (ex-Philips) exploring global roles. Would love to hear about your experience there — happy to keep it to 15 minutes!`},
+  ];
+
+  document.getElementById('netTitle').textContent=`Network at ${c.name} · ${locLabel}`;
+  document.getElementById('netBody').innerHTML=searches.map((s,i)=>`
+    <div class="net-item">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div><div class="net-label">${s.e} ${s.label}</div><div class="net-sub">${s.sub}</div></div>
+        <a href="${s.url}" target="_blank" class="btn pri" style="flex-shrink:0;margin-left:10px">Open LinkedIn ↗</a>
+      </div>
+      <div style="font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:.4px;margin:8px 0 4px">📋 Copy this → go to LinkedIn → Connect → paste as note:</div>
+      <div class="msg-box" id="nm${i}">${s.msg}</div>
+      <button class="btn" style="margin-top:6px" onclick="copyById('nm${i}',this)">Copy Message</button>
+    </div>`).join('');
+  openModal('netModal');
+}
+
+// ── PIPELINE ──
+function renderPipeline(){
+  const filter=document.getElementById('pipeFilter').value;
+  const all=allCompanies();
+  const tbody=document.getElementById('pipeBody');
+  const empty=document.getElementById('pipeEmpty');
+
+  // Show all companies — tracked ones show data, untracked show empty row
+  const rows=all.filter(c=>{
+    const tr=tracked[c.id];
+    if(filter==='all') return true;
+    const stage=tr?tr.stage:'new';
+    return stage===filter;
+  });
+
+  if(rows.length===0){tbody.innerHTML='';empty.style.display='block';return;}
+  empty.style.display='none';
+
+  tbody.innerHTML=rows.map(c=>{
+    const tr=tracked[c.id]||{};
+    const stage=tr.stage||'new';
+    const winLabels={none:'—',researching:'🔍 Researching',prepared:'📝 Ready',sent:'📤 Sent',discussed:'💬 Discussed'};
+    return `<tr>
+      <td><div style="font-weight:600;font-size:13px">${c.name}</div><div style="font-size:10px;color:var(--t3)">${formatRegionName(c.region)} · ${c.pay}</div></td>
+      <td style="color:var(--t2)">${tr.role||c.roles.map(r=>ROLE_LABELS[r]).join(', ')}</td>
+      <td><span class="stage ${STAGE_CSS[stage]}">${STAGE_LABELS[stage]||stage}</span></td>
+      <td style="color:var(--t2)">${tr.conns||'—'}</td>
+      <td style="color:var(--t2)">${tr.msgs||'—'}</td>
+      <td style="color:var(--t2)">${winLabels[tr.win||'none']||'—'}</td>
+      <td style="color:var(--t2);max-width:200px;font-size:11px">${tr.notes||'—'}</td>
+      <td><button class="btn" onclick="openUpdate('${c.id}')">Update</button></td>
+    </tr>`;
+  }).join('');
+  updateStats();
+}
+
+// ── TRACK / UPDATE ──
+function openUpdate(id){
+  const c=allCompanies().find(x=>x.id===id);
+  if(!c) return;
+  const tr=tracked[id]||{};
+  document.getElementById('updateTitle').textContent=`Track: ${c.name}`;
+  document.getElementById('updateId').value=id;
+  document.getElementById('updateStage').value=tr.stage||'new';
+  document.getElementById('updateConns').value=tr.conns||'';
+  document.getElementById('updateMsgs').value=tr.msgs||'';
+  document.getElementById('updateWin').value=tr.win||'none';
+  document.getElementById('updateJD').value=tr.jd||'';
+  document.getElementById('updateNotes').value=tr.notes||'';
+  openModal('updateModal');
+}
+
+function saveUpdate(){
+  const id=document.getElementById('updateId').value;
+  tracked[id]={
+    stage:document.getElementById('updateStage').value,
+    conns:document.getElementById('updateConns').value,
+    msgs:document.getElementById('updateMsgs').value,
+    win:document.getElementById('updateWin').value,
+    jd:document.getElementById('updateJD').value,
+    notes:document.getElementById('updateNotes').value,
+    role:allCompanies().find(x=>x.id===id)?.roles.map(r=>ROLE_LABELS[r]).join(', ')||'',
+    updated:new Date().toLocaleDateString()
+  };
+  saveTracked();
+  closeModal('updateModal');
+  renderCards();
+  renderPipeline();
+}
+
+function deleteTracked(){
+  const id=document.getElementById('updateId').value;
+  delete tracked[id];
+  saveTracked();
+  closeModal('updateModal');
+  renderCards();
+  renderPipeline();
+}
+
+// ── ADD COMPANY ──
+function openAddModal(){openModal('addModal');}
+
+function addCompany(){
+  const name=document.getElementById('addName').value.trim();
+  if(!name){alert('Company name is required');return;}
+  const id='custom_'+Date.now();
+  const c={
+    id,name,
+    region:document.getElementById('addRegion').value,
+    roles:['fs'],
+    pay:document.getElementById('addPay').value||'Market rate',
+    desc:document.getElementById('addNotes').value||'Custom tracked company.',
+    apply:document.getElementById('addUrl').value||'#',
+    custom:true
+  };
+  customCompanies.push(c);
+  saveCustom();
+  tracked[id]={stage:'new',conns:'',msgs:'',win:'none',notes:'',updated:new Date().toLocaleDateString()};
+  saveTracked();
+  closeModal('addModal');
+  document.getElementById('addName').value='';
+  document.getElementById('addRole').value='';
+  document.getElementById('addUrl').value='';
+  document.getElementById('addPay').value='';
+  document.getElementById('addNotes').value='';
+  renderCards();
+  if (typeof renderPipeline === 'function') renderPipeline();
+  updateStats();
+  if (window.__CC__ && typeof window.__CC__.pushState === 'function') {
+    window.__CC__.pushState();
+  }
+}
+
+// ── RESUME TAILORING ──
+function genTailorPrompt(){
+  const company=document.getElementById('tailorCompany').value.trim();
+  const role=document.getElementById('tailorRole').value.trim();
+  const jd=document.getElementById('tailorJD').value.trim();
+  if(!jd){alert('Please paste the job description');return;}
+  const prompt=`I am applying for a ${role||'[role]'} role at ${company||'[company]'}.
+
+JOB DESCRIPTION:
+${jd}
+
+MY MASTER RESUME DETAILS:
+Name: Siddhant Rangari
+Title: Senior Full-Stack Engineer · AI/Agent Platform Builder · Forward Deployed Engineer
+Email: siddhantrangari@gmail.com | siddhantrangari.com | Mumbai | Open to relocation & remote
+
+EXPERIENCE:
+• Philips Innovation Campus (Sep 2021–Feb 2024) — Full-Stack Engineer: Real-time Patient Monitoring Dashboard (Kafka→React, sub-second latency), Kafka→AWS S3 pipeline (70% load reduction), Apache Camel→Spring Boot migration (98% API efficiency), Prometheus/Grafana/OpenTelemetry observability (30-40% MTTR reduction), mentored 5+ devs (20% delivery improvement)
+• Career Break (Feb–Apr 2024) — Travel & personal
+• Growlogic/Eeko.ai (Apr 2024–Jul 2025) — Freelance Solutions Architect: Azure AKS 6-microservice architecture (Spring Boot), WhatsApp Business API Spring Batch pipeline, ArgoCD GitOps, React/Next.js + Razorpay frontend
+• ChalOnline (Aug–Sep 2025) — Independent: Creator/education SaaS, PostgreSQL + Redis on VPS, Razorpay
+• TradingOS (Oct 2025–Feb 2026) — Independent: TimescaleDB market data pipeline, backtesting engine, LLaMA 3 AI coach, 10-module platform
+• MyAgentFirm (Mar–Aug 2026) — Independent: Multi-tenant AI agent platform — 24 API routes, 6 async workers, LLM failover (DeepInfra→Groq→Together AI), MCP integration (Gmail/Calendar/GitHub/Notion/Slack), Razorpay credit ledger, 12+ API integrations (Meta, Twilio, ElevenLabs, Sarvam AI, Firebase, Cloudflare R2)
+
+STACK: Java Spring Boot · Node.js/Fastify · React 18 · Python · TypeScript · LangChain · Multi-Agent Systems · RAG · Prompt Engineering · MCP · Docker · Kubernetes (AKS/EKS) · AWS · Azure · Kafka · PostgreSQL · Redis · TimescaleDB · Nginx · ArgoCD · Prometheus · Grafana · OpenTelemetry
+
+EDUCATION: Diploma in Computer Technology · Late Vasantdada Polytechnic · 2015
+
+Now create a tailored 1-page resume for this specific role and company. Instructions:
+1. Rewrite the professional summary to directly mirror the JD language and top 3 requirements
+2. Reorder and emphasise bullet points that match the JD — put the most relevant ones first
+3. For skills, only show technologies relevant to this role — no padding
+4. Keep all metrics (70%, 98%, 30-40%, etc) — they are real and verified
+5. Add any missing keywords from the JD naturally into existing bullets (don't fabricate new ones)
+6. Keep it honest — do not invent experience I don't have
+7. Format: clean, ATS-friendly, no tables or columns`;
+  document.getElementById('tailorText').textContent=prompt;
+  document.getElementById('tailorOut').style.display='block';
+}
+
+function copyTailor(){
+  const text=document.getElementById('tailorText').textContent;
+  navigator.clipboard.writeText(text).then(()=>{
+    const btn=event.target;btn.textContent='✓ Copied!';btn.style.color='var(--g)';
+    setTimeout(()=>{btn.textContent='Copy Prompt';btn.style.color='';},2000);
+  });
+}
+
+// ── UTILS ──
+function openModal(id){document.getElementById(id).style.display='flex';document.body.style.overflow='hidden';}
+function closeModal(id){document.getElementById(id).style.display='none';document.body.style.overflow='';}
+
+function copyP(btn){
+  const el=btn.previousElementSibling;
+  navigator.clipboard.writeText(el.textContent).then(()=>{
+    btn.textContent='✓ Copied!';
+    setTimeout(()=>{btn.textContent=btn.textContent.includes('Prompt')?'Copy Prompt':'Copy';},2000);
+  });
+}
+
+function copyById(id,btn){
+  navigator.clipboard.writeText(document.getElementById(id).textContent).then(()=>{
+    btn.textContent='✓ Copied!';btn.style.color='var(--g)';btn.style.borderColor='var(--g)';
+    setTimeout(()=>{btn.textContent='Copy Message';btn.style.color='';btn.style.borderColor='';},2000);
+  });
+}
+
+// Click outside modal to close
+document.querySelectorAll('.modal').forEach(m=>{
+  m.addEventListener('click',e=>{if(e.target===m)closeModal(m.id);});
+});
+
+// ── INIT ──
+function initTabs(){
+  try {
+    const u = new URL(window.location.href);
+    const tabParam = u.searchParams.get('tab') || (window.location.hash ? window.location.hash.replace(/^#/,'').split('&')[0] : null);
+    const savedTab = tabParam || localStorage.getItem('cc_active_tab_outreach') || 'companies';
+    if (savedTab && document.getElementById(savedTab)) {
+      showTab(savedTab, document.querySelector(`.tab[onclick*="showTab('${savedTab}'"]`));
+    } else {
+      renderCards('all');
+    }
+  } catch(e) {
+    renderCards('all');
+  }
+  updateStats();
+}
+
+window.addEventListener('popstate', () => {
+  try {
+    const u = new URL(window.location.href);
+    const t = u.searchParams.get('tab') || 'companies';
+    if (document.getElementById(t)) {
+      showTab(t, document.querySelector(`.tab[onclick*="showTab('${t}'"]`));
+    }
+  } catch(e) {}
+});
+
+initTabs();
+</script>
+</body>
+</html>

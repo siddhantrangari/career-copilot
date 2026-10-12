@@ -2,32 +2,20 @@
   "name": "career-copilot",
   "version": "1.0.0",
   "private": true,
-  "description": "AI-Powered Job Search & Executive Career Accelerator SaaS (NxtJob Alternative)",
-  "workspaces": [
-    "server",
-    "client"
-  ],
+  "type": "module",
+  "description": "Personal job search OS — Fastify + PostgreSQL backend with AI outreach, WIN docs and resume tailoring",
+  "workspaces": ["server"],
   "scripts": {
-    "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
-    "dev:server": "npm --prefix server run dev",
-    "dev:client": "npm --prefix client run dev",
-    "build": "npm --prefix client run build",
+    "dev": "npm --prefix server run dev",
     "start": "npm --prefix server start",
-    "docker:db:up": "docker compose up -d career-copilot-postgres",
-    "docker:db:down": "docker compose down",
-    "docker:db:logs": "docker compose logs -f career-copilot-postgres",
-    "install:all": "npm install && npm --prefix server install && npm --prefix client install"
+    "migrate": "npm --prefix server run migrate",
+    "seed": "npm --prefix server run seed",
+    "build:web": "node scripts/build-web.js",
+    "db:up": "docker compose up -d career-copilot-postgres",
+    "db:down": "docker compose down",
+    "db:logs": "docker compose logs -f career-copilot-postgres",
+    "setup": "npm install && npm run db:up && sleep 6 && npm run migrate && npm run seed && npm run build:web"
   },
-  "devDependencies": {
-    "concurrently": "^8.2.2"
-  },
-  "keywords": [
-    "career-copilot",
-    "nxtjob-alternative",
-    "ai-job-search",
-    "ats-scanner",
-    "mock-interview"
-  ],
   "author": "Siddhant Rangari",
   "license": "MIT"
 }

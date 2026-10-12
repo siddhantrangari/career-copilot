@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Interview Room — Career Copilot</title>
+<link rel="stylesheet" href="/bridge.css">
+<style>
+  :root {
+    --bg: #0b0d12; --panel: #141822; --panel2: #0f131b; --line: #232a38;
+    --t1: #e7ecf3; --t2: #a9b6c9; --t3: #7c8ba3;
+    --ac: #4a7cff; --g: #3ddc84; --y: #ffb020; --r: #ff6b6b;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--t1);
+    font: 14px/1.6 -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    padding-top: 34px;
+  }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 22px 18px 80px; }
+  h1 { font-size: 20px; margin: 0 0 4px; }
+  .sub { color: var(--t3); font-size: 13px; margin-bottom: 22px; }
+
+  .panel {
+    background: var(--panel); border: 1px solid var(--line);
+    border-radius: 14px; padding: 18px 20px; margin-bottom: 16px;
+  }
+  label { display: block; font-size: 11px; text-transform: uppercase;
+          letter-spacing: .06em; color: var(--t3); margin: 0 0 5px; }
+  select, input[type=text], textarea {
+    width: 100%; padding: 10px 12px; background: var(--panel2);
+    border: 1px solid #2a3243; border-radius: 9px; color: var(--t1);
+    font: inherit; font-size: 13px;
+  }
+  select:focus, input:focus, textarea:focus { outline: none; border-color: var(--ac); }
+  textarea { min-height: 90px; resize: vertical; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; }
+  .btn {
+    padding: 10px 18px; border-radius: 9px; border: 1px solid #2a3243;
+    background: #1b2130; color: var(--t1); font: inherit; font-weight: 600;
+    font-size: 13px; cursor: pointer;
+  }
+  .btn:hover:not(:disabled) { border-color: var(--ac); }
+  .btn.pri { background: var(--ac); border-color: var(--ac); color: #fff; }
+  .btn.danger { background: transparent; border-color: #4a2230; color: var(--r); }
+  .btn:disabled { opacity: .45; cursor: default; }
+
+  /* ── Interview room ─────────────────────────────────────────── */
+  #room { display: none; }
+  .room-head {
+    display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+    padding: 14px 18px; background: var(--panel); border: 1px solid var(--line);
+    border-radius: 14px; margin-bottom: 14px;
+  }
+  .avatar {
+    width: 46px; height: 46px; border-radius: 50%; flex: none;
+    background: linear-gradient(135deg, var(--ac), #8b5cf6);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 16px; color: #fff;
+  }
+  .avatar.speaking { animation: pulse 1.1s ease-in-out infinite; }
+  @keyframes pulse {
+    0%,100% { box-shadow: 0 0 0 0 rgba(74,124,255,.55); }
+    50%     { box-shadow: 0 0 0 11px rgba(74,124,255,0); }
+  }
+  .who { flex: 1; min-width: 160px; }
+  .who strong { display: block; font-size: 14px; }
+  .who span { color: var(--t3); font-size: 12px; }
+  .timer { font-variant-numeric: tabular-nums; font-size: 22px; font-weight: 700; }
+  .timer.low { color: var(--y); }
+
+  #transcript {
+    background: var(--panel2); border: 1px solid var(--line); border-radius: 14px;
+    padding: 18px; height: 46vh; min-height: 300px; overflow-y: auto; margin-bottom: 14px;
+  }
+  .msg { margin-bottom: 16px; display: flex; gap: 11px; }
+  .msg .tag {
+    flex: none; width: 30px; height: 30px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 700;
+  }
+  .msg.interviewer .tag { background: #24304a; color: #9ab4ff; }
+  .msg.candidate  .tag { background: #1f3a2c; color: #7ee0a8; }
+  .msg .body { flex: 1; }
+  .msg .body .name { font-size: 11px; color: var(--t3); margin-bottom: 3px; }
+  .msg.interim .body { color: var(--t3); font-style: italic; }
+
+  .controls { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  #mic {
+    width: 64px; height: 64px; border-radius: 50%; border: 0; cursor: pointer;
+    background: var(--ac); color: #fff; font-size: 24px; flex: none;
+  }
+  #mic.listening { background: var(--r); animation: pulse 1.1s ease-in-out infinite; }
+  #mic:disabled { opacity: .4; cursor: default; }
+  .hint { color: var(--t3); font-size: 12px; flex: 1; min-width: 180px; }
+
+  .report h3 { font-size: 15px; margin: 22px 0 8px; }
+  .rating { display: inline-block; padding: 2px 9px; border-radius: 999px; font-size: 11px; font-weight: 700; }
+  .rating.strong        { background: rgba(61,220,132,.15); color: #7ee0a8; }
+  .rating.adequate      { background: rgba(74,124,255,.15); color: #9ab4ff; }
+  .rating\.needs        { background: rgba(255,176,32,.15); color: #ffd08a; }
+  .rating.needs-practice{ background: rgba(255,176,32,.15); color: #ffd08a; }
+  .rating.not-assessed  { background: #1b2130; color: var(--t3); }
+  blockquote {
+    margin: 7px 0; padding: 8px 13px; border-left: 3px solid #2a3243;
+    color: var(--t2); font-style: italic; background: var(--panel2); border-radius: 0 8px 8px 0;
+  }
+  .costnote { color: var(--t3); font-size: 11px; margin-top: 10px; }
+  .cc-pill { top: 4px !important; right: 14px !important; bottom: auto !important; left: auto !important; }
+
+  /* Modal — the browser confirm() looked nothing like the rest of the app. */
+  .cc-modal {
+    position: fixed; inset: 0; z-index: 10000; display: none;
+    align-items: center; justify-content: center;
+    background: rgba(6, 8, 12, .72); backdrop-filter: blur(4px);
+  }
+  .cc-modal.open { display: flex; }
+  .cc-modal-box {
+    width: min(440px, calc(100vw - 36px));
+    background: var(--panel); border: 1px solid var(--line);
+    border-radius: 16px; padding: 24px 26px;
+    box-shadow: 0 28px 70px rgba(0,0,0,.6);
+  }
+  .cc-modal-box h3 { margin: 0 0 8px; font-size: 17px; }
+  .cc-modal-box p { margin: 0 0 20px; color: var(--t2); font-size: 13px; }
+  .cc-modal-actions { display: flex; gap: 9px; justify-content: flex-end; }
+
+  /* Self-view — small, corner, so it does not dominate the transcript. */
+  #selfView {
+    display: none; position: fixed; right: 18px; bottom: 96px; z-index: 50;
+    width: 208px; border-radius: 12px; border: 1px solid var(--line);
+    background: #000; box-shadow: 0 10px 30px rgba(0,0,0,.5);
+    transform: scaleX(-1); /* mirror, as every video call does */
+  }
+  #selfView.on { display: block; }
+  .rec-dot {
+    display: none; align-items: center; gap: 6px; font-size: 11px; color: var(--r);
+    font-weight: 700;
+  }
+  .rec-dot.on { display: inline-flex; }
+  .rec-dot i {
+    width: 8px; height: 8px; border-radius: 50%; background: var(--r);
+    animation: pulse 1.4s ease-in-out infinite;
+  }
+
+  /* Recording playback + model answers on the report */
+  #playback { width: 100%; border-radius: 12px; background: #000; margin-bottom: 8px; }
+  .model-answer {
+    background: var(--panel2); border: 1px solid var(--line);
+    border-left: 3px solid var(--g); border-radius: 0 10px 10px 0;
+    padding: 12px 15px; margin: 8px 0 18px;
+  }
+  .metric-row {
+    display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 14px;
+  }
+  .metric {
+    background: var(--panel2); border: 1px solid var(--line); border-radius: 10px;
+    padding: 10px 14px; min-width: 104px;
+  }
+  .metric b { display: block; font-size: 19px; font-variant-numeric: tabular-nums; }
+  .metric span { font-size: 11px; color: var(--t3); }
+
+  /* Time-up banner */
+  #timeUp {
+    display: none; margin-bottom: 12px; padding: 11px 14px; border-radius: 10px;
+    background: rgba(255,176,32,.09); border: 1px solid rgba(255,176,32,.32);
+    color: #ffd08a; font-size: 12px;
+  }
+  #timeUp.show { display: block; }
+</style>
+</head>
+<body>
+
+<div id="cc-nav" style="position:fixed;top:0;left:0;right:0;z-index:9997;display:flex;gap:2px;
+     padding:6px 14px;background:rgba(10,13,18,.92);backdrop-filter:blur(8px);
+     border-bottom:1px solid #232a38;font:600 12px -apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif">
+  <a href="/" style="padding:5px 12px;border-radius:7px;color:#a9b6c9;text-decoration:none">Companies &amp; Pipeline</a>
+  <a href="/outreach.html" style="padding:5px 12px;border-radius:7px;color:#a9b6c9;text-decoration:none">Outreach &amp; Resume</a>
+  <a href="/interview.html" style="padding:5px 12px;border-radius:7px;background:#1e2635;color:#fff;text-decoration:none">Interview Room</a>
+</div>
+
+<div class="wrap">
+  <!-- ── Setup ──────────────────────────────────────────────── -->
+  <div id="setup">
+    <h1>Interview Room</h1>
+    <div class="sub">
+      A live voice mock interview against a real company in your pipeline. The interviewer
+      reads your job description, tailored resume, WIN document and grounded research
+      before it starts.
+    </div>
+
+    <div class="panel">
+      <div class="grid">
+        <div>
+          <label>Company</label>
+          <select id="company"></select>
+        </div>
+        <div>
+          <label>Round</label>
+          <select id="round">
+            <option value="screening">Screening — recruiter / HM</option>
+            <option value="technical">Technical — depth on the stack</option>
+            <option value="manager">Hiring manager — scope &amp; ownership</option>
+            <option value="behavioural">Behavioural — STAR evidence</option>
+            <option value="win-defence">WIN defence — defend your proposal</option>
+          </select>
+        </div>
+        <div>
+          <label>Length</label>
+          <select id="duration">
+            <option value="15">15 minutes</option>
+            <option value="30" selected>30 minutes</option>
+            <option value="45">45 minutes</option>
+          </select>
+        </div>
+        <div>
+          <label>Role title</label>
+          <input type="text" id="role" placeholder="e.g. Forward Deployed Engineer">
+        </div>
+        <div>
+          <label>Interviewer voice</label>
+          <select id="voice"></select>
+        </div>
+        <div>
+          <label>Record yourself</label>
+          <select id="record">
+            <option value="video" selected>Camera + mic</option>
+            <option value="audio">Mic only</option>
+            <option value="off">Don't record</option>
+          </select>
+        </div>
+      </div>
+
+      <div style="margin-top:14px">
+        <label>Job description <span style="text-transform:none;letter-spacing:0">— optional; reuses the JD from your tailored resume if blank</span></label>
+        <textarea id="jd" placeholder="Paste the JD, or leave blank to reuse the one already stored for this company…"></textarea>
+      </div>
+
+      <div style="margin-top:16px;display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+        <button class="btn pri" id="startBtn" type="button">🎙 Start mock interview</button>
+        <button class="btn"     id="prepBtn"  type="button">🧭 Prep guide (research + study plan)</button>
+        <span class="hint" id="setupHint"></span>
+      </div>
+      <div class="hint" style="margin-top:8px;font-size:12px">
+        Mock = a live voice conversation. Prep guide = a study document —
+        searches how <em>this company</em> actually interviews, then maps every likely question
+        back to your resume, JD and WIN doc.
+      </div>
+      <div class="costnote" id="costNote"></div>
+      <div class="costnote" id="prepProgress" style="display:none"></div>
+      <div id="prepTrace" class="panel" style="display:none;margin-top:10px;background:var(--panel2);max-height:44vh;overflow-y:auto"></div>
+    </div>
+
+    <div class="panel">
+      <h3 style="margin:0 0 8px;font-size:14px">Past interviews</h3>
+      <div id="history" class="hint">Loading…</div>
+    </div>
+
+    <div class="panel">
+      <h3 style="margin:0 0 8px;font-size:14px">Past prep guides</h3>
+      <div id="prepHistory" class="hint">Loading…</div>
+    </div>
+  </div>
+
+  <!-- ── Prep guide view ────────────────────────────────────── -->
+  <div id="prepView" style="display:none">
+    <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:10px">
+      <button class="btn" id="prepBack" type="button">← Back</button>
+      <h1 id="prepTitle" style="margin:0;flex:1;min-width:220px">Prep guide</h1>
+      <button class="btn pri" id="prepToMock" type="button" title="Start a live mock with the same setup">Start mock →</button>
+    </div>
+    <div class="sub" id="prepSub"></div>
+    <div class="panel report" id="prepReport"></div>
+  </div>
+
+  <!-- ── Room ──────────────────────────────────────────────── -->
+  <div id="room">
+    <div class="room-head">
+      <div class="avatar" id="avatar">?</div>
+      <div class="who">
+        <strong id="ivName">Interviewer</strong>
+        <span id="ivTitle"></span>
+      </div>
+      <div>
+        <div class="timer" id="timer">00:00</div>
+        <span class="hint" id="roundLabel"></span>
+      </div>
+      <div style="text-align:right">
+        <div id="costMeter" style="font-size:12px;color:var(--t3)">$0.0000</div>
+        <span class="hint" style="font-size:11px">spent this interview</span>
+      </div>
+      <button class="btn danger" id="endBtn" type="button">End &amp; get feedback</button>
+    </div>
+
+    <video id="selfView" autoplay muted playsinline></video>
+    <div id="timeUp"></div>
+    <div id="transcript"></div>
+
+    <div class="controls">
+      <button id="mic" type="button" title="Hold to speak, or click to toggle">🎙</button>
+      <span class="hint" id="micHint">Click the mic and answer out loud. Click again when you're done.</span>
+      <button class="btn" id="typeBtn" type="button">Type instead</button>
+    </div>
+    <div id="typeRow" style="display:none;margin-top:10px">
+      <textarea id="typed" placeholder="Type your answer…" style="min-height:70px"></textarea>
+      <button class="btn pri" id="sendTyped" type="button" style="margin-top:8px">Send answer</button>
+    </div>
+  </div>
+
+  <!-- ── Report ────────────────────────────────────────────── -->
+  <div id="reportView" style="display:none">
+    <h1>Interview feedback</h1>
+    <div class="sub" id="reportSub"></div>
+    <div class="panel report" id="report"></div>
+    <button class="btn pri" id="againBtn" type="button">Practise again</button>
+  </div>
+</div>
+
+<script src="/bridge.js"></script>
+<script src="/interview.js"></script>
+
+<div id="modal" class="cc-modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+  <div class="cc-modal-box">
+    <h3 id="modalTitle">End the interview?</h3>
+    <p id="modalBody">Maya will wrap up, then I'll assess your answers and show what to practise next.</p>
+    <div class="cc-modal-actions">
+      <button class="btn" id="modalCancel" type="button">Keep going</button>
+      <button class="btn pri" id="modalOk" type="button">End &amp; get feedback</button>
+    </div>
+  </div>
+</div>
+</body>
+</html>
