@@ -105,9 +105,7 @@ input[type=text],input[type=url]{width:100%}
 </div>
 
 <div class="tabs">
-  <div class="tab active" onclick="showTab('companies',this)">🏢 Companies</div>
-  <div class="tab" onclick="showTab('pipeline',this)">📊 Pipeline</div>
-  <div class="tab" onclick="showTab('outreach',this)">🚀 Outreach System</div>
+  <div class="tab active" onclick="showTab('outreach',this)">🚀 Outreach System</div>
   <div class="tab" onclick="showTab('resume',this)">📄 Resume</div>
   <div class="tab" onclick="showTab('search',this)">🔍 Job Search</div>
   <div class="tab" onclick="showTab('daily',this)">📅 Daily System</div>
@@ -115,57 +113,8 @@ input[type=text],input[type=url]{width:100%}
 
 <div class="main">
 
-<!-- COMPANIES -->
-<div class="sec active" id="companies">
-  <div class="sec-title">Target Companies</div>
-  <div class="sec-sub">45 pre-loaded · No DSA/LeetCode · Click + Add Company to track any new one</div>
-  <div class="filters">
-    <span style="font-size:11px;color:var(--t3)">Filter:</span>
-    <button class="fb active" onclick="filterC('all',this)">All</button>
-    <button class="fb" onclick="filterC('eu',this)">🇪🇺 Europe</button>
-    <button class="fb" onclick="filterC('gulf',this)">🌙 Gulf</button>
-    <button class="fb" onclick="filterC('global',this)">🌐 Global Remote</button>
-    <button class="fb" onclick="filterC('in',this)">🇮🇳 India / BLR</button>
-    <button class="fb" onclick="filterC('fde',this)">⚡ FDE</button>
-    <button class="fb" onclick="filterC('ai',this)">🤖 AI Eng</button>
-    <button class="btn grn" onclick="openAddModal()" style="margin-left:auto">+ Add Company</button>
-  </div>
-  <div class="cgrid" id="cgrid"></div>
-</div>
-
-<!-- PIPELINE -->
-<div class="sec" id="pipeline">
-  <div class="sec-title">Application Pipeline</div>
-  <div class="sec-sub">Track every company — connections, messages, WIN docs, interviews, offers. Click any row to update.</div>
-  <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">
-    <button class="btn pri" onclick="openAddModal()">+ Add Company</button>
-    <select id="pipeFilter" onchange="renderPipeline()" style="background:var(--s2);border:1px solid var(--bd);border-radius:6px;padding:5px 10px;color:var(--t);font-size:12px;font-family:inherit">
-      <option value="all">All Stages</option>
-      <option value="new">New</option>
-      <option value="networking">Networking</option>
-      <option value="call">Call Scheduled</option>
-      <option value="win">WIN Doc Sent</option>
-      <option value="interview">Interview</option>
-      <option value="offer">Offer</option>
-      <option value="failed">Closed</option>
-    </select>
-  </div>
-  <div style="overflow-x:auto">
-    <table class="pipe-table">
-      <thead><tr>
-        <th>Company</th><th>Role Target</th><th>Stage</th>
-        <th>Connections</th><th>Messages</th><th>WIN Doc</th><th>Notes</th><th></th>
-      </tr></thead>
-      <tbody id="pipeBody"></tbody>
-    </table>
-    <div id="pipeEmpty" style="text-align:center;padding:40px;color:var(--t3);display:none">
-      No companies tracked yet. Click a company card and hit "Track" to start.
-    </div>
-  </div>
-</div>
-
 <!-- OUTREACH -->
-<div class="sec" id="outreach">
+<div class="sec active" id="outreach">
   <div class="sec-title">Outreach System — The NxtJob Method</div>
   <div class="sec-sub">Research first. Curiosity hook. 15-min call. WIN document. That's the sequence.</div>
 
@@ -611,6 +560,9 @@ function saveCustom(){save('sr_custom',customCompanies);}
 
 // ── TABS ──
 function showTab(id,el){
+  if (id === 'companies' || id === 'pipeline') {
+    id = 'outreach';
+  }
   const sec = document.getElementById(id);
   if (!sec) return;
   document.querySelectorAll('.sec').forEach(s=>s.classList.remove('active'));
@@ -624,8 +576,6 @@ function showTab(id,el){
     u.searchParams.set('tab', id);
     window.history.replaceState(null, '', u.toString());
   } catch(e) {}
-  if(id==='pipeline') renderPipeline();
-  else if(id==='companies') renderCards();
 }
 
 // ── HEADER STATS ──
@@ -935,25 +885,25 @@ function initTabs(){
   try {
     const u = new URL(window.location.href);
     const tabParam = u.searchParams.get('tab') || (window.location.hash ? window.location.hash.replace(/^#/,'').split('&')[0] : null);
-    const savedTab = tabParam || localStorage.getItem('cc_active_tab_outreach') || 'companies';
-    if (savedTab && document.getElementById(savedTab)) {
-      showTab(savedTab, document.querySelector(`.tab[onclick*="showTab('${savedTab}'"]`));
-    } else {
-      renderCards('all');
+    let savedTab = tabParam || localStorage.getItem('cc_active_tab_outreach') || 'outreach';
+    if (savedTab === 'companies' || savedTab === 'pipeline' || !document.getElementById(savedTab)) {
+      savedTab = 'outreach';
     }
+    showTab(savedTab, document.querySelector(`.tab[onclick*="showTab('${savedTab}'"]`));
   } catch(e) {
-    renderCards('all');
+    showTab('outreach', document.querySelector(`.tab[onclick*="showTab('outreach'"]`));
   }
-  updateStats();
+  if (typeof updateStats === 'function') updateStats();
 }
 
 window.addEventListener('popstate', () => {
   try {
     const u = new URL(window.location.href);
-    const t = u.searchParams.get('tab') || 'companies';
-    if (document.getElementById(t)) {
-      showTab(t, document.querySelector(`.tab[onclick*="showTab('${t}'"]`));
+    let t = u.searchParams.get('tab') || 'outreach';
+    if (t === 'companies' || t === 'pipeline' || !document.getElementById(t)) {
+      t = 'outreach';
     }
+    showTab(t, document.querySelector(`.tab[onclick*="showTab('${t}'"]`));
   } catch(e) {}
 });
 

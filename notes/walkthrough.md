@@ -28,6 +28,9 @@ Added comprehensive region targeting options across the Career Copilot platform,
   * Updated `openNet(id)` to map Indian regions to India's LinkedIn Geo URN (`102257491`).
 
 * **`job_search_os_outreach_resume.html`**:
+  * Removed duplicate `🏢 Companies` and `📊 Pipeline` sub-tabs to eliminate confusion with the dedicated `Companies & Pipeline` section.
+  * Set `🚀 Outreach System` as the primary default active tab and view on `/outreach.html`.
+  * Removed the duplicate companies grid and pipeline tracking DOM tables from this view.
   * Added all new region options to `#addRegion`.
   * Added matching CSS classes for card borders and badge pills.
   * Added `formatRegionBadge()` and `formatRegionName()` formatters.
