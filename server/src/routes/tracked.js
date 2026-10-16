@@ -1,6 +1,6 @@
 import { many, one, query } from '../db/pool.js';
 
-const STAGES = ['new', 'networking', 'call', 'win', 'interview', 'offer', 'failed'];
+const STAGES = ['new', 'applied', 'networking', 'call', 'win', 'interview', 'offer', 'failed'];
 const CONN_STATUSES = ['req', 'dm', 'reply', 'fu1', 'fu2', 'fu3', 'win', 'call', 'ref', 'ab'];
 const CONN_TYPES = ['peer', 'hm', 'hr', 'indian', 'other'];
 

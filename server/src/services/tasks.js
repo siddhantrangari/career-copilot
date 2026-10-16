@@ -259,7 +259,7 @@ export async function generateWinDoc(payload = {}, ctx = {}) {
     );
     await query(
       `UPDATE tracked_companies SET win_status = 'drafted', stage =
-         CASE WHEN stage IN ('new','networking','call') THEN 'win' ELSE stage END,
+         CASE WHEN stage IN ('new','applied','networking','call') THEN 'win' ELSE stage END,
          updated_at = now()
        WHERE company_id = $1`,
       [company.id],

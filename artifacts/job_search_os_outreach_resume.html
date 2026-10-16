@@ -65,7 +65,7 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans
 .pipe-table td{padding:9px 10px;border-bottom:1px solid var(--bd);vertical-align:middle}
 .pipe-table tr:hover td{background:rgba(255,255,255,.02)}
 .stage{font-size:10px;font-weight:600;padding:2px 8px;border-radius:10px;white-space:nowrap}
-.s-new{background:rgba(79,142,247,.15);color:var(--ac)}.s-net{background:rgba(247,201,72,.15);color:var(--y)}
+.s-new{background:rgba(79,142,247,.15);color:var(--ac)}.s-app{background:rgba(56,189,248,.18);color:#38bdf8}.s-net{background:rgba(247,201,72,.15);color:var(--y)}
 .s-call{background:rgba(181,123,238,.15);color:var(--p)}.s-win{background:rgba(56,217,169,.15);color:var(--g)}
 .s-int{background:rgba(255,107,107,.15);color:var(--r)}.s-off{background:rgba(56,217,169,.3);color:#fff}
 .s-fail{background:rgba(74,85,120,.3);color:var(--t3)}
@@ -891,8 +891,8 @@ const COMPANIES = [
 ];
 
 const ROLE_LABELS = {fde:'FDE',ai:'AI Eng',fs:'Full-Stack',se:'Solutions Eng'};
-const STAGE_CSS = {new:'s-new',networking:'s-net',call:'s-call',win:'s-win',interview:'s-int',offer:'s-off',failed:'s-fail'};
-const STAGE_LABELS = {new:'New',networking:'Networking',call:'Call',win:'WIN Sent',interview:'Interview',offer:'Offer 🎉',failed:'Closed'};
+const STAGE_CSS = {new:'s-new',applied:'s-app',networking:'s-net',call:'s-call',win:'s-win',interview:'s-int',offer:'s-off',failed:'s-fail'};
+const STAGE_LABELS = {new:'New',applied:'Applied',networking:'Networking',call:'Call',win:'WIN Sent',interview:'Interview',offer:'Offer 🎉',failed:'Closed'};
 
 // ── STORAGE ──
 function load(k){try{return JSON.parse(localStorage.getItem(k)||'null')}catch{return null}}

@@ -1508,7 +1508,7 @@
   // ── Drag a company between pipeline columns ─────────────────────────
   // The prototype re-renders the board from localStorage, so a drop writes
   // through the API and then lets the prototype's own render run.
-  var STAGES = ['new', 'networking', 'call', 'win', 'interview', 'offer', 'failed'];
+  var STAGES = ['new', 'applied', 'networking', 'call', 'win', 'interview', 'offer', 'failed'];
   var dragging = null;
 
   function wireBoard() {
@@ -1712,9 +1712,9 @@
 (function () {
   'use strict';
 
-  var STAGES = ['new', 'networking', 'call', 'win', 'interview', 'offer', 'failed'];
+  var STAGES = ['new', 'applied', 'networking', 'call', 'win', 'interview', 'offer', 'failed'];
   var STAGE_LABELS = {
-    new: 'New', networking: 'Networking', call: 'Call',
+    new: 'New', applied: 'Applied', networking: 'Networking', call: 'Call',
     win: 'WIN Sent', interview: 'Interview', offer: 'Offer 🎉', failed: 'Closed',
   };
 

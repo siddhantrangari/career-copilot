@@ -15,7 +15,7 @@ import { many, one } from '../db/pool.js';
  */
 
 const STAGE_RANK = {
-  new: 0, networking: 1, call: 2, win: 3, interview: 4, offer: 5, failed: 6,
+  new: 0, applied: 1, networking: 2, call: 3, win: 4, interview: 5, offer: 6, failed: 7,
 };
 
 export async function autofillCompany(companyId) {

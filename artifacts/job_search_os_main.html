@@ -41,7 +41,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);min-heig
 .cdesc{font-size:12px;color:var(--t2);margin:5px 0;line-height:1.5}
 .pay{font-family:'JetBrains Mono';font-size:11px;font-weight:600;color:var(--g);background:rgba(56,217,169,.1);padding:2px 7px;border-radius:4px}
 /* KANBAN */
-.kanban{display:grid;grid-template-columns:repeat(7,minmax(160px,1fr));gap:10px;overflow-x:auto;padding-bottom:10px}
+.kanban{display:grid;grid-template-columns:repeat(8,minmax(160px,1fr));gap:10px;overflow-x:auto;padding-bottom:10px}
 .kcol{background:var(--s1);border:1px solid var(--bd);border-radius:8px;min-height:300px}
 .khead{padding:10px 12px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--bd)}
 .kcards{padding:8px}
@@ -68,7 +68,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);min-heig
 .ptable td{padding:8px 10px;border-bottom:1px solid var(--bd);vertical-align:top}
 .ptable tr:hover td{background:rgba(255,255,255,.02)}
 .stage{font-size:10px;font-weight:600;padding:2px 8px;border-radius:10px;white-space:nowrap}
-.s-new{background:rgba(79,142,247,.15);color:var(--ac)}.s-networking{background:rgba(247,201,72,.15);color:var(--y)}
+.s-new{background:rgba(79,142,247,.15);color:var(--ac)}.s-applied{background:rgba(56,189,248,.18);color:#38bdf8}.s-networking{background:rgba(247,201,72,.15);color:var(--y)}
 .s-call{background:rgba(181,123,238,.15);color:var(--p)}.s-win{background:rgba(56,217,169,.15);color:var(--g)}
 .s-interview{background:rgba(255,107,107,.15);color:var(--r)}.s-offer{background:rgba(56,217,169,.3);color:#fff}
 .s-failed{background:rgba(74,85,120,.3);color:var(--t3)}
@@ -151,7 +151,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);min-heig
     <button class="btn ac" onclick="openM('addModal')">+ Add Company</button>
     <select id="pf" onchange="renderPipeline()" style="background:var(--s2);border:1px solid var(--bd);border-radius:5px;padding:5px 8px;color:var(--t);font-size:12px;font-family:inherit">
       <option value="all">All Stages</option>
-      <option value="new">New</option><option value="networking">Networking</option>
+      <option value="new">New</option><option value="applied">Applied</option><option value="networking">Networking</option>
       <option value="call">Call</option><option value="win">WIN Sent</option>
       <option value="interview">Interview</option><option value="offer">Offer</option><option value="failed">Closed</option>
     </select>
@@ -364,7 +364,7 @@ Format as a numbered table.</div>
           <div class="fr">
             <label>Pipeline Stage</label>
             <select id="tStage">
-              <option value="new">New</option><option value="networking">Networking</option>
+              <option value="new">New</option><option value="applied">Applied</option><option value="networking">Networking</option>
               <option value="call">Call Scheduled/Done</option><option value="win">WIN Doc Sent</option>
               <option value="interview">Interview</option><option value="offer">Offer 🎉</option><option value="failed">Closed</option>
             </select>
@@ -471,6 +471,16 @@ Format as a numbered table.</div>
             <option value="in_remote">🇮🇳 India Remote</option>
             <option value="blr_onsite">🏢 Bangalore 5 Days</option>
             <option value="blr_hybrid">🏙️ Bangalore Hybrid</option>
+          </select>
+        </div>
+        <div class="fr">
+          <label>Initial Pipeline Stage</label>
+          <select id="aStage">
+            <option value="new">New (Target Company)</option>
+            <option value="applied" selected>Applied (Application Submitted)</option>
+            <option value="networking">Networking</option>
+            <option value="call">Call</option>
+            <option value="interview">Interview</option>
           </select>
         </div>
         <div class="fr">
@@ -3249,8 +3259,8 @@ const COS=[
   }
 ];
 const RL={fde:'FDE',ai:'AI Eng',fs:'Full-Stack',se:'Solutions Eng'};
-const SC={new:'s-new',networking:'s-networking',call:'s-call',win:'s-win',interview:'s-interview',offer:'s-offer',failed:'s-failed'};
-const SL={new:'New',networking:'Networking',call:'Call',win:'WIN Sent',interview:'Interview',offer:'Offer 🎉',failed:'Closed'};
+const SC={new:'s-new',applied:'s-applied',networking:'s-networking',call:'s-call',win:'s-win',interview:'s-interview',offer:'s-offer',failed:'s-failed'};
+const SL={new:'New',applied:'Applied',networking:'Networking',call:'Call',win:'WIN Sent',interview:'Interview',offer:'Offer 🎉',failed:'Closed'};
 const CONN_STATUS={req:'Connection Req',dm:'DM Sent',reply:'Reply ✓',fu1:'Follow-up 1',fu2:'Follow-up 2',fu3:'Follow-up 3',win:'WIN Shared',call:'Call Done',ref:'Referred 🎉',ab:'Abandoned'};
 const CONN_CSS={req:'cs-req',dm:'cs-dm',reply:'cs-reply',fu1:'cs-fu',fu2:'cs-fu',fu3:'cs-fu',win:'cs-win',call:'cs-call',ref:'cs-ref',ab:'cs-ab'};
 
@@ -3882,8 +3892,8 @@ function renderTable(all,filter){
 }
 
 function renderKanban(all,filter){
-  const stages=['new','networking','call','win','interview','offer','failed'];
-  const colors={new:'var(--ac)',networking:'var(--y)',call:'var(--p)',win:'var(--g)',interview:'var(--r)',offer:'var(--g)',failed:'var(--t3)'};
+  const stages=['new','applied','networking','call','win','interview','offer','failed'];
+  const colors={new:'var(--ac)',applied:'#38bdf8',networking:'var(--y)',call:'var(--p)',win:'var(--g)',interview:'var(--r)',offer:'var(--g)',failed:'var(--t3)'};
   const board=document.getElementById('kanbanBoard');
   board.innerHTML=stages.map(s=>{
     const cards=all.filter(c=>{
@@ -4214,8 +4224,9 @@ function addCo(){
   custom.push(c);
   saveCu();
 
+  const initStage = (document.getElementById('aStage') && document.getElementById('aStage').value) || 'new';
   tracked[id]={
-    stage:'new',
+    stage: initStage,
     roleTitle: c.roleTitle,
     connections:[],
     msgs:'',
