@@ -24,12 +24,12 @@ const PAGES = [
 ];
 
 const NAV = `
-<div id="cc-nav" style="position:fixed;top:0;left:0;right:0;z-index:9997;display:flex;gap:2px;
-     padding:6px 14px;background:rgba(10,13,18,.92);backdrop-filter:blur(8px);
-     border-bottom:1px solid #232a38;font:600 12px -apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif">
-  <a href="/" style="padding:5px 12px;border-radius:7px;color:#a9b6c9;text-decoration:none">Companies &amp; Pipeline</a>
-  <a href="/outreach.html" style="padding:5px 12px;border-radius:7px;color:#a9b6c9;text-decoration:none">Outreach &amp; Resume</a>
-  <a href="/interview.html" style="padding:5px 12px;border-radius:7px;color:#a9b6c9;text-decoration:none">Interview Room</a>
+<div id="cc-nav" style="position:fixed;top:0;left:0;right:0;height:36px;z-index:9997;display:flex;align-items:center;gap:4px;
+     padding:0 14px;background:rgba(10,13,18,.96);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+     border-bottom:1px solid #232a38;font:600 12px -apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;box-sizing:border-box">
+  <a href="/" style="padding:4px 12px;border-radius:6px;color:#a9b6c9;text-decoration:none">Companies &amp; Pipeline</a>
+  <a href="/outreach.html" style="padding:4px 12px;border-radius:6px;color:#a9b6c9;text-decoration:none">Outreach &amp; Resume</a>
+  <a href="/interview.html" style="padding:4px 12px;border-radius:6px;color:#a9b6c9;text-decoration:none">Interview Room</a>
 </div>
 <script>
   (function () {
@@ -37,7 +37,7 @@ const NAV = `
     document.querySelectorAll('#cc-nav a').forEach(function (a) {
       if (a.getAttribute('href') === here) { a.style.background = '#1e2635'; a.style.color = '#fff'; }
     });
-    document.body.style.paddingTop = '34px';
+    document.body.style.paddingTop = '36px';
   })();
 </script>`;
 
@@ -65,6 +65,7 @@ const RELABEL = [
 
 const headInject = (v) => `
 <link rel="stylesheet" href="/bridge.css?v=${v.bridgeCss}">
+<script src="/html2pdf.bundle.min.js"></script>
 <script>window.CC_ASSET_VERSION=${JSON.stringify(v.actions)};</script>
 <script src="/bridge.js?v=${v.bridgeJs}"></script>`;
 
@@ -84,6 +85,7 @@ async function build() {
   await fs.rm(OUT, { recursive: true, force: true });
   await fs.mkdir(OUT, { recursive: true });
 
+  await fs.copyFile(path.join(ROOT, 'web/html2pdf.bundle.min.js'), path.join(OUT, 'html2pdf.bundle.min.js'));
   await fs.copyFile(path.join(ROOT, 'web/bridge.js'), path.join(OUT, 'bridge.js'));
   await fs.copyFile(path.join(ROOT, 'web/bridge.css'), path.join(OUT, 'bridge.css'));
   await fs.copyFile(path.join(ROOT, 'web/prototype-actions.js'), path.join(OUT, 'prototype-actions.js'));

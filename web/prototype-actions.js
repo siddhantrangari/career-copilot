@@ -161,8 +161,21 @@
   }
 
   // ── outreach page: Tailored Resume ─────────────────────────────────
+  // ── outreach page: Tailored Resume & Studio ───────────────────────
+  window.__CC_RESUME_STUDIO_ACTIONS__ = {
+    runJob: runJob,
+    api: window.__CC__.api,
+    esc: esc,
+    running: running,
+    failed: failed,
+  };
+
   if (document.getElementById('tailorJD')) {
     window.genTailorPrompt = function () {
+      if (typeof window.triggerTailorResume === 'function') {
+        window.triggerTailorResume();
+        return;
+      }
       var name = document.getElementById('tailorCompany').value.trim();
       var role = document.getElementById('tailorRole').value.trim();
       var jd = document.getElementById('tailorJD').value.trim();
@@ -495,11 +508,14 @@
         var s = d.suggested || {}, p = d.provenance || {}, f = d.facts || {};
 
         // Only fill fields the user has not already filled.
-        [['tJD', 'jd'], ['tMsgs', 'msgs'], ['tNotes', 'notes']].forEach(function (pair) {
+        [['tJD', 'jd'], ['tJdText', 'jdText'], ['tMsgs', 'msgs'], ['tNotes', 'notes']].forEach(function (pair) {
           var el = document.getElementById(pair[0]);
           if (el && !el.value.trim() && s[pair[1]]) {
             el.value = s[pair[1]];
             hintRow(pair[0], p[pair[1]]);
+            if (pair[0] === 'tJdText' && typeof window.updateJdWordCount === 'function') {
+              window.updateJdWordCount();
+            }
           }
         });
 

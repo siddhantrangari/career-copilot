@@ -9,6 +9,7 @@ import {
   messagesPrompt,
   winDocPrompt,
   tailorResumePrompt,
+  refineResumePrompt,
   verifyResumePrompt,
   coldEmailPrompt,
   callPrepPrompt,
@@ -270,7 +271,7 @@ export async function generateWinDoc(payload = {}, ctx = {}) {
 
 // ── Tailored resume (+ fact-check pass) ───────────────────────────────
 export async function tailorResume(payload = {}) {
-  const { jobTitle, jobDescription, save = true, verify = true } = payload;
+  const { jobTitle, jobDescription, save = true, verify = true, instructions, comments } = payload;
   if (!jobDescription?.trim()) throw new AiError('jobDescription is required', 400);
 
   const company = await resolveCompany(payload);
@@ -281,6 +282,7 @@ export async function tailorResume(payload = {}) {
     companyName: name,
     jobTitle: jobTitle || 'Senior Engineer',
     jobDescription,
+    instructions: instructions || comments || '',
     candidate,
   });
 
@@ -342,6 +344,108 @@ export async function tailorResume(payload = {}) {
   }
 
   return { resume: result, id: saved?.id || null };
+}
+
+// ── Refine resume (chat / feedback revisions) ─────────────────────────
+export async function refineResume(payload = {}) {
+  const {
+    resumeId,
+    currentResumeText,
+    feedback,
+    comments,
+    chatHistory,
+    companyName,
+    jobTitle,
+    jobDescription,
+    verify = true,
+  } = payload;
+
+  const userFeedback = feedback || comments;
+  if (!userFeedback?.trim()) throw new AiError('feedback or comments is required to refine resume', 400);
+  if (!currentResumeText?.trim()) throw new AiError('currentResumeText is required', 400);
+
+  const company = await resolveCompany(payload);
+  const name = company?.name || companyName || 'Target company';
+
+  const candidate = await candidateBlock();
+  const prompt = refineResumePrompt({
+    companyName: name,
+    jobTitle: jobTitle || 'Senior Engineer',
+    jobDescription: jobDescription || '',
+    currentResumeText,
+    feedback: userFeedback,
+    chatHistory: Array.isArray(chatHistory) ? chatHistory : [],
+    candidate,
+  });
+
+  const result = await chatJson({
+    kind: 'refine-resume',
+    companyId: company?.id,
+    system: prompt.system,
+    user: prompt.user,
+    maxTokens: 16_000,
+    input: { companyName: name, jobTitle, feedback: userFeedback },
+  });
+
+  // Verification pass
+  if (result.tailoredResumeText && verify !== false) {
+    const check = verifyResumePrompt({ tailoredResume: result.tailoredResumeText, candidate });
+    try {
+      const verification = await chatJson({
+        kind: 'verify-resume',
+        companyId: company?.id,
+        system: check.system,
+        user: check.user,
+        maxTokens: 6_000,
+        input: { companyName: name, jobTitle },
+      });
+
+      const issues = Array.isArray(verification.issues) ? verification.issues : [];
+      const blocking = issues.filter((i) => ['critical', 'moderate'].includes(i.severity));
+
+      result.verification = {
+        ...verification,
+        issues,
+        clean: issues.length === 0,
+        safeToSend: blocking.length === 0,
+        blockingCount: blocking.length,
+      };
+    } catch (err) {
+      result.verification = {
+        clean: null,
+        issues: [],
+        verdict: `Verification unavailable: ${err.message}`,
+      };
+    }
+  }
+
+  let savedId = resumeId || null;
+  if (resumeId) {
+    await query(
+      `UPDATE resume_versions
+       SET tailored_text = $1,
+           match_score = COALESCE(NULLIF($2, 0), match_score)
+       WHERE id = $3`,
+      [result.tailoredResumeText || '', Math.round(result.matchScore || 0), resumeId],
+    );
+  } else {
+    const saved = await one(
+      `INSERT INTO resume_versions
+         (company_id, company_name, job_title, job_description, tailored_text, match_score)
+       VALUES ($1, $2, $3, $4, $5, $6) RETURNING id, created_at`,
+      [
+        company?.id || null,
+        name,
+        jobTitle || '',
+        jobDescription || '',
+        result.tailoredResumeText || '',
+        Math.round(result.matchScore || 0),
+      ],
+    );
+    savedId = saved?.id || null;
+  }
+
+  return { resume: result, id: savedId };
 }
 
 // ── Cold email ────────────────────────────────────────────────────────
@@ -466,6 +570,7 @@ export const TASKS = {
   'generate-messages': generateMessages,
   'generate-win-doc': generateWinDoc,
   'tailor-resume': tailorResume,
+  'refine-resume': refineResume,
   'cold-email': coldEmail,
   'call-prep': callPrep,
   'linkedin-post': linkedInPost,

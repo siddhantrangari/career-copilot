@@ -45,10 +45,23 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);min-heig
 .kcol{background:var(--s1);border:1px solid var(--bd);border-radius:8px;min-height:300px}
 .khead{padding:10px 12px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--bd)}
 .kcards{padding:8px}
-.kcard{background:var(--s2);border:1px solid var(--bd);border-radius:6px;padding:9px 10px;margin-bottom:7px;cursor:pointer;transition:border-color .15s;font-size:12px}
+.kcard{position:relative;background:var(--s2);border:1px solid var(--bd);border-radius:6px;padding:9px 10px;padding-top:16px;margin-bottom:7px;cursor:pointer;transition:border-color .15s,box-shadow .15s;font-size:12px}
 .kcard:hover{border-color:var(--ac)}
-.kcard-name{font-weight:600;color:var(--t);margin-bottom:3px}
+.kcard.is-fav{border-left:3px solid #f59e0b!important;border-color:rgba(245,158,11,.45);background:linear-gradient(135deg,rgba(245,158,11,.08) 0%,var(--s2) 100%)!important;box-shadow:0 2px 10px rgba(245,158,11,.15)}
+.kcard.is-fav:hover{border-color:#f59e0b!important;box-shadow:0 4px 14px rgba(245,158,11,.28)}
+.kcard-name{font-weight:600;color:var(--t);margin-bottom:3px;padding-right:48px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .kcard-meta{font-size:10px;color:var(--t3)}
+.kcard-fav-btn{position:absolute;top:6px;right:28px;background:none;border:none;font-size:15px;line-height:1;padding:0 2px;cursor:pointer;color:#7c8ba3;transition:transform .15s,color .15s;z-index:2}
+.kcard-fav-btn:hover{transform:scale(1.25);color:#f59e0b}
+.kcard-fav-btn.active{color:#f59e0b;text-shadow:0 0 6px rgba(245,158,11,.6)}
+.kcard-fav-badge{display:inline-flex;align-items:center;gap:3px;background:rgba(245,158,11,.18);color:#fbbf24;border:1px solid rgba(245,158,11,.4);border-radius:4px;font-size:9px;font-weight:700;padding:1px 5px;letter-spacing:.4px}
+.kcard-jd-badge{display:inline-flex;align-items:center;gap:2px;background:rgba(56,217,169,.12);color:var(--g);border:1px solid rgba(56,217,169,.25);border-radius:4px;font-size:9px;font-weight:600;padding:1px 5px}
+.jd-doc-chip{display:flex;align-items:center;justify-content:space-between;background:rgba(79,142,247,.1);border:1px solid rgba(79,142,247,.3);border-radius:6px;padding:7px 10px;margin-top:6px;font-size:12px;gap:8px}
+.jd-doc-name{display:flex;align-items:center;gap:6px;font-weight:600;color:var(--t);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;min-width:0}
+.jd-doc-size{font-size:10px;color:var(--t3);font-weight:normal}
+.jd-upload-drop{border:1px dashed var(--bd);border-radius:6px;padding:9px;text-align:center;background:rgba(255,255,255,.02);cursor:pointer;transition:all .15s}
+.jd-upload-drop:hover{border-color:var(--ac);background:rgba(79,142,247,.06)}
+.ptable tr.is-fav td{background:rgba(245,158,11,.03);border-left:2px solid #f59e0b}
 /* PIPELINE TABLE */
 .ptable{width:100%;border-collapse:collapse;font-size:12px}
 .ptable th{text-align:left;padding:8px 10px;color:var(--t3);font-size:10px;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--bd);font-weight:600}
@@ -259,35 +272,135 @@ Format as a numbered table.</div>
 
 <!-- TRACK MODAL -->
 <div class="modal" id="trackModal">
-  <div class="mbox" style="max-width:640px">
-    <div class="mhdr"><div><div class="mtitle" id="trackTitle">Track Company</div><div class="msub">Log your activity and connections for this company</div></div><button class="xbtn" onclick="closeM('trackModal')">✕</button></div>
-    <div class="mbody">
+  <div class="mbox" style="max-width:700px">
+    <div class="mhdr">
+      <div style="flex:1;min-width:0;display:flex;align-items:center;justify-content:space-between;padding-right:12px">
+        <div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <div class="mtitle" id="trackTitle" style="font-size:16px">Track Company</div>
+            <button type="button" id="trackFavBtn" onclick="toggleCurrentTrackFav()" class="btn" style="padding:2px 9px;font-size:11px;border-radius:12px;display:inline-flex;align-items:center;gap:4px;cursor:pointer">
+              <span id="trackFavStar">☆</span> <span id="trackFavLabel">Mark Priority</span>
+            </button>
+          </div>
+          <div class="msub" id="trackSub">View full role details, job description, uploaded documents &amp; outreach</div>
+        </div>
+      </div>
+      <button class="xbtn" onclick="closeM('trackModal')">✕</button>
+    </div>
+    <div class="mbody" style="padding:14px 18px">
       <input type="hidden" id="trackId">
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-        <div class="fr"><label>Stage</label>
-          <select id="tStage">
-            <option value="new">New</option><option value="networking">Networking</option>
-            <option value="call">Call Scheduled/Done</option><option value="win">WIN Doc Sent</option>
-            <option value="interview">Interview</option><option value="offer">Offer 🎉</option><option value="failed">Closed</option>
-          </select>
+
+      <!-- COMPANY & ROLE DETAILS SECTION -->
+      <div style="background:var(--s2);border:1px solid var(--bd);border-radius:8px;padding:12px;margin-bottom:12px">
+        <div style="font-size:11px;font-weight:700;color:var(--t2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;display:flex;align-items:center;gap:6px">
+          <span>🏢</span> Company &amp; Role Details
         </div>
-        <div class="fr"><label>Job Link (if found)</label><input type="text" id="tJD" placeholder="https://..."></div>
-        <div class="fr"><label>Messages Sent</label><input type="text" id="tMsgs" placeholder="e.g. 2 DMs sent, 1 replied"></div>
-        <div class="fr"><label>WIN Document</label>
-          <select id="tWin"><option value="none">Not started</option><option value="researching">Researching</option><option value="prepared">Prepared</option><option value="sent">Sent to HM</option><option value="discussed">Discussed on call</option></select>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <div class="fr">
+            <label>Target Role / Job Title</label>
+            <input type="text" id="tRole" placeholder="e.g. Senior Full-Stack Engineer">
+          </div>
+          <div class="fr">
+            <label>Region</label>
+            <select id="tR">
+              <option value="eu">🇪🇺 Europe</option>
+              <option value="gulf">🌙 Gulf / UAE</option>
+              <option value="global">🌐 Global Remote</option>
+              <option value="global_onsite">🏢 Global On-site</option>
+              <option value="in_remote">🇮🇳 India Remote</option>
+              <option value="blr_onsite">🏢 Bangalore 5 Days</option>
+              <option value="blr_hybrid">🏙️ Bangalore Hybrid</option>
+            </select>
+          </div>
+          <div class="fr">
+            <label>Pay Range</label>
+            <input type="text" id="tPay" placeholder="e.g. €90–€130k or $120–$160k">
+          </div>
+          <div class="fr">
+            <label>Job Link / URL</label>
+            <div style="display:flex;gap:6px">
+              <input type="text" id="tJD" placeholder="https://..." style="flex:1">
+              <a id="tUrlOpenBtn" href="#" target="_blank" class="btn ac" style="display:none;align-items:center;font-size:11px;padding:0 8px;flex-shrink:0" title="Open Job Link in new tab">Open ↗</a>
+            </div>
+          </div>
+        </div>
+        <div class="fr" style="margin-top:6px;margin-bottom:0">
+          <label>Why This Company / Role Notes</label>
+          <textarea id="tDesc" rows="2" placeholder="What's interesting about them? Referral notes, team context..."></textarea>
         </div>
       </div>
-      <div class="fr"><label>Notes (calls, feedback, next steps)</label><textarea id="tNotes" rows="3" placeholder="What happened? What's next?"></textarea></div>
 
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;margin-top:4px">
-        <div style="font-size:12px;font-weight:600;color:var(--t)">🤝 Connections Made</div>
-        <button class="btn ac" onclick="addConn()" style="font-size:11px">+ Add Connection</button>
+      <!-- DETAILED JOB DESCRIPTION & DOCUMENT UPLOAD SECTION -->
+      <div style="background:var(--s2);border:1px solid var(--bd);border-radius:8px;padding:12px;margin-bottom:12px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <div style="font-size:11px;font-weight:700;color:var(--t2);text-transform:uppercase;letter-spacing:.5px;display:flex;align-items:center;gap:6px">
+            <span>📋</span> Job Description (JD) &amp; Documents
+          </div>
+          <div style="display:flex;align-items:center;gap:6px">
+            <button type="button" class="btn" onclick="copyTrackJd()" style="font-size:10px;padding:2px 7px">📋 Copy JD</button>
+            <button type="button" class="btn ac" onclick="document.getElementById('tJdFile').click()" style="font-size:10px;padding:2px 7px">📎 Attach Doc</button>
+          </div>
+        </div>
+
+        <!-- Hidden document file input -->
+        <input type="file" id="tJdFile" accept=".pdf,.docx,.doc,.txt,.md" style="display:none" onchange="handleJdUpload(this, 't')">
+        <div id="tJdFileContainer" style="margin-bottom:8px"></div>
+
+        <div class="fr" style="margin-bottom:0">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+            <label style="margin:0">Detailed Job Description Text</label>
+            <span id="tJdWordCount" style="font-size:10px;color:var(--t3)">0 words</span>
+          </div>
+          <textarea id="tJdText" rows="6" placeholder="Paste or view the full Job Description text here..." style="font-family:inherit;font-size:12px;line-height:1.5" oninput="updateJdWordCount()"></textarea>
+        </div>
       </div>
-      <div id="connList"></div>
 
-      <div style="display:flex;gap:8px;margin-top:12px">
-        <button class="btn ac" onclick="saveTrack()" style="flex:1;justify-content:center;padding:8px">Save</button>
-        <button class="btn red" onclick="delTrack()">Remove</button>
+      <!-- PIPELINE PROGRESS & OUTREACH SECTION -->
+      <div style="background:var(--s2);border:1px solid var(--bd);border-radius:8px;padding:12px;margin-bottom:12px">
+        <div style="font-size:11px;font-weight:700;color:var(--t2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;display:flex;align-items:center;gap:6px">
+          <span>📊</span> Pipeline Status &amp; Outreach
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <div class="fr">
+            <label>Pipeline Stage</label>
+            <select id="tStage">
+              <option value="new">New</option><option value="networking">Networking</option>
+              <option value="call">Call Scheduled/Done</option><option value="win">WIN Doc Sent</option>
+              <option value="interview">Interview</option><option value="offer">Offer 🎉</option><option value="failed">Closed</option>
+            </select>
+          </div>
+          <div class="fr">
+            <label>WIN Document Status</label>
+            <select id="tWin">
+              <option value="none">Not started</option><option value="researching">Researching</option><option value="prepared">Prepared</option><option value="sent">Sent to HM</option><option value="discussed">Discussed on call</option>
+            </select>
+          </div>
+          <div class="fr" style="grid-column:1/-1">
+            <label>Messages Sent / Outreach Log</label>
+            <input type="text" id="tMsgs" placeholder="e.g. 2 DMs sent, 1 replied on LinkedIn">
+          </div>
+        </div>
+        <div class="fr" style="margin-top:6px;margin-bottom:0">
+          <label>Activity Notes (calls, feedback, next steps)</label>
+          <textarea id="tNotes" rows="3" placeholder="What happened? What's next?"></textarea>
+        </div>
+      </div>
+
+      <!-- CONNECTIONS SECTION -->
+      <div style="background:var(--s2);border:1px solid var(--bd);border-radius:8px;padding:12px;margin-bottom:12px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <div style="font-size:11px;font-weight:700;color:var(--t2);text-transform:uppercase;letter-spacing:.5px;display:flex;align-items:center;gap:6px">
+            <span>🤝</span> Connections Made
+          </div>
+          <button class="btn ac" onclick="addConn()" style="font-size:11px;padding:3px 8px">+ Add Connection</button>
+        </div>
+        <div id="connList"></div>
+      </div>
+
+      <!-- ACTION BUTTONS -->
+      <div style="display:flex;gap:8px;margin-top:14px">
+        <button class="btn ac" onclick="saveTrack()" style="flex:1;justify-content:center;padding:10px;font-size:13px;font-weight:600">Save Changes</button>
+        <button class="btn red" onclick="delTrack()" style="padding:10px 14px">Remove</button>
       </div>
     </div>
   </div>
@@ -326,24 +439,94 @@ Format as a numbered table.</div>
 
 <!-- ADD COMPANY MODAL -->
 <div class="modal" id="addModal">
-  <div class="mbox" style="max-width:460px">
-    <div class="mhdr"><div><div class="mtitle">+ Add Company</div></div><button class="xbtn" onclick="closeM('addModal')">✕</button></div>
-    <div class="mbody">
-      <div class="fr"><label>Company Name *</label><input type="text" id="aN" placeholder="e.g. Stripe"></div>
-      <div class="fr"><label>Region</label><select id="aR">
-        <option value="eu">🇪🇺 Europe</option>
-        <option value="gulf">🌙 Gulf / UAE</option>
-        <option value="global">🌐 Global Remote</option>
-        <option value="global_onsite">🏢 Global On-site</option>
-        <option value="in_remote">🇮🇳 India Remote</option>
-        <option value="blr_onsite">🏢 Bangalore Full time 5 days</option>
-        <option value="blr_hybrid">🏙️ Bangalore Hybrid</option>
-      </select></div>
-      <div class="fr"><label>Role Types</label><select id="aRoles" multiple style="height:80px"><option value="fde">FDE</option><option value="ai">AI Engineer</option><option value="fs" selected>Full-Stack</option><option value="se">Solutions Engineer</option></select></div>
-      <div class="fr"><label>Pay Range</label><input type="text" id="aPay" placeholder="e.g. €90–€130k"></div>
-      <div class="fr"><label>Career Page / Job Link</label><input type="text" id="aUrl" placeholder="https://..."></div>
-      <div class="fr"><label>Why This Company</label><textarea id="aDesc" placeholder="What's interesting about them?"></textarea></div>
-      <button class="btn ac" onclick="addCo()" style="width:100%;justify-content:center;padding:8px">Add & Track</button>
+  <div class="mbox" style="max-width:580px">
+    <div class="mhdr">
+      <div>
+        <div class="mtitle">+ Add Company to Pipeline</div>
+        <div class="msub">Add target company, job description, document, and tracking priority</div>
+      </div>
+      <button class="xbtn" onclick="closeM('addModal')">✕</button>
+    </div>
+    <div class="mbody" style="padding:14px 18px">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div class="fr" style="grid-column:1/-1">
+          <label>Company Name *</label>
+          <input type="text" id="aN" placeholder="e.g. Stripe, Epsilon, Ruya AI">
+        </div>
+        <div class="fr">
+          <label>Target Role / Job Title</label>
+          <input type="text" id="aRoleTitle" placeholder="e.g. Senior Full-Stack Engineer">
+        </div>
+        <div class="fr">
+          <label>Pay Range</label>
+          <input type="text" id="aPay" placeholder="e.g. €90–€130k or $120–$160k">
+        </div>
+        <div class="fr">
+          <label>Region</label>
+          <select id="aR">
+            <option value="eu">🇪🇺 Europe</option>
+            <option value="gulf">🌙 Gulf / UAE</option>
+            <option value="global" selected>🌐 Global Remote</option>
+            <option value="global_onsite">🏢 Global On-site</option>
+            <option value="in_remote">🇮🇳 India Remote</option>
+            <option value="blr_onsite">🏢 Bangalore 5 Days</option>
+            <option value="blr_hybrid">🏙️ Bangalore Hybrid</option>
+          </select>
+        </div>
+        <div class="fr">
+          <label>Role Category</label>
+          <select id="aRoles" multiple style="height:70px">
+            <option value="fs" selected>Full-Stack</option>
+            <option value="ai">AI Engineer</option>
+            <option value="fde">Forward Deployed Engineer (FDE)</option>
+            <option value="se">Solutions Engineer</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="fr" style="margin-top:6px">
+        <label>Career Page / Job Link (if available)</label>
+        <input type="text" id="aUrl" placeholder="https://jobs.company.com/role/...">
+      </div>
+
+      <!-- JD DOCUMENT UPLOAD -->
+      <div class="fr">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px">
+          <label style="margin:0">Upload JD Document (if link not available)</label>
+          <span style="font-size:10px;color:var(--t3)">PDF, DOCX, DOC, TXT, MD</span>
+        </div>
+        <input type="file" id="aJdFile" accept=".pdf,.docx,.doc,.txt,.md" style="display:none" onchange="handleJdUpload(this, 'a')">
+        <div id="aJdFileContainer">
+          <div class="jd-upload-drop" onclick="document.getElementById('aJdFile').click()">
+            <div style="font-size:12px;color:var(--ac);font-weight:600">📎 Click to upload Job Description Document</div>
+            <div style="font-size:10px;color:var(--t3);margin-top:2px">Upload PDF or DOCX if direct job link is not available</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- DETAILED JD TEXT -->
+      <div class="fr">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px">
+          <label style="margin:0">Detailed Job Description (JD Text)</label>
+          <span id="aJdWordCount" style="font-size:10px;color:var(--t3)">0 words</span>
+        </div>
+        <textarea id="aJdText" rows="5" placeholder="Paste full JD text here (requirements, responsibilities, tech stack)..." oninput="updateAddJdWordCount()"></textarea>
+      </div>
+
+      <div class="fr">
+        <label>Why This Company / Notes</label>
+        <textarea id="aDesc" rows="2" placeholder="What's interesting about them? Referral notes, team context..."></textarea>
+      </div>
+
+      <!-- PRIORITY / FAVOURITE CHECKBOX -->
+      <div style="display:flex;align-items:center;gap:8px;background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.25);border-radius:6px;padding:8px 12px;margin:8px 0 12px">
+        <input type="checkbox" id="aFav" style="width:16px;height:16px;accent-color:#f59e0b;cursor:pointer">
+        <label for="aFav" style="font-size:12px;color:var(--t);font-weight:600;cursor:pointer;margin:0">
+          ⭐ Mark as Priority / Favourite <span style="font-size:11px;color:var(--t3);font-weight:normal">(floats to top of pipeline column)</span>
+        </label>
+      </div>
+
+      <button class="btn ac" onclick="addCo()" style="width:100%;justify-content:center;padding:9px;font-size:13px;font-weight:600">Add &amp; Track in Pipeline</button>
     </div>
   </div>
 </div>
@@ -3324,27 +3507,374 @@ function renderPipeline(){
   updateStats();
 }
 
+// --- PRIORITY & JD HELPERS ---
+function isCoFav(id) {
+  if (!id) return false;
+  if (window.__CC_FAVOURITES__ && window.__CC_FAVOURITES__.has(id)) return true;
+  if (tracked[id] && (tracked[id].fav || tracked[id].favourite)) return true;
+  const c = allCos().find(x => x.id === id);
+  return !!(c && (c.favourite || c.fav));
+}
+window.isCoFav = isCoFav;
+
+function toggleCoFav(e, id) {
+  if (e) {
+    e.preventDefault();
+    e.stopPropagation();
+  }
+  if (!id) return;
+  const nowFav = !isCoFav(id);
+
+  if (!tracked[id]) tracked[id] = { stage: 'new', connections: [] };
+  tracked[id].fav = nowFav;
+  tracked[id].favourite = nowFav;
+
+  const c = allCos().find(x => x.id === id);
+  if (c) {
+    c.favourite = nowFav;
+    c.fav = nowFav;
+  }
+
+  if (window.__CC_FAVOURITES__) {
+    if (nowFav) window.__CC_FAVOURITES__.add(id);
+    else window.__CC_FAVOURITES__.delete(id);
+  }
+
+  saveTr();
+  saveCu();
+  renderPipeline();
+  renderCards();
+  updateStats();
+
+  if (window.__CC__ && typeof window.__CC__.api === 'function') {
+    window.__CC__.api('/companies/' + encodeURIComponent(id) + '/favourite', { method: 'POST', body: {} })
+      .catch(console.error);
+    if (typeof window.__CC__.pushState === 'function') window.__CC__.pushState();
+  }
+}
+window.toggleCoFav = toggleCoFav;
+
+function toggleCurrentTrackFav() {
+  const id = document.getElementById('trackId').value;
+  if (!id) return;
+  toggleCoFav(null, id);
+  updateTrackFavButton(isCoFav(id));
+}
+window.toggleCurrentTrackFav = toggleCurrentTrackFav;
+
+function updateTrackFavButton(isFav) {
+  const btn = document.getElementById('trackFavBtn');
+  const star = document.getElementById('trackFavStar');
+  const label = document.getElementById('trackFavLabel');
+  if (!btn) return;
+  if (isFav) {
+    btn.style.background = 'rgba(245,158,11,0.2)';
+    btn.style.borderColor = '#f59e0b';
+    btn.style.color = '#fbbf24';
+    if (star) star.textContent = '★';
+    if (label) label.textContent = 'Priority / Fav';
+  } else {
+    btn.style.background = 'var(--s2)';
+    btn.style.borderColor = 'var(--bd)';
+    btn.style.color = 'var(--t2)';
+    if (star) star.textContent = '☆';
+    if (label) label.textContent = 'Mark Priority';
+  }
+}
+
+function formatBytes(bytes) {
+  if (!bytes || bytes === 0) return '0 B';
+  const k = 1024;
+  const sizes = ['B', 'KB', 'MB', 'GB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+}
+
+function getJdFileObj(id) {
+  if (!id) return null;
+  const tr = tracked[id] || {};
+  const c = allCos().find(x => x.id === id) || {};
+  return tr.jdFile || c.jdFile || (window.__TRACK_JD_FILES__ && window.__TRACK_JD_FILES__[id]) || null;
+}
+
+function viewJdFileById(id) {
+  const fileObj = getJdFileObj(id);
+  if (!fileObj) {
+    alert('No document attached.');
+    return;
+  }
+  viewJdFile(fileObj);
+}
+window.viewJdFileById = viewJdFileById;
+
+function viewJdFile(fileObj) {
+  if (!fileObj || !fileObj.data) {
+    alert('Document data not found.');
+    return;
+  }
+  if (fileObj.data.startsWith('data:application/pdf') || fileObj.type === 'application/pdf') {
+    const w = window.open('');
+    if (w) {
+      w.document.title = fileObj.name || 'Job Description Document';
+      w.document.body.style.margin = '0';
+      w.document.body.style.height = '100vh';
+      const iframe = w.document.createElement('iframe');
+      iframe.src = fileObj.data;
+      iframe.style.width = '100%';
+      iframe.style.height = '100%';
+      iframe.style.border = 'none';
+      w.document.body.appendChild(iframe);
+      return;
+    }
+  }
+  const a = document.createElement('a');
+  a.href = fileObj.data;
+  a.download = fileObj.name || 'Job_Description';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+}
+window.viewJdFile = viewJdFile;
+
+function viewCurrentAddFile() {
+  if (window.__ADD_JD_FILE__) viewJdFile(window.__ADD_JD_FILE__);
+  else alert('No document selected.');
+}
+window.viewCurrentAddFile = viewCurrentAddFile;
+
+function viewCurrentTrackFile() {
+  const id = document.getElementById('trackId').value;
+  viewJdFileById(id);
+}
+window.viewCurrentTrackFile = viewCurrentTrackFile;
+
+function renderFileBadge(prefix, fileObj) {
+  const container = document.getElementById(prefix + 'JdFileContainer');
+  if (!container) return;
+
+  if (!fileObj || !fileObj.name) {
+    if (prefix === 'a') {
+      container.innerHTML = `
+        <div class="jd-upload-drop" onclick="document.getElementById('aJdFile').click()">
+          <div style="font-size:12px;color:var(--ac);font-weight:600">📎 Click to upload Job Description Document</div>
+          <div style="font-size:10px;color:var(--t3);margin-top:2px">Upload PDF or DOCX if direct job link is not available</div>
+        </div>`;
+    } else {
+      container.innerHTML = `
+        <div style="display:flex;align-items:center;gap:8px">
+          <button type="button" class="btn" onclick="document.getElementById('tJdFile').click()" style="font-size:11px;padding:4px 10px">
+            📎 Upload JD Document (.pdf, .docx, .txt, .md)
+          </button>
+          <span style="font-size:11px;color:var(--t3)">No document attached yet</span>
+        </div>`;
+    }
+    return;
+  }
+
+  const sizeStr = formatBytes(fileObj.size);
+  const isAdd = prefix === 'a';
+
+  container.innerHTML = `
+    <div class="jd-doc-chip">
+      <div class="jd-doc-name" title="${fileObj.name}">
+        <span>📄</span>
+        <span style="max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${fileObj.name}</span>
+        <span class="jd-doc-size">(${sizeStr})</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px">
+        <button type="button" class="btn ac" onclick="${isAdd ? 'viewCurrentAddFile()' : 'viewCurrentTrackFile()'}" style="font-size:10px;padding:3px 8px">
+          👁️ View / Download
+        </button>
+        <button type="button" class="btn" onclick="document.getElementById('${prefix}JdFile').click()" style="font-size:10px;padding:3px 8px">
+          🔄 Replace
+        </button>
+        <button type="button" class="btn red" onclick="removeJdFile('${prefix}')" style="font-size:10px;padding:3px 6px">
+          ✕
+        </button>
+      </div>
+    </div>`;
+}
+
+function removeJdFile(prefix) {
+  if (prefix === 'a') {
+    window.__ADD_JD_FILE__ = null;
+    const fileInput = document.getElementById('aJdFile');
+    if (fileInput) fileInput.value = '';
+    renderFileBadge('a', null);
+  } else if (prefix === 't') {
+    const id = document.getElementById('trackId').value;
+    if (window.__TRACK_JD_FILES__) delete window.__TRACK_JD_FILES__[id];
+    if (tracked[id]) delete tracked[id].jdFile;
+    const c = allCos().find(x => x.id === id);
+    if (c) delete c.jdFile;
+    const fileInput = document.getElementById('tJdFile');
+    if (fileInput) fileInput.value = '';
+    renderFileBadge('t', null);
+    saveTr();
+    saveCu();
+  }
+}
+window.removeJdFile = removeJdFile;
+
+function handleJdUpload(input, prefix) {
+  const file = input.files && input.files[0];
+  if (!file) return;
+
+  if (file.size > 8 * 1024 * 1024) {
+    alert('File is too large (> 8MB). Please choose a smaller file.');
+    input.value = '';
+    return;
+  }
+
+  const isText = file.name.endsWith('.txt') || file.name.endsWith('.md') || file.type.startsWith('text/');
+
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const fileObj = {
+      name: file.name,
+      size: file.size,
+      type: file.type || 'application/octet-stream',
+      data: e.target.result,
+      uploadedAt: new Date().toISOString()
+    };
+
+    if (prefix === 'a') {
+      window.__ADD_JD_FILE__ = fileObj;
+      renderFileBadge('a', fileObj);
+      if (isText) {
+        const tr = new FileReader();
+        tr.onload = function(te) {
+          const area = document.getElementById('aJdText');
+          if (area && !area.value.trim()) {
+            area.value = te.target.result;
+            updateAddJdWordCount();
+          }
+        };
+        tr.readAsText(file);
+      }
+    } else if (prefix === 't') {
+      const id = document.getElementById('trackId').value;
+      if (!window.__TRACK_JD_FILES__) window.__TRACK_JD_FILES__ = {};
+      window.__TRACK_JD_FILES__[id] = fileObj;
+      if (tracked[id]) tracked[id].jdFile = fileObj;
+      const c = allCos().find(x => x.id === id);
+      if (c) c.jdFile = fileObj;
+      renderFileBadge('t', fileObj);
+      if (isText) {
+        const tr = new FileReader();
+        tr.onload = function(te) {
+          const area = document.getElementById('tJdText');
+          if (area && !area.value.trim()) {
+            area.value = te.target.result;
+            updateJdWordCount();
+          }
+        };
+        tr.readAsText(file);
+      }
+    }
+  };
+  reader.readAsDataURL(file);
+}
+window.handleJdUpload = handleJdUpload;
+
+function updateJdWordCount() {
+  const el = document.getElementById('tJdText');
+  const countEl = document.getElementById('tJdWordCount');
+  if (!el || !countEl) return;
+  const text = el.value.trim();
+  if (!text) {
+    countEl.textContent = '0 words';
+    return;
+  }
+  const words = text.split(/\s+/).filter(Boolean).length;
+  countEl.textContent = `${words.toLocaleString()} words · ${text.length.toLocaleString()} chars`;
+}
+window.updateJdWordCount = updateJdWordCount;
+
+function updateAddJdWordCount() {
+  const el = document.getElementById('aJdText');
+  const countEl = document.getElementById('aJdWordCount');
+  if (!el || !countEl) return;
+  const text = el.value.trim();
+  if (!text) {
+    countEl.textContent = '0 words';
+    return;
+  }
+  const words = text.split(/\s+/).filter(Boolean).length;
+  countEl.textContent = `${words.toLocaleString()} words`;
+}
+window.updateAddJdWordCount = updateAddJdWordCount;
+
+function copyTrackJd() {
+  const el = document.getElementById('tJdText');
+  if (!el || !el.value.trim()) {
+    alert('No JD text to copy.');
+    return;
+  }
+  navigator.clipboard.writeText(el.value).then(() => {
+    const btn = document.querySelector('button[onclick="copyTrackJd()"]');
+    if (btn) {
+      const old = btn.textContent;
+      btn.textContent = 'Copied ✓';
+      setTimeout(() => btn.textContent = old, 1500);
+    }
+  }).catch(() => {
+    el.select();
+    document.execCommand('copy');
+    alert('Copied JD to clipboard!');
+  });
+}
+window.copyTrackJd = copyTrackJd;
+
 function renderTable(all,filter){
   const tbody=document.getElementById('pBody');
   const empty=document.getElementById('pEmpty');
   const wl={none:'—',researching:'🔍 Researching',prepared:'📝 Ready',sent:'📤 Sent',discussed:'💬 Discussed'};
-  const rows=all.filter(c=>{
+  let rows=all.filter(c=>{
     const tr=tracked[c.id];const stage=tr?tr.stage:'new';
     return filter==='all'||stage===filter;
   });
   if(!rows.length){tbody.innerHTML='';empty.style.display='block';return;}
   empty.style.display='none';
+  rows.sort((a, b) => {
+    const aFav = isCoFav(a.id) ? 1 : 0;
+    const bFav = isCoFav(b.id) ? 1 : 0;
+    if (bFav !== aFav) return bFav - aFav;
+    return (a.name || '').localeCompare(b.name || '');
+  });
   tbody.innerHTML=rows.map(c=>{
     const tr=tracked[c.id]||{};const stage=tr.stage||'new';
+    const isFav = isCoFav(c.id);
     const conns=tr.connections||[];
     const connSummary=conns.length?conns.map(cn=>`<div style="font-size:10px;color:var(--t2)">${cn.name} <span class="conn-status ${CONN_CSS[cn.status]||'cs-req'}" style="font-size:9px">${CONN_STATUS[cn.status]||cn.status}</span></div>`).join(''):'—';
-    return`<tr>
-      <td><div style="font-weight:600;font-size:12px">${c.name}</div><div style="font-size:10px;color:var(--t3)">${formatRegionName(c.region)} · ${c.pay}</div></td>
+    const jobLink = tr.jobLink || (c.apply && c.apply !== '#' ? c.apply : (tr.jd && /^https?:\/\//i.test(tr.jd) ? tr.jd : ''));
+    const docFile = tr.jdFile || c.jdFile;
+    const role = tr.roleTitle || c.roleTitle || (Array.isArray(c.roles) ? c.roles.map(r=>RL[r]||r).join(', ') : '');
+    return`<tr class="${isFav ? 'is-fav' : ''}">
+      <td>
+        <div style="display:flex;align-items:center;gap:6px">
+          <button type="button" class="kcard-fav-btn ${isFav?'active':''}" style="position:static" onclick="toggleCoFav(event,'${c.id}')" title="Priority toggle">${isFav?'★':'☆'}</button>
+          <div>
+            <div style="font-weight:600;font-size:12px;display:flex;align-items:center;gap:5px">
+              ${c.name}
+              ${isFav ? '<span class="kcard-fav-badge" style="font-size:8px">PRIORITY</span>' : ''}
+            </div>
+            ${role ? `<div style="font-size:10px;color:var(--ac)">${role}</div>` : ''}
+            <div style="font-size:10px;color:var(--t3)">${formatRegionName(c.region)} · ${c.pay}</div>
+          </div>
+        </div>
+      </td>
       <td><span class="stage ${SC[stage]}">${SL[stage]||stage}</span></td>
       <td style="min-width:130px">${connSummary}</td>
       <td style="color:var(--t2);font-size:11px">${tr.msgs||'—'}</td>
       <td style="color:var(--t2);font-size:11px">${wl[tr.win||'none']}</td>
-      <td>${tr.jd?`<a href="${tr.jd}" target="_blank" class="btn" style="font-size:10px">View JD ↗</a>`:'—'}</td>
+      <td>
+        <div style="display:flex;gap:4px;flex-wrap:wrap">
+          ${jobLink ? `<a href="${jobLink}" target="_blank" class="btn" style="font-size:10px;padding:2px 6px">Link ↗</a>` : ''}
+          ${docFile ? `<button type="button" class="btn ac" onclick="viewJdFileById('${c.id}')" style="font-size:10px;padding:2px 6px">📄 Doc</button>` : ''}
+          ${!jobLink && !docFile ? (tr.jdText || tr.jd || c.jdText ? `<span style="font-size:10px;color:var(--g)">📋 JD Text</span>` : '—') : ''}
+        </div>
+      </td>
       <td style="color:var(--t2);font-size:11px;max-width:160px">${tr.notes||'—'}</td>
       <td><button class="btn" onclick="openTrack('${c.id}')">Update</button></td>
     </tr>`;
@@ -3360,13 +3890,34 @@ function renderKanban(all,filter){
       const tr=tracked[c.id];const stage=tr?tr.stage:'new';
       return stage===s&&(filter==='all'||stage===filter);
     });
+    // SORT FAVORITES TO THE VERY TOP OF THE COLUMN!
+    cards.sort((a, b) => {
+      const aFav = isCoFav(a.id) ? 1 : 0;
+      const bFav = isCoFav(b.id) ? 1 : 0;
+      if (bFav !== aFav) return bFav - aFav;
+      return (a.name || '').localeCompare(b.name || '');
+    });
     return`<div class="kcol">
       <div class="khead" style="color:${colors[s]}">${SL[s]} <span style="background:rgba(255,255,255,.1);padding:1px 6px;border-radius:10px;font-size:10px;margin-left:4px">${cards.length}</span></div>
-      <div class="kcards">${cards.map(c=>`<div class="kcard" onclick="openTrack('${c.id}')">
-        <div class="kcard-name">${c.name}</div>
-        <div class="kcard-meta">${c.pay}</div>
-        ${(tracked[c.id]?.connections||[]).length?`<div class="kcard-meta" style="margin-top:3px">🤝 ${tracked[c.id].connections.length} connections</div>`:''}
-      </div>`).join('')}</div>
+      <div class="kcards">${cards.map(c=>{
+        const tr=tracked[c.id]||{};
+        const isFav=isCoFav(c.id);
+        const hasDoc = !!(tr.jdFile || c.jdFile);
+        const hasJd = !!(tr.jdText || (tr.jd && !/^https?:\/\//i.test(tr.jd)) || c.jdText || (c.custom && c.desc && c.desc.length > 50));
+        const role = tr.roleTitle || c.roleTitle || (Array.isArray(c.roles) ? c.roles.map(r=>RL[r]||r).join(', ') : '');
+        return `<div class="kcard ${isFav?'is-fav':''}" onclick="openTrack('${c.id}')" data-company-id="${c.id}">
+          <button type="button" class="kcard-fav-btn ${isFav?'active':''}" onclick="toggleCoFav(event,'${c.id}')" title="${isFav?'Priority / Favourite (Click to unmark)':'Mark as Priority / Favourite'}">${isFav?'★':'☆'}</button>
+          <div class="kcard-name">${c.name}</div>
+          ${isFav ? `<div style="margin-bottom:3px"><span class="kcard-fav-badge">★ PRIORITY</span></div>` : ''}
+          ${role ? `<div class="kcard-meta" style="color:var(--ac);font-weight:500;margin-bottom:2px">${role}</div>` : ''}
+          <div class="kcard-meta">${formatRegionName(c.region)} · ${c.pay}</div>
+          <div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap;margin-top:4px">
+            ${(tr.connections||[]).length?`<div class="kcard-meta" style="margin:0">🤝 ${tr.connections.length}</div>`:''}
+            ${hasJd?`<span class="kcard-jd-badge" title="JD Text Attached">📋 JD</span>`:''}
+            ${hasDoc?`<span class="kcard-jd-badge" style="background:rgba(74,124,255,.15);color:#8bb2ff;border-color:rgba(74,124,255,.3)" title="JD Document Uploaded">📄 Doc</span>`:''}
+          </div>
+        </div>`;
+      }).join('')}</div>
     </div>`;
   }).join('');
 }
@@ -3417,12 +3968,76 @@ function openTrack(id){
   const tr=tracked[id]||{};
   document.getElementById('trackTitle').textContent=`Track: ${c.name}`;
   document.getElementById('trackId').value=id;
+
+  // Favorite / Priority button state
+  const isFav = isCoFav(id);
+  updateTrackFavButton(isFav);
+
+  // Stage & Outreach activity
   document.getElementById('tStage').value=tr.stage||'new';
   document.getElementById('tMsgs').value=tr.msgs||'';
   document.getElementById('tWin').value=tr.win||'none';
-  document.getElementById('tJD').value=tr.jd||'';
   document.getElementById('tNotes').value=tr.notes||'';
-  renderConnList(tr.connections||[]);
+
+  // Company & Role details
+  const roleVal = tr.roleTitle || c.roleTitle || c.targetRole || (Array.isArray(c.roles) ? c.roles.map(r=>RL[r]||r).join(', ') : '');
+  const roleEl = document.getElementById('tRole');
+  if (roleEl) roleEl.value = roleVal;
+
+  const regEl = document.getElementById('tR');
+  if (regEl) regEl.value = c.region || 'global';
+
+  const payEl = document.getElementById('tPay');
+  if (payEl) payEl.value = tr.pay || c.pay || '';
+
+  // Job Link
+  const jobLink = tr.jobLink || (c.apply && c.apply !== '#' ? c.apply : (tr.jd && /^https?:\/\//i.test(tr.jd) ? tr.jd : ''));
+  const jdInput = document.getElementById('tJD');
+  if (jdInput) jdInput.value = jobLink;
+  const openBtn = document.getElementById('tUrlOpenBtn');
+  if (openBtn) {
+    if (jobLink && jobLink !== '#') {
+      openBtn.href = jobLink;
+      openBtn.style.display = 'inline-flex';
+    } else {
+      openBtn.href = '#';
+      openBtn.style.display = 'none';
+    }
+  }
+
+  // Detailed JD Text
+  let jdText = tr.jdText || '';
+  if (!jdText && tr.jd && !/^https?:\/\/[^\s]+$/.test(tr.jd.trim())) {
+    jdText = tr.jd;
+  }
+  if (!jdText && c.jdText) {
+    jdText = c.jdText;
+  }
+  if (!jdText && c.desc && (c.custom || c.desc.length > 40)) {
+    jdText = c.desc;
+  }
+  const jdTextEl = document.getElementById('tJdText');
+  if (jdTextEl) jdTextEl.value = jdText;
+  updateJdWordCount();
+
+  // Why this company notes
+  const descEl = document.getElementById('tDesc');
+  if (descEl) {
+    descEl.value = (c.desc && c.desc !== jdText) ? c.desc : '';
+  }
+
+  // Document file preview/upload badge
+  const docFile = tr.jdFile || c.jdFile || (window.__TRACK_JD_FILES__ && window.__TRACK_JD_FILES__[id]);
+  renderFileBadge('t', docFile);
+
+  // Subtitle info
+  const conns = tr.connections || [];
+  const subEl = document.getElementById('trackSub');
+  if (subEl) {
+    subEl.textContent = `${SL[tr.stage||'new']} · ${conns.length} connection${conns.length===1?'':'s'} · ${formatRegionName(c.region)} · ${c.pay||'Market rate'}`;
+  }
+
+  renderConnList(conns);
   openM('trackModal');
 }
 
@@ -3470,37 +4085,170 @@ function saveConn(){
 
 function saveTrack(){
   const id=document.getElementById('trackId').value;
-  if(!tracked[id])tracked[id]={connections:[]};
-  tracked[id].stage=document.getElementById('tStage').value;
-  tracked[id].msgs=document.getElementById('tMsgs').value;
-  tracked[id].win=document.getElementById('tWin').value;
-  tracked[id].jd=document.getElementById('tJD').value;
-  tracked[id].notes=document.getElementById('tNotes').value;
-  tracked[id].updated=new Date().toLocaleDateString();
-  saveTr();closeM('trackModal');renderCards();renderPipeline();updateStats();
+  if(!id) return;
+  if(!tracked[id]) tracked[id]={connections:[]};
+  const c=allCos().find(x=>x.id===id);
+
+  // 1. Pipeline tracking status
+  tracked[id].stage = document.getElementById('tStage').value;
+  tracked[id].msgs = document.getElementById('tMsgs').value;
+  tracked[id].win = document.getElementById('tWin').value;
+  tracked[id].notes = document.getElementById('tNotes').value;
+
+  // 2. Company & Role details
+  const roleTitle = (document.getElementById('tRole')?.value || '').trim();
+  const region = document.getElementById('tR')?.value || 'global';
+  const pay = (document.getElementById('tPay')?.value || '').trim();
+  const jobLink = (document.getElementById('tJD')?.value || '').trim();
+  const jdText = (document.getElementById('tJdText')?.value || '').trim();
+  const desc = (document.getElementById('tDesc')?.value || '').trim();
+
+  tracked[id].roleTitle = roleTitle;
+  tracked[id].pay = pay;
+  tracked[id].jobLink = jobLink;
+  tracked[id].jd = jdText || jobLink;
+  tracked[id].jdText = jdText;
+  tracked[id].updated = new Date().toLocaleDateString();
+
+  if (window.__TRACK_JD_FILES__ && window.__TRACK_JD_FILES__[id] !== undefined) {
+    tracked[id].jdFile = window.__TRACK_JD_FILES__[id];
+  }
+
+  // Update company object
+  if (c) {
+    if (roleTitle) c.roleTitle = roleTitle;
+    if (region) c.region = region;
+    if (pay) c.pay = pay;
+    if (jobLink) c.apply = jobLink;
+    if (jdText) c.jdText = jdText;
+    if (desc) c.desc = desc;
+    else if (jdText && !c.desc) c.desc = jdText.slice(0, 150) + '...';
+    if (tracked[id].jdFile) c.jdFile = tracked[id].jdFile;
+    saveCu();
+  }
+
+  saveTr();
+  closeM('trackModal');
+  renderCards();
+  renderPipeline();
+  updateStats();
+
   if (window.__CC__ && typeof window.__CC__.pushState === 'function') {
     window.__CC__.pushState();
   }
+
+  // Push to server API
+  if (window.__CC__ && typeof window.__CC__.api === 'function') {
+    window.__CC__.api('/tracked/' + encodeURIComponent(id), {
+      method: 'POST',
+      body: {
+        stage: tracked[id].stage,
+        win: tracked[id].win,
+        msgs: tracked[id].msgs,
+        jd: tracked[id].jd,
+        jobLink: tracked[id].jobLink,
+        notes: tracked[id].notes
+      }
+    }).catch(console.error);
+
+    if (c && c.custom) {
+      window.__CC__.api('/companies/' + encodeURIComponent(id), {
+        method: 'PATCH',
+        body: {
+          name: c.name,
+          region: c.region,
+          pay: c.pay,
+          apply: c.apply,
+          desc: c.desc || c.jdText
+        }
+      }).catch(console.error);
+    }
+  }
 }
+
 function delTrack(){
   const id=document.getElementById('trackId').value;
-  delete tracked[id];saveTr();closeM('trackModal');renderCards();renderPipeline();updateStats();
-  if (window.__CC__ && typeof window.__CC__.pushState === 'function') {
-    window.__CC__.pushState();
+  if (!id) return;
+  if (confirm('Remove this company from your tracking pipeline?')) {
+    delete tracked[id];
+    if (window.__CC_FAVOURITES__) window.__CC_FAVOURITES__.delete(id);
+    saveTr();closeM('trackModal');renderCards();renderPipeline();updateStats();
+    if (window.__CC__ && typeof window.__CC__.pushState === 'function') {
+      window.__CC__.pushState();
+    }
   }
 }
 
 // ADD COMPANY
 function addCo(){
-  const name=document.getElementById('aN').value.trim();if(!name){alert('Name required');return;}
+  const name=document.getElementById('aN').value.trim();
+  if(!name){alert('Company name is required');return;}
+
+  const roleTitle = (document.getElementById('aRoleTitle')?.value || '').trim();
+  const pay = (document.getElementById('aPay')?.value || '').trim() || 'Market rate';
+  const region = document.getElementById('aR').value;
   const sel=document.getElementById('aRoles');
   const roles=[...sel.selectedOptions].map(o=>o.value);
+  const applyUrl = (document.getElementById('aUrl')?.value || '').trim();
+  const jdText = (document.getElementById('aJdText')?.value || '').trim();
+  const desc = (document.getElementById('aDesc')?.value || '').trim() || (roleTitle ? `Target role: ${roleTitle}` : 'Custom company.');
+  const isFav = !!(document.getElementById('aFav')?.checked);
+  const jdFile = window.__ADD_JD_FILE__ || null;
+
   const id='c_'+Date.now();
-  const c={id,name,region:document.getElementById('aR').value,roles:roles.length?roles:['fs'],pay:document.getElementById('aPay').value||'Market rate',desc:document.getElementById('aDesc').value||'Custom company.',apply:document.getElementById('aUrl').value||'#',custom:true};
-  custom.push(c);saveCu();
-  tracked[id]={stage:'new',connections:[],msgs:'',win:'none',notes:'',jd:'',updated:new Date().toLocaleDateString()};
-  saveTr();closeM('addModal');
-  ['aN','aPay','aUrl','aDesc'].forEach(i=>document.getElementById(i).value='');
+  const c={
+    id,
+    name,
+    roleTitle: roleTitle || (roles.length ? roles.map(r=>RL[r]||r).join(', ') : 'Full-Stack'),
+    region,
+    roles: roles.length ? roles : ['fs'],
+    pay,
+    desc,
+    jdText,
+    jdFile,
+    apply: applyUrl || '#',
+    favourite: isFav,
+    fav: isFav,
+    custom: true
+  };
+  custom.push(c);
+  saveCu();
+
+  tracked[id]={
+    stage:'new',
+    roleTitle: c.roleTitle,
+    connections:[],
+    msgs:'',
+    win:'none',
+    notes:'',
+    jd: jdText || applyUrl,
+    jdText: jdText,
+    jobLink: applyUrl,
+    jdFile: jdFile,
+    pay: pay,
+    fav: isFav,
+    favourite: isFav,
+    updated: new Date().toLocaleDateString()
+  };
+  saveTr();
+
+  if (isFav && window.__CC_FAVOURITES__) {
+    window.__CC_FAVOURITES__.add(id);
+  }
+
+  // Reset form
+  ['aN','aRoleTitle','aPay','aUrl','aJdText','aDesc'].forEach(i=>{
+    const el = document.getElementById(i);
+    if(el) el.value = '';
+  });
+  if (document.getElementById('aFav')) document.getElementById('aFav').checked = false;
+  window.__ADD_JD_FILE__ = null;
+  const aFile = document.getElementById('aJdFile');
+  if (aFile) aFile.value = '';
+  renderFileBadge('a', null);
+  updateAddJdWordCount();
+
+  closeM('addModal');
   renderCards();
   renderPipeline();
   updateStats();
@@ -3516,7 +4264,13 @@ function addCo(){
   }
 
   if (window.__CC__ && typeof window.__CC__.api === 'function') {
-    window.__CC__.api('/companies', { method: 'POST', body: c }).catch(console.error);
+    window.__CC__.api('/companies', { method: 'POST', body: c })
+      .then(() => {
+        if (isFav) {
+          window.__CC__.api('/companies/' + encodeURIComponent(id) + '/favourite', { method: 'POST', body: {} }).catch(console.error);
+        }
+      })
+      .catch(console.error);
     if (typeof window.__CC__.pushState === 'function') window.__CC__.pushState();
   }
 }
@@ -3592,7 +4346,7 @@ Best regards,
 Siddhant Rangari
 📞 [Your Phone]
 📧 siddhantrangari@gmail.com
-🌐 linkedin.com/in/siddhantrangari`;
+🌐 linkedin.com/in/siddhant-rangari`;
   document.getElementById('ceOut').textContent=email;
 }
 

@@ -153,21 +153,22 @@ input[type=text],input[type=url]{width:100%}
 .res-viewer-actions{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
 .res-viewer-scroll{flex:1;overflow-y:auto;padding:24px 20px;background:#0b0e14;display:block;box-sizing:border-box}
 
-.res-doc-sheet{display:block;width:100%;max-width:800px;margin:0 auto 30px auto;height:auto !important;min-height:980px;background:#ffffff;color:#1a202c;padding:34px 40px;border-radius:6px;box-shadow:0 16px 45px rgba(0,0,0,.6);font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:10.5px;line-height:1.45;box-sizing:border-box;transform-origin:top center;transition:transform .15s ease,background .2s ease,color .2s ease;overflow:visible}
-.res-doc-sheet h1.res-name{font-size:20px;font-weight:800;letter-spacing:.5px;color:#0f172a;text-transform:uppercase;margin:0 0 2px 0;line-height:1.15}
-.res-doc-sheet .res-title-line{font-size:11px;font-weight:700;color:#2563eb;margin:0 0 5px 0;line-height:1.25}
-.res-doc-sheet .res-contact-bar{font-size:9px;color:#475569;display:flex;flex-wrap:wrap;gap:8px;border-bottom:1.5px solid #0f172a;padding-bottom:5px;margin-bottom:10px;font-weight:500;line-height:1.2}
-.res-doc-sheet h2.res-sec-head{font-size:11px;font-weight:800;color:#0f172a;text-transform:uppercase;letter-spacing:.8px;border-bottom:1px solid #cbd5e1;padding-bottom:2px;margin:9px 0 4px 0}
-.res-doc-sheet .res-summary-text{color:#334155;line-height:1.48;margin-bottom:6px;font-size:10px}
-.res-doc-sheet .res-role-row{display:flex;justify-content:space-between;align-items:baseline;font-weight:700;color:#0f172a;font-size:10.5px;margin-top:5px;margin-bottom:2px}
-.res-doc-sheet .res-role-dates{font-weight:600;color:#64748b;font-size:9.5px;white-space:nowrap}
-.res-doc-sheet .res-role-sub{font-size:9.5px;font-style:italic;color:#475569;margin-bottom:2px}
-.res-doc-sheet .res-stack-line{font-size:9px;color:#475569;margin-top:2px;margin-bottom:4px;line-height:1.35}
+.res-doc-sheet{display:block;width:100%;max-width:820px;margin:0 auto 30px auto;height:auto !important;min-height:980px;background:#ffffff;color:#1a202c;padding:36px 44px;border-radius:6px;box-shadow:0 16px 45px rgba(0,0,0,.6);font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:13.5px;line-height:1.48;box-sizing:border-box;transform-origin:top center;transition:transform .15s ease,background .2s ease,color .2s ease;overflow:visible}
+.res-doc-sheet h1.res-name{font-size:26px;font-weight:800;letter-spacing:.5px;color:#0f172a;text-transform:uppercase;margin:0 0 3px 0;line-height:1.15}
+.res-doc-sheet .res-title-line{font-size:14px;font-weight:700;color:#2563eb;margin:0 0 6px 0;line-height:1.25}
+.res-doc-sheet .res-contact-bar{font-size:12px;color:#475569;display:flex;flex-wrap:wrap;gap:10px;border-bottom:1.5px solid #0f172a;padding-bottom:6px;margin-bottom:12px;font-weight:500;line-height:1.2}
+.res-doc-sheet h2.res-sec-head{font-size:15px;font-weight:800;color:#0f172a;text-transform:uppercase;letter-spacing:.8px;border-bottom:1px solid #cbd5e1;padding-bottom:3px;margin:14px 0 5px 0}
+.res-doc-sheet .res-summary-text{color:#334155;line-height:1.5;margin-bottom:8px;font-size:13.5px}
+.res-doc-sheet .res-role-block{margin-top:8px;margin-bottom:4px}
+.res-doc-sheet .res-role-row{display:flex;justify-content:space-between;align-items:baseline;font-weight:700;color:#0f172a;font-size:14px;margin-top:6px;margin-bottom:2px}
+.res-doc-sheet .res-role-dates{font-weight:600;color:#64748b;font-size:12.5px;white-space:nowrap}
+.res-doc-sheet .res-role-sub{font-size:12.5px;font-style:italic;color:#475569;margin-bottom:3px}
+.res-doc-sheet .res-stack-line{font-size:12px;color:#475569;margin-top:2px;margin-bottom:5px;line-height:1.35}
 .res-doc-sheet .res-stack-label{font-weight:700;color:#1e293b}
-.res-doc-sheet .res-bullets{margin:2px 0 5px 15px;padding:0;color:#334155}
-.res-doc-sheet .res-bullets li{margin-bottom:2.5px;line-height:1.4;font-size:10px}
+.res-doc-sheet .res-bullets{margin:3px 0 6px 18px;padding:0;color:#334155}
+.res-doc-sheet .res-bullets li{margin-bottom:3.5px;line-height:1.45;font-size:13px}
 .res-doc-sheet strong{font-weight:700;color:#0f172a}
-.res-doc-sheet .res-skills-cat{margin-bottom:2.5px;color:#334155;font-size:9.5px;line-height:1.4}
+.res-doc-sheet .res-skills-cat{margin-bottom:3.5px;color:#334155;font-size:13px;line-height:1.45}
 .res-doc-sheet .res-skills-cat strong{color:#0f172a}
 
 /* Dark Theme Mode for Resume Preview */
@@ -189,51 +190,34 @@ input[type=text],input[type=url]{width:100%}
 .res-doc-sheet.theme-dark .res-skills-cat{color:#cbd5e1 !important}
 .res-doc-sheet.theme-dark .res-skills-cat strong{color:#f8fafc !important}
 
-/* Dedicated Pristine A4 PDF Print Sheet (used for html2pdf export) */
-/* Dedicated Pristine A4 PDF Print Sheet (used for html2pdf export) */
-.res-pdf-print-sheet{display:block;width:190mm;max-width:190mm;background:#ffffff !important;color:#0f172a !important;box-sizing:border-box;padding:0;margin:0;font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:10.2px;line-height:1.40;box-shadow:none !important;border-radius:0 !important;border:none !important;overflow:visible}
-.res-pdf-print-sheet h1.res-name{font-size:22px;font-weight:800;color:#0f172a;text-transform:uppercase;letter-spacing:.5px;margin:0 0 2.5px 0;line-height:1.15}
-.res-pdf-print-sheet .res-title-line{font-size:10.8px;font-weight:700;color:#1d4ed8;margin:0 0 4px 0;line-height:1.25}
-.res-pdf-print-sheet .res-contact-bar{font-size:9px;color:#475569;display:flex;flex-wrap:wrap;gap:8px;border-bottom:1.5px solid #0f172a;padding-bottom:4px;margin-bottom:8px;font-weight:500;line-height:1.2}
-.res-pdf-print-sheet h2.res-sec-head{font-size:11px;font-weight:800;color:#0f172a;text-transform:uppercase;letter-spacing:.7px;border-bottom:1px solid #cbd5e1;padding-bottom:2px;margin:10px 0 4px 0;break-after:avoid;page-break-after:avoid}
-.res-pdf-print-sheet .res-summary-text{color:#334155;font-size:10px;line-height:1.42;margin:0 0 5px 0}
-.res-pdf-print-sheet .res-role-row{display:flex;justify-content:space-between;align-items:baseline;font-weight:700;color:#0f172a;font-size:10.5px;margin-top:5px;margin-bottom:1.5px;break-inside:avoid;page-break-inside:avoid;break-after:avoid;page-break-after:avoid}
-.res-pdf-print-sheet .res-role-dates{font-weight:600;color:#64748b;font-size:9.2px;white-space:nowrap}
-.res-pdf-print-sheet .res-role-sub{font-size:9.2px;font-style:italic;color:#475569;margin-bottom:2px}
-.res-pdf-print-sheet .res-stack-line{font-size:9px;color:#475569;margin-top:1.5px;margin-bottom:4px;line-height:1.32;break-inside:avoid;page-break-inside:avoid}
+/* Dedicated Pristine A4 PDF Print Sheet (used for html2pdf export) - True Readable Industry Standards */
+.res-pdf-print-sheet{display:block;width:186mm;max-width:186mm;background:#ffffff !important;color:#0f172a !important;box-sizing:border-box;padding:0;margin:0;font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:10.5pt;line-height:1.42;box-shadow:none !important;border-radius:0 !important;border:none !important;overflow:visible}
+.res-pdf-print-sheet h1.res-name{font-size:22pt;font-weight:800;color:#0f172a;text-transform:uppercase;letter-spacing:.5px;margin:0 0 2pt 0;line-height:1.15}
+.res-pdf-print-sheet .res-title-line{font-size:11pt;font-weight:700;color:#1d4ed8;margin:0 0 3.5pt 0;line-height:1.25}
+.res-pdf-print-sheet .res-contact-bar{font-size:9.5pt;color:#475569;display:flex;flex-wrap:wrap;gap:8pt;border-bottom:1.5pt solid #0f172a;padding-bottom:4pt;margin-bottom:8pt;font-weight:500;line-height:1.2}
+.res-pdf-print-sheet h2.res-sec-head{font-size:12pt;font-weight:800;color:#0f172a;text-transform:uppercase;letter-spacing:.8px;border-bottom:1pt solid #cbd5e1;padding-bottom:2pt;margin:9pt 0 3.5pt 0;break-after:avoid;page-break-after:avoid}
+.res-pdf-print-sheet .res-summary-text{color:#334155;font-size:10.5pt;line-height:1.42;margin:0 0 4pt 0}
+.res-pdf-print-sheet .res-role-block{margin-top:5pt;margin-bottom:2pt;break-inside:avoid;page-break-inside:avoid}
+.res-pdf-print-sheet .res-role-row{display:flex;justify-content:space-between;align-items:baseline;font-weight:700;color:#0f172a;font-size:11pt;margin-top:4pt;margin-bottom:1.5pt;break-inside:avoid;page-break-inside:avoid;break-after:avoid;page-break-after:avoid}
+.res-pdf-print-sheet .res-role-dates{font-weight:600;color:#64748b;font-size:9.5pt;white-space:nowrap}
+.res-pdf-print-sheet .res-role-sub{font-size:9.5pt;font-style:italic;color:#475569;margin-bottom:2pt}
+.res-pdf-print-sheet .res-stack-line{font-size:9.5pt;color:#475569;margin-top:1.5pt;margin-bottom:3.5pt;line-height:1.32;break-inside:avoid;page-break-inside:avoid}
 .res-pdf-print-sheet .res-stack-label{font-weight:700;color:#1e293b}
-.res-pdf-print-sheet .res-bullets{margin:2px 0 4px 14px;padding:0;color:#334155}
-.res-pdf-print-sheet .res-bullets li{font-size:9.8px;line-height:1.40;margin-bottom:2.5px;break-inside:avoid;page-break-inside:avoid}
+.res-pdf-print-sheet .res-bullets{margin:2pt 0 3.5pt 14pt;padding:0;color:#334155}
+.res-pdf-print-sheet .res-bullets li{font-size:10.2pt;line-height:1.40;margin-bottom:2.2pt;break-inside:avoid;page-break-inside:avoid}
 .res-pdf-print-sheet strong{font-weight:700;color:#0f172a}
-.res-pdf-print-sheet .res-skills-cat{font-size:9.5px;line-height:1.38;margin-bottom:2.5px;color:#334155;break-inside:avoid;page-break-inside:avoid}
+.res-pdf-print-sheet .res-skills-cat{font-size:10pt;line-height:1.38;margin-bottom:2.5pt;color:#334155;break-inside:avoid;page-break-inside:avoid}
 
-/* Spacious Fit (auto-applied when concise resume has room to expand and fill 100% of the page) */
-.res-pdf-print-sheet.fit-spacious{font-size:10.6px;line-height:1.45}
-.res-pdf-print-sheet.fit-spacious h1.res-name{font-size:24px;margin-bottom:4px}
-.res-pdf-print-sheet.fit-spacious .res-title-line{font-size:11.5px;margin-bottom:6px}
-.res-pdf-print-sheet.fit-spacious .res-contact-bar{font-size:9.5px;padding-bottom:5px;margin-bottom:11px}
-.res-pdf-print-sheet.fit-spacious h2.res-sec-head{font-size:11.5px;margin:12px 0 5px 0;padding-bottom:2.5px}
-.res-pdf-print-sheet.fit-spacious .res-summary-text{font-size:10.2px;line-height:1.46;margin-bottom:6px}
-.res-pdf-print-sheet.fit-spacious .res-role-row{font-size:11px;margin-top:7px;margin-bottom:2.5px}
-.res-pdf-print-sheet.fit-spacious .res-role-dates{font-size:9.5px}
-.res-pdf-print-sheet.fit-spacious .res-stack-line{font-size:9.5px;line-height:1.36;margin-bottom:5px}
-.res-pdf-print-sheet.fit-spacious .res-bullets{margin:2.5px 0 5px 15px}
-.res-pdf-print-sheet.fit-spacious .res-bullets li{font-size:10.2px;line-height:1.44;margin-bottom:3.5px}
-.res-pdf-print-sheet.fit-spacious .res-skills-cat{font-size:9.8px;line-height:1.42;margin-bottom:3.5px}
+/* Density presets if user explicitly chooses them from dropdown */
+.res-pdf-print-sheet.fit-spacious{font-size:11pt;line-height:1.48}
+.res-pdf-print-sheet.fit-spacious h1.res-name{font-size:24pt}
+.res-pdf-print-sheet.fit-spacious h2.res-sec-head{font-size:12.5pt;margin:11pt 0 4pt 0}
+.res-pdf-print-sheet.fit-spacious .res-bullets li{font-size:10.6pt;margin-bottom:3pt}
 
-/* Compact Fit (auto-applied when resume slightly overflows 1062px by 1-3 lines to pull it into 1 single page) */
-.res-pdf-print-sheet.fit-compact{font-size:9.5px;line-height:1.32}
-.res-pdf-print-sheet.fit-compact h1.res-name{font-size:18px;margin-bottom:1.5px}
-.res-pdf-print-sheet.fit-compact .res-title-line{font-size:10px;margin-bottom:3px}
-.res-pdf-print-sheet.fit-compact .res-contact-bar{font-size:8.5px;padding-bottom:3px;margin-bottom:5px}
-.res-pdf-print-sheet.fit-compact h2.res-sec-head{font-size:10px;margin:6px 0 2.5px 0;padding-bottom:1.5px}
-.res-pdf-print-sheet.fit-compact .res-summary-text{font-size:9px;line-height:1.32;margin-bottom:3.5px}
-.res-pdf-print-sheet.fit-compact .res-role-row{font-size:9.5px;margin-top:3.5px;margin-bottom:1px}
-.res-pdf-print-sheet.fit-compact .res-role-dates{font-size:8.5px}
-.res-pdf-print-sheet.fit-compact .res-stack-line{font-size:8.5px;line-height:1.28;margin-bottom:2.5px}
-.res-pdf-print-sheet.fit-compact .res-bullets{margin:1.5px 0 2.5px 13px}
-.res-pdf-print-sheet.fit-compact .res-bullets li{font-size:9px;line-height:1.30;margin-bottom:1.5px}
-.res-pdf-print-sheet.fit-compact .res-skills-cat{font-size:8.5px;line-height:1.30;margin-bottom:1.5px}
+.res-pdf-print-sheet.fit-compact{font-size:9.8pt;line-height:1.36}
+.res-pdf-print-sheet.fit-compact h1.res-name{font-size:20pt}
+.res-pdf-print-sheet.fit-compact h2.res-sec-head{font-size:11pt;margin:7pt 0 2.5pt 0}
+.res-pdf-print-sheet.fit-compact .res-bullets li{font-size:9.5pt;margin-bottom:1.8pt}
 
 .res-lib-card{background:var(--s1);border:1px solid var(--bd);border-radius:12px;padding:18px 20px;margin-top:20px}
 .res-lib-table{width:100%;border-collapse:collapse;font-size:12px;margin-top:12px}
@@ -1214,19 +1198,19 @@ Freelance Solutions Architect | Growlogic Technologies (Eeko.ai) | May 2024 – 
 - Built a WhatsApp Business API notification pipeline with Spring Batch (chunk size 100) and timezone-aware scheduling — delivered prompts to ~200 paid customers/month with zero missed sends.
 - Established a GitOps pipeline (GitHub → ArgoCD → AKS) with zero-downtime rollouts.
 
-## INDEPENDENT PRODUCTION PLATFORMS
-Forward Deployed Engineer | MyAgentFirm (AI Platform) | Apr 2026 – Aug 2026
+## INDEPENDENT ENGINEERING PROJECTS | JAN 2026 – SEP 2026
+Founding Engineer — MyAgentFirm (Co-Founder) | Apr 2026 – Aug 2026 | Nagpur, India
 - Architected a Fastify (Node 22/ESM) backend from 0→1 serving 24 API routes with PostgreSQL job queue (SKIP LOCKED pattern) driving 8 recurring cron loops.
 - Engineered LLM routing with automated failover across DeepInfra → Groq → Together AI, maintaining near-zero downtime.
 - Built 6 async background workers (AI video generation, auto-dubbing, voice calls via Twilio) and designed full MCP integration layer (Gmail, Calendar, GitHub, Notion, Slack).
 - Built atomic credit ledger on Razorpay across 11 pricing tiers; shipped 23 database migrations across PostgreSQL 15 schema.
 
-Forward Deployed Engineer | TradingOS (Fintech Infrastructure) | Feb 2026 – Apr 2026
+Forward Deployed Engineer (Co-Founder) | TradingOS | Feb 2026 – Apr 2026 | Nagpur, India
 - Built full trading platform from 0→1: TradingView-style backtesting engine with custom SVG drawing tools overlay and equity-curve tracking.
 - Built AI coaching module (LLaMA 3 via Ollama) with Firestore live context and SSE streaming.
 - Designed and built Python market-data pipeline with Databento and Binance feeding TimescaleDB; migrated 221K+ bars and 1.78M flow events with zero data loss.
 
-Co-Founder & Founding Engineer | ChalOnline (Creator SaaS) | Jan 2026 – Feb 2026
+Founding Engineer (Co-Founder) | ChalOnline | Jan 2026 – Feb 2026 | Nagpur, India
 - Built creator SaaS platform end-to-end on VPS with PostgreSQL, Redis, and Razorpay; identified and remediated database port exposure via SSH tunneling.
 
 AI Engineer | AnnaRakshak AI (Google "Build with AI" Hackathon) | Sep 2026
@@ -1305,17 +1289,26 @@ function parseResumeMarkdown(md) {
 
   let html = '';
   let inList = false;
+  let inRoleBlock = false;
+
+  function closeList() {
+    if (inList) { html += '</ul>'; inList = false; }
+  }
+  function closeRole() {
+    closeList();
+    if (inRoleBlock) { html += '</div>'; inRoleBlock = false; }
+  }
 
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
     if (!line) {
-      if (inList) { html += '</ul>'; inList = false; }
+      closeList();
       continue;
     }
 
     // Name (Header 1)
     if (/^#\s+/.test(line)) {
-      if (inList) { html += '</ul>'; inList = false; }
+      closeRole();
       const name = cleanPlain(line.replace(/^#\s+/, ''));
       html += `<h1 class="res-name">${esc(name)}</h1>`;
       continue;
@@ -1323,10 +1316,10 @@ function parseResumeMarkdown(md) {
 
     // Section Header (Header 2 or recognized standard resume section)
     const cleanUpper = cleanPlain(line).toUpperCase();
-    const isKnownSection = /^(PROFESSIONAL SUMMARY|SUMMARY|TECHNICAL SKILLS|CORE SKILLS|SKILLS|PROFESSIONAL EXPERIENCE|WORK EXPERIENCE|EXPERIENCE|INDEPENDENT PRODUCTION PLATFORMS|PRODUCTION PLATFORMS|PROJECTS|KEY PROJECTS|EDUCATION|EDUCATION & CERTIFICATIONS|CERTIFICATIONS)$/i.test(cleanUpper);
+    const isKnownSection = /^(PROFESSIONAL SUMMARY|SUMMARY|TECHNICAL SKILLS|CORE SKILLS|SKILLS|PROFESSIONAL EXPERIENCE|WORK EXPERIENCE|EXPERIENCE|INDEPENDENT PRODUCTION PLATFORMS|PRODUCTION PLATFORMS|PROJECTS|KEY PROJECTS|EDUCATION|EDUCATION & CERTIFICATIONS|CERTIFICATIONS|FREELANCE ENGAGEMENT|HACKATHON PROJECT|INDEPENDENT ENGINEERING PROJECTS.*)$/i.test(cleanUpper);
 
-    if (/^##\s+/.test(line) || (isKnownSection && line.length < 60)) {
-      if (inList) { html += '</ul>'; inList = false; }
+    if (/^##\s+/.test(line) || (isKnownSection && line.length < 70)) {
+      closeRole();
       const secTitle = cleanPlain(line.replace(/^##\s+/, ''));
       html += `<h2 class="res-sec-head">${esc(secTitle)}</h2>`;
       continue;
@@ -1334,7 +1327,7 @@ function parseResumeMarkdown(md) {
 
     // Contact bar check
     if (line.includes('@') && (line.includes('|') || line.includes('•') || line.includes('linkedin'))) {
-      if (inList) { html += '</ul>'; inList = false; }
+      closeRole();
       const items = line.split(/[|•]/).map(s=>cleanPlain(s)).filter(Boolean);
       html += '<div class="res-contact-bar">';
       items.forEach((item, idx) => {
@@ -1358,7 +1351,7 @@ function parseResumeMarkdown(md) {
 
     // Candidate title line right under name (e.g. Senior Full-Stack & AI Engineer | 12+ Years | Bangalore)
     if (i <= 2 && (line.includes('|') || line.includes('•'))) {
-      if (inList) { html += '</ul>'; inList = false; }
+      closeRole();
       const cleanTitleLine = cleanPlain(line);
       const parts = cleanTitleLine.split(/[|•]/).map(s => cleanPlain(s)).filter(Boolean);
       html += `<div class="res-title-line">${parts.map(esc).join(' · ')}</div>`;
@@ -1367,7 +1360,7 @@ function parseResumeMarkdown(md) {
 
     // Key Stack / Tech Stack line
     if (/^(\*{0,2})([A-Za-z\s]+Stack)(\*{0,2})\s*:/i.test(line)) {
-      if (inList) { html += '</ul>'; inList = false; }
+      closeList();
       const colonIdx = line.indexOf(':');
       const label = cleanPlain(line.slice(0, colonIdx));
       const stackContent = cleanPlain(line.slice(colonIdx + 1));
@@ -1379,7 +1372,9 @@ function parseResumeMarkdown(md) {
     const lineCleanForRole = line.replace(/^#+\s*/, '').trim();
     const hasRoleDates = /\b(19\d\d|20\d\d|present|current)\b/i.test(lineCleanForRole);
     if (lineCleanForRole.includes('|') && hasRoleDates && !lineCleanForRole.includes('@') && !lineCleanForRole.toLowerCase().includes('stack:') && i > 2) {
-      if (inList) { html += '</ul>'; inList = false; }
+      closeRole();
+      html += '<div class="res-role-block">';
+      inRoleBlock = true;
       const parts = lineCleanForRole.split('|').map(s => cleanPlain(s)).filter(Boolean);
       let roleTitle = parts[0] || '';
       let compName = '';
@@ -1436,7 +1431,9 @@ function parseResumeMarkdown(md) {
       nextLine && isDateLine(nextLine) &&
       !line.toLowerCase().includes('stack:') && i > 2
     ) {
-      if (inList) { html += '</ul>'; inList = false; }
+      closeRole();
+      html += '<div class="res-role-block">';
+      inRoleBlock = true;
       const cleanLine = cleanPlain(line.replace(/^###\s+/, ''));
       let roleTitle = cleanLine;
       let compName = '';
@@ -1457,7 +1454,9 @@ function parseResumeMarkdown(md) {
 
     // Standalone Role Header (e.g. ### Role Title or ### Role — Company without next line date)
     if (/^###\s+/.test(line)) {
-      if (inList) { html += '</ul>'; inList = false; }
+      closeRole();
+      html += '<div class="res-role-block">';
+      inRoleBlock = true;
       const cleanLine = cleanPlain(line.replace(/^###\s+/, ''));
       let roleTitle = cleanLine;
       let compName = '';
@@ -1476,7 +1475,7 @@ function parseResumeMarkdown(md) {
 
     // Subtitle / Product description: e.g. *AI-Powered Social Media SaaS for SMBs*
     if (/^\*+[^*]+\*+$/.test(line) || (line.startsWith('*') && line.endsWith('*') && line.length < 100)) {
-      if (inList) { html += '</ul>'; inList = false; }
+      closeList();
       const cleanSub = cleanPlain(line);
       html += `<div class="res-role-sub">${esc(cleanSub)}</div>`;
       continue;
@@ -1490,10 +1489,11 @@ function parseResumeMarkdown(md) {
       continue;
     }
 
-    if (inList) { html += '</ul>'; inList = false; }
+    closeList();
 
     // Skills Category line (e.g. - **Languages:** Java, Python or **Languages:** Java, Python or Category: list)
     if (line.startsWith('- **') || line.startsWith('**') || /^[A-Z][a-zA-Z\s&/]+:/.test(line)) {
+      closeRole();
       let formatted = cleanInlineMd(line.replace(/^-\s+/, ''));
       if (!formatted.includes('<strong>') && formatted.includes(':')) {
         const colon = formatted.indexOf(':');
@@ -1504,13 +1504,15 @@ function parseResumeMarkdown(md) {
     }
 
     // Standard paragraph or summary text
+    closeRole();
     const formatted = cleanInlineMd(line);
     html += `<p class="res-summary-text">${formatted}</p>`;
   }
 
-  if (inList) html += '</ul>';
+  closeRole();
   return html;
 }
+window.parseResumeMarkdown = parseResumeMarkdown;
 
 function renderResumeDocument(md, company, role) {
   const doc = document.getElementById('resumeDocument');
@@ -1633,44 +1635,22 @@ function onDensityChange(){
 }
 
 function generateResumePdfFromMarkdown(markdownText, filename, btn, densityOverride){
-  const density = densityOverride || currentPdfDensity || 'auto';
+  const density = densityOverride || currentPdfDensity || 'standard';
   const sheet = document.createElement('div');
   sheet.className = 'res-pdf-print-sheet';
   sheet.innerHTML = parseResumeMarkdown(markdownText || DEFAULT_MASTER_RESUME);
-
-  // Attach temporarily to measure exact natural height at 96 DPI (190mm printable width = 718px)
-  document.body.appendChild(sheet);
-
-  const a4PageHeight = 1062; // 281mm printable area (297mm - 16mm margins)
-  let h = sheet.offsetHeight;
 
   if (density === 'spacious') {
     sheet.classList.add('fit-spacious');
   } else if (density === 'compact') {
     sheet.classList.add('fit-compact');
-  } else if (density === 'standard') {
-    // Keep baseline 10.2px
-  } else {
-    // Auto-Fit (Default):
-    // 1. If underfilling 1 page (< 960px), expand with fit-spacious so it fills 95-99% of the page!
-    if (h < 960) {
-      sheet.classList.add('fit-spacious');
-      if (sheet.offsetHeight > a4PageHeight) {
-        // If spacious causes overflow onto page 2, fall back to baseline
-        sheet.classList.remove('fit-spacious');
-      }
-    } else if (h > a4PageHeight && h < 1160) {
-      // 2. If slightly spilling (1-3 lines onto page 2), compress to 1 single page!
-      sheet.classList.add('fit-compact');
-      if (sheet.offsetHeight > a4PageHeight) {
-        // If it still overflows despite compact, revert to baseline and let it be a clean 2-page document
-        sheet.classList.remove('fit-compact');
-      }
-    }
   }
 
+  // Attach temporarily to measure and render
+  document.body.appendChild(sheet);
+
   const opt = {
-    margin: [8, 10, 8, 10], // mm: [top, left, bottom, right]
+    margin: [8, 10, 8, 10], // mm: [top, left, bottom, right] - leaves 190mm printable width
     filename: filename || 'Siddhant_Rangari_Resume.pdf',
     image: { type: 'jpeg', quality: 0.98 },
     enableLinks: true,
@@ -1685,7 +1665,7 @@ function generateResumePdfFromMarkdown(markdownText, filename, btn, densityOverr
     jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
     pagebreak: {
       mode: ['css', 'legacy'],
-      avoid: ['.res-role-row', '.res-sec-head', '.res-stack-line', 'li', 'h1', 'h2']
+      avoid: ['.res-role-block', '.res-role-row', '.res-sec-head', '.res-stack-line', 'li', 'h1', 'h2', '.res-skills-cat']
     }
   };
 

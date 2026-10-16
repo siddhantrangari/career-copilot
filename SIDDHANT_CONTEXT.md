@@ -4,7 +4,7 @@
 - **Name**: Siddhant Rangari
 - **Based**: Mumbai, India
 - **Email**: siddhantrangari@gmail.com
-- **LinkedIn**: linkedin.com/in/siddhantrangari
+- **LinkedIn**: https://linkedin.com/in/siddhant-rangari
 - **Personal site**: siddhantrangari.com
 - **Personal brand**: "India's AI Agents Guy"
 
@@ -31,9 +31,9 @@
 | Sep 2021 – Feb 2024 | Full-Stack Engineer (Software Technologist II) at Philips Innovation Campus, Bangalore | Real-time clinical systems |
 | Feb 2024 – Apr 2024 | Career Break | Travel, marriage celebrations, personal reset |
 | Apr 2024 – Jul 2025 | Freelance Solutions Architect at Growlogic Technologies (Eeko.ai), Remote | Azure AKS microservices SaaS |
-| Aug 2025 – Sep 2025 | Independent: ChalOnline | Creator/education SaaS |
-| Oct 2025 – Feb 2026 | Independent: TradingOS | Trading platform with AI coaching |
-| Mar 2026 – Aug 2026 | Independent: MyAgentFirm | Multi-tenant AI agent platform |
+| Aug 2025 – Sep 2025 | Independent: ChalOnline | Creator/education SaaS (Nagpur, India) — Founding Engineer (Co-Founder) |
+| Oct 2025 – Feb 2026 | Independent: TradingOS | Trading platform with AI coaching (Nagpur, India) — Forward Deployed Engineer (Co-Founder) |
+| Mar 2026 – Aug 2026 | Independent: MyAgentFirm | Multi-tenant AI agent platform (Nagpur, India) — Founding Engineer — MyAgentFirm (Co-Founder) |
 | Sep 2026 | Actively job hunting | |
 
 ## Gap Explanation (interview answer)

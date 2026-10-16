@@ -24,6 +24,7 @@ export default async function aiRoutes(app) {
   syncRoute('/generate-messages', 'generate-messages');
   syncRoute('/generate-win-doc', 'generate-win-doc');
   syncRoute('/tailor-resume', 'tailor-resume');
+  syncRoute('/refine-resume', 'refine-resume');
   syncRoute('/cold-email', 'cold-email');
   syncRoute('/call-prep', 'call-prep');
   syncRoute('/linkedin-post', 'linkedin-post');
@@ -98,7 +99,7 @@ export default async function aiRoutes(app) {
 
   app.get('/resumes', async () => ({
     resumes: await many(
-      `SELECT id, company_name, job_title, match_score, created_at
+      `SELECT id, company_id, company_name, job_title, job_description, tailored_text, match_score, keywords_matched, keywords_missing, created_at
        FROM resume_versions ORDER BY created_at DESC LIMIT 100`,
     ),
   }));
@@ -107,6 +108,12 @@ export default async function aiRoutes(app) {
     const row = await one('SELECT * FROM resume_versions WHERE id = $1', [request.params.id]);
     if (!row) return reply.code(404).send({ error: 'Resume version not found' });
     return { resume: row };
+  });
+
+  app.delete('/resumes/:id', async (request, reply) => {
+    const row = await one('DELETE FROM resume_versions WHERE id = $1 RETURNING id', [request.params.id]);
+    if (!row) return reply.code(404).send({ error: 'Resume version not found' });
+    return { ok: true, id: row.id };
   });
 
   /** The live search evidence a brief or WIN doc was built from. */

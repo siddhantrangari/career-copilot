@@ -189,25 +189,90 @@ Return JSON exactly in this shape:
 Every "problem" slide's bullets must be short — under ~14 words each — because they will render on a slide, not on a page. Never repeat the same evidence URL across two slides.`,
 });
 
-export const tailorResumePrompt = ({ companyName, jobTitle, jobDescription, candidate }) => ({
+export const tailorResumePrompt = ({ companyName, jobTitle, jobDescription, candidate, instructions }) => ({
   system: `${CONSULTANT_STANCE}
 
 You tailor the candidate's master resume to a specific job description. Absolute rule: never invent experience, employers, dates or metrics. You may only re-order, re-weight, re-word and select from what is in the master resume and achievement bank. Return valid JSON only.`,
 
   user: `Company: ${companyName}
 Role: ${jobTitle}
-
+${instructions ? `\nUSER INSTRUCTIONS / SPECIFIC COMMENTS:\n${instructions}\n` : ''}
 JOB DESCRIPTION
 ${jobDescription}
 
 ${candidate}
 
-Produce:
-1. A tailored resume in markdown — same real history, but with the summary rewritten for this role and bullets selected and re-worded to mirror the JD's language and priorities. Lead each bullet with a strong verb and keep every real metric.
+PRODUCE:
+1. A tailored resume in clean markdown — same verified history, but with the summary rewritten specifically for this target role and bullets selected and re-worded to mirror the JD's language and priorities${instructions ? ' and adhering strictly to the user instructions' : ''}. Lead each bullet with a strong action verb and keep every real metric.
+
+CANDIDATE HEADLINE & TITLE ACCURACY (DO NOT OVERCLAIM SENIORITY):
+- The candidate's verified identity is Senior Full-Stack & AI Engineer (12+ Years).
+- Even if the target job title is 'Principal Software Engineer', do NOT claim 'Principal' as the candidate's personal headline/banner!
+- Use honest verified seniority: 'Senior Full-Stack & AI Engineer | 12+ Years | Bangalore, India' (or 'Senior Full-Stack Engineer — Java Backend, Distributed Systems & Cloud-Native Architecture | 12+ Years | Bangalore, India').
+
+INDEPENDENT ENGINEERING PROJECTS GROUPING & NAMING (MANDATORY & PERMANENT):
+- Group MyAgentFirm, TradingOS, and ChalOnline under the exact section header:
+  ## INDEPENDENT ENGINEERING PROJECTS | JAN 2026 – SEP 2026
+- EXACT ROLE HEADERS AND LOCATIONS (MUST BE NAGPUR, NOT BANGALORE):
+  * Founding Engineer — MyAgentFirm (Co-Founder) | Apr 2026 – Aug 2026 | Nagpur, India
+  * Forward Deployed Engineer (Co-Founder) | TradingOS | Feb 2026 – Apr 2026 | Nagpur, India
+  * Founding Engineer (Co-Founder) | ChalOnline | Jan 2026 – Feb 2026 | Nagpur, India
+- Location for all three projects MUST be 'Nagpur, India', NEVER 'Bangalore'.
+- MyAgentFirm title MUST be 'Founding Engineer — MyAgentFirm (Co-Founder)'!
+
+FULL CAREER TIMELINE PRESERVATION (CRITICAL — ZERO OMISSIONS):
+- You MUST include EVERY SINGLE employer and role from the candidate's verified history (never drop or omit any employer to save space):
+  1. Philips Innovation Campus (Sep 2021 – Feb 2024)
+  2. GE Healthcare (Sep 2020 – Jun 2021)
+  3. Cropdata Technology (Jun 2019 – Jun 2020)
+  4. Ajanta Photo and Technologies (May 2016 – May 2019)
+  5. Naresh i Technologies (Jun 2014 – Mar 2016)
+  6. Growlogic Technologies (May 2024 – Dec 2025)
+  7. MyAgentFirm (Apr 2026 – Aug 2026)
+  8. TradingOS (Feb 2026 – Apr 2026)
+  9. ChalOnline (Jan 2026 – Feb 2026)
+  10. AnnaRakshak AI (Google Hackathon, Sep 2026)
+  11. Education & Certifications (Polytechnic 2016, NareshIT 2014)
+
+CURATING TECHNICAL SKILLS TO MATCH THE TARGET JD (CRITICAL FOR 1.5–2 PAGE FIT):
+- Do NOT output an exhaustive 6-category, 20-line skill dump that wastes half a page!
+- Instead, curate 3–4 dense, categorized lines that prioritize skills explicitly required by this JD:
+  - **Core Languages & Frameworks:** (lead with technologies central to this JD, e.g. Java, Spring Boot, Microservices, Kafka for backend; or Python, Fastify, LangChain/LLM, React for AI/Full-Stack)
+  - **Cloud, Systems & Architecture:** (AWS/Azure, Docker, Kubernetes, CI/CD, Observability)
+  - **Databases & Data Storage:** (PostgreSQL, Redis, Kafka, TimescaleDB, S3)
+  - **Secondary / Tools:** (concise list of adjacent tools)
+- This maximizes ATS keyword relevance to the specific JD while saving 10–15 lines.
+
+STRICT LENGTH CONSTRAINTS (MUST FIT WITHIN 1.5 TO 2 PAGES MAX — 650 TO 780 WORDS TOTAL):
+- Maximum total word count ceiling: 700–780 words total! Resumes over 800 words spill to 2.5–3 pages when exported to PDF. The output MUST fit in 1.5 to 2 pages max.
+- SUMMARY: exactly 3–4 punchy, high-impact sentences tailored to this target JD.
+- EXPERIENCE BULLETS:
+  * Most relevant flagship roles for this JD (Philips + MyAgentFirm + Growlogic): 2–3 sharp, metric-heavy bullets each.
+  * All other verified roles (GE Healthcare, Cropdata, Ajanta, NareshIT, ChalOnline, TradingOS, AnnaRakshak): exactly 1 concise, metric-heavy one-liner bullet each.
+  * Bullet length: 15–25 words max per bullet.
+  * DO NOT include a separate redundant 'SELECTED ACHIEVEMENTS' or 'OPEN TO' section — achievements are already proven inside the role bullets. This avoids repetition and saves 20 lines.
+
+MARKDOWN FORMATTING & SYNTAX CONSTRAINTS (NO '###' SYMBOLS):
+- For section headers, use: '## PROFESSIONAL EXPERIENCE', '## TECHNICAL SKILLS', etc.
+- For role headers, use clean single-line text with pipe delimiters:
+  Role Title | Company Name | Dates | Location
+  (e.g., Full-Stack Engineer — Software Technologist II | Philips Innovation Campus | Sep 2021 – Feb 2024 | Bangalore, India)
+  CRITICAL: NEVER prefix role lines with '###' or any '#' symbols. Roles are items under sections, NOT markdown H3 headers.
+- For tech stack under a role, use: Key Stack: Java · Spring Boot · Kafka · AWS
+- NEVER include markdown horizontal dividers (do NOT output '---' or '***' or '___').
+- NEVER output orphan date lines like '**Sep 2021 – Feb 2024**'. Put them in the single-line role header.
+- Bullets must start with '- ' and bold key metrics inline (e.g., '- Designed Kafka pipeline reducing load time by **70%**.').
+
+CRITICAL JSON FORMATTING RULES:
+- Output MUST be valid, parseable JSON only.
+- Inside "tailoredResumeText", use standard JSON escaping (\\n for newlines, \\" for quotes). Do NOT output unescaped raw control characters or trailing commas.
+- Do NOT wrap markdown code fences (\`\`\`) inside the resume text itself.
+
 2. Keywords from the JD that the candidate genuinely matches.
 3. Keywords from the JD that the candidate does NOT have — stated honestly, with the nearest adjacent experience he can speak to.
 4. An honest match score out of 100.
 5. Whether this JD signals DSA/LeetCode-style interviews (the candidate is avoiding those), with the phrase that gave it away.
+6. 3–5 talking points for the screening call.
 
 Return JSON exactly in this shape:
 {
@@ -219,6 +284,118 @@ Return JSON exactly in this shape:
   "dsaSignal": { "likely": false, "evidence": "..." },
   "talkingPoints": ["3–5 things to lead with in the screening call"]
 }`,
+});
+
+export const refineResumePrompt = ({
+  companyName,
+  jobTitle,
+  jobDescription,
+  currentResumeText,
+  feedback,
+  chatHistory = [],
+  candidate,
+}) => ({
+  system: `${CONSULTANT_STANCE}
+
+You are an expert executive resume consultant refining an existing tailored resume based on user feedback, chat suggestions, or requested changes.
+Absolute rule: never invent experience, employers, dates or metrics. You may only re-order, re-weight, re-word, expand or trim from what is verified in the master resume, achievement bank, and the user's feedback. Return valid JSON only.`,
+
+  user: `Company: ${companyName || 'Target Company'}
+Role: ${jobTitle || 'Senior Engineer'}
+
+${chatHistory && chatHistory.length ? `CONVERSATION HISTORY OF REFINEMENTS (Review this to understand cumulative context across turns):\n${chatHistory.map(m => `${m.role === 'user' ? 'USER' : 'ASSISTANT'}: ${m.content}`).join('\n')}\n` : ''}
+
+LATEST USER FEEDBACK / REQUESTED CHANGES:
+${feedback}
+
+CURRENT TAILORED RESUME:
+${currentResumeText}
+
+${jobDescription ? `ORIGINAL JOB DESCRIPTION:\n${jobDescription}\n` : ''}
+SOURCE OF TRUTH — CANDIDATE'S MASTER PROFILE & ACHIEVEMENTS:
+${candidate}
+
+PRODUCE:
+1. The refined tailored resume in clean markdown, faithfully incorporating the user's feedback while adhering strictly to verified history and keeping all real metrics.
+
+CUMULATIVE REFINEMENT & PRESERVATION (CRITICAL — DO NOT REVERT PREVIOUS DECISIONS):
+- You are incrementally refining the CURRENT TAILORED RESUME.
+- DO NOT undo or revert earlier user decisions! For instance, if the user previously asked for Senior Full-Stack positioning instead of Principal, KEEP IT as Senior Full-Stack. If the user previously refined bullets or headers, PRESERVE those adjustments.
+- Do NOT revert to an older state unless the user explicitly tells you to revert.
+- Every instruction is additive and cumulative.
+
+INDEPENDENT ENGINEERING PROJECTS GROUPING & NAMING (MANDATORY & PERMANENT):
+- Group MyAgentFirm, TradingOS, and ChalOnline under the exact section header:
+  ## INDEPENDENT ENGINEERING PROJECTS | JAN 2026 – SEP 2026
+- EXACT ROLE HEADERS AND LOCATIONS (MUST BE NAGPUR, NOT BANGALORE):
+  * Founding Engineer — MyAgentFirm (Co-Founder) | Apr 2026 – Aug 2026 | Nagpur, India
+  * Forward Deployed Engineer (Co-Founder) | TradingOS | Feb 2026 – Apr 2026 | Nagpur, India
+  * Founding Engineer (Co-Founder) | ChalOnline | Jan 2026 – Feb 2026 | Nagpur, India
+- Location for all three projects MUST be 'Nagpur, India', NEVER 'Bangalore'.
+- MyAgentFirm title MUST be 'Founding Engineer — MyAgentFirm (Co-Founder)'!
+
+CANDIDATE HEADLINE & TITLE ACCURACY (DO NOT OVERCLAIM SENIORITY):
+- The candidate's verified identity is Senior Full-Stack & AI Engineer (12+ Years).
+- Never claim 'Principal' in the candidate's personal headline/banner. Use 'Senior Full-Stack & AI Engineer | 12+ Years | Bangalore, India' (or 'Senior Full-Stack Engineer — Java Backend, Distributed Systems & Cloud-Native Architecture | 12+ Years | Bangalore, India').
+
+FULL CAREER TIMELINE PRESERVATION (CRITICAL — ZERO OMISSIONS):
+- You MUST retain EVERY SINGLE employer and role from the candidate's verified history with ZERO gaps:
+  1. Philips Innovation Campus (Sep 2021 – Feb 2024)
+  2. GE Healthcare (Sep 2020 – Jun 2021)
+  3. Cropdata Technology (Jun 2019 – Jun 2020)
+  4. Ajanta Photo and Technologies (May 2016 – May 2019)
+  5. Naresh i Technologies (Jun 2014 – Mar 2016)
+  6. Growlogic Technologies (May 2024 – Dec 2025)
+  7. MyAgentFirm (Apr 2026 – Aug 2026)
+  8. TradingOS (Feb 2026 – Apr 2026)
+  9. ChalOnline (Jan 2026 – Feb 2026)
+  10. AnnaRakshak AI (Google Hackathon, Sep 2026)
+  11. Education & Certifications (Polytechnic 2016, NareshIT 2014)
+
+CURATING TECHNICAL SKILLS TO MATCH THE TARGET JD (CRITICAL FOR 1.5–2 PAGE FIT):
+- Do NOT output an exhaustive 6-category, 20-line skill dump that wastes half a page!
+- Instead, curate 3–4 dense, categorized lines that prioritize skills explicitly required by this JD:
+  - **Core Languages & Frameworks:** (lead with technologies central to this JD, e.g. Java, Spring Boot, Microservices, Kafka for backend; or Python, Fastify, LangChain/LLM, React for AI/Full-Stack)
+  - **Cloud, Systems & Architecture:** (AWS/Azure, Docker, Kubernetes, CI/CD, Observability)
+  - **Databases & Data Storage:** (PostgreSQL, Redis, Kafka, TimescaleDB, S3)
+  - **Secondary / Tools:** (concise list of adjacent tools)
+- This maximizes ATS keyword relevance to the specific JD while saving 10–15 lines.
+
+STRICT LENGTH CONSTRAINTS (MUST FIT WITHIN 1.5 TO 2 PAGES MAX — 650 TO 780 WORDS TOTAL):
+- Maximum total word count ceiling: 700–780 words total! Resumes over 800 words spill to 2.5–3 pages when exported to PDF. The output MUST fit in 1.5 to 2 pages max.
+- SUMMARY: exactly 3–4 punchy, high-impact sentences tailored to this target JD.
+- EXPERIENCE BULLETS:
+  * Most relevant flagship roles for this JD (Philips + MyAgentFirm + Growlogic): 2–3 sharp, metric-heavy bullets each.
+  * All other verified roles (GE Healthcare, Cropdata, Ajanta, NareshIT, ChalOnline, TradingOS, AnnaRakshak): exactly 1 concise, metric-heavy one-liner bullet each.
+  * Bullet length: 15–25 words max per bullet.
+  * DO NOT include a separate redundant 'SELECTED ACHIEVEMENTS' or 'OPEN TO' section — achievements are already proven inside the role bullets. This avoids repetition and saves 20 lines.
+
+MARKDOWN FORMATTING & SYNTAX CONSTRAINTS (NO '###' SYMBOLS):
+- For role headers, use clean single-line text with pipe delimiters:
+  Role Title | Company Name | Dates | Location
+  (e.g., Full-Stack Engineer — Software Technologist II | Philips Innovation Campus | Sep 2021 – Feb 2024 | Bangalore, India)
+  CRITICAL: NEVER prefix role lines with '###' or any '#' symbols. Roles are items under sections, NOT markdown H3 headers.
+- For tech stack under a role, use: Key Stack: Java · Spring Boot · Kafka · AWS
+- NEVER include markdown horizontal dividers ('---', '***').
+- Use '- ' for bullets with inline bolding '**metric**'.
+
+CRITICAL JSON FORMATTING RULES:
+- Output MUST be valid, parseable JSON only.
+- Inside "tailoredResumeText", use standard JSON escaping (\\n for newlines, \\" for quotes). Do NOT output unescaped raw control characters or trailing commas.
+- Do NOT wrap markdown code fences (\`\`\`) inside the resume text itself.
+
+2. A clear, bulleted summary of the changes made and how they improve the resume.
+3. An updated match score out of 100.
+4. 3-5 talking points for the candidate's interview screening call.
+
+Return JSON exactly in this shape:
+{
+  "tailoredResumeText": "full refined resume in markdown",
+  "changeSummary": "bulleted explanation of adjustments made",
+  "matchScore": 0,
+  "talkingPoints": ["..."]
+}
+`,
 });
 
 /**

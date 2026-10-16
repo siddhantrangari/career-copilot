@@ -10,21 +10,107 @@ export class AiError extends Error {
   }
 }
 
-/** Pull the JSON object out of a response that may be fenced or padded with prose. */
-export function parseJson(raw, fallback = null) {
-  if (!raw || typeof raw !== 'string') return fallback;
-  try {
-    return JSON.parse(raw);
-  } catch {
-    const fenced = raw.match(/```(?:json)?\s*([\s\S]*?)```/i);
-    const candidate = fenced ? fenced[1] : raw.match(/\{[\s\S]*\}/)?.[0];
-    if (!candidate) return fallback;
-    try {
-      return JSON.parse(candidate);
-    } catch {
-      return fallback;
+/** Repair unescaped newlines/tabs inside string literals and trailing commas. */
+function repairJson(str) {
+  let inString = false;
+  let escaped = false;
+  let out = '';
+  for (let i = 0; i < str.length; i++) {
+    const ch = str[i];
+    if (inString) {
+      if (escaped) {
+        escaped = false;
+        out += ch;
+      } else if (ch === '\\') {
+        escaped = true;
+        out += ch;
+      } else if (ch === '"') {
+        inString = false;
+        out += ch;
+      } else if (ch === '\n') {
+        out += '\\n';
+      } else if (ch === '\r') {
+        out += '\\r';
+      } else if (ch === '\t') {
+        out += '\\t';
+      } else {
+        out += ch;
+      }
+    } else {
+      if (ch === '"') {
+        inString = true;
+        out += ch;
+      } else {
+        out += ch;
+      }
     }
   }
+  return out.replace(/,(\s*[}\]])/g, '$1');
+}
+
+/** Pull the JSON object out of a response that may be fenced, padded with prose, or have unescaped control chars. */
+export function parseJson(raw, fallback = null) {
+  if (!raw || typeof raw !== 'string') return fallback;
+
+  // 1. Direct parse attempt
+  try {
+    return JSON.parse(raw);
+  } catch {}
+
+  // 2. Strip leading and trailing markdown code block wrapper
+  let text = raw.trim();
+  if (text.startsWith('```')) {
+    text = text.replace(/^```(?:json)?\s*\n?/i, '');
+    const lastFence = text.lastIndexOf('```');
+    if (lastFence !== -1) {
+      text = text.slice(0, lastFence).trim();
+    }
+  }
+
+  try {
+    return JSON.parse(text);
+  } catch {}
+
+  // 3. Extract outermost JSON object or array ({ ... } or [ ... ])
+  const firstBrace = text.indexOf('{');
+  const lastBrace = text.lastIndexOf('}');
+  const firstBracket = text.indexOf('[');
+  const lastBracket = text.lastIndexOf(']');
+
+  let candidate = text;
+  if (firstBrace !== -1 && lastBrace !== -1 && (firstBracket === -1 || firstBrace < firstBracket)) {
+    candidate = text.slice(firstBrace, lastBrace + 1);
+  } else if (firstBracket !== -1 && lastBracket !== -1) {
+    candidate = text.slice(firstBracket, lastBracket + 1);
+  }
+
+  try {
+    return JSON.parse(candidate);
+  } catch {}
+
+  // 4. Try repairing common LLM JSON defects (unescaped newlines/tabs inside strings, trailing commas)
+  try {
+    const repaired = repairJson(candidate);
+    return JSON.parse(repaired);
+  } catch {}
+
+  // 5. Fallback regex extraction for tailoredResumeText if the response is a tailored/refined resume object
+  try {
+    const match = candidate.match(/"tailoredResumeText"\s*:\s*"([\s\S]*?)(?:",\s*"(?:changeSummary|summaryRewrite|keywordsMatched|matchScore|talkingPoints)|"\s*})/);
+    if (match) {
+      const rawResume = match[1].replace(/\\n/g, '\n').replace(/\\"/g, '"');
+      const scoreMatch = candidate.match(/"matchScore"\s*:\s*(\d+)/);
+      const summaryMatch = candidate.match(/"changeSummary"\s*:\s*"([^"]*)"/);
+      return {
+        tailoredResumeText: rawResume,
+        changeSummary: summaryMatch ? summaryMatch[1] : 'Resume refined according to feedback.',
+        matchScore: scoreMatch ? parseInt(scoreMatch[1], 10) : 85,
+        talkingPoints: []
+      };
+    }
+  } catch {}
+
+  return fallback;
 }
 
 async function logRun({

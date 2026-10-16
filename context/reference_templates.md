@@ -128,7 +128,7 @@ Thanks for your time.
 Best regards,
 Siddhant Rangari
 📧 siddhantrangari@gmail.com
-🌐 linkedin.com/in/siddhantrangari
+🌐 linkedin.com/in/siddhant-rangari
 ```
 
 ## Visa Sponsorship Research Prompt

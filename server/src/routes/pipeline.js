@@ -9,7 +9,7 @@ export default async function pipelineRoutes(app) {
   app.get('/pipeline', async () => {
     const rows = await many(
       `SELECT t.company_id, t.stage, t.win_status, t.notes, t.jd, t.job_link, t.updated_at,
-              c.name, c.region, c.roles, c.pay, c.apply_url AS apply,
+              c.name, c.region, c.roles, c.pay, c.apply_url AS apply, c.favourite,
               COALESCE(cn.count, 0)::int AS connection_count,
               COALESCE(cn.replies, 0)::int AS reply_count
        FROM tracked_companies t
@@ -20,7 +20,7 @@ export default async function pipelineRoutes(app) {
                 COUNT(*) FILTER (WHERE status IN ('reply','call','win','ref')) AS replies
          FROM connections GROUP BY company_id
        ) cn ON cn.company_id = t.company_id
-       ORDER BY t.updated_at DESC`,
+       ORDER BY c.favourite DESC, t.updated_at DESC`,
     );
 
     const columns = Object.fromEntries(STAGES.map((s) => [s, []]));
