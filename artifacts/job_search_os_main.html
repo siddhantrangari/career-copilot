@@ -41,12 +41,19 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);min-heig
 .cdesc{font-size:12px;color:var(--t2);margin:5px 0;line-height:1.5}
 .pay{font-family:'JetBrains Mono';font-size:11px;font-weight:600;color:var(--g);background:rgba(56,217,169,.1);padding:2px 7px;border-radius:4px}
 /* KANBAN */
-.kanban{display:grid;grid-template-columns:repeat(8,minmax(160px,1fr));gap:10px;overflow-x:auto;padding-bottom:10px}
-.kcol{background:var(--s1);border:1px solid var(--bd);border-radius:8px;min-height:300px}
-.khead{padding:10px 12px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--bd)}
-.kcards{padding:8px}
-.kcard{position:relative;background:var(--s2);border:1px solid var(--bd);border-radius:6px;padding:9px 10px;padding-top:16px;margin-bottom:7px;cursor:pointer;transition:border-color .15s,box-shadow .15s;font-size:12px}
-.kcard:hover{border-color:var(--ac)}
+.kanban{display:grid;grid-template-columns:repeat(8,minmax(160px,1fr));gap:10px;overflow-x:auto;padding-bottom:12px}
+.kcol{background:var(--s1);border:1px solid var(--bd);border-radius:8px;min-height:380px;display:flex;flex-direction:column;transition:border-color .15s,background .15s,box-shadow .15s}
+.kcol.drag-over{border-color:#38bdf8!important;background:rgba(56,189,248,.07)!important;box-shadow:0 0 0 2px rgba(56,189,248,.25),inset 0 0 20px rgba(56,189,248,.05)!important}
+.khead{padding:10px 12px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--bd);user-select:none}
+.kcards{padding:8px;flex:1;min-height:160px;transition:background .15s}
+.kcard{position:relative;background:var(--s2);border:1px solid var(--bd);border-radius:6px;padding:9px 10px;padding-top:16px;margin-bottom:8px;cursor:grab;user-select:none;-webkit-user-select:none;transition:transform .15s cubic-bezier(.2,0,0,1),box-shadow .15s,border-color .15s,opacity .15s;font-size:12px}
+.kcard:hover{border-color:var(--ac);transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,0,0,.3)}
+.kcard:active{cursor:grabbing}
+.kcard.is-dragging{opacity:.35!important;transform:scale(.97)!important;border:1px dashed #38bdf8!important;box-shadow:none!important}
+.kcard.just-dropped{animation:cardDropPulse .5s cubic-bezier(.16,1,.3,1)}
+@keyframes cardDropPulse{0%{transform:scale(.95);box-shadow:0 0 0 3px rgba(56,189,248,.5)}50%{transform:scale(1.02)}100%{transform:scale(1);box-shadow:none}}
+.cc-drag-handle{position:absolute;top:6px;right:8px;color:#7c8ba3;cursor:grab;font-size:14px;line-height:1;letter-spacing:-2px;user-select:none;padding:1px 3px;border-radius:3px;transition:color .15s}
+.kcard:hover .cc-drag-handle{color:#cbd5e1}
 .kcard.is-fav{border-left:3px solid #f59e0b!important;border-color:rgba(245,158,11,.45);background:linear-gradient(135deg,rgba(245,158,11,.08) 0%,var(--s2) 100%)!important;box-shadow:0 2px 10px rgba(245,158,11,.15)}
 .kcard.is-fav:hover{border-color:#f59e0b!important;box-shadow:0 4px 14px rgba(245,158,11,.28)}
 .kcard-name{font-weight:600;color:var(--t);margin-bottom:3px;padding-right:48px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -3907,15 +3914,16 @@ function renderKanban(all,filter){
       if (bFav !== aFav) return bFav - aFav;
       return (a.name || '').localeCompare(b.name || '');
     });
-    return`<div class="kcol">
+    return`<div class="kcol" data-stage="${s}" ondragenter="onKanbanColDragEnter(event,'${s}')" ondragover="onKanbanColDragOver(event,'${s}')" ondragleave="onKanbanColDragLeave(event,'${s}')" ondrop="onKanbanColDrop(event,'${s}')">
       <div class="khead" style="color:${colors[s]}">${SL[s]} <span style="background:rgba(255,255,255,.1);padding:1px 6px;border-radius:10px;font-size:10px;margin-left:4px">${cards.length}</span></div>
-      <div class="kcards">${cards.map(c=>{
+      <div class="kcards" data-stage="${s}">${cards.map(c=>{
         const tr=tracked[c.id]||{};
         const isFav=isCoFav(c.id);
         const hasDoc = !!(tr.jdFile || c.jdFile);
         const hasJd = !!(tr.jdText || (tr.jd && !/^https?:\/\//i.test(tr.jd)) || c.jdText || (c.custom && c.desc && c.desc.length > 50));
         const role = tr.roleTitle || c.roleTitle || (Array.isArray(c.roles) ? c.roles.map(r=>RL[r]||r).join(', ') : '');
-        return `<div class="kcard ${isFav?'is-fav':''}" onclick="openTrack('${c.id}')" data-company-id="${c.id}">
+        return `<div class="kcard ${isFav?'is-fav':''}" draggable="true" data-company-id="${c.id}" ondragstart="onKanbanCardDragStart(event,'${c.id}')" ondragend="onKanbanCardDragEnd(event)" onclick="onKanbanCardClick(event,'${c.id}')">
+          <span class="cc-drag-handle" title="Drag to move stage">⋮⋮</span>
           <button type="button" class="kcard-fav-btn ${isFav?'active':''}" onclick="toggleCoFav(event,'${c.id}')" title="${isFav?'Priority / Favourite (Click to unmark)':'Mark as Priority / Favourite'}">${isFav?'★':'☆'}</button>
           <div class="kcard-name">${c.name}</div>
           ${isFav ? `<div style="margin-bottom:3px"><span class="kcard-fav-badge">★ PRIORITY</span></div>` : ''}
@@ -3931,6 +3939,155 @@ function renderKanban(all,filter){
     </div>`;
   }).join('');
 }
+
+// ── KANBAN DRAG & DROP SYSTEM ─────────────────────────
+window.__kanbanDraggingId = null;
+window.__kanbanJustDragged = false;
+
+function onKanbanCardClick(e, id) {
+  if (window.__kanbanJustDragged) {
+    e.preventDefault();
+    e.stopPropagation();
+    return;
+  }
+  openTrack(id);
+}
+
+function onKanbanCardDragStart(e, id) {
+  // Ignore drag if clicking an interactive control
+  if (e.target && (e.target.tagName === 'SELECT' || e.target.tagName === 'BUTTON' || e.target.closest('button') || e.target.closest('select'))) {
+    e.preventDefault();
+    return;
+  }
+  window.__kanbanDraggingId = id;
+  window.__kanbanJustDragged = true;
+
+  if (e.dataTransfer) {
+    e.dataTransfer.setData('text/plain', id);
+    e.dataTransfer.setData('application/x-company-id', id);
+    e.dataTransfer.effectAllowed = 'move';
+  }
+
+  const card = e.currentTarget;
+  setTimeout(() => {
+    if (card) card.classList.add('is-dragging');
+  }, 0);
+}
+
+function onKanbanCardDragEnd(e) {
+  const card = e.currentTarget;
+  if (card) card.classList.remove('is-dragging');
+  window.__kanbanDraggingId = null;
+
+  document.querySelectorAll('.kcol').forEach(col => {
+    col.classList.remove('drag-over');
+    delete col.dataset.dragDepth;
+  });
+
+  // Keep justDragged true briefly so browser click does not fire openTrack modal
+  setTimeout(() => {
+    window.__kanbanJustDragged = false;
+  }, 200);
+}
+
+function onKanbanColDragEnter(e, stage) {
+  e.preventDefault();
+  const col = e.currentTarget;
+  let depth = parseInt(col.dataset.dragDepth || '0', 10);
+  depth += 1;
+  col.dataset.dragDepth = depth;
+  col.classList.add('drag-over');
+}
+
+function onKanbanColDragOver(e, stage) {
+  e.preventDefault();
+  if (e.dataTransfer) e.dataTransfer.dropEffect = 'move';
+  const col = e.currentTarget;
+  if (!col.classList.contains('drag-over')) {
+    col.classList.add('drag-over');
+  }
+}
+
+function onKanbanColDragLeave(e, stage) {
+  const col = e.currentTarget;
+  let depth = parseInt(col.dataset.dragDepth || '1', 10);
+  depth -= 1;
+  col.dataset.dragDepth = Math.max(0, depth);
+  if (depth <= 0) {
+    col.dataset.dragDepth = '0';
+    col.classList.remove('drag-over');
+  }
+}
+
+function onKanbanColDrop(e, stage) {
+  e.preventDefault();
+  e.stopPropagation();
+  const col = e.currentTarget;
+  col.classList.remove('drag-over');
+  col.dataset.dragDepth = '0';
+
+  const id = window.__kanbanDraggingId ||
+    (e.dataTransfer && (e.dataTransfer.getData('application/x-company-id') || e.dataTransfer.getData('text/plain')));
+
+  if (!id || !stage) return;
+  moveCompanyToStage(id, stage);
+}
+
+function moveCompanyToStage(id, nextStage) {
+  if (!id || !nextStage) return;
+
+  if (!tracked[id]) {
+    tracked[id] = { connections: [], stage: 'new' };
+  }
+
+  const prevStage = tracked[id].stage || 'new';
+  if (prevStage === nextStage) return; // Already in target stage
+
+  // 1. Instant Optimistic UI Update (0ms latency)
+  tracked[id].stage = nextStage;
+  tracked[id].updated = new Date().toLocaleDateString();
+
+  try {
+    localStorage.setItem('sr_tracked', JSON.stringify(tracked));
+  } catch (err) {}
+
+  renderPipeline();
+  updateStats();
+
+  if (typeof window.__CC_APPLY_PIPE_FILTER__ === 'function') {
+    window.__CC_APPLY_PIPE_FILTER__();
+  }
+
+  // Smooth drop pulse feedback on the moved card
+  setTimeout(() => {
+    const movedCard = document.querySelector(`.kcard[data-company-id="${id}"]`);
+    if (movedCard) {
+      movedCard.classList.add('just-dropped');
+      setTimeout(() => movedCard.classList.remove('just-dropped'), 600);
+    }
+  }, 20);
+
+  // 2. Background Server Sync
+  const pushApi = (window.__CC__ && typeof window.__CC__.api === 'function')
+    ? window.__CC__.api
+    : (typeof window.api === 'function' ? window.api : null);
+
+  if (pushApi) {
+    pushApi('/tracked/' + encodeURIComponent(id), { method: 'POST', body: { stage: nextStage } })
+      .catch(err => {
+        console.error('Failed to sync stage to backend:', err);
+        // Revert on error
+        tracked[id].stage = prevStage;
+        try {
+          localStorage.setItem('sr_tracked', JSON.stringify(tracked));
+        } catch (e) {}
+        renderPipeline();
+        updateStats();
+        alert('Could not move company: ' + (err.message || err));
+      });
+  }
+}
+window.moveCompanyToStage = moveCompanyToStage;
 
 // NETWORK MODAL
 function openNet(id){
@@ -3974,6 +4131,7 @@ function quickAddConn(id,type){
 
 // TRACK MODAL
 function openTrack(id){
+  if (window.__kanbanJustDragged) return;
   const c=allCos().find(x=>x.id===id);if(!c)return;
   const tr=tracked[id]||{};
   document.getElementById('trackTitle').textContent=`Track: ${c.name}`;

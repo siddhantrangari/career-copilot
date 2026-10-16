@@ -1506,101 +1506,19 @@
   }
 
   // ── Drag a company between pipeline columns ─────────────────────────
-  // The prototype re-renders the board from localStorage, so a drop writes
-  // through the API and then lets the prototype's own render run.
   var STAGES = ['new', 'applied', 'networking', 'call', 'win', 'interview', 'offer', 'failed'];
-  var dragging = null;
 
   function wireBoard() {
-    var board = document.getElementById('kanbanBoard');
-    if (!board || board.dataset.ccDnd === String(board.children.length)) return;
-    board.dataset.ccDnd = String(board.children.length);
-
-    board.querySelectorAll('.kcard').forEach(function (card) {
-      var onclick = card.getAttribute('onclick') || '';
-      var m = onclick.match(/openTrack\('([^']+)'\)/);
-      if (!m) return;
-
-      card.setAttribute('draggable', 'true');
-      card.style.cursor = 'grab';
-      card.dataset.company = m[1];
-
-      card.addEventListener('dragstart', function (e) {
-        dragging = m[1];
-        card.style.opacity = '.4';
-        try { e.dataTransfer.setData('text/plain', m[1]); } catch (err) {}
-        e.dataTransfer.effectAllowed = 'move';
-      });
-      card.addEventListener('dragend', function () {
-        dragging = null;
-        card.style.opacity = '';
-        board.querySelectorAll('.kcards').forEach(function (z) { z.style.background = ''; });
-      });
-    });
-
-    board.querySelectorAll('.kcol').forEach(function (col, i) {
-      var zone = col.querySelector('.kcards');
-      if (!zone) return;
-      var stage = STAGES[i];
-
-      zone.addEventListener('dragover', function (e) {
-        if (!dragging) return;
-        e.preventDefault();
-        e.dataTransfer.dropEffect = 'move';
-        zone.style.background = 'rgba(74,124,255,.08)';
-      });
-      zone.addEventListener('dragleave', function () { zone.style.background = ''; });
-
-      zone.addEventListener('drop', function (e) {
-        e.preventDefault();
-        zone.style.background = '';
-        var id = dragging || (e.dataTransfer && e.dataTransfer.getData('text/plain'));
-        if (!id || !stage) return;
-
-        // Write through the API, then update the prototype's own state so its
-        // re-render agrees with the server rather than snapping back.
-        api('/tracked/' + encodeURIComponent(id), { method: 'POST', body: { stage: stage } })
-          .then(function () {
-            var entry = null;
-            try {
-              var t = JSON.parse(localStorage.getItem('sr_tracked') || '{}');
-              entry = Object.assign({ connections: [] }, t[id], {
-                stage: stage,
-                updated: new Date().toLocaleDateString(),
-              });
-              t[id] = entry;
-              localStorage.setItem('sr_tracked', JSON.stringify(t));
-            } catch (err) {}
-
-            // The prototype holds its state in a top-level `let tracked`, which
-            // is a global lexical binding rather than a property of window — so
-            // it has to be reached by bare identifier, not window.tracked.
-            var live = false;
-            try {
-              /* eslint-disable no-undef */
-              if (typeof tracked === 'object' && tracked && entry) {
-                tracked[id] = entry;
-                live = true;
-              }
-              /* eslint-enable no-undef */
-            } catch (err) {}
-
-            if (live && typeof window.renderPipeline === 'function') {
-              window.renderPipeline();
-              if (typeof window.updateStats === 'function') window.updateStats();
-              setTimeout(wireBoard, 60);
-            } else {
-              // Could not reach it — reload rather than leave the board lying.
-              location.reload();
-            }
-          })
-          .catch(function (err) { alert('Could not move it: ' + err.message); });
-      });
-    });
+    // Native drag-and-drop is cleanly integrated into renderKanban() with
+    // 0ms optimistic updates, drag-depth tracking, and pulse animations.
+    if (typeof window.moveCompanyToStage !== 'function' && typeof changeStage === 'function') {
+      window.moveCompanyToStage = function (id, nextStage) {
+        changeStage(id, nextStage);
+      };
+    }
   }
 
   wireBoard();
-  // The board only exists once the Pipeline tab is opened, and re-renders often.
   document.addEventListener('click', function () { setTimeout(wireBoard, 150); });
 })();
 
@@ -1884,6 +1802,12 @@
   function changeStage(id, nextStage, afterRender) {
     if (!id || STAGES.indexOf(nextStage) === -1) return;
 
+    if (typeof window.moveCompanyToStage === 'function') {
+      window.moveCompanyToStage(id, nextStage);
+      if (afterRender) setTimeout(afterRender, 60);
+      return;
+    }
+
     api('/tracked/' + encodeURIComponent(id), { method: 'POST', body: { stage: nextStage } })
       .then(function () {
         // Keep the prototype's localStorage mirror in sync so its re-render
@@ -2012,55 +1936,9 @@
   }
 
   // ── Drop-zone upgrade ───────────────────────────────────────────────
-  // The prototype's inner `.kcards` is tiny when a column is empty, so
-  // drops often miss. Enlarging the drop area and highlighting the whole
-  // column (not just its inner card list) fixes the most common misses.
   function enlargeDropZones() {
-    var board = document.getElementById('kanbanBoard');
-    if (!board) return;
-    board.querySelectorAll('.kcol').forEach(function (col) {
-      if (col.dataset.ccEnlarged === '1') return;
-      col.dataset.ccEnlarged = '1';
-
-      var zone = col.querySelector('.kcards');
-      if (!zone) return;
-      zone.style.minHeight = '220px';
-      zone.style.padding = '12px';
-      zone.style.borderRadius = '8px';
-      zone.style.transition = 'background .15s, outline-color .15s';
-      zone.style.outline = '2px dashed transparent';
-
-      // Make the column itself a drop target too, delegating to its zone —
-      // dragging into the header no longer bounces back as "no drop".
-      col.addEventListener('dragover', function (e) {
-        if (!zone) return;
-        e.preventDefault();
-        e.dataTransfer.dropEffect = 'move';
-        zone.style.background = 'rgba(74,124,255,.12)';
-        zone.style.outlineColor = '#4a7cff';
-      });
-      col.addEventListener('dragleave', function (e) {
-        // Only clear when leaving the column entirely, not when moving over
-        // one of its inner elements.
-        if (col.contains(e.relatedTarget)) return;
-        zone.style.background = '';
-        zone.style.outlineColor = 'transparent';
-      });
-      col.addEventListener('drop', function (e) {
-        zone.style.background = '';
-        zone.style.outlineColor = 'transparent';
-        // The existing drop handler on `.kcards` runs for drops inside it;
-        // this one covers drops on the column header / padding, so dispatch
-        // a synthetic drop onto `.kcards` to reuse that handler.
-        if (e.target === zone || zone.contains(e.target)) return;
-        e.preventDefault();
-        var dt = e.dataTransfer;
-        var id = dt && dt.getData && dt.getData('text/plain');
-        if (!id) return;
-        var stageIndex = Array.prototype.indexOf.call(board.children, col);
-        changeStage(id, STAGES[stageIndex]);
-      });
-    });
+    // Drop zones, visual feedback, and column drop handling are now natively
+    // integrated directly into renderKanban() with zero-latency optimistic updates.
   }
 
   // Watch the pipeline containers so augmentations re-apply after every
