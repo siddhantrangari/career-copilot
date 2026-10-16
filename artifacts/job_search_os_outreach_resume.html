@@ -5,22 +5,38 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Siddhant's Job Search OS</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
-:root{--bg:#0f1117;--s1:#181c27;--s2:#1e2335;--bd:#2a3050;--ac:#4f8ef7;--g:#38d9a9;--y:#f7c948;--r:#ff6b6b;--p:#b57bee;--t:#e8eaf0;--t2:#8892b0;--t3:#4a5578;font-size:14px}
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap');
+:root{--nav-h:36px;--bg:#0f1117;--s1:#181c27;--s2:#1e2335;--bd:#2a3050;--ac:#4f8ef7;--g:#38d9a9;--y:#f7c948;--r:#ff6b6b;--p:#b57bee;--t:#e8eaf0;--t2:#8892b0;--t3:#4a5578;font-size:14px}
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);min-height:100vh;line-height:1.5}
-/* HEADER */
-.hdr{padding:14px 20px;border-bottom:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:var(--bg);z-index:90}
-.hdr h1{font-size:16px;font-weight:700}.hdr p{font-size:11px;color:var(--t2);margin-top:1px}
-.stats{display:flex;gap:18px}.stat-n{font-size:18px;font-weight:700;color:var(--ac);font-family:'JetBrains Mono',monospace;text-align:center}
-.stat-l{font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:.5px;text-align:center}
+body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--t);min-height:100vh;line-height:1.5;padding-top:var(--nav-h)}
+
+/* STICKY HEADER & NAV DOCK */
+.sticky-header-container{position:sticky;top:var(--nav-h);z-index:90;background:rgba(15,17,23,.96);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid var(--bd);box-shadow:0 4px 20px rgba(0,0,0,.35)}
+.hdr{padding:12px 24px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(42,48,80,.4)}
+.hdr h1{font-size:16px;font-weight:700;display:flex;align-items:center;gap:8px}.hdr p{font-size:11px;color:var(--t2);margin-top:2px}
+.stats{display:flex;gap:10px;align-items:center}
+.stat-box{background:var(--s1);border:1px solid var(--bd);border-radius:8px;padding:4px 12px;text-align:center;min-width:68px}
+.stat-n{font-size:16px;font-weight:700;color:var(--ac);font-family:'JetBrains Mono',monospace;line-height:1.2}
+.stat-l{font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:.5px;margin-top:1px}
+
 /* TABS */
-.tabs{display:flex;gap:2px;padding:10px 20px 0;border-bottom:1px solid var(--bd);overflow-x:auto}
-.tab{padding:7px 14px;border-radius:6px 6px 0 0;cursor:pointer;font-size:12px;font-weight:500;color:var(--t2);border:1px solid transparent;border-bottom:none;white-space:nowrap;transition:all .15s}
-.tab:hover{color:var(--t);background:var(--s1)}.tab.active{color:var(--ac);background:var(--s1);border-color:var(--bd)}
-/* MAIN */
-.main{padding:16px 20px}.sec{display:none}.sec.active{display:block}
-.sec-title{font-size:15px;font-weight:700;margin-bottom:3px}.sec-sub{font-size:12px;color:var(--t2);margin-bottom:14px}
+.tabs{display:flex;gap:4px;padding:6px 24px 0;overflow-x:auto}
+.tab{padding:8px 16px;border-radius:6px 6px 0 0;cursor:pointer;font-size:12px;font-weight:600;color:var(--t2);border:1px solid transparent;border-bottom:none;white-space:nowrap;transition:all .15s;display:flex;align-items:center;gap:6px}
+.tab:hover{color:var(--t);background:var(--s1)}
+.tab.active{color:var(--ac);background:var(--s1);border-color:var(--bd);border-bottom:2px solid var(--ac)}
+
+/* MAIN CONTAINER & AUTO RESPONSIVENESS */
+.main{max-width:1600px;margin:0 auto;padding:22px 24px 60px;width:100%;box-sizing:border-box}
+.sec{display:none;scroll-margin-top:140px}.sec.active{display:block}
+.sec-title{font-size:16px;font-weight:700;margin-bottom:3px}.sec-sub{font-size:12px;color:var(--t2);margin-bottom:16px}
+@media(max-width:900px){
+  .hdr{flex-direction:column;align-items:flex-start;gap:10px;padding:10px 14px}
+  .stats{width:100%;justify-content:space-between;gap:6px}
+  .stat-box{padding:4px 8px;min-width:auto;flex:1}
+  .tabs{padding:4px 14px 0}
+  .main{padding:14px}
+}
+
 /* CARDS */
 .card{background:var(--s1);border:1px solid var(--bd);border-radius:10px;padding:14px;margin-bottom:10px}
 .card:hover{border-color:var(--ac)}
@@ -90,25 +106,174 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);min-heig
 .bool-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--t3);margin-bottom:7px}
 .bool-text{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--g);background:var(--s2);border-radius:6px;padding:9px 11px;line-height:1.6;word-break:break-all}
 input[type=text],input[type=url]{width:100%}
+
+/* RESUME STUDIO WORKSPACE */
+.res-studio{display:flex;flex-direction:column;gap:18px}
+.res-hero{display:flex;align-items:center;justify-content:space-between;background:linear-gradient(135deg,rgba(79,142,247,.1),rgba(181,123,238,.08));border:1px solid rgba(79,142,247,.25);border-radius:12px;padding:16px 20px;flex-wrap:wrap;gap:12px}
+.res-hero h2{font-size:17px;font-weight:700;display:flex;align-items:center;gap:8px;color:#fff}
+.res-hero p{font-size:12px;color:var(--t2);margin-top:3px}
+.res-hero-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+
+.res-split-grid{display:grid;grid-template-columns:minmax(420px,490px) 1fr;gap:20px;align-items:start}
+@media(max-width:1140px){
+  .res-split-grid{grid-template-columns:1fr}
+  .res-viewer-pane{position:static;max-height:850px}
+}
+
+.res-card{background:var(--s1);border:1px solid var(--bd);border-radius:10px;padding:16px;margin-bottom:14px}
+.res-card-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid rgba(42,48,80,.6)}
+.res-card-title{font-size:13px;font-weight:700;color:var(--t);display:flex;align-items:center;gap:6px}
+
+.res-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+@media(max-width:600px){.res-form-grid{grid-template-columns:1fr}}
+
+.btn-glow-primary{width:100%;padding:11px 18px;border-radius:8px;border:none;background:linear-gradient(135deg,#4f8ef7,#38d9a9);color:#0b0f19;font-size:13px;font-weight:700;font-family:inherit;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 4px 16px rgba(79,142,247,.35);transition:all .2s}
+.btn-glow-primary:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 6px 22px rgba(79,142,247,.5)}
+.btn-glow-primary:disabled{opacity:.6;cursor:default}
+
+.res-progress-box{background:var(--s2);border:1px solid var(--bd);border-radius:8px;padding:12px 14px;margin-top:12px;display:none}
+.res-progress-steps{display:flex;flex-direction:column;gap:6px;font-size:11.5px;color:var(--t2);margin-top:8px}
+.res-progress-step{display:flex;align-items:center;gap:7px}
+.res-progress-step.done{color:var(--g)}
+.res-progress-step.active{color:var(--ac);font-weight:600}
+
+.res-chat-box{display:flex;flex-direction:column;gap:10px}
+.res-chat-stream{background:var(--bg);border:1px solid var(--bd);border-radius:8px;padding:12px;max-height:250px;overflow-y:auto;display:flex;flex-direction:column;gap:10px}
+.res-chat-msg{padding:9px 12px;border-radius:8px;font-size:12px;line-height:1.55;max-width:92%;word-break:break-word}
+.res-chat-msg.ai{background:rgba(79,142,247,.12);border:1px solid rgba(79,142,247,.25);color:var(--t);align-self:flex-start}
+.res-chat-msg.user{background:rgba(56,217,169,.15);border:1px solid rgba(56,217,169,.3);color:#e6fff7;align-self:flex-end}
+.res-chips-row{display:flex;gap:5px;flex-wrap:wrap;margin:8px 0}
+.res-chip{background:var(--s2);border:1px solid var(--bd);border-radius:12px;padding:3px 9px;font-size:10.5px;color:var(--t2);cursor:pointer;transition:all .15s}
+.res-chip:hover{border-color:var(--ac);color:var(--ac);background:rgba(79,142,247,.1)}
+.res-chat-input-row{display:flex;gap:8px}
+.res-chat-input-row textarea{flex:1;min-height:48px;resize:vertical}
+
+.res-viewer-pane{background:var(--s1);border:1px solid var(--bd);border-radius:12px;overflow:hidden;display:flex;flex-direction:column;position:sticky;top:calc(var(--nav-h) + 100px);max-height:calc(100vh - 150px)}
+.res-viewer-toolbar{padding:10px 16px;background:var(--s2);border-bottom:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.res-viewer-actions{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.res-viewer-scroll{flex:1;overflow-y:auto;padding:24px 20px;background:#0b0e14;display:block;box-sizing:border-box}
+
+.res-doc-sheet{display:block;width:100%;max-width:800px;margin:0 auto 30px auto;height:auto !important;min-height:980px;background:#ffffff;color:#1a202c;padding:34px 40px;border-radius:6px;box-shadow:0 16px 45px rgba(0,0,0,.6);font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:10.5px;line-height:1.45;box-sizing:border-box;transform-origin:top center;transition:transform .15s ease,background .2s ease,color .2s ease;overflow:visible}
+.res-doc-sheet h1.res-name{font-size:20px;font-weight:800;letter-spacing:.5px;color:#0f172a;text-transform:uppercase;margin:0 0 2px 0;line-height:1.15}
+.res-doc-sheet .res-title-line{font-size:11px;font-weight:700;color:#2563eb;margin:0 0 5px 0;line-height:1.25}
+.res-doc-sheet .res-contact-bar{font-size:9px;color:#475569;display:flex;flex-wrap:wrap;gap:8px;border-bottom:1.5px solid #0f172a;padding-bottom:5px;margin-bottom:10px;font-weight:500;line-height:1.2}
+.res-doc-sheet h2.res-sec-head{font-size:11px;font-weight:800;color:#0f172a;text-transform:uppercase;letter-spacing:.8px;border-bottom:1px solid #cbd5e1;padding-bottom:2px;margin:9px 0 4px 0}
+.res-doc-sheet .res-summary-text{color:#334155;line-height:1.48;margin-bottom:6px;font-size:10px}
+.res-doc-sheet .res-role-row{display:flex;justify-content:space-between;align-items:baseline;font-weight:700;color:#0f172a;font-size:10.5px;margin-top:5px;margin-bottom:2px}
+.res-doc-sheet .res-role-dates{font-weight:600;color:#64748b;font-size:9.5px;white-space:nowrap}
+.res-doc-sheet .res-role-sub{font-size:9.5px;font-style:italic;color:#475569;margin-bottom:2px}
+.res-doc-sheet .res-stack-line{font-size:9px;color:#475569;margin-top:2px;margin-bottom:4px;line-height:1.35}
+.res-doc-sheet .res-stack-label{font-weight:700;color:#1e293b}
+.res-doc-sheet .res-bullets{margin:2px 0 5px 15px;padding:0;color:#334155}
+.res-doc-sheet .res-bullets li{margin-bottom:2.5px;line-height:1.4;font-size:10px}
+.res-doc-sheet strong{font-weight:700;color:#0f172a}
+.res-doc-sheet .res-skills-cat{margin-bottom:2.5px;color:#334155;font-size:9.5px;line-height:1.4}
+.res-doc-sheet .res-skills-cat strong{color:#0f172a}
+
+/* Dark Theme Mode for Resume Preview */
+.res-doc-sheet.theme-dark{background:#141824 !important;color:#e2e8f0 !important;border:1px solid #2a3346;box-shadow:0 16px 45px rgba(0,0,0,.7)}
+.res-doc-sheet.theme-dark h1.res-name{color:#ffffff !important}
+.res-doc-sheet.theme-dark .res-title-line{color:#60a5fa !important}
+.res-doc-sheet.theme-dark .res-contact-bar{color:#94a3b8 !important;border-bottom-color:#334155 !important}
+.res-doc-sheet.theme-dark .res-contact-bar a{color:#60a5fa !important}
+.res-doc-sheet.theme-dark h2.res-sec-head{color:#38d9a9 !important;border-bottom-color:#334155 !important}
+.res-doc-sheet.theme-dark .res-summary-text{color:#cbd5e1 !important}
+.res-doc-sheet.theme-dark .res-role-row{color:#ffffff !important}
+.res-doc-sheet.theme-dark .res-role-dates{color:#94a3b8 !important}
+.res-doc-sheet.theme-dark .res-role-sub{color:#94a3b8 !important}
+.res-doc-sheet.theme-dark .res-stack-line{color:#94a3b8 !important}
+.res-doc-sheet.theme-dark .res-stack-label{color:#e2e8f0 !important}
+.res-doc-sheet.theme-dark .res-bullets{color:#cbd5e1 !important}
+.res-doc-sheet.theme-dark .res-bullets li strong{color:#ffffff !important}
+.res-doc-sheet.theme-dark strong{color:#ffffff !important}
+.res-doc-sheet.theme-dark .res-skills-cat{color:#cbd5e1 !important}
+.res-doc-sheet.theme-dark .res-skills-cat strong{color:#f8fafc !important}
+
+/* Dedicated Pristine A4 PDF Print Sheet (used for html2pdf export) */
+/* Dedicated Pristine A4 PDF Print Sheet (used for html2pdf export) */
+.res-pdf-print-sheet{display:block;width:190mm;max-width:190mm;background:#ffffff !important;color:#0f172a !important;box-sizing:border-box;padding:0;margin:0;font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:10.2px;line-height:1.40;box-shadow:none !important;border-radius:0 !important;border:none !important;overflow:visible}
+.res-pdf-print-sheet h1.res-name{font-size:22px;font-weight:800;color:#0f172a;text-transform:uppercase;letter-spacing:.5px;margin:0 0 2.5px 0;line-height:1.15}
+.res-pdf-print-sheet .res-title-line{font-size:10.8px;font-weight:700;color:#1d4ed8;margin:0 0 4px 0;line-height:1.25}
+.res-pdf-print-sheet .res-contact-bar{font-size:9px;color:#475569;display:flex;flex-wrap:wrap;gap:8px;border-bottom:1.5px solid #0f172a;padding-bottom:4px;margin-bottom:8px;font-weight:500;line-height:1.2}
+.res-pdf-print-sheet h2.res-sec-head{font-size:11px;font-weight:800;color:#0f172a;text-transform:uppercase;letter-spacing:.7px;border-bottom:1px solid #cbd5e1;padding-bottom:2px;margin:10px 0 4px 0;break-after:avoid;page-break-after:avoid}
+.res-pdf-print-sheet .res-summary-text{color:#334155;font-size:10px;line-height:1.42;margin:0 0 5px 0}
+.res-pdf-print-sheet .res-role-row{display:flex;justify-content:space-between;align-items:baseline;font-weight:700;color:#0f172a;font-size:10.5px;margin-top:5px;margin-bottom:1.5px;break-inside:avoid;page-break-inside:avoid;break-after:avoid;page-break-after:avoid}
+.res-pdf-print-sheet .res-role-dates{font-weight:600;color:#64748b;font-size:9.2px;white-space:nowrap}
+.res-pdf-print-sheet .res-role-sub{font-size:9.2px;font-style:italic;color:#475569;margin-bottom:2px}
+.res-pdf-print-sheet .res-stack-line{font-size:9px;color:#475569;margin-top:1.5px;margin-bottom:4px;line-height:1.32;break-inside:avoid;page-break-inside:avoid}
+.res-pdf-print-sheet .res-stack-label{font-weight:700;color:#1e293b}
+.res-pdf-print-sheet .res-bullets{margin:2px 0 4px 14px;padding:0;color:#334155}
+.res-pdf-print-sheet .res-bullets li{font-size:9.8px;line-height:1.40;margin-bottom:2.5px;break-inside:avoid;page-break-inside:avoid}
+.res-pdf-print-sheet strong{font-weight:700;color:#0f172a}
+.res-pdf-print-sheet .res-skills-cat{font-size:9.5px;line-height:1.38;margin-bottom:2.5px;color:#334155;break-inside:avoid;page-break-inside:avoid}
+
+/* Spacious Fit (auto-applied when concise resume has room to expand and fill 100% of the page) */
+.res-pdf-print-sheet.fit-spacious{font-size:10.6px;line-height:1.45}
+.res-pdf-print-sheet.fit-spacious h1.res-name{font-size:24px;margin-bottom:4px}
+.res-pdf-print-sheet.fit-spacious .res-title-line{font-size:11.5px;margin-bottom:6px}
+.res-pdf-print-sheet.fit-spacious .res-contact-bar{font-size:9.5px;padding-bottom:5px;margin-bottom:11px}
+.res-pdf-print-sheet.fit-spacious h2.res-sec-head{font-size:11.5px;margin:12px 0 5px 0;padding-bottom:2.5px}
+.res-pdf-print-sheet.fit-spacious .res-summary-text{font-size:10.2px;line-height:1.46;margin-bottom:6px}
+.res-pdf-print-sheet.fit-spacious .res-role-row{font-size:11px;margin-top:7px;margin-bottom:2.5px}
+.res-pdf-print-sheet.fit-spacious .res-role-dates{font-size:9.5px}
+.res-pdf-print-sheet.fit-spacious .res-stack-line{font-size:9.5px;line-height:1.36;margin-bottom:5px}
+.res-pdf-print-sheet.fit-spacious .res-bullets{margin:2.5px 0 5px 15px}
+.res-pdf-print-sheet.fit-spacious .res-bullets li{font-size:10.2px;line-height:1.44;margin-bottom:3.5px}
+.res-pdf-print-sheet.fit-spacious .res-skills-cat{font-size:9.8px;line-height:1.42;margin-bottom:3.5px}
+
+/* Compact Fit (auto-applied when resume slightly overflows 1062px by 1-3 lines to pull it into 1 single page) */
+.res-pdf-print-sheet.fit-compact{font-size:9.5px;line-height:1.32}
+.res-pdf-print-sheet.fit-compact h1.res-name{font-size:18px;margin-bottom:1.5px}
+.res-pdf-print-sheet.fit-compact .res-title-line{font-size:10px;margin-bottom:3px}
+.res-pdf-print-sheet.fit-compact .res-contact-bar{font-size:8.5px;padding-bottom:3px;margin-bottom:5px}
+.res-pdf-print-sheet.fit-compact h2.res-sec-head{font-size:10px;margin:6px 0 2.5px 0;padding-bottom:1.5px}
+.res-pdf-print-sheet.fit-compact .res-summary-text{font-size:9px;line-height:1.32;margin-bottom:3.5px}
+.res-pdf-print-sheet.fit-compact .res-role-row{font-size:9.5px;margin-top:3.5px;margin-bottom:1px}
+.res-pdf-print-sheet.fit-compact .res-role-dates{font-size:8.5px}
+.res-pdf-print-sheet.fit-compact .res-stack-line{font-size:8.5px;line-height:1.28;margin-bottom:2.5px}
+.res-pdf-print-sheet.fit-compact .res-bullets{margin:1.5px 0 2.5px 13px}
+.res-pdf-print-sheet.fit-compact .res-bullets li{font-size:9px;line-height:1.30;margin-bottom:1.5px}
+.res-pdf-print-sheet.fit-compact .res-skills-cat{font-size:8.5px;line-height:1.30;margin-bottom:1.5px}
+
+.res-lib-card{background:var(--s1);border:1px solid var(--bd);border-radius:12px;padding:18px 20px;margin-top:20px}
+.res-lib-table{width:100%;border-collapse:collapse;font-size:12px;margin-top:12px}
+.res-lib-table th{text-align:left;padding:8px 12px;color:var(--t3);font-size:10px;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--bd)}
+.res-lib-table td{padding:10px 12px;border-bottom:1px solid var(--bd);vertical-align:middle}
+.res-lib-table tr:hover td{background:rgba(255,255,255,.02)}
+
+@media print{
+  body{background:#fff !important;color:#000 !important;padding:0 !important;margin:0 !important}
+  #cc-nav,.sticky-header-container,.res-hero,.res-studio-left,.res-viewer-toolbar,.res-lib-card,.cc-pill,.cc-fab,.cc-drawer,.modal,.tabs,.hdr,.achievement-bank-card{display:none !important}
+  .main{padding:0 !important;max-width:none !important;margin:0 !important}
+  .res-split-grid{display:block !important}
+  .res-viewer-pane{position:static !important;max-height:none !important;border:none !important;background:transparent !important;overflow:visible !important}
+  .res-viewer-scroll{padding:0 !important;background:transparent !important;display:block !important}
+  .res-doc-sheet{box-shadow:none !important;border:none !important;padding:8mm 10mm !important;max-width:100% !important;width:100% !important;margin:0 !important;transform:none !important;min-height:auto !important}
+  .res-role-row, .res-stack-line, .res-role-sub, li{page-break-inside:avoid}
+  h2.res-sec-head{page-break-after:avoid}
+  @page{size:A4 portrait;margin:8mm}
+}
 </style>
 </head>
 <body>
 
-<div class="hdr">
-  <div><h1>🎯 Siddhant's Job Search OS</h1><p>Senior Full-Stack · AI Engineer · Forward Deployed · Global Remote</p></div>
-  <div class="stats">
-    <div><div class="stat-n" id="statTotal">45</div><div class="stat-l">Companies</div></div>
-    <div><div class="stat-n" style="color:var(--y)" id="statActive">0</div><div class="stat-l">In Progress</div></div>
-    <div><div class="stat-n" style="color:var(--g)" id="statInterviews">0</div><div class="stat-l">Interviews</div></div>
-    <div><div class="stat-n" style="color:var(--r)" id="statOffers">0</div><div class="stat-l">Offers</div></div>
+<div class="sticky-header-container">
+  <div class="hdr">
+    <div><h1>🎯 Siddhant's Job Search OS</h1><p>Senior Full-Stack · AI Engineer · Forward Deployed · Global Remote</p></div>
+    <div class="stats">
+      <div class="stat-box"><div class="stat-n" id="statTotal">45</div><div class="stat-l">Companies</div></div>
+      <div class="stat-box"><div class="stat-n" style="color:var(--y)" id="statActive">0</div><div class="stat-l">In Progress</div></div>
+      <div class="stat-box"><div class="stat-n" style="color:var(--g)" id="statInterviews">0</div><div class="stat-l">Interviews</div></div>
+      <div class="stat-box"><div class="stat-n" style="color:var(--r)" id="statOffers">0</div><div class="stat-l">Offers</div></div>
+    </div>
   </div>
-</div>
 
-<div class="tabs">
-  <div class="tab active" onclick="showTab('outreach',this)">🚀 Outreach System</div>
-  <div class="tab" onclick="showTab('resume',this)">📄 Resume</div>
-  <div class="tab" onclick="showTab('search',this)">🔍 Job Search</div>
-  <div class="tab" onclick="showTab('daily',this)">📅 Daily System</div>
+  <div class="tabs">
+    <div class="tab active" onclick="showTab('outreach',this)">🚀 Outreach System</div>
+    <div class="tab" onclick="showTab('resume',this)">📄 Resume Studio</div>
+    <div class="tab" onclick="showTab('search',this)">🔍 Job Search</div>
+    <div class="tab" onclick="showTab('daily',this)">📅 Daily System</div>
+  </div>
 </div>
 
 <div class="main">
@@ -264,81 +429,278 @@ Now with family settled and a year of intensive AI engineering behind me, I'm re
   </div>
 </div>
 
-<!-- RESUME -->
+<!-- RESUME STUDIO -->
 <div class="sec" id="resume">
-  <div class="sec-title">Resume Hub</div>
-  <div class="sec-sub">Your master resume + tailored resume generator. Paste a JD below to get a tailored version.</div>
+  <div class="res-studio">
+    <!-- HERO STRIP -->
+    <div class="res-hero">
+      <div>
+        <h2>📄 AI Resume Hub &amp; Live Studio</h2>
+        <p>Tailor your verified history to any JD, chat with AI to tweak tone &amp; bullets, view live PDF preview, and manage versions.</p>
+      </div>
+      <div class="res-hero-actions">
+        <select id="resumeVersionSelect" onchange="onSelectResumeVersion(this.value)" style="padding:7px 12px;background:var(--s2);border:1px solid var(--bd);color:var(--t);border-radius:7px;font-size:12px;font-weight:600;outline:none">
+          <option value="active">✨ Active Working Draft</option>
+          <option value="master">📋 Siddhant's Master Resume</option>
+          <optgroup id="savedResumeOptGroup" label="Saved Tailored Resumes"></optgroup>
+        </select>
+        <button class="btn pri" onclick="resetNewTailor()" title="Start fresh tailored draft">➕ New Tailor</button>
+        <button class="btn" onclick="scrollToSavedResumes()" title="View all saved resumes in library">📚 History (<span id="savedCountBadge">0</span>)</button>
+        <button class="btn grn" onclick="downloadCurrentResumePdf()" style="font-weight:700">📥 Download PDF</button>
+      </div>
+    </div>
 
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
-    <div>
-      <div class="card" style="margin-bottom:0">
-        <div class="stitle" style="margin-bottom:8px">📄 Master Resume Summary</div>
-        <div style="font-size:12px;color:var(--t2);line-height:1.7">
-          <div style="margin-bottom:6px"><span style="color:var(--ac);font-weight:600">Name:</span> Siddhant Rangari</div>
-          <div style="margin-bottom:6px"><span style="color:var(--ac);font-weight:600">Title:</span> Senior Full-Stack Engineer · AI/Agent Platform Builder · Forward Deployed Engineer</div>
-          <div style="margin-bottom:6px"><span style="color:var(--ac);font-weight:600">Contact:</span> siddhantrangari@gmail.com · siddhantrangari.com · Mumbai · Open to relocation</div>
-          <div style="margin-bottom:10px"><span style="color:var(--ac);font-weight:600">Stack:</span> Java Spring Boot · Node.js/Fastify · React 18 · Python · TypeScript · LangChain · RAG · MCP · Docker · Kubernetes · Kafka · PostgreSQL · Redis · AWS · Azure</div>
-          <div style="font-size:11px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px">Timeline</div>
-          <div style="font-size:11px;line-height:1.9;color:var(--t2)">
-            <div>Sep 2021–Feb 2024 · <span style="color:var(--t)">Philips Innovation Campus</span> — Full-Stack Engineer</div>
-            <div>Feb–Apr 2024 · <span style="color:var(--t3)">Career Break</span> — Travel & personal</div>
-            <div>Apr 2024–Jul 2025 · <span style="color:var(--t)">Growlogic/Eeko.ai</span> — Freelance Solutions Architect</div>
-            <div>Aug–Sep 2025 · <span style="color:var(--t)">ChalOnline</span> — Independent project</div>
-            <div>Oct 2025–Feb 2026 · <span style="color:var(--t)">TradingOS</span> — Independent project</div>
-            <div>Mar–Aug 2026 · <span style="color:var(--t)">MyAgentFirm</span> — Independent project</div>
-            <div>Sep 2026 · <span style="color:var(--g)">Actively job hunting</span></div>
+    <!-- MAIN TWO-COLUMN SPLIT STUDIO -->
+    <div class="res-split-grid">
+      <!-- LEFT WORKSPACE: Controls, AI Chat & Analytics -->
+      <div class="res-studio-left">
+        <!-- 1. Target Role & Job Description Form -->
+        <div class="res-card" id="resumeTargetCard">
+          <div class="res-card-hdr">
+            <div class="res-card-title">🎯 Target Company &amp; Job Description</div>
+            <span class="ndsa" id="resLiveBadge">AI Fact-Checked</span>
+          </div>
+
+          <div class="res-form-grid">
+            <div class="form-row" style="margin-bottom:8px">
+              <label>Company Name</label>
+              <input type="text" id="tailorCompany" placeholder="e.g. Palantir, Philips, Stripe" oninput="onTargetChange()">
+            </div>
+            <div class="form-row" style="margin-bottom:8px">
+              <label>Role Title</label>
+              <input type="text" id="tailorRole" placeholder="e.g. Forward Deployed Engineer" oninput="onTargetChange()">
+            </div>
+          </div>
+
+          <div class="form-row" style="margin-bottom:10px">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+              <label style="margin:0">Job Description</label>
+              <span id="jdWordCount" style="font-size:10px;color:var(--t3)">0 chars</span>
+            </div>
+            <textarea id="tailorJD" rows="5" placeholder="Paste the full job description here..." oninput="updateJdCount()"></textarea>
+          </div>
+
+          <div class="form-row" style="margin-bottom:12px">
+            <label style="display:flex;justify-content:space-between">
+              <span>AI Guidance / Focus Comments (Optional)</span>
+              <span style="color:var(--ac);font-weight:400;text-transform:none">e.g. Highlight Kafka, AWS scale</span>
+            </label>
+            <input type="text" id="tailorInstructions" placeholder="e.g. Focus on sub-second latency, Kafka, multi-agent AI, and Staff-level leadership...">
+          </div>
+
+          <button id="btnTailorResume" class="btn-glow-primary" onclick="triggerTailorResume()">
+            <span>✨ Tailor My Resume</span>
+          </button>
+
+          <!-- Tailoring Progress Status -->
+          <div id="tailorProgressBox" class="res-progress-box">
+            <div style="display:flex;align-items:center;gap:8px">
+              <span class="cc-spin" style="font-size:16px;color:var(--ac)">◐</span>
+              <strong id="tailorProgressLabel" style="font-size:12px;color:var(--t)">Tailoring resume against your master history…</strong>
+            </div>
+            <div class="res-progress-steps">
+              <div class="res-progress-step" id="pStep1"><span>1.</span> Analyzing JD requirements &amp; keyword density</div>
+              <div class="res-progress-step" id="pStep2"><span>2.</span> Rewriting executive summary &amp; ordering verified bullets</div>
+              <div class="res-progress-step" id="pStep3"><span>3.</span> Running adversarial fact-check &amp; anti-hallucination audit</div>
+              <div class="res-progress-step" id="pStep4"><span>4.</span> Rendering ATS-compliant PDF document preview</div>
+            </div>
           </div>
         </div>
-        <div style="margin-top:12px;display:flex;gap:6px;flex-wrap:wrap">
-          <a href="https://claude.ai" target="_blank" class="btn pri">📥 Download Resume (ask Claude)</a>
+
+        <!-- 2. AI Chat & Refinement Card -->
+        <div class="res-card" id="resumeChatCard">
+          <div class="res-card-hdr">
+            <div class="res-card-title">💬 Chat with AI to Refine Resume</div>
+            <span style="font-size:11px;color:var(--ac);font-weight:600">Live AI Iteration</span>
+          </div>
+          <div style="font-size:11.5px;color:var(--t2);line-height:1.5;margin-bottom:10px">
+            Suggest changes, ask to adjust tone, emphasize specific architectures, or condense bullets. Updates the PDF preview instantly.
+          </div>
+
+          <!-- Chat Stream -->
+          <div id="resumeChatMessages" class="res-chat-stream">
+            <div class="res-chat-msg ai">
+              👋 <strong>AI Copilot:</strong> Ready to tailor your resume! Enter a company name and paste the JD above, or choose an old tailored resume from the dropdown. Once generated, you can chat with me here to refine bullets, adjust emphasis, or customize sections.
+            </div>
+          </div>
+
+          <!-- Quick Suggestion Chips -->
+          <div class="res-chips-row">
+            <span class="res-chip" onclick="applySuggestionChip('Emphasize high-throughput Kafka pipelines and sub-second clinical latency')">⚡ Emphasize Kafka &amp; High Scale</span>
+            <span class="res-chip" onclick="applySuggestionChip('Rewrite summary to position as Staff / Principal Full-Stack Engineer')">🎯 Staff Engineer Tone</span>
+            <span class="res-chip" onclick="applySuggestionChip('Highlight multi-agent LLM failover architecture and MCP integrations')">🤖 Multi-Agent &amp; LLMs</span>
+            <span class="res-chip" onclick="applySuggestionChip('Tighten bullet points and condense to fit strictly on 1 page')">📄 Condense to 1 Page</span>
+            <span class="res-chip" onclick="applySuggestionChip('Emphasize Docker, Kubernetes, AKS GitOps and AWS cloud infrastructure')">☁️ Cloud &amp; Kubernetes</span>
+          </div>
+
+          <!-- Chat Input -->
+          <div class="res-chat-input-row">
+            <textarea id="chatRefineInput" rows="2" placeholder="Tell AI what to tweak or improve (e.g. 'Make the Philips bullets punchier', 'Highlight my Python experience')..." onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();submitResumeRefinement();}"></textarea>
+            <button id="btnChatRefine" class="btn pri" onclick="submitResumeRefinement()" style="padding:0 14px;white-space:nowrap;display:flex;align-items:center;gap:4px">
+              <span>🚀 Refine</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- 3. Match Analytics & Verification Audit Card -->
+        <div class="res-card" id="resumeAuditCard">
+          <div class="res-card-hdr">
+            <div class="res-card-title">📊 JD Match &amp; Fact-Check Audit</div>
+            <span id="auditScoreBadge" style="font-size:12px;font-weight:700;color:var(--g);background:rgba(56,217,169,0.12);padding:2px 8px;border-radius:10px">Match: 95/100</span>
+          </div>
+
+          <div id="factCheckBanner" class="cc-ok" style="margin-bottom:10px;font-size:11.5px">
+            🛡️ <strong>Fact-Check Passed:</strong> All claims, metrics, and dates trace back to Siddhant's real verified history.
+          </div>
+
+          <div id="dsaWarningBanner" class="cc-warn" style="display:none;margin-bottom:10px;font-size:11.5px">
+            <strong>⚠️ DSA / LeetCode Signal:</strong> <span id="dsaEvidence"></span>
+          </div>
+
+          <div style="margin-bottom:10px">
+            <div style="font-size:10px;color:var(--t3);text-transform:uppercase;font-weight:600;letter-spacing:.4px;margin-bottom:4px">Keywords Matched</div>
+            <div id="keywordsMatchedList" style="display:flex;flex-wrap:wrap;gap:4px">
+              <span class="rb gulf">Kafka</span><span class="rb gulf">Spring Boot</span><span class="rb gulf">React</span><span class="rb gulf">Python</span><span class="rb gulf">AWS</span><span class="rb gulf">Kubernetes</span><span class="rb gulf">Microservices</span>
+            </div>
+          </div>
+
+          <div id="keywordsMissingWrap" style="margin-bottom:10px">
+            <div style="font-size:10px;color:var(--t3);text-transform:uppercase;font-weight:600;letter-spacing:.4px;margin-bottom:4px">Keywords Missing (Honest Adjacent Experience)</div>
+            <div id="keywordsMissingList" style="display:flex;flex-wrap:wrap;gap:4px">
+              <span style="font-size:10px;color:var(--t3)">None flagged</span>
+            </div>
+          </div>
+
+          <div id="talkingPointsWrap" style="margin-top:10px">
+            <div style="font-size:10px;color:var(--t3);text-transform:uppercase;font-weight:600;letter-spacing:.4px;margin-bottom:4px">Lead with these in your interview call:</div>
+            <ul id="talkingPointsList" style="margin:0 0 0 16px;font-size:11.5px;color:var(--t2);line-height:1.6">
+              <li>Kafka→AWS S3 decoupling pipeline reducing dashboard load time by 70% with sub-second clinical vitals delivery.</li>
+              <li>Production multi-agent platform with automated LLM failover across 3 providers and MCP tools integration.</li>
+              <li>Azure AKS 6-microservice architecture with Spring Batch zero-missed-send notifications and ArgoCD GitOps.</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- 4. Key CAR Stories Reference -->
+        <div class="res-card achievement-bank-card">
+          <div class="res-card-hdr">
+            <div class="res-card-title">🏆 Verified CAR Story Bank</div>
+            <span style="font-size:10px;color:var(--t3)">Truth Source</span>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:8px;font-size:11.5px">
+            <div style="background:var(--s2);border-radius:6px;padding:8px 10px;border-left:3px solid var(--ac)">
+              <strong style="color:var(--t)">Philips Patient Monitoring</strong>
+              <div style="color:var(--t2);margin-top:2px">Kafka→S3 · 70% load reduction · Sub-second latency · 98% API efficiency · 30-40% MTTR cut</div>
+            </div>
+            <div style="background:var(--s2);border-radius:6px;padding:8px 10px;border-left:3px solid var(--r)">
+              <strong style="color:var(--t)">MyAgentFirm AI Platform</strong>
+              <div style="color:var(--t2);margin-top:2px">24 API routes · 6 workers · LLM failover · MCP integration · Atomic credit ledger</div>
+            </div>
+            <div style="background:var(--s2);border-radius:6px;padding:8px 10px;border-left:3px solid var(--g)">
+              <strong style="color:var(--t)">Growlogic / Eeko.ai</strong>
+              <div style="color:var(--t2);margin-top:2px">Azure AKS · 6 Spring Boot services · Spring Batch · ArgoCD GitOps · Zero-downtime</div>
+            </div>
+            <div style="background:var(--s2);border-radius:6px;padding:8px 10px;border-left:3px solid var(--y)">
+              <strong style="color:var(--t)">TradingOS Fintech Platform</strong>
+              <div style="color:var(--t2);margin-top:2px">TimescaleDB market data · 221K+ bars · LLaMA 3 AI coach · Custom backtesting</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT WORKSPACE: Sticky Live PDF Preview -->
+      <div class="res-viewer-pane" id="resumeViewerPane">
+        <div class="res-viewer-toolbar">
+          <div style="display:flex;align-items:center;gap:8px">
+            <span id="viewerDocTitle" style="font-size:12px;font-weight:700;color:var(--t);display:flex;align-items:center;gap:6px">
+              📄 Preview: Siddhant Rangari — Master Resume
+            </span>
+            <div style="display:flex;background:var(--s1);border:1px solid var(--bd);border-radius:6px;padding:2px">
+              <button id="btnViewFormatted" class="tab active" style="padding:4px 9px;font-size:10.5px;border:none;border-radius:4px" onclick="setResumeViewMode('formatted')">📄 Formatted PDF</button>
+              <button id="btnViewMarkdown" class="tab" style="padding:4px 9px;font-size:10.5px;border:none;border-radius:4px" onclick="setResumeViewMode('markdown')">📝 Markdown</button>
+              <button id="btnViewEdit" class="tab" style="padding:4px 9px;font-size:10.5px;border:none;border-radius:4px" onclick="setResumeViewMode('edit')">✏️ Edit Text</button>
+            </div>
+          </div>
+
+          <div class="res-viewer-actions">
+            <!-- Density / Fit Selector -->
+            <select id="resumePdfDensity" style="background:var(--s1);border:1px solid var(--bd);border-radius:6px;padding:3px 7px;font-size:11px;color:var(--t2);cursor:pointer;outline:none" title="PDF Page Fit / Density" onchange="onDensityChange()">
+              <option value="auto" selected>✨ Auto-Fit (1 Full Page)</option>
+              <option value="standard">Standard (10.2px)</option>
+              <option value="spacious">Spacious (10.6px)</option>
+              <option value="compact">Compact (9.5px)</option>
+            </select>
+            <!-- Zoom Controls -->
+            <div style="display:flex;align-items:center;background:var(--s1);border:1px solid var(--bd);border-radius:6px;padding:2px">
+              <button class="btn" style="padding:2px 7px;border:none" onclick="zoomResume(-10)" title="Zoom Out">−</button>
+              <span id="zoomPercent" style="font-size:10px;font-weight:600;padding:0 6px;color:var(--t2)">100%</span>
+              <button class="btn" style="padding:2px 7px;border:none" onclick="zoomResume(10)" title="Zoom In">+</button>
+              <button class="btn" style="padding:2px 7px;border:none;font-size:10px" onclick="zoomResume(0)" title="Reset Zoom">Fit</button>
+            </div>
+            <button id="btnToggleSheetTheme" class="btn" onclick="toggleSheetTheme()" title="Switch between ATS White Paper and Dark Mode Preview">🌙 Dark</button>
+            <button class="btn" onclick="copyCurrentResumeMarkdown()" title="Copy Markdown text">📋 Copy</button>
+            <button class="btn" onclick="printCurrentResume()" title="Print / Native Save as PDF">🖨️ Print</button>
+            <button class="btn grn" onclick="downloadCurrentResumePdf()" style="font-weight:700;box-shadow:0 2px 8px rgba(56,217,169,0.3)">
+              📥 Download PDF
+            </button>
+          </div>
+        </div>
+
+        <div class="res-viewer-scroll" id="resumeViewerScroll">
+          <!-- 1. Formatted A4 Document Sheet -->
+          <div id="resumeDocument" class="res-doc-sheet">
+            <!-- Rendered via JS -->
+          </div>
+
+          <!-- 2. Raw Markdown View (hidden by default) -->
+          <div id="resumeRawView" style="display:none;width:100%;max-width:800px;background:var(--s2);color:var(--t);padding:20px;border-radius:6px;font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.7;white-space:pre-wrap;box-sizing:border-box"></div>
+
+          <!-- 3. Direct In-Place Editor (hidden by default) -->
+          <div id="resumeEditWrap" style="display:none;width:100%;max-width:800px;box-sizing:border-box">
+            <textarea id="resumeEditText" style="width:100%;min-height:900px;background:#151a24;color:#e7ecf3;border:1px solid var(--bd);border-radius:6px;padding:18px;font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.7;box-sizing:border-box" placeholder="Edit resume markdown..."></textarea>
+            <div style="margin-top:10px;display:flex;gap:8px">
+              <button class="btn pri" onclick="applyManualResumeEdits()">Apply &amp; Update PDF Preview</button>
+              <button class="btn" onclick="setResumeViewMode('formatted')">Cancel</button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
 
-    <div>
-      <div class="card" style="margin-bottom:0">
-        <div class="stitle" style="margin-bottom:8px">✂️ Tailored Resume Generator</div>
-        <div style="font-size:11px;color:var(--t3);margin-bottom:10px">Paste a JD below → copy the prompt → paste into Claude → get a tailored resume in 30 seconds</div>
-        <div class="form-row">
-          <label>Company Name</label>
-          <input type="text" id="tailorCompany" placeholder="e.g. Palantir">
+    <!-- BOTTOM SECTION: Saved Tailored Resumes Library -->
+    <div class="res-lib-card" id="resumeLibrarySection">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+        <div>
+          <div style="font-size:14px;font-weight:700;color:var(--t);display:flex;align-items:center;gap:6px">
+            📚 Saved Tailored Resumes Library (<span id="savedTotalCount">0</span>)
+          </div>
+          <div style="font-size:11.5px;color:var(--t2);margin-top:2px">
+            All tailored resume versions saved in your database. Click to preview, chat to refine, or download PDF instantly.
+          </div>
         </div>
-        <div class="form-row">
-          <label>Role Title</label>
-          <input type="text" id="tailorRole" placeholder="e.g. Forward Deployed Engineer">
-        </div>
-        <div class="form-row">
-          <label>Job Description (paste full JD)</label>
-          <textarea id="tailorJD" rows="5" placeholder="Paste the full job description here..."></textarea>
-        </div>
-        <button class="btn pri" onclick="genTailorPrompt()" style="width:100%;justify-content:center;padding:8px">Generate Tailored Resume Prompt</button>
-        <div id="tailorOut" style="display:none;margin-top:10px">
-          <div style="font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:.4px;margin-bottom:5px">Copy this prompt → paste into Claude:</div>
-          <div id="tailorText" class="sbody" style="max-height:200px;overflow-y:auto"></div>
-          <button class="btn grn" onclick="copyTailor()" style="margin-top:6px">Copy Prompt</button>
+        <div style="display:flex;gap:6px">
+          <button class="btn" onclick="refreshSavedResumes()">🔄 Refresh Library</button>
+          <button class="btn pri" onclick="downloadMasterResumePdf()">📥 Download Master Resume PDF</button>
         </div>
       </div>
-    </div>
-  </div>
 
-  <div class="card" style="margin-top:14px">
-    <div class="stitle" style="margin-bottom:8px">🏆 Key Achievement Bank (use in interviews + WIN docs)</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:12px">
-      <div style="background:var(--s2);border-radius:6px;padding:10px;border-left:3px solid var(--ac)">
-        <div style="font-weight:600;color:var(--t);margin-bottom:4px">Philips — Patient Dashboard</div>
-        <div style="color:var(--t2);line-height:1.6">Kafka→AWS S3 pipeline · 70% load reduction · Sub-second latency · 98% API efficiency improvement · 30-40% MTTR reduction · Mentored 5+ devs · 20% delivery improvement</div>
-      </div>
-      <div style="background:var(--s2);border-radius:6px;padding:10px;border-left:3px solid var(--r)">
-        <div style="font-weight:600;color:var(--t);margin-bottom:4px">MyAgentFirm — AI Agent Platform</div>
-        <div style="color:var(--t2);line-height:1.6">24 API routes · 6 async workers · LLM failover (3 providers) · 12+ integrations · 23 DB migrations · MCP integration · Atomic credit ledger · Full solo build</div>
-      </div>
-      <div style="background:var(--s2);border-radius:6px;padding:10px;border-left:3px solid var(--g)">
-        <div style="font-weight:600;color:var(--t);margin-bottom:4px">Growlogic/Eeko.ai — Azure AKS</div>
-        <div style="color:var(--t2);line-height:1.6">6 Spring Boot microservices · Azure AKS deployment · ArgoCD GitOps · WhatsApp Business API · Spring Batch scheduler · Zero-downtime rollouts</div>
-      </div>
-      <div style="background:var(--s2);border-radius:6px;padding:10px;border-left:3px solid var(--y)">
-        <div style="font-weight:600;color:var(--t);margin-bottom:4px">TradingOS — Full Platform</div>
-        <div style="color:var(--t2);line-height:1.6">TimescaleDB market data pipeline · Custom backtesting engine · SVG drawing tools · LLaMA 3 AI coach with live context · 10-module platform · Gamification XP system</div>
+      <div style="overflow-x:auto;margin-top:10px">
+        <table class="res-lib-table">
+          <thead>
+            <tr>
+              <th>Company &amp; Target Role</th>
+              <th>Match Score</th>
+              <th>Created Date</th>
+              <th>Keywords Matched</th>
+              <th style="text-align:right">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="savedResumesTableBody">
+            <tr>
+              <td colspan="5" style="text-align:center;color:var(--t3);padding:24px">Loading saved resumes…</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
   </div>
@@ -576,6 +938,9 @@ function showTab(id,el){
     u.searchParams.set('tab', id);
     window.history.replaceState(null, '', u.toString());
   } catch(e) {}
+  if (id === 'resume' && typeof initResumeStudio === 'function') {
+    initResumeStudio();
+  }
 }
 
 // ── HEADER STATS ──
@@ -808,52 +1173,1036 @@ function addCompany(){
   }
 }
 
-// ── RESUME TAILORING ──
-function genTailorPrompt(){
-  const company=document.getElementById('tailorCompany').value.trim();
-  const role=document.getElementById('tailorRole').value.trim();
-  const jd=document.getElementById('tailorJD').value.trim();
-  if(!jd){alert('Please paste the job description');return;}
-  const prompt=`I am applying for a ${role||'[role]'} role at ${company||'[company]'}.
+// ── RESUME STUDIO ENGINE ──
+const DEFAULT_MASTER_RESUME = `# SIDDHANT RANGARI
+Senior Full-Stack & AI Engineer | Forward Deployed Engineer | 12+ Years
+siddhantrangari@gmail.com • +91 86689 88485 • linkedin.com/in/siddhant-rangari • siddhantrangari.com • Bangalore / Mumbai
 
-JOB DESCRIPTION:
-${jd}
+## PROFESSIONAL SUMMARY
+Senior Full-Stack & AI Engineer with 12+ years of end-to-end product delivery across healthcare enterprise systems and multi-tenant AI SaaS platforms. Delivered real-time clinical monitoring platforms at Philips Innovation Campus and GE Healthcare. Spent the last 8 months independently building and shipping three production systems from 0→1 — a multi-agent AI platform (MyAgentFirm) with LLM failover routing and MCP integrations, a fintech data-infrastructure platform (TradingOS), and a creator SaaS platform (ChalOnline). Fluent across the full stack — Java Spring Boot, Node.js/Fastify, React 18, Python, Docker, Kubernetes — with hands-on cloud architecture on Azure AKS and AWS. Open to Forward Deployed Engineer, Senior AI Engineer, and Staff Full-Stack roles.
 
-MY MASTER RESUME DETAILS:
-Name: Siddhant Rangari
-Title: Senior Full-Stack Engineer · AI/Agent Platform Builder · Forward Deployed Engineer
-Email: siddhantrangari@gmail.com | siddhantrangari.com | Mumbai | Open to relocation & remote
+## TECHNICAL SKILLS
+- **Languages & Frameworks:** Java (Spring Boot, Spring Cloud, Microservices), Node.js (Fastify, Express), Python, TypeScript, React 18, Next.js
+- **AI & LLM Engineering:** LangChain, Google ADK, Gemini 2.5 Flash / Vertex AI, Multi-Agent Systems, RAG pipelines, Prompt Engineering, LLM routing & failover (DeepInfra, Groq, Together AI, Ollama/LLaMA 3), MCP (Model Context Protocol)
+- **Infrastructure & Cloud:** Docker, Kubernetes (AKS, EKS), AWS (S3, EMR, CloudWatch), Azure (AKS, MySQL, Blob Storage), Nginx, ArgoCD, GitHub Actions, Kafka, ELK Stack, Prometheus, Grafana, OpenTelemetry
+- **Databases & Storage:** PostgreSQL, MySQL, Redis, TimescaleDB, Firestore, VectorDB, Cloudflare R2, AWS S3
+- **Integrations:** Meta Marketing API, Twilio (Voice + WhatsApp), WhatsApp Business API, Razorpay, Firebase Auth
 
-EXPERIENCE:
-• Philips Innovation Campus (Sep 2021–Feb 2024) — Full-Stack Engineer: Real-time Patient Monitoring Dashboard (Kafka→React, sub-second latency), Kafka→AWS S3 pipeline (70% load reduction), Apache Camel→Spring Boot migration (98% API efficiency), Prometheus/Grafana/OpenTelemetry observability (30-40% MTTR reduction), mentored 5+ devs (20% delivery improvement)
-• Career Break (Feb–Apr 2024) — Travel & personal
-• Growlogic/Eeko.ai (Apr 2024–Jul 2025) — Freelance Solutions Architect: Azure AKS 6-microservice architecture (Spring Boot), WhatsApp Business API Spring Batch pipeline, ArgoCD GitOps, React/Next.js + Razorpay frontend
-• ChalOnline (Aug–Sep 2025) — Independent: Creator/education SaaS, PostgreSQL + Redis on VPS, Razorpay
-• TradingOS (Oct 2025–Feb 2026) — Independent: TimescaleDB market data pipeline, backtesting engine, LLaMA 3 AI coach, 10-module platform
-• MyAgentFirm (Mar–Aug 2026) — Independent: Multi-tenant AI agent platform — 24 API routes, 6 async workers, LLM failover (DeepInfra→Groq→Together AI), MCP integration (Gmail/Calendar/GitHub/Notion/Slack), Razorpay credit ledger, 12+ API integrations (Meta, Twilio, ElevenLabs, Sarvam AI, Firebase, Cloudflare R2)
+## PROFESSIONAL EXPERIENCE
+Full-Stack Engineer — Software Technologist II | Philips Innovation Campus | Sep 2021 – Feb 2024 | Bangalore, India
+- Built a real-time Patient Monitoring Dashboard streaming live vitals and alerts from Kafka topics through a Spring Boot backend to a React frontend, enabling clinicians to track patient status with sub-second latency.
+- Designed and implemented a Kafka → AWS S3 decoupling pipeline, separating data streaming from dashboard rendering and reducing load time by 70%.
+- Migrated a resource-intensive Apache Camel integration process into a Spring Boot microservice with a React frontend, improving API efficiency by 98%.
+- Engineered resilient cloud-native APIs on AWS supporting secure, high-volume healthcare data workflows across hybrid environments; spearheaded a Redshift-to-EMR-on-EKS migration and S3 data lake architecture.
+- Strengthened system observability using Prometheus, Grafana, Loki, Tempo, OpenTelemetry, and CloudWatch — contributing to a 30–40% reduction in MTTR.
+- Mentored 5+ junior developers, improving team delivery efficiency by 20% through backend best practices and microservices coaching.
 
-STACK: Java Spring Boot · Node.js/Fastify · React 18 · Python · TypeScript · LangChain · Multi-Agent Systems · RAG · Prompt Engineering · MCP · Docker · Kubernetes (AKS/EKS) · AWS · Azure · Kafka · PostgreSQL · Redis · TimescaleDB · Nginx · ArgoCD · Prometheus · Grafana · OpenTelemetry
+Senior Software Engineer | GE Healthcare | Sep 2020 – Jun 2021 | Bangalore, India
+- Developed integrations between hardware patient-monitoring devices, EMR systems, and Spring Boot microservices for maternal-fetal monitoring with real-time React clinical dashboards.
 
-EDUCATION: Diploma in Computer Technology · Late Vasantdada Polytechnic · 2015
+Senior Software Engineer | Cropdata Technology | Jun 2019 – Jun 2020 | Nagpur, India
+- Built Java Spring Boot microservices, REST APIs, and React reporting interfaces for agricultural data systems across rural regions.
 
-Now create a tailored 1-page resume for this specific role and company. Instructions:
-1. Rewrite the professional summary to directly mirror the JD language and top 3 requirements
-2. Reorder and emphasise bullet points that match the JD — put the most relevant ones first
-3. For skills, only show technologies relevant to this role — no padding
-4. Keep all metrics (70%, 98%, 30-40%, etc) — they are real and verified
-5. Add any missing keywords from the JD naturally into existing bullets (don't fabricate new ones)
-6. Keep it honest — do not invent experience I don't have
-7. Format: clean, ATS-friendly, no tables or columns`;
-  document.getElementById('tailorText').textContent=prompt;
-  document.getElementById('tailorOut').style.display='block';
+Software Engineer | Ajanta Photo and Technologies | May 2016 – May 2019 | Nagpur, India
+- Delivered enterprise Java EE business applications using Spring MVC, Hibernate, and AWS cloud deployment.
+
+Java Developer | Naresh i Technologies | Jun 2014 – Mar 2016 | Hyderabad, India
+- Developed core Java enterprise modules, JDBC integrations, and web portals using Spring MVC and JSP.
+
+Freelance Solutions Architect | Growlogic Technologies (Eeko.ai) | May 2024 – Dec 2025 | Remote
+- Designed microservices on Azure AKS (6 Spring Boot services, Azure MySQL, Azure Blob Storage) for an automated social marketing platform.
+- Built a WhatsApp Business API notification pipeline with Spring Batch (chunk size 100) and timezone-aware scheduling — delivered prompts to ~200 paid customers/month with zero missed sends.
+- Established a GitOps pipeline (GitHub → ArgoCD → AKS) with zero-downtime rollouts.
+
+## INDEPENDENT PRODUCTION PLATFORMS
+Forward Deployed Engineer | MyAgentFirm (AI Platform) | Apr 2026 – Aug 2026
+- Architected a Fastify (Node 22/ESM) backend from 0→1 serving 24 API routes with PostgreSQL job queue (SKIP LOCKED pattern) driving 8 recurring cron loops.
+- Engineered LLM routing with automated failover across DeepInfra → Groq → Together AI, maintaining near-zero downtime.
+- Built 6 async background workers (AI video generation, auto-dubbing, voice calls via Twilio) and designed full MCP integration layer (Gmail, Calendar, GitHub, Notion, Slack).
+- Built atomic credit ledger on Razorpay across 11 pricing tiers; shipped 23 database migrations across PostgreSQL 15 schema.
+
+Forward Deployed Engineer | TradingOS (Fintech Infrastructure) | Feb 2026 – Apr 2026
+- Built full trading platform from 0→1: TradingView-style backtesting engine with custom SVG drawing tools overlay and equity-curve tracking.
+- Built AI coaching module (LLaMA 3 via Ollama) with Firestore live context and SSE streaming.
+- Designed and built Python market-data pipeline with Databento and Binance feeding TimescaleDB; migrated 221K+ bars and 1.78M flow events with zero data loss.
+
+Co-Founder & Founding Engineer | ChalOnline (Creator SaaS) | Jan 2026 – Feb 2026
+- Built creator SaaS platform end-to-end on VPS with PostgreSQL, Redis, and Razorpay; identified and remediated database port exposure via SSH tunneling.
+
+AI Engineer | AnnaRakshak AI (Google "Build with AI" Hackathon) | Sep 2026
+- Built crop-price anomaly detector over public mandi prices with 3 Gemini 2.5 Flash agents with Google ADK on Google Cloud Run and Vertex AI.
+
+## EDUCATION & CERTIFICATIONS
+- Diploma in Computer Technology | Late Vasantdada Polytechnic | 2016
+- Java Enterprise Development Certification | NareshIT | 2014`;
+
+let currentTailoredResume = {
+  id: null,
+  companyName: 'Master Profile',
+  jobTitle: 'Senior Full-Stack & AI Engineer',
+  jobDescription: '',
+  tailoredResumeText: DEFAULT_MASTER_RESUME,
+  matchScore: 100,
+  keywordsMatched: ['Java', 'Spring Boot', 'Kafka', 'React', 'Python', 'AWS', 'Kubernetes', 'Docker', 'PostgreSQL', 'Microservices'],
+  keywordsMissing: [],
+  dsaSignal: { likely: false, evidence: '' },
+  talkingPoints: [
+    'Kafka→AWS S3 decoupling pipeline reducing dashboard load time by 70% with sub-second clinical vitals delivery.',
+    'Production multi-agent platform with automated LLM failover across 3 providers and MCP tools integration.',
+    'Azure AKS 6-microservice architecture with Spring Batch zero-missed-send notifications and ArgoCD GitOps.'
+  ],
+  verification: { clean: true, safeToSend: true, blockingCount: 0, issues: [] }
+};
+
+let savedResumesList = [];
+let currentZoomLevel = 100;
+let resumeChatHistory = [];
+
+function esc(s){
+  return String(s==null?'':s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
 
-function copyTailor(){
-  const text=document.getElementById('tailorText').textContent;
-  navigator.clipboard.writeText(text).then(()=>{
-    const btn=event.target;btn.textContent='✓ Copied!';btn.style.color='var(--g)';
-    setTimeout(()=>{btn.textContent='Copy Prompt';btn.style.color='';},2000);
+function cleanInlineMd(s) {
+  if (!s) return '';
+  let out = s.trim();
+  out = out.replace(/^#+\s*/, '');
+  out = out.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" style="color:inherit;text-decoration:none"><strong>$1</strong></a>');
+  out = out.replace(/\*{3,}/g, '**');
+  out = out.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+  out = out.replace(/(^|[^\*])\*([^\*]+)\*([^\*]|$)/g, '$1<em>$2</em>$3');
+  out = out.replace(/[\*#]/g, '');
+  return out;
+}
+
+function cleanPlain(s) {
+  if (!s) return '';
+  return s.replace(/^#+\s*/, '').replace(/[\*\_#]/g, '').replace(/\s+/g, ' ').trim();
+}
+
+function isDivider(line) {
+  if (!line) return false;
+  const stripped = line.replace(/[\s\*\-_=~]/g, '');
+  return stripped === '' && line.trim().length >= 2;
+}
+
+function isDateLine(s) {
+  const clean = cleanPlain(s);
+  const hasYear = /\b(19\d\d|20\d\d)\b/.test(clean);
+  const hasMonth = /\b(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\b/i.test(clean);
+  const hasDateWords = /\b(present|current|remote)\b/i.test(clean);
+  return (hasYear || (hasMonth && hasDateWords)) && clean.length < 90;
+}
+
+function parseResumeMarkdown(md) {
+  if (!md) return '';
+  const rawLines = md.split('\n');
+  const lines = [];
+  for (let r of rawLines) {
+    const t = r.trim();
+    if (isDivider(t)) continue;
+    lines.push(t);
+  }
+
+  let html = '';
+  let inList = false;
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    if (!line) {
+      if (inList) { html += '</ul>'; inList = false; }
+      continue;
+    }
+
+    // Name (Header 1)
+    if (/^#\s+/.test(line)) {
+      if (inList) { html += '</ul>'; inList = false; }
+      const name = cleanPlain(line.replace(/^#\s+/, ''));
+      html += `<h1 class="res-name">${esc(name)}</h1>`;
+      continue;
+    }
+
+    // Section Header (Header 2 or recognized standard resume section)
+    const cleanUpper = cleanPlain(line).toUpperCase();
+    const isKnownSection = /^(PROFESSIONAL SUMMARY|SUMMARY|TECHNICAL SKILLS|CORE SKILLS|SKILLS|PROFESSIONAL EXPERIENCE|WORK EXPERIENCE|EXPERIENCE|INDEPENDENT PRODUCTION PLATFORMS|PRODUCTION PLATFORMS|PROJECTS|KEY PROJECTS|EDUCATION|EDUCATION & CERTIFICATIONS|CERTIFICATIONS)$/i.test(cleanUpper);
+
+    if (/^##\s+/.test(line) || (isKnownSection && line.length < 60)) {
+      if (inList) { html += '</ul>'; inList = false; }
+      const secTitle = cleanPlain(line.replace(/^##\s+/, ''));
+      html += `<h2 class="res-sec-head">${esc(secTitle)}</h2>`;
+      continue;
+    }
+
+    // Contact bar check
+    if (line.includes('@') && (line.includes('|') || line.includes('•') || line.includes('linkedin'))) {
+      if (inList) { html += '</ul>'; inList = false; }
+      const items = line.split(/[|•]/).map(s=>cleanPlain(s)).filter(Boolean);
+      html += '<div class="res-contact-bar">';
+      items.forEach((item, idx) => {
+        if (item.includes('@')) {
+          html += `<a href="mailto:${esc(item)}" style="color:inherit;text-decoration:none">${esc(item)}</a>`;
+        } else if (item.includes('linkedin.com')) {
+          let corrected = item.replace('linkedin.com/in/siddhantrangari', 'linkedin.com/in/siddhant-rangari');
+          const url = corrected.startsWith('http') ? corrected : 'https://' + corrected;
+          html += `<a href="${esc(url)}" target="_blank" style="color:inherit;text-decoration:none">${esc(corrected)}</a>`;
+        } else if (item.includes('.com') || item.includes('.ai') || item.includes('.io')) {
+          const u2 = item.startsWith('http') ? item : 'https://' + item;
+          html += `<a href="${esc(u2)}" target="_blank" style="color:inherit;text-decoration:none">${esc(item)}</a>`;
+        } else {
+          html += `<span>${esc(item)}</span>`;
+        }
+        if (idx < items.length - 1) html += ' · ';
+      });
+      html += '</div>';
+      continue;
+    }
+
+    // Candidate title line right under name (e.g. Senior Full-Stack & AI Engineer | 12+ Years | Bangalore)
+    if (i <= 2 && (line.includes('|') || line.includes('•'))) {
+      if (inList) { html += '</ul>'; inList = false; }
+      const cleanTitleLine = cleanPlain(line);
+      const parts = cleanTitleLine.split(/[|•]/).map(s => cleanPlain(s)).filter(Boolean);
+      html += `<div class="res-title-line">${parts.map(esc).join(' · ')}</div>`;
+      continue;
+    }
+
+    // Key Stack / Tech Stack line
+    if (/^(\*{0,2})([A-Za-z\s]+Stack)(\*{0,2})\s*:/i.test(line)) {
+      if (inList) { html += '</ul>'; inList = false; }
+      const colonIdx = line.indexOf(':');
+      const label = cleanPlain(line.slice(0, colonIdx));
+      const stackContent = cleanPlain(line.slice(colonIdx + 1));
+      html += `<div class="res-stack-line"><span class="res-stack-label">${esc(label)}:</span> ${esc(stackContent)}</div>`;
+      continue;
+    }
+
+    // Single-line Role (Role Title | Company Name | Dates | Location) or (### Role Title | Company Name | Dates | Location)
+    const lineCleanForRole = line.replace(/^#+\s*/, '').trim();
+    const hasRoleDates = /\b(19\d\d|20\d\d|present|current)\b/i.test(lineCleanForRole);
+    if (lineCleanForRole.includes('|') && hasRoleDates && !lineCleanForRole.includes('@') && !lineCleanForRole.toLowerCase().includes('stack:') && i > 2) {
+      if (inList) { html += '</ul>'; inList = false; }
+      const parts = lineCleanForRole.split('|').map(s => cleanPlain(s)).filter(Boolean);
+      let roleTitle = parts[0] || '';
+      let compName = '';
+      let datesLoc = '';
+
+      if (parts.length >= 4) {
+        roleTitle = parts[0];
+        compName = parts[1];
+        datesLoc = parts.slice(2).join(' · ');
+      } else if (parts.length === 3) {
+        if (isDateLine(parts[1])) {
+          if (parts[0].includes(' — ')) {
+            const sub = parts[0].split(' — ');
+            roleTitle = sub[0].trim();
+            compName = sub.slice(1).join(' — ').trim();
+          } else if (parts[0].includes(' - ')) {
+            const sub = parts[0].split(' - ');
+            roleTitle = sub[0].trim();
+            compName = sub.slice(1).join(' - ').trim();
+          } else {
+            roleTitle = parts[0];
+          }
+          datesLoc = parts.slice(1).join(' · ');
+        } else {
+          roleTitle = parts[0];
+          compName = parts[1];
+          datesLoc = parts[2];
+        }
+      } else if (parts.length === 2) {
+        if (parts[0].includes(' — ')) {
+          const sub = parts[0].split(' — ');
+          roleTitle = sub[0].trim();
+          compName = sub.slice(1).join(' — ').trim();
+        } else if (parts[0].includes(' - ')) {
+          const sub = parts[0].split(' - ');
+          roleTitle = sub[0].trim();
+          compName = sub.slice(1).join(' - ').trim();
+        } else {
+          roleTitle = parts[0];
+        }
+        datesLoc = parts[1];
+      }
+
+      html += `<div class="res-role-row"><span><strong>${esc(roleTitle)}</strong>${compName ? ' — ' + esc(compName) : ''}</span><span class="res-role-dates">${esc(datesLoc)}</span></div>`;
+      continue;
+    }
+
+    // Multi-line Role Header:
+    // Line 1: Role [| or —] Company (or ### Role)
+    // Line 2: **Dates – Location**
+    let nextLine = (i + 1 < lines.length) ? lines[i + 1] : '';
+    if (
+      (/^###\s+/.test(line) || line.includes('|') || line.includes('—') || line.includes(' - ')) &&
+      nextLine && isDateLine(nextLine) &&
+      !line.toLowerCase().includes('stack:') && i > 2
+    ) {
+      if (inList) { html += '</ul>'; inList = false; }
+      const cleanLine = cleanPlain(line.replace(/^###\s+/, ''));
+      let roleTitle = cleanLine;
+      let compName = '';
+      if (cleanLine.includes('|')) {
+        const p = cleanLine.split('|').map(s => s.trim());
+        roleTitle = p[0];
+        compName = p.slice(1).join(' — ');
+      } else if (cleanLine.includes(' — ')) {
+        const p = cleanLine.split(' — ').map(s => s.trim());
+        roleTitle = p[0];
+        compName = p.slice(1).join(' — ');
+      }
+      const datesLoc = cleanPlain(nextLine);
+      html += `<div class="res-role-row"><span><strong>${esc(roleTitle)}</strong>${compName ? ' — ' + esc(compName) : ''}</span><span class="res-role-dates">${esc(datesLoc)}</span></div>`;
+      i++;
+      continue;
+    }
+
+    // Standalone Role Header (e.g. ### Role Title or ### Role — Company without next line date)
+    if (/^###\s+/.test(line)) {
+      if (inList) { html += '</ul>'; inList = false; }
+      const cleanLine = cleanPlain(line.replace(/^###\s+/, ''));
+      let roleTitle = cleanLine;
+      let compName = '';
+      if (cleanLine.includes('|')) {
+        const p = cleanLine.split('|').map(s => s.trim());
+        roleTitle = p[0];
+        compName = p.slice(1).join(' — ');
+      } else if (cleanLine.includes(' — ')) {
+        const p = cleanLine.split(' — ').map(s => s.trim());
+        roleTitle = p[0];
+        compName = p.slice(1).join(' — ');
+      }
+      html += `<div class="res-role-row"><span><strong>${esc(roleTitle)}</strong>${compName ? ' — ' + esc(compName) : ''}</span></div>`;
+      continue;
+    }
+
+    // Subtitle / Product description: e.g. *AI-Powered Social Media SaaS for SMBs*
+    if (/^\*+[^*]+\*+$/.test(line) || (line.startsWith('*') && line.endsWith('*') && line.length < 100)) {
+      if (inList) { html += '</ul>'; inList = false; }
+      const cleanSub = cleanPlain(line);
+      html += `<div class="res-role-sub">${esc(cleanSub)}</div>`;
+      continue;
+    }
+
+    // Bullets (-, *, •, or numbered)
+    if (/^([•\-\*]|\d+\.)\s+/.test(line)) {
+      if (!inList) { html += '<ul class="res-bullets">'; inList = true; }
+      const bText = line.replace(/^([•\-\*]|\d+\.)\s+/, '');
+      html += `<li>${cleanInlineMd(bText)}</li>`;
+      continue;
+    }
+
+    if (inList) { html += '</ul>'; inList = false; }
+
+    // Skills Category line (e.g. - **Languages:** Java, Python or **Languages:** Java, Python or Category: list)
+    if (line.startsWith('- **') || line.startsWith('**') || /^[A-Z][a-zA-Z\s&/]+:/.test(line)) {
+      let formatted = cleanInlineMd(line.replace(/^-\s+/, ''));
+      if (!formatted.includes('<strong>') && formatted.includes(':')) {
+        const colon = formatted.indexOf(':');
+        formatted = `<strong>${formatted.slice(0, colon + 1)}</strong>${formatted.slice(colon + 1)}`;
+      }
+      html += `<div class="res-skills-cat">${formatted}</div>`;
+      continue;
+    }
+
+    // Standard paragraph or summary text
+    const formatted = cleanInlineMd(line);
+    html += `<p class="res-summary-text">${formatted}</p>`;
+  }
+
+  if (inList) html += '</ul>';
+  return html;
+}
+
+function renderResumeDocument(md, company, role) {
+  const doc = document.getElementById('resumeDocument');
+  if (!doc) return;
+  doc.innerHTML = parseResumeMarkdown(md || DEFAULT_MASTER_RESUME);
+  
+  const raw = document.getElementById('resumeRawView');
+  if (raw) raw.textContent = md || DEFAULT_MASTER_RESUME;
+  
+  const edit = document.getElementById('resumeEditText');
+  if (edit) edit.value = md || DEFAULT_MASTER_RESUME;
+  
+  const title = document.getElementById('viewerDocTitle');
+  if (title) {
+    const c = company || currentTailoredResume.companyName || 'Siddhant Rangari';
+    const r = role || currentTailoredResume.jobTitle || 'Master Profile';
+    title.innerHTML = `📄 Preview: <strong>${esc(c)}</strong> — <span style="color:var(--t2)">${esc(r)}</span>`;
+  }
+}
+
+function updateJdCount(){
+  const val = document.getElementById('tailorJD').value || '';
+  const countEl = document.getElementById('jdWordCount');
+  if (countEl) countEl.textContent = `${val.length} chars · ~${val.trim().split(/\s+/).filter(Boolean).length} words`;
+}
+
+function onTargetChange(){
+  const c = document.getElementById('tailorCompany').value.trim();
+  const r = document.getElementById('tailorRole').value.trim();
+  const title = document.getElementById('viewerDocTitle');
+  if (title && (c || r)) {
+    title.innerHTML = `📄 Preview: <strong>${esc(c || 'Draft Company')}</strong> — <span style="color:var(--t2)">${esc(r || 'Target Role')}</span>`;
+  }
+}
+
+function setResumeViewMode(mode){
+  const doc = document.getElementById('resumeDocument');
+  const raw = document.getElementById('resumeRawView');
+  const edit = document.getElementById('resumeEditWrap');
+  const btnF = document.getElementById('btnViewFormatted');
+  const btnM = document.getElementById('btnViewMarkdown');
+  const btnE = document.getElementById('btnViewEdit');
+
+  [btnF, btnM, btnE].forEach(b => b && b.classList.remove('active'));
+
+  if (mode === 'markdown') {
+    if (doc) doc.style.display = 'none';
+    if (raw) raw.style.display = 'block';
+    if (edit) edit.style.display = 'none';
+    if (btnM) btnM.classList.add('active');
+  } else if (mode === 'edit') {
+    if (doc) doc.style.display = 'none';
+    if (raw) raw.style.display = 'none';
+    if (edit) edit.style.display = 'block';
+    if (btnE) btnE.classList.add('active');
+  } else {
+    if (doc) doc.style.display = 'block';
+    if (raw) raw.style.display = 'none';
+    if (edit) edit.style.display = 'none';
+    if (btnF) btnF.classList.add('active');
+  }
+}
+
+function zoomResume(delta){
+  if (delta === 0) currentZoomLevel = 100;
+  else currentZoomLevel = Math.max(60, Math.min(150, currentZoomLevel + delta));
+  
+  const sheet = document.getElementById('resumeDocument');
+  const pct = document.getElementById('zoomPercent');
+  if (pct) pct.textContent = `${currentZoomLevel}%`;
+  if (sheet) sheet.style.transform = `scale(${currentZoomLevel / 100})`;
+}
+
+function applyManualResumeEdits(){
+  const edit = document.getElementById('resumeEditText');
+  if (!edit) return;
+  const newMd = edit.value.trim();
+  currentTailoredResume.tailoredResumeText = newMd;
+  renderResumeDocument(newMd, currentTailoredResume.companyName, currentTailoredResume.jobTitle);
+  setResumeViewMode('formatted');
+  appendChatMessage('user', '✏️ [Manual Edit Applied to Resume Document]');
+  appendChatMessage('ai', '✅ Live preview updated with your manual edits! You can download the PDF or continue asking AI to refine further.');
+}
+
+function copyCurrentResumeMarkdown(){
+  const md = currentTailoredResume.tailoredResumeText || DEFAULT_MASTER_RESUME;
+  navigator.clipboard.writeText(md).then(()=>{
+    const btn = event.target;
+    const old = btn.textContent;
+    btn.textContent = '✓ Copied!';
+    setTimeout(()=>btn.textContent = old, 1800);
   });
+}
+
+function toggleSheetTheme(){
+  const doc = document.getElementById('resumeDocument');
+  const btn = document.getElementById('btnToggleSheetTheme');
+  if (!doc) return;
+  const isDark = doc.classList.toggle('theme-dark');
+  if (btn) {
+    btn.innerHTML = isDark ? '☀️ Paper' : '🌙 Dark';
+    btn.title = isDark ? 'Switch to ATS White Paper View' : 'Switch to Dark Mode Preview';
+  }
+}
+
+function printCurrentResume(){
+  setResumeViewMode('formatted');
+  const sheet = document.getElementById('resumeDocument');
+  const wasDark = sheet && sheet.classList.contains('theme-dark');
+  if (wasDark) sheet.classList.remove('theme-dark');
+  window.print();
+  if (wasDark) setTimeout(() => sheet.classList.add('theme-dark'), 1000);
+}
+
+let currentPdfDensity = 'auto';
+
+function onDensityChange(){
+  const sel = document.getElementById('resumePdfDensity');
+  if (sel) currentPdfDensity = sel.value;
+}
+
+function generateResumePdfFromMarkdown(markdownText, filename, btn, densityOverride){
+  const density = densityOverride || currentPdfDensity || 'auto';
+  const sheet = document.createElement('div');
+  sheet.className = 'res-pdf-print-sheet';
+  sheet.innerHTML = parseResumeMarkdown(markdownText || DEFAULT_MASTER_RESUME);
+
+  // Attach temporarily to measure exact natural height at 96 DPI (190mm printable width = 718px)
+  document.body.appendChild(sheet);
+
+  const a4PageHeight = 1062; // 281mm printable area (297mm - 16mm margins)
+  let h = sheet.offsetHeight;
+
+  if (density === 'spacious') {
+    sheet.classList.add('fit-spacious');
+  } else if (density === 'compact') {
+    sheet.classList.add('fit-compact');
+  } else if (density === 'standard') {
+    // Keep baseline 10.2px
+  } else {
+    // Auto-Fit (Default):
+    // 1. If underfilling 1 page (< 960px), expand with fit-spacious so it fills 95-99% of the page!
+    if (h < 960) {
+      sheet.classList.add('fit-spacious');
+      if (sheet.offsetHeight > a4PageHeight) {
+        // If spacious causes overflow onto page 2, fall back to baseline
+        sheet.classList.remove('fit-spacious');
+      }
+    } else if (h > a4PageHeight && h < 1160) {
+      // 2. If slightly spilling (1-3 lines onto page 2), compress to 1 single page!
+      sheet.classList.add('fit-compact');
+      if (sheet.offsetHeight > a4PageHeight) {
+        // If it still overflows despite compact, revert to baseline and let it be a clean 2-page document
+        sheet.classList.remove('fit-compact');
+      }
+    }
+  }
+
+  const opt = {
+    margin: [8, 10, 8, 10], // mm: [top, left, bottom, right]
+    filename: filename || 'Siddhant_Rangari_Resume.pdf',
+    image: { type: 'jpeg', quality: 0.98 },
+    enableLinks: true,
+    html2canvas: {
+      scale: 2,
+      useCORS: true,
+      letterRendering: true,
+      logging: false,
+      scrollX: 0,
+      scrollY: 0
+    },
+    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+    pagebreak: {
+      mode: ['css', 'legacy'],
+      avoid: ['.res-role-row', '.res-sec-head', '.res-stack-line', 'li', 'h1', 'h2']
+    }
+  };
+
+  const oldHtml = btn ? btn.innerHTML : '';
+  if (btn) btn.innerHTML = '⏳ Exporting...';
+
+  const cleanup = () => {
+    if (sheet.parentNode) sheet.parentNode.removeChild(sheet);
+  };
+
+  if (typeof html2pdf !== 'undefined') {
+    return html2pdf().set(opt).from(sheet).save().then(() => {
+      cleanup();
+      if (btn) {
+        btn.innerHTML = '✓ Downloaded!';
+        setTimeout(() => btn.innerHTML = oldHtml, 2000);
+      }
+    }).catch(err => {
+      cleanup();
+      console.error('PDF generation error:', err);
+      if (btn) btn.innerHTML = oldHtml;
+      window.print();
+    });
+  } else {
+    cleanup();
+    if (btn) btn.innerHTML = oldHtml;
+    window.print();
+  }
+}
+
+function downloadCurrentResumePdf(){
+  setResumeViewMode('formatted');
+  const comp = (currentTailoredResume.companyName || 'Siddhant_Rangari').replace(/[^a-zA-Z0-9_-]/g, '_');
+  const role = (currentTailoredResume.jobTitle || 'Engineer').replace(/[^a-zA-Z0-9_-]/g, '_');
+  const filename = `Resume_${comp}_${role}.pdf`;
+  const md = (currentTailoredResume && currentTailoredResume.tailoredResumeText) ? currentTailoredResume.tailoredResumeText : DEFAULT_MASTER_RESUME;
+  const btn = (typeof event !== 'undefined' && event && event.target) ? event.target.closest('button') : null;
+  generateResumePdfFromMarkdown(md, filename, btn);
+}
+
+function downloadMasterResumePdf(){
+  const btn = (typeof event !== 'undefined' && event && event.target) ? event.target.closest('button') : null;
+  generateResumePdfFromMarkdown(DEFAULT_MASTER_RESUME, 'Siddhant_Rangari_Master_Resume.pdf', btn);
+}
+
+function appendChatMessage(sender, text){
+  const stream = document.getElementById('resumeChatMessages');
+  if (!stream) return;
+  const msg = document.createElement('div');
+  msg.className = `res-chat-msg ${sender}`;
+  msg.innerHTML = sender === 'ai' 
+    ? `🤖 <strong>AI Copilot:</strong> ${esc(text)}` 
+    : `👤 <strong>You:</strong> ${esc(text)}`;
+  stream.appendChild(msg);
+  stream.scrollTop = stream.scrollHeight;
+
+  resumeChatHistory.push({
+    role: sender === 'ai' ? 'assistant' : 'user',
+    content: text
+  });
+  if (resumeChatHistory.length > 20) {
+    resumeChatHistory = resumeChatHistory.slice(-20);
+  }
+}
+
+function applySuggestionChip(text){
+  const input = document.getElementById('chatRefineInput');
+  if (input) {
+    input.value = text;
+    submitResumeRefinement();
+  }
+}
+
+// ── TRIGGER TAILOR RESUME (RUN JOB) ──
+function triggerTailorResume(){
+  const company = document.getElementById('tailorCompany').value.trim();
+  const role = document.getElementById('tailorRole').value.trim();
+  const jd = document.getElementById('tailorJD').value.trim();
+  const instructions = document.getElementById('tailorInstructions').value.trim();
+
+  if (!jd) {
+    alert('Please paste the job description first.');
+    document.getElementById('tailorJD').focus();
+    return;
+  }
+
+  resumeChatHistory = [];
+
+  const btn = document.getElementById('btnTailorResume');
+  const pBox = document.getElementById('tailorProgressBox');
+  const pLabel = document.getElementById('tailorProgressLabel');
+
+  btn.disabled = true;
+  btn.innerHTML = '<span class="cc-spin">◐</span> Tailoring Resume…';
+  pBox.style.display = 'block';
+
+  const s1 = document.getElementById('pStep1');
+  const s2 = document.getElementById('pStep2');
+  const s3 = document.getElementById('pStep3');
+  const s4 = document.getElementById('pStep4');
+
+  [s1, s2, s3, s4].forEach(s => s && (s.className = 'res-progress-step'));
+  if (s1) s1.className = 'res-progress-step active';
+
+  const runner = (window.__CC_RESUME_STUDIO_ACTIONS__ && window.__CC_RESUME_STUDIO_ACTIONS__.runJob)
+    || (window.__CC__ && window.__CC__.runJob);
+
+  const onTick = (secs, status) => {
+    if (pLabel) pLabel.textContent = `Tailoring resume (${secs}s) — ${status}…`;
+    if (secs > 5 && s1 && s2) { s1.className = 'res-progress-step done'; s2.className = 'res-progress-step active'; }
+    if (secs > 18 && s2 && s3) { s2.className = 'res-progress-step done'; s3.className = 'res-progress-step active'; }
+    if (secs > 35 && s3 && s4) { s3.className = 'res-progress-step done'; s4.className = 'res-progress-step active'; }
+  };
+
+  const payload = {
+    companyName: company || 'Target Company',
+    jobTitle: role || 'Senior Full-Stack & AI Engineer',
+    jobDescription: jd,
+    instructions: instructions,
+    save: true
+  };
+
+  if (runner) {
+    runner('tailor-resume', payload, onTick)
+      .then(res => handleTailorSuccess(res, payload))
+      .catch(err => handleTailorError(err))
+      .finally(() => {
+        btn.disabled = false;
+        btn.innerHTML = '<span>✨ Tailor My Resume</span>';
+      });
+  } else {
+    // Direct sync fallback via fetch
+    fetch('/api/tailor-resume', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + (localStorage.getItem('cc_token')||'') },
+      body: JSON.stringify(payload)
+    })
+    .then(r => r.json())
+    .then(res => handleTailorSuccess(res, payload))
+    .catch(err => handleTailorError(err))
+    .finally(() => {
+      btn.disabled = false;
+      btn.innerHTML = '<span>✨ Tailor My Resume</span>';
+    });
+  }
+}
+
+function handleTailorSuccess(res, payload){
+  const r = res.resume || res;
+  const pBox = document.getElementById('tailorProgressBox');
+  if (pBox) pBox.style.display = 'none';
+
+  resumeChatHistory = [];
+
+  currentTailoredResume = {
+    id: res.id || null,
+    companyName: payload.companyName,
+    jobTitle: payload.jobTitle,
+    jobDescription: payload.jobDescription,
+    tailoredResumeText: r.tailoredResumeText || DEFAULT_MASTER_RESUME,
+    matchScore: r.matchScore || 90,
+    keywordsMatched: r.keywordsMatched || [],
+    keywordsMissing: r.keywordsMissing || [],
+    dsaSignal: r.dsaSignal || { likely: false },
+    talkingPoints: r.talkingPoints || [],
+    verification: r.verification || { clean: true, safeToSend: true, issues: [] }
+  };
+
+  renderResumeDocument(currentTailoredResume.tailoredResumeText, currentTailoredResume.companyName, currentTailoredResume.jobTitle);
+  updateAuditDisplay(currentTailoredResume);
+
+  appendChatMessage('ai', `🎯 Tailored resume generated for ${payload.companyName} (${payload.jobTitle}) with ${currentTailoredResume.matchScore}% JD match! Every metric and bullet traces to your verified history. Use the chat box below to suggest any changes, tweak bullets, or alter the tone.`);
+
+  refreshSavedResumes();
+  setResumeViewMode('formatted');
+}
+
+function handleTailorError(err){
+  const pBox = document.getElementById('tailorProgressBox');
+  if (pBox) pBox.style.display = 'none';
+  alert('Resume tailoring failed: ' + (err.message || 'Unknown error'));
+  appendChatMessage('ai', '❌ Resume tailoring encountered an error: ' + (err.message || 'Please check backend logs.'));
+}
+
+// ── SUBMIT CHAT REFINEMENT ──
+function submitResumeRefinement(){
+  const input = document.getElementById('chatRefineInput');
+  const btn = document.getElementById('btnChatRefine');
+  const feedback = (input.value || '').trim();
+  if (!feedback) return;
+
+  appendChatMessage('user', feedback);
+  input.value = '';
+
+  btn.disabled = true;
+  btn.innerHTML = '<span class="cc-spin">◐</span> Refining…';
+
+  const runner = (window.__CC_RESUME_STUDIO_ACTIONS__ && window.__CC_RESUME_STUDIO_ACTIONS__.runJob)
+    || (window.__CC__ && window.__CC__.runJob);
+
+  const payload = {
+    resumeId: currentTailoredResume.id,
+    currentResumeText: currentTailoredResume.tailoredResumeText,
+    feedback: feedback,
+    chatHistory: resumeChatHistory.slice(-10),
+    companyName: currentTailoredResume.companyName,
+    jobTitle: currentTailoredResume.jobTitle,
+    jobDescription: currentTailoredResume.jobDescription
+  };
+
+  const onTick = (secs, status) => {
+    // Chat status
+  };
+
+  const handleResult = (res) => {
+    const r = res.resume || res;
+    if (r.tailoredResumeText) {
+      currentTailoredResume.tailoredResumeText = r.tailoredResumeText;
+      if (r.matchScore) currentTailoredResume.matchScore = r.matchScore;
+      if (r.verification) currentTailoredResume.verification = r.verification;
+      if (r.talkingPoints) currentTailoredResume.talkingPoints = r.talkingPoints;
+
+      renderResumeDocument(currentTailoredResume.tailoredResumeText, currentTailoredResume.companyName, currentTailoredResume.jobTitle);
+      updateAuditDisplay(currentTailoredResume);
+
+      const summary = r.changeSummary ? `\n\nChanges applied:\n${r.changeSummary}` : '';
+      appendChatMessage('ai', `✨ Resume refined according to your instructions! Live PDF preview updated.${summary}`);
+      refreshSavedResumes();
+    } else {
+      appendChatMessage('ai', 'Received refinement, but no updated text was returned.');
+    }
+  };
+
+  if (runner) {
+    runner('refine-resume', payload, onTick)
+      .then(handleResult)
+      .catch(err => {
+        appendChatMessage('ai', 'Refinement failed: ' + (err.message || 'Unknown error'));
+      })
+      .finally(() => {
+        btn.disabled = false;
+        btn.innerHTML = '<span>🚀 Refine</span>';
+      });
+  } else {
+    fetch('/api/refine-resume', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + (localStorage.getItem('cc_token')||'') },
+      body: JSON.stringify(payload)
+    })
+    .then(r => r.json())
+    .then(handleResult)
+    .catch(err => {
+      appendChatMessage('ai', 'Refinement failed: ' + (err.message || 'Unknown error'));
+    })
+    .finally(() => {
+      btn.disabled = false;
+      btn.innerHTML = '<span>🚀 Refine</span>';
+    });
+  }
+}
+
+function updateAuditDisplay(data){
+  const badge = document.getElementById('auditScoreBadge');
+  if (badge) badge.textContent = `Match: ${data.matchScore || 0}/100`;
+
+  const banner = document.getElementById('factCheckBanner');
+  const v = data.verification || {};
+  if (banner) {
+    if (v.safeToSend === false) {
+      banner.className = 'cc-bad';
+      banner.innerHTML = `⚠️ <strong>Audit Warning:</strong> ${v.blockingCount || 0} claim(s) need review before sending.`;
+    } else {
+      banner.className = 'cc-ok';
+      banner.innerHTML = `🛡️ <strong>Fact-Check Passed:</strong> All claims & metrics trace back to Siddhant's real history.`;
+    }
+  }
+
+  const dsaBanner = document.getElementById('dsaWarningBanner');
+  const dsaEv = document.getElementById('dsaEvidence');
+  if (dsaBanner && dsaEv) {
+    if (data.dsaSignal && data.dsaSignal.likely) {
+      dsaBanner.style.display = 'block';
+      dsaEv.textContent = data.dsaSignal.evidence || 'LeetCode style phrasing identified.';
+    } else {
+      dsaBanner.style.display = 'none';
+    }
+  }
+
+  const kMatched = document.getElementById('keywordsMatchedList');
+  if (kMatched) {
+    const list = data.keywordsMatched || [];
+    kMatched.innerHTML = list.length 
+      ? list.map(k => `<span class="rb gulf">${esc(k)}</span>`).join('') 
+      : '<span style="font-size:11px;color:var(--t3)">No specific keywords flagged</span>';
+  }
+
+  const kMissing = document.getElementById('keywordsMissingList');
+  if (kMissing) {
+    const list = data.keywordsMissing || [];
+    kMissing.innerHTML = list.length 
+      ? list.map(k => {
+          const name = typeof k === 'string' ? k : (k.keyword + (k.closestExperience ? ` (Nearby: ${k.closestExperience})` : ''));
+          return `<span class="rb in_remote">${esc(name)}</span>`;
+        }).join('') 
+      : '<span style="font-size:11px;color:var(--t3)">None flagged</span>';
+  }
+
+  const tpList = document.getElementById('talkingPointsList');
+  if (tpList) {
+    const pts = data.talkingPoints || [];
+    if (pts.length) {
+      tpList.innerHTML = pts.map(p => `<li>${esc(p)}</li>`).join('');
+    }
+  }
+}
+
+// ── SAVED RESUMES LIBRARY ──
+function refreshSavedResumes(){
+  const apiFn = (window.__CC_RESUME_STUDIO_ACTIONS__ && window.__CC_RESUME_STUDIO_ACTIONS__.api)
+    || (window.__CC__ && window.__CC__.api);
+
+  const handleResumes = (data) => {
+    savedResumesList = data.resumes || [];
+    try { localStorage.setItem('cc_saved_resumes_cache', JSON.stringify(savedResumesList)); } catch(e){}
+
+    const tbody = document.getElementById('savedResumesTableBody');
+    const optGroup = document.getElementById('savedResumeOptGroup');
+    const badge = document.getElementById('savedCountBadge');
+    const total = document.getElementById('savedTotalCount');
+
+    if (badge) badge.textContent = savedResumesList.length;
+    if (total) total.textContent = savedResumesList.length;
+
+    if (optGroup) {
+      optGroup.innerHTML = savedResumesList.map(r => 
+        `<option value="${r.id}">${esc(r.company_name || 'Company')} — ${esc(r.job_title || 'Role')} (${r.match_score || 0}%)</option>`
+      ).join('');
+    }
+
+    if (tbody) {
+      if (savedResumesList.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--t3);padding:24px">No tailored resumes saved yet. Enter a JD above and click "Tailor My Resume" to generate your first version!</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = savedResumesList.map(r => {
+        const dateStr = r.created_at ? new Date(r.created_at).toLocaleDateString() : 'Recent';
+        const score = r.match_score || 0;
+        const scoreColor = score >= 90 ? 'var(--g)' : (score >= 75 ? 'var(--y)' : 'var(--ac)');
+        const kCount = (r.keywords_matched || []).length;
+
+        return `<tr>
+          <td>
+            <div style="font-weight:700;font-size:13px;color:var(--t)">${esc(r.company_name || 'Target Company')}</div>
+            <div style="font-size:11px;color:var(--t2)">${esc(r.job_title || 'Target Role')}</div>
+          </td>
+          <td>
+            <span style="font-family:'JetBrains Mono',monospace;font-weight:700;color:${scoreColor};background:rgba(255,255,255,0.05);padding:2px 7px;border-radius:6px">
+              ${score}%
+            </span>
+          </td>
+          <td style="color:var(--t2);font-size:11.5px">${dateStr}</td>
+          <td>
+            <span class="ndsa" style="font-size:10px">${kCount} keywords</span>
+          </td>
+          <td style="text-align:right;white-space:nowrap">
+            <button class="btn pri" onclick="loadSavedResume('${r.id}')" title="Load into live studio & chat">👁️ Load &amp; Chat</button>
+            <button class="btn grn" onclick="downloadPdfForVersion('${r.id}')" title="Instant PDF download" style="font-weight:600">📥 PDF</button>
+            <button class="btn" onclick="deleteSavedResume('${r.id}')" title="Delete version" style="color:var(--r);border-color:rgba(255,107,107,0.3)">🗑️</button>
+          </td>
+        </tr>`;
+      }).join('');
+    }
+  };
+
+  if (apiFn) {
+    apiFn('/resumes')
+      .then(handleResumes)
+      .catch(() => {
+        let cached = [];
+        try { cached = JSON.parse(localStorage.getItem('cc_saved_resumes_cache') || '[]'); } catch(e){}
+        handleResumes({ resumes: cached });
+      });
+  } else {
+    let cached = [];
+    try { cached = JSON.parse(localStorage.getItem('cc_saved_resumes_cache') || '[]'); } catch(e){}
+    handleResumes({ resumes: cached });
+  }
+}
+
+function loadSavedResume(id){
+  const r = savedResumesList.find(x => x.id === id);
+  if (!r) return;
+
+  currentTailoredResume = {
+    id: r.id,
+    companyName: r.company_name || '',
+    jobTitle: r.job_title || '',
+    jobDescription: r.job_description || '',
+    tailoredResumeText: r.tailored_text || DEFAULT_MASTER_RESUME,
+    matchScore: r.match_score || 90,
+    keywordsMatched: r.keywords_matched || [],
+    keywordsMissing: r.keywords_missing || [],
+    dsaSignal: { likely: false },
+    talkingPoints: [],
+    verification: { clean: true, safeToSend: true, issues: [] }
+  };
+
+  resumeChatHistory = [];
+
+  document.getElementById('tailorCompany').value = currentTailoredResume.companyName;
+  document.getElementById('tailorRole').value = currentTailoredResume.jobTitle;
+  document.getElementById('tailorJD').value = currentTailoredResume.jobDescription;
+  updateJdCount();
+
+  const sel = document.getElementById('resumeVersionSelect');
+  if (sel) sel.value = id;
+
+  renderResumeDocument(currentTailoredResume.tailoredResumeText, currentTailoredResume.companyName, currentTailoredResume.jobTitle);
+  updateAuditDisplay(currentTailoredResume);
+
+  appendChatMessage('ai', `📄 Loaded saved tailored resume for ${currentTailoredResume.companyName} (${currentTailoredResume.jobTitle})! You can suggest any edits or chat below to refine it.`);
+
+  setResumeViewMode('formatted');
+  window.scrollTo({ top: document.getElementById('resumeTargetCard').offsetTop - 60, behavior: 'smooth' });
+}
+
+function downloadPdfForVersion(id){
+  const r = savedResumesList.find(x => x.id === id);
+  if (!r) return;
+
+  const comp = (r.company_name || 'Tailored').replace(/[^a-zA-Z0-9_-]/g, '_');
+  const role = (r.job_title || 'Resume').replace(/[^a-zA-Z0-9_-]/g, '_');
+  const filename = `Resume_${comp}_${role}.pdf`;
+  const btn = (typeof event !== 'undefined' && event && event.target) ? event.target.closest('button') : null;
+  generateResumePdfFromMarkdown(r.tailored_text || DEFAULT_MASTER_RESUME, filename, btn);
+}
+
+function deleteSavedResume(id){
+  if (!confirm('Are you sure you want to delete this saved tailored resume?')) return;
+  const apiFn = (window.__CC_RESUME_STUDIO_ACTIONS__ && window.__CC_RESUME_STUDIO_ACTIONS__.api)
+    || (window.__CC__ && window.__CC__.api);
+
+  if (apiFn) {
+    apiFn('/resumes/' + id, { method: 'DELETE' })
+      .then(() => {
+        savedResumesList = savedResumesList.filter(x => x.id !== id);
+        refreshSavedResumes();
+      })
+      .catch(err => {
+        alert('Delete failed: ' + err.message);
+      });
+  } else {
+    savedResumesList = savedResumesList.filter(x => x.id !== id);
+    try { localStorage.setItem('cc_saved_resumes_cache', JSON.stringify(savedResumesList)); } catch(e){}
+    refreshSavedResumes();
+  }
+}
+
+function onSelectResumeVersion(val){
+  if (val === 'active') {
+    renderResumeDocument(currentTailoredResume.tailoredResumeText, currentTailoredResume.companyName, currentTailoredResume.jobTitle);
+  } else if (val === 'master') {
+    renderResumeDocument(DEFAULT_MASTER_RESUME, 'Siddhant Rangari', 'Master Profile');
+  } else {
+    loadSavedResume(val);
+  }
+}
+
+function resetNewTailor(){
+  currentTailoredResume = {
+    id: null,
+    companyName: '',
+    jobTitle: '',
+    jobDescription: '',
+    tailoredResumeText: DEFAULT_MASTER_RESUME,
+    matchScore: 0,
+    keywordsMatched: [],
+    keywordsMissing: [],
+    dsaSignal: { likely: false },
+    talkingPoints: [],
+    verification: { clean: true, safeToSend: true, issues: [] }
+  };
+
+  document.getElementById('tailorCompany').value = '';
+  document.getElementById('tailorRole').value = '';
+  document.getElementById('tailorJD').value = '';
+  document.getElementById('tailorInstructions').value = '';
+  updateJdCount();
+
+  const sel = document.getElementById('resumeVersionSelect');
+  if (sel) sel.value = 'active';
+
+  renderResumeDocument(DEFAULT_MASTER_RESUME, 'Draft Company', 'Target Role');
+  appendChatMessage('ai', 'Started fresh tailored resume draft. Paste your target company and JD above to begin!');
+}
+
+function scrollToSavedResumes(){
+  const el = document.getElementById('resumeLibrarySection');
+  if (el) el.scrollIntoView({ behavior: 'smooth' });
+}
+
+// Global hook for prototype-actions / modals
+window.triggerTailorResume = triggerTailorResume;
+window.downloadCurrentResumePdf = downloadCurrentResumePdf;
+
+let resumeStudioInitialized = false;
+function initResumeStudio(){
+  if (!resumeStudioInitialized) {
+    const text = (currentTailoredResume && currentTailoredResume.tailoredResumeText) ? currentTailoredResume.tailoredResumeText : DEFAULT_MASTER_RESUME;
+    const comp = (currentTailoredResume && currentTailoredResume.companyName) ? currentTailoredResume.companyName : 'Siddhant Rangari';
+    const title = (currentTailoredResume && currentTailoredResume.jobTitle) ? currentTailoredResume.jobTitle : 'Master Profile';
+    renderResumeDocument(text, comp, title);
+    updateJdCount();
+    resumeStudioInitialized = true;
+  }
+  refreshSavedResumes();
 }
 
 // ── UTILS ──
@@ -894,6 +2243,7 @@ function initTabs(){
     showTab('outreach', document.querySelector(`.tab[onclick*="showTab('outreach'"]`));
   }
   if (typeof updateStats === 'function') updateStats();
+  if (typeof initResumeStudio === 'function') initResumeStudio();
 }
 
 window.addEventListener('popstate', () => {
