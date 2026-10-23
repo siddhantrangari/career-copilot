@@ -18,6 +18,37 @@ const STAGE_RANK = {
   new: 0, applied: 1, networking: 2, call: 3, win: 4, interview: 5, offer: 6, failed: 7,
 };
 
+export function cleanJdText(raw) {
+  if (!raw || typeof raw !== 'string') return '';
+  let text = raw;
+  for (let i = 0; i < 2; i++) {
+    if (!/&(?:[a-zA-Z]+|#\d+|#x[0-9a-fA-F]+);/.test(text)) break;
+    text = text
+      .replace(/&quot;/g, '"')
+      .replace(/&#39;/g, "'")
+      .replace(/&apos;/g, "'")
+      .replace(/&lt;/g, '<')
+      .replace(/&gt;/g, '>')
+      .replace(/&nbsp;/g, ' ')
+      .replace(/&amp;/g, '&')
+      .replace(/&#(\d+);/g, (_, dec) => String.fromCharCode(dec))
+      .replace(/&#x([0-9a-fA-F]+);/g, (_, hex) => String.fromCharCode(parseInt(hex, 16)));
+  }
+  text = text
+    .replace(/<\/(p|div|h[1-6]|li|tr|section|article)>/gi, '\n')
+    .replace(/<br\s*\/?>/gi, '\n')
+    .replace(/<li[^>]*>/gi, '• ')
+    .replace(/<[^>]+>/g, '')
+    .replace(/\r\n/g, '\n')
+    .replace(/\r/g, '\n');
+  return text
+    .split('\n')
+    .map((l) => l.trim())
+    .join('\n')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
+}
+
 export async function autofillCompany(companyId) {
   const company = await one('SELECT * FROM companies WHERE id = $1', [companyId]);
   if (!company) return null;
@@ -68,37 +99,6 @@ export async function autofillCompany(companyId) {
     suggested.jd = company.apply_url;
     provenance.jd = 'Company careers page from the catalogue';
   }
-
-export function cleanJdText(raw) {
-  if (!raw || typeof raw !== 'string') return '';
-  let text = raw;
-  for (let i = 0; i < 2; i++) {
-    if (!/&(?:[a-zA-Z]+|#\d+|#x[0-9a-fA-F]+);/.test(text)) break;
-    text = text
-      .replace(/&quot;/g, '"')
-      .replace(/&#39;/g, "'")
-      .replace(/&apos;/g, "'")
-      .replace(/&lt;/g, '<')
-      .replace(/&gt;/g, '>')
-      .replace(/&nbsp;/g, ' ')
-      .replace(/&amp;/g, '&')
-      .replace(/&#(\d+);/g, (_, dec) => String.fromCharCode(dec))
-      .replace(/&#x([0-9a-fA-F]+);/g, (_, hex) => String.fromCharCode(parseInt(hex, 16)));
-  }
-  text = text
-    .replace(/<\/(p|div|h[1-6]|li|tr|section|article)>/gi, '\n')
-    .replace(/<br\s*\/?>/gi, '\n')
-    .replace(/<li[^>]*>/gi, '• ')
-    .replace(/<[^>]+>/g, '')
-    .replace(/\r\n/g, '\n')
-    .replace(/\r/g, '\n');
-  return text
-    .split('\n')
-    .map((l) => l.trim())
-    .join('\n')
-    .replace(/\n{3,}/g, '\n\n')
-    .trim();
-}
 
   // ── Job description text ────────────────────────────────────────────
   // Distinct from `jd` (which is a URL). This is the actual pasted JD body
