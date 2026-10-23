@@ -4,3 +4,5 @@ node_modules/
 server/public/
 *.log
 .DS_Store
+scratch/
+

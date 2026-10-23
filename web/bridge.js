@@ -242,6 +242,7 @@
   // ── AI drawer ───────────────────────────────────────────────────────
   var companies = [];
   var openCopilot = null;
+  var refreshCompaniesFn = null;
 
   function esc(s) {
     return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) {
@@ -583,9 +584,15 @@
     drawer.innerHTML =
       '<header><h3>AI Copilot</h3><button class="cc-close" type="button">×</button></header>' +
       '<div class="cc-body">' +
-      '<div class="cc-row">' +
-      '<select class="cc-company"></select>' +
+      '<div class="cc-row" style="margin-bottom:6px">' +
+      '<select class="cc-company" style="flex:1.2"></select>' +
       '<input type="text" class="cc-role" placeholder="Role (e.g. Forward Deployed Engineer)">' +
+      '</div>' +
+      '<div class="cc-other-row" style="display:none;margin-bottom:12px">' +
+      '<div style="display:flex;gap:6px">' +
+      '<input type="text" class="cc-other-company" placeholder="Enter company name (e.g. Anthropic, Datadog)..." style="flex:1">' +
+      '<button type="button" class="cc-cancel-other" style="padding:6px 10px;font-size:11px;background:#1b2130;border:1px solid #2a3243;color:#8b96a8;border-radius:8px;cursor:pointer">Cancel</button>' +
+      '</div>' +
       '</div>' +
       '<div class="cc-actions">' +
       '<button data-act="research" class="cc-primary" type="button">1. Research</button>' +
@@ -597,7 +604,7 @@
       '<button data-act="email" type="button">Cold email</button>' +
       '</div>' +
       '<div class="cc-extra"></div>' +
-      '<div class="cc-out"><p class="cc-muted">Pick a company, then start with Research — every other step reads from it.</p></div>' +
+      '<div class="cc-out"><p class="cc-muted">Pick a company or select Other to type one, then start with Research — every other step reads from it.</p></div>' +
       '</div>';
     document.body.appendChild(drawer);
 
@@ -605,6 +612,9 @@
     var extra = drawer.querySelector('.cc-extra');
     var select = drawer.querySelector('.cc-company');
     var roleInput = drawer.querySelector('.cc-role');
+    var otherRow = drawer.querySelector('.cc-other-row');
+    var otherInput = drawer.querySelector('.cc-other-company');
+    var cancelOtherBtn = drawer.querySelector('.cc-cancel-other');
 
     fab.addEventListener('click', function () { drawer.classList.add('cc-open'); });
     drawer.querySelector('.cc-close').addEventListener('click', function () {
@@ -620,19 +630,57 @@
       });
     });
 
-    api('/companies')
-      .then(function (data) {
-        companies = data.companies || [];
-        select.innerHTML = companies
-          .map(function (c) {
-            return '<option value="' + esc(c.id) + '">' + esc(c.name) +
-              (c.research ? ' ✓' : '') + '</option>';
-          })
-          .join('');
-      })
-      .catch(function () {
-        select.innerHTML = '<option value="">Could not load companies</option>';
-      });
+    function renderCompanySelect(selectedId) {
+      var opts = '';
+      if (companies.length) {
+        opts += '<optgroup label="Target & Tracked Companies">';
+        opts += companies.map(function (c) {
+          return '<option value="' + esc(c.id) + '">' + esc(c.name) +
+            (c.research ? ' ✓' : '') + '</option>';
+        }).join('');
+        opts += '</optgroup>';
+      }
+      opts += '<optgroup label="Custom / Applied Somewhere Else">';
+      opts += '<option value="__other__">✏️ Other / Type Company Name…</option>';
+      opts += '</optgroup>';
+      select.innerHTML = opts;
+      if (selectedId) {
+        select.value = selectedId;
+        if (select.value === selectedId) {
+          otherRow.style.display = 'none';
+        }
+      }
+    }
+
+    function refreshCompanies(selectedId) {
+      return api('/companies')
+        .then(function (data) {
+          companies = data.companies || [];
+          renderCompanySelect(selectedId || select.value);
+        });
+    }
+    refreshCompaniesFn = refreshCompanies;
+
+    refreshCompanies().catch(function () {
+      select.innerHTML = '<option value="">Could not load companies</option><option value="__other__">✏️ Other / Type Company Name…</option>';
+    });
+
+    select.addEventListener('change', function () {
+      if (select.value === '__other__') {
+        otherRow.style.display = 'block';
+        otherInput.value = '';
+        otherInput.focus();
+      } else {
+        otherRow.style.display = 'none';
+      }
+    });
+
+    cancelOtherBtn.addEventListener('click', function () {
+      otherRow.style.display = 'none';
+      otherInput.value = '';
+      if (companies.length) select.value = companies[0].id;
+      else select.value = '';
+    });
 
     function busy(label) {
       out.innerHTML = '<p class="cc-muted"><span class="cc-spin">◐</span> ' + esc(label) + '…</p>' +
@@ -691,7 +739,62 @@
       out.innerHTML = '<div class="cc-bad"><strong>Failed.</strong><br>' + esc(e.message) + '</div>';
     }
     function selected() {
-      return { id: select.value, name: (select.options[select.selectedIndex] || {}).text };
+      if (select.value === '__other__') {
+        var customName = (otherInput.value || '').trim();
+        if (!customName) {
+          throw new Error('Please type a company name first.');
+        }
+        var match = companies.find(function (c) {
+          return (c.name || '').toLowerCase() === customName.toLowerCase();
+        });
+        if (match) {
+          return { id: match.id, name: match.name, isCustom: false };
+        }
+        return { id: null, name: customName, isCustom: true };
+      }
+      var opt = select.options[select.selectedIndex];
+      return { id: select.value, name: opt ? opt.text.replace(/ ✓$/, '') : '', isCustom: false };
+    }
+
+    function ensureSelectedCompany() {
+      var c;
+      try {
+        c = selected();
+      } catch (err) {
+        return Promise.reject(err);
+      }
+      if (!c.name) return Promise.reject(new Error('Please select or type a company name first.'));
+      if (c.id && !c.isCustom) return Promise.resolve(c);
+
+      var role = (roleInput.value || '').trim();
+      busy('Adding ' + c.name + ' to your companies & pipeline');
+      return api('/companies', {
+        method: 'POST',
+        body: {
+          name: c.name,
+          roleTitle: role || 'Full-Stack',
+          roles: ['fs'],
+          region: 'global',
+          stage: 'applied'
+        }
+      }).then(function (res) {
+        var created = res.company;
+        c.id = created.id;
+        c.name = created.name;
+        c.isCustom = false;
+
+        var existing = companies.find(function (x) { return x.id === created.id; });
+        if (!existing) companies.unshift(created);
+
+        renderCompanySelect(created.id);
+        otherRow.style.display = 'none';
+
+        if (typeof window.addCompanyFromExternal === 'function') {
+          window.addCompanyFromExternal(created, 'applied');
+        }
+
+        return c;
+      });
     }
 
     /**
@@ -789,75 +892,88 @@
     var ACTIONS = {
       /** Show the brief already on file, without paying for a new search. */
       'view-research': function () {
-        var c = selected();
-        extra.innerHTML = '';
-        out.innerHTML = '<p class="cc-muted">Loading the saved brief…</p>';
-        api('/companies/' + encodeURIComponent(c.id) + '/research')
-          .then(function (d) {
-            renderResearch(d.research, d.evidence);
-          })
-          .catch(function (err) {
-            out.innerHTML = '<div class="cc-warn">' + esc(err.message) +
-              '<br><br>Run <strong>1. Research</strong> to build one.</div>';
-          });
+        try {
+          var c = selected();
+          if (c.isCustom && !c.id) {
+            out.innerHTML = '<div class="cc-warn">No brief saved for <strong>' + esc(c.name) + '</strong> yet.<br><br>Click <strong>1. Research</strong> to run live web research.</div>';
+            return;
+          }
+          extra.innerHTML = '';
+          out.innerHTML = '<p class="cc-muted">Loading the saved brief…</p>';
+          api('/companies/' + encodeURIComponent(c.id) + '/research')
+            .then(function (d) {
+              renderResearch(d.research, d.evidence);
+            })
+            .catch(function (err) {
+              out.innerHTML = '<div class="cc-warn">' + esc(err.message) +
+                '<br><br>Run <strong>1. Research</strong> to build one.</div>';
+            });
+        } catch (err) {
+          fail(err);
+        }
       },
 
       research: function () {
-        var c = selected();
         extra.innerHTML = '';
-        job('research', { companyId: c.id, roleName: roleInput.value, force: true },
-            'Searching the live web for ' + c.name + ', then building the brief')
-          .then(function (data) { renderResearch(data.research, null, out.querySelector('.cc-steps')); })
+        ensureSelectedCompany()
+          .then(function (c) {
+            return job('research', { companyId: c.id, roleName: roleInput.value, force: true },
+                'Searching the live web for ' + c.name + ', then building the brief')
+              .then(function (data) { renderResearch(data.research, null, out.querySelector('.cc-steps')); });
+          })
           .catch(fail);
       },
 
       messages: function () {
-        var c = selected();
         extra.innerHTML = '';
-        job('generate-messages', { companyId: c.id, roleName: roleInput.value },
-            'Writing outreach for ' + c.name)
-          .then(function (data) {
-            var m = data.messages;
-            var over = m.connectionNoteOverLimit;
-            var html = '';
-            html += '<h4>Connection request</h4>' +
-              card('', m.connectionNote || '',
-                '<span' + (over ? ' style="color:#ff6b6b"' : '') + '>' +
-                m.connectionNoteChars + ' / 300 chars' + (over ? ' — TOO LONG' : '') + '</span>');
-            html += '<h4>First DM</h4>' + card('', m.firstDM || '');
-            html += '<h4>Peer / referral DM</h4>' + card('', m.peerDM || '');
-            html += '<h4>Follow-up (day 4)</h4>' + card('', m.followUp || '');
-            if (m.rationale) html += '<p class="cc-muted">Angle: ' + esc(m.rationale) + '</p>';
-            out.innerHTML = html;
+        ensureSelectedCompany()
+          .then(function (c) {
+            return job('generate-messages', { companyId: c.id, roleName: roleInput.value },
+                'Writing outreach for ' + c.name)
+              .then(function (data) {
+                var m = data.messages;
+                var over = m.connectionNoteOverLimit;
+                var html = '';
+                html += '<h4>Connection request</h4>' +
+                  card('', m.connectionNote || '',
+                    '<span' + (over ? ' style="color:#ff6b6b"' : '') + '>' +
+                    m.connectionNoteChars + ' / 300 chars' + (over ? ' — TOO LONG' : '') + '</span>');
+                html += '<h4>First DM</h4>' + card('', m.firstDM || '');
+                html += '<h4>Peer / referral DM</h4>' + card('', m.peerDM || '');
+                html += '<h4>Follow-up (day 4)</h4>' + card('', m.followUp || '');
+                if (m.rationale) html += '<p class="cc-muted">Angle: ' + esc(m.rationale) + '</p>';
+                out.innerHTML = html;
+              });
           })
           .catch(fail);
       },
 
       callprep: function () {
-        var c = selected();
         extra.innerHTML = '';
-        job('call-prep', { companyId: c.id }, 'Preparing call script for ' + c.name)
-          .then(function (data) {
-            var p = data.callPrep;
-            var html = '<h4>Opening</h4>' + card('', p.opening || '');
-            html += '<h4>Questions — listen 80%, talk 20%</h4>';
-            (p.questions || []).forEach(function (q, i) {
-              html += card((i + 1) + '. ' + (q.question || ''),
-                'Why: ' + (q.why || '') + '\nListen for: ' + (q.listenFor || ''));
-            });
-            html += '<h4>Closing — earns the WIN doc</h4>' + card('', p.closing || '');
-            if (p.gapAnswer) html += '<h4>If the gap comes up</h4>' + card('', p.gapAnswer);
-            if ((p.notesToCapture || []).length) {
-              html += '<h4>Capture immediately after</h4>' +
-                card('', (p.notesToCapture || []).map(function (n) { return '• ' + n; }).join('\n'));
-            }
-            out.innerHTML = html;
+        ensureSelectedCompany()
+          .then(function (c) {
+            return job('call-prep', { companyId: c.id }, 'Preparing call script for ' + c.name)
+              .then(function (data) {
+                var p = data.callPrep;
+                var html = '<h4>Opening</h4>' + card('', p.opening || '');
+                html += '<h4>Questions — listen 80%, talk 20%</h4>';
+                (p.questions || []).forEach(function (q, i) {
+                  html += card((i + 1) + '. ' + (q.question || ''),
+                    'Why: ' + (q.why || '') + '\nListen for: ' + (q.listenFor || ''));
+                });
+                html += '<h4>Closing — earns the WIN doc</h4>' + card('', p.closing || '');
+                if (p.gapAnswer) html += '<h4>If the gap comes up</h4>' + card('', p.gapAnswer);
+                if ((p.notesToCapture || []).length) {
+                  html += '<h4>Capture immediately after</h4>' +
+                    card('', (p.notesToCapture || []).map(function (n) { return '• ' + n; }).join('\n'));
+                }
+                out.innerHTML = html;
+              });
           })
           .catch(fail);
       },
 
       windoc: function () {
-        var c = selected();
         extra.innerHTML =
           '<div class="cc-ok">The WIN doc is built from research — you do not need a call first. ' +
           'Before a conversation it is what makes you interesting enough to get one. ' +
@@ -872,33 +988,37 @@
         extra.querySelector('.cc-go').addEventListener('click', function () {
           var problems = extra.querySelector('.cc-problems').value
             .split('\n').map(function (s) { return s.trim(); }).filter(Boolean);
-          job('generate-win-doc', {
-            companyId: c.id,
-            roleTitle: roleInput.value,
-            contactName: extra.querySelector('.cc-contact').value,
-            problems: problems,
-          }, (problems.length ? 'Building WIN doc from your call notes for ' : 'Researching and building the WIN doc for ') + c.name)
-            .then(function (data) {
-              var w = data.winDoc || {};
-              var winDocId = data.id;
-              var slides = (w.slides && w.slides.length) ? w.slides
-                : (w.sections && w.sections.slides) || [];
+          var contactVal = extra.querySelector('.cc-contact').value;
+          ensureSelectedCompany()
+            .then(function (c) {
+              return job('generate-win-doc', {
+                companyId: c.id,
+                roleTitle: roleInput.value,
+                contactName: contactVal,
+                problems: problems,
+              }, (problems.length ? 'Building WIN doc from your call notes for ' : 'Researching and building the WIN doc for ') + c.name)
+                .then(function (data) {
+                  var w = data.winDoc || {};
+                  var winDocId = data.id;
+                  var slides = (w.slides && w.slides.length) ? w.slides
+                    : (w.sections && w.sections.slides) || [];
 
-              // Brand fetch is fire-and-forget: the slide viewer renders with a
-              // safe default palette immediately and swaps to the company's own
-              // colors once /brand returns. This keeps the deck usable even if
-              // Brandfetch is down or the domain resolution missed.
-              api('/companies/' + encodeURIComponent(c.id) + '/brand')
-                .then(function (b) { applyBrand(b.brand); })
-                .catch(function () {});
+                  // Brand fetch is fire-and-forget: the slide viewer renders with a
+                  // safe default palette immediately and swaps to the company's own
+                  // colors once /brand returns. This keeps the deck usable even if
+                  // Brandfetch is down or the domain resolution missed.
+                  api('/companies/' + encodeURIComponent(c.id) + '/brand')
+                    .then(function (b) { applyBrand(b.brand); })
+                    .catch(function () {});
 
-              renderWinDeck({
-                container: out,
-                winDoc: w,
-                slides: slides,
-                companyName: c.name,
-                winDocId: winDocId,
-              });
+                  renderWinDeck({
+                    container: out,
+                    winDoc: w,
+                    slides: slides,
+                    companyName: c.name,
+                    winDocId: winDocId,
+                  });
+                });
             })
             .catch(fail);
         });
@@ -906,7 +1026,6 @@
       },
 
       resume: function () {
-        var c = selected();
         extra.innerHTML =
           '<div class="cc-jd-note cc-muted" style="margin-bottom:6px;min-height:14px"></div>' +
           '<textarea class="cc-jd" placeholder="Paste the full job description…"></textarea>' +
@@ -926,46 +1045,40 @@
           clearBtn.style.display = '';
         }
 
-        // Two-tier auto-fill:
-        //   1. Whatever JD text this company already has on file (tracker JD,
-        //      last tailored resume, discovered job) — instant, no network.
-        //   2. If nothing is on file, ask the server to fetch the matching
-        //      role live from the company's public ATS board. This is why
-        //      Tailor Resume feels like it "already knows" the JD for a
-        //      company you have not tailored against before.
-        noteEl.textContent = 'Looking for a JD on file…';
-        api('/companies/' + encodeURIComponent(c.id) + '/autofill')
-          .then(function (d) {
-            var jdText = d && d.suggested && d.suggested.jdText;
-            var where  = d && d.provenance && d.provenance.jdText;
-            if (jdText && !jdEl.value) {
-              acceptJd(jdText, where);
-              return;
-            }
-            // Nothing cached — try the live ATS lookup, scoped to the role
-            // typed in the drawer so a company with many open roles resolves
-            // to the right one.
-            noteEl.textContent = 'No JD on file — checking ' + c.name + '\'s careers page…';
-            var role = (roleInput.value || '').trim();
-            return api('/companies/' + encodeURIComponent(c.id) +
-                       '/find-jd?role=' + encodeURIComponent(role))
-              .then(function (r) {
-                if (jdEl.value) return; // user already started typing
-                var jd = r && r.jd;
-                if (!jd) return;
-                var body = (jd.title ? jd.title + '\n' : '') +
-                           (jd.location ? jd.location + '\n\n' : '\n') +
-                           (jd.description || '');
-                acceptJd(body, 'Live from ' + (jd.source || 'careers page') +
-                               (jd.url ? ' — ' + jd.url : ''));
-              })
-              .catch(function () {
-                noteEl.textContent = 'Could not find a JD automatically — paste it below.';
-              });
-          })
-          .catch(function () {
-            noteEl.textContent = '';
-          });
+        var c;
+        try { c = selected(); } catch (e) { c = null; }
+        if (c && c.id && !c.isCustom) {
+          noteEl.textContent = 'Looking for a JD on file…';
+          api('/companies/' + encodeURIComponent(c.id) + '/autofill')
+            .then(function (d) {
+              var jdText = d && d.suggested && d.suggested.jdText;
+              var where  = d && d.provenance && d.provenance.jdText;
+              if (jdText && !jdEl.value) {
+                acceptJd(jdText, where);
+                return;
+              }
+              noteEl.textContent = 'No JD on file — checking ' + c.name + '\'s careers page…';
+              var role = (roleInput.value || '').trim();
+              return api('/companies/' + encodeURIComponent(c.id) +
+                         '/find-jd?role=' + encodeURIComponent(role))
+                .then(function (r) {
+                  if (jdEl.value) return; // user already started typing
+                  var jd = r && r.jd;
+                  if (!jd) return;
+                  var body = (jd.title ? jd.title + '\n' : '') +
+                             (jd.location ? jd.location + '\n\n' : '\n') +
+                             (jd.description || '');
+                  acceptJd(body, 'Live from ' + (jd.source || 'careers page') +
+                                 (jd.url ? ' — ' + jd.url : ''));
+                })
+                .catch(function () {
+                  noteEl.textContent = 'Could not find a JD automatically — paste it below.';
+                });
+            })
+            .catch(function () {
+              noteEl.textContent = '';
+            });
+        }
 
         clearBtn.addEventListener('click', function () {
           jdEl.value = '';
@@ -980,46 +1093,49 @@
             out.innerHTML = '<div class="cc-bad">Paste the job description first.</div>';
             return;
           }
-          job('tailor-resume', { companyId: c.id, jobTitle: roleInput.value, jobDescription: jd },
-              'Tailoring resume for ' + c.name + ' (includes a fact-check pass)')
-            .then(function (data) {
-              var r = data.resume;
-              var v = r.verification || {};
-              var html = '';
+          ensureSelectedCompany()
+            .then(function (c) {
+              return job('tailor-resume', { companyId: c.id, jobTitle: roleInput.value, jobDescription: jd },
+                  'Tailoring resume for ' + c.name + ' (includes a fact-check pass)')
+                .then(function (data) {
+                  var r = data.resume;
+                  var v = r.verification || {};
+                  var html = '';
 
-              if (v.safeToSend === false) {
-                html += '<div class="cc-bad"><strong>Do not send as-is — ' + v.blockingCount +
-                  ' claim(s) the fact-checker could not verify against your real history.</strong></div>';
-              } else if (v.clean) {
-                html += '<div class="cc-ok">Fact-check passed — every claim traces back to your real history.</div>';
-              }
+                  if (v.safeToSend === false) {
+                    html += '<div class="cc-bad"><strong>Do not send as-is — ' + v.blockingCount +
+                      ' claim(s) the fact-checker could not verify against your real history.</strong></div>';
+                  } else if (v.clean) {
+                    html += '<div class="cc-ok">Fact-check passed — every claim traces back to your real history.</div>';
+                  }
 
-              (v.issues || []).forEach(function (i) {
-                html += '<div class="' + (i.severity === 'minor' ? 'cc-warn' : 'cc-bad') + '">' +
-                  '<strong>' + esc(i.severity) + '</strong> — ' + esc(i.claim) + '<br>' +
-                  esc(i.problem) + '<br><em>Fix: ' + esc(i.correction) + '</em></div>';
-              });
+                  (v.issues || []).forEach(function (i) {
+                    html += '<div class="' + (i.severity === 'minor' ? 'cc-warn' : 'cc-bad') + '">' +
+                      '<strong>' + esc(i.severity) + '</strong> — ' + esc(i.claim) + '<br>' +
+                      esc(i.problem) + '<br><em>Fix: ' + esc(i.correction) + '</em></div>';
+                  });
 
-              html += '<h4>Match: ' + (r.matchScore || 0) + '/100</h4>';
-              if (r.dsaSignal && r.dsaSignal.likely) {
-                html += '<div class="cc-warn"><strong>Possible DSA/LeetCode process.</strong><br>' +
-                  esc(r.dsaSignal.evidence) + '</div>';
-              }
-              html += '<h4>Matched keywords</h4><p class="cc-muted">' +
-                esc((r.keywordsMatched || []).join(' · ')) + '</p>';
-              if ((r.keywordsMissing || []).length) {
-                html += '<h4>Gaps — be ready for these</h4>';
-                (r.keywordsMissing || []).forEach(function (k) {
-                  html += card(typeof k === 'string' ? k : k.keyword,
-                    typeof k === 'string' ? '' : ('Closest you have: ' + (k.closestExperience || '—')));
+                  html += '<h4>Match: ' + (r.matchScore || 0) + '/100</h4>';
+                  if (r.dsaSignal && r.dsaSignal.likely) {
+                    html += '<div class="cc-warn"><strong>Possible DSA/LeetCode process.</strong><br>' +
+                      esc(r.dsaSignal.evidence) + '</div>';
+                  }
+                  html += '<h4>Matched keywords</h4><p class="cc-muted">' +
+                    esc((r.keywordsMatched || []).join(' · ')) + '</p>';
+                  if ((r.keywordsMissing || []).length) {
+                    html += '<h4>Gaps — be ready for these</h4>';
+                    (r.keywordsMissing || []).forEach(function (k) {
+                      html += card(typeof k === 'string' ? k : k.keyword,
+                        typeof k === 'string' ? '' : ('Closest you have: ' + (k.closestExperience || '—')));
+                    });
+                  }
+                  if ((r.talkingPoints || []).length) {
+                    html += '<h4>Lead with these</h4>' +
+                      card('', (r.talkingPoints || []).map(function (t) { return '• ' + t; }).join('\n'));
+                  }
+                  html += '<h4>Tailored resume</h4>' + card('', r.tailoredResumeText || '');
+                  out.innerHTML = html;
                 });
-              }
-              if ((r.talkingPoints || []).length) {
-                html += '<h4>Lead with these</h4>' +
-                  card('', (r.talkingPoints || []).map(function (t) { return '• ' + t; }).join('\n'));
-              }
-              html += '<h4>Tailored resume</h4>' + card('', r.tailoredResumeText || '');
-              out.innerHTML = html;
             })
             .catch(fail);
         });
@@ -1027,16 +1143,18 @@
       },
 
       email: function () {
-        var c = selected();
         extra.innerHTML = '';
-        job('cold-email', { companyId: c.id, roleName: roleInput.value },
-            'Writing cold email for ' + c.name)
-          .then(function (data) {
-            var e = data.email;
-            out.innerHTML =
-              '<h4>Subject</h4>' + card('', e.subject || '') +
-              '<h4>Body</h4>' + card('', e.body || '') +
-              '<h4>Follow-up</h4>' + card('', (e.followUpSubject || '') + '\n\n' + (e.followUpBody || ''));
+        ensureSelectedCompany()
+          .then(function (c) {
+            return job('cold-email', { companyId: c.id, roleName: roleInput.value },
+                'Writing cold email for ' + c.name)
+              .then(function (data) {
+                var e = data.email;
+                out.innerHTML =
+                  '<h4>Subject</h4>' + card('', e.subject || '') +
+                  '<h4>Body</h4>' + card('', e.body || '') +
+                  '<h4>Follow-up</h4>' + card('', (e.followUpSubject || '') + '\n\n' + (e.followUpBody || ''));
+              });
           })
           .catch(fail);
       },
@@ -1054,76 +1172,95 @@
      * the system knows about it — so every action below runs in that context
      * instead of making you re-pick it.
      */
-    openCopilot = function (companyId, roleTitle) {
+    openCopilot = function (companyId, roleTitle, initialAction) {
       drawer.classList.add('cc-open');
       extra.innerHTML = '';
 
       var apply = function () {
-        if (companyId) select.value = companyId;
+        if (companyId) {
+          select.value = companyId;
+          if (select.value === companyId) {
+            otherRow.style.display = 'none';
+          }
+        }
         if (roleTitle) roleInput.value = roleTitle;
+        if (initialAction) {
+          drawer.querySelectorAll('.cc-actions [data-act]').forEach(function (b) {
+            b.classList.toggle('cc-primary', b.getAttribute('data-act') === initialAction);
+          });
+          if (ACTIONS[initialAction]) {
+            ACTIONS[initialAction]();
+            return;
+          }
+        }
+        loadOverview();
       };
+
+      var loadOverview = function () {
+        if (!companyId) return;
+        out.innerHTML = '<p class="cc-muted">Loading what we know about this company…</p>';
+
+        api('/companies/' + encodeURIComponent(companyId) + '/autofill')
+          .then(function (d) {
+            var f = d.facts || {};
+            if (!roleInput.value && d.suggested && d.suggested.jd) {
+              // nothing to fill from a URL, but keep the JD handy below
+            }
+
+            var rows = [
+              ['Research', f.researched
+                ? '<a href="#" class="cc-view-research" style="color:#5b86ff">done' +
+                  (f.researchedAt ? ' · ' + new Date(f.researchedAt).toLocaleDateString() : '') + ' — view</a>'
+                : 'not run yet'],
+              ['Connections', String(f.connections || 0)],
+              ['Messages', String(f.messages || 0)],
+              ['WIN docs', String(f.winDocs || 0)],
+              ['Tailored resumes', String(f.tailoredResumes || 0)],
+              ['LinkedIn ID', f.linkedInId ? f.linkedInId : 'not set'],
+            ];
+
+            var html = '<div class="cc-card"><strong>' + esc(d.company.name) + '</strong>' +
+              '<div class="cc-meta" style="margin-top:7px">IN CONTEXT FOR EVERY ACTION BELOW</div>' +
+              rows.map(function (r) {
+                // The research row carries a link, so it is not escaped.
+                var isLink = r[0] === 'Research' && /^</.test(r[1]);
+                return '<div style="display:flex;justify-content:space-between;gap:12px">' +
+                  '<span class="cc-muted">' + esc(r[0]) + '</span><span>' +
+                  (isLink ? r[1] : esc(r[1])) + '</span></div>';
+              }).join('') + '</div>';
+
+            if (d.suggested && d.suggested.notes) {
+              html += '<div class="cc-ok"><strong>Next step:</strong> ' + esc(d.suggested.notes) + '</div>';
+            }
+            if (d.suggested && d.suggested.jd) {
+              html += '<p class="cc-muted">Role / JD: <a href="' + esc(d.suggested.jd) +
+                '" target="_blank" rel="noopener" style="color:#5b86ff">' + esc(d.suggested.jd) + '</a></p>';
+            }
+            if ((f.interviews || []).length) {
+              html += '<p class="cc-muted">Interviews: ' + f.interviews.map(function (i) {
+                return '<a href="/interview.html?session=' + esc(i.id) + '" style="color:#5b86ff">' +
+                  esc(i.round) + (i.readiness ? ' (' + esc(i.readiness) + ')' : '') + '</a>';
+              }).join(' · ') + '</p>';
+            }
+
+            html += '<p class="cc-muted">Pick an action above — it will use this company.</p>';
+            out.innerHTML = html;
+
+            var link = out.querySelector('.cc-view-research');
+            if (link) {
+              link.addEventListener('click', function (e) {
+                e.preventDefault();
+                if (ACTIONS['view-research']) ACTIONS['view-research']();
+              });
+            }
+          })
+          .catch(function (err) {
+            out.innerHTML = '<div class="cc-bad">Could not load company context: ' + esc(err.message) + '</div>';
+          });
+      };
+
       // The company list may still be loading on first open.
       if (select.options.length) apply(); else setTimeout(apply, 600);
-
-      out.innerHTML = '<p class="cc-muted">Loading what we know about this company…</p>';
-
-      api('/companies/' + encodeURIComponent(companyId) + '/autofill')
-        .then(function (d) {
-          var f = d.facts || {};
-          if (!roleInput.value && d.suggested && d.suggested.jd) {
-            // nothing to fill from a URL, but keep the JD handy below
-          }
-
-          var rows = [
-            ['Research', f.researched
-              ? '<a href="#" class="cc-view-research" style="color:#5b86ff">done' +
-                (f.researchedAt ? ' · ' + new Date(f.researchedAt).toLocaleDateString() : '') + ' — view</a>'
-              : 'not run yet'],
-            ['Connections', String(f.connections || 0)],
-            ['Messages', String(f.messages || 0)],
-            ['WIN docs', String(f.winDocs || 0)],
-            ['Tailored resumes', String(f.tailoredResumes || 0)],
-            ['LinkedIn ID', f.linkedInId ? f.linkedInId : 'not set'],
-          ];
-
-          var html = '<div class="cc-card"><strong>' + esc(d.company.name) + '</strong>' +
-            '<div class="cc-meta" style="margin-top:7px">IN CONTEXT FOR EVERY ACTION BELOW</div>' +
-            rows.map(function (r) {
-              // The research row carries a link, so it is not escaped.
-              var isLink = r[0] === 'Research' && /^</.test(r[1]);
-              return '<div style="display:flex;justify-content:space-between;gap:12px">' +
-                '<span class="cc-muted">' + esc(r[0]) + '</span><span>' +
-                (isLink ? r[1] : esc(r[1])) + '</span></div>';
-            }).join('') + '</div>';
-
-          if (d.suggested && d.suggested.notes) {
-            html += '<div class="cc-ok"><strong>Next step:</strong> ' + esc(d.suggested.notes) + '</div>';
-          }
-          if (d.suggested && d.suggested.jd) {
-            html += '<p class="cc-muted">Role / JD: <a href="' + esc(d.suggested.jd) +
-              '" target="_blank" rel="noopener" style="color:#5b86ff">' + esc(d.suggested.jd) + '</a></p>';
-          }
-          if ((f.interviews || []).length) {
-            html += '<p class="cc-muted">Interviews: ' + f.interviews.map(function (i) {
-              return '<a href="/interview.html?session=' + esc(i.id) + '" style="color:#5b86ff">' +
-                esc(i.round) + (i.readiness ? ' (' + esc(i.readiness) + ')' : '') + '</a>';
-            }).join(' · ') + '</p>';
-          }
-
-          html += '<p class="cc-muted">Pick an action above — it will use this company.</p>';
-          out.innerHTML = html;
-
-          var link = out.querySelector('.cc-view-research');
-          if (link) {
-            link.addEventListener('click', function (e) {
-              e.preventDefault();
-              if (ACTIONS['view-research']) ACTIONS['view-research']();
-            });
-          }
-        })
-        .catch(function (err) {
-          out.innerHTML = '<div class="cc-bad">Could not load company context: ' + esc(err.message) + '</div>';
-        });
     };
   }
 
@@ -1141,7 +1278,8 @@
     window.__CC__ = {
       api: api, runJob: runJob, esc: esc,
       pushState: pushState, scheduleSync: scheduleSync,
-      openCopilot: function (id, role) { if (openCopilot) openCopilot(id, role); },
+      openCopilot: function (id, role, act) { if (openCopilot) openCopilot(id, role, act); },
+      refreshCompanies: function (id) { if (refreshCompaniesFn) return refreshCompaniesFn(id); },
       // Slide-viewer primitives so the outreach page's Step 4 renders WIN docs
       // the same way as the AI Copilot drawer — one implementation, both UIs.
       renderWinDeck: renderWinDeck,

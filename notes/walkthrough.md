@@ -87,3 +87,38 @@ Fixed severe formatting issues with downloaded PDFs from the Resume Studio (`/ou
      * Added manual Density / Fit dropdown (`Auto-Fit`, `Standard`, `Spacious`, `Compact`) in the live preview toolbar.
      * Live verified with Ferguson tailored resume: rendered height is **1049px** out of **1062px** (**98.8% page fill**), single page, zero void, crisp legible fonts. Overwrote `/Users/Data/Useful Files/Resumes/Tailored-Resumes/Resume_Ferguson_Principal_Software_Engineer_-_Java_Backend.pdf` directly.
 
+
+---
+
+## 6. Pipeline Direct Actions, AI Copilot "Other" Input & Unified Directory/Pipeline Sync
+
+### 1. AI Copilot — Custom Company Option ("Other")
+- Added `✏️ Other / Type Company Name…` to the AI Copilot company dropdown.
+- Selecting "Other" displays an inline input for typing any custom company applied to from external job boards or sources.
+- Clicking any AI action (`1. Research`, `2. Outreach messages`, `3. Call prep`, `4. WIN doc`, `Tailor resume`, `Cold email`) auto-creates the company record on the backend (`POST /api/companies`), adds it to the user's directory (`custom`) and pipeline (`tracked`), and triggers the requested generation seamlessly.
+
+### 2. Direct Action Buttons in Pipeline & Companies
+- **Kanban Cards (`renderKanban`)**: Added `.kcard-actions` quick-action toolbar to every Kanban card:
+  - `🏆 WIN`: Launches Copilot directly in WIN doc generation mode for that company.
+  - `🔍 Research`: Launches Copilot directly into live web research and company brief.
+  - `✨ Copilot`: Opens Copilot overview with company context.
+  - Interactive click handling includes `event.stopPropagation()` so clicking actions does not trigger drag-and-drop or modal click.
+- **Pipeline Table (`renderTable`)**:
+  - WIN Doc column enhanced with a one-click `🏆 WIN Doc` launch button.
+  - Actions column enhanced with direct `✨ Copilot` button alongside `Update`.
+- **Track Modal (`trackModal`)**:
+  - Embedded an AI Copilot Quick Actions toolbar right below the header: buttons for `🏆 Create WIN Doc`, `🔍 Company Research`, `✉️ Outreach`, `📞 Call Prep`, and `📄 Tailor Resume`.
+- **Companies Tab Cards (`renderCards`)**:
+  - Added direct `🏆 WIN Doc` and `🔍 Research` action buttons next to `Network` and `Track`.
+
+### 3. Unified "Add Company" (Directory + Pipeline)
+- Clarified the shared modal title to `+ Add Company` and subtitle to: `Adds to both your Target Companies Directory & Application Pipeline — no duplicate entry needed.`
+- Fixed custom company visibility bug:
+  - Defaulted `window.__CC_ONLY_OPEN_JOBS__` to `false` (previously defaulted to `true`, which hid custom-added companies without scraped job boards).
+  - Protected custom and tracked companies in `renderCards()`: `c.custom || tracked[c.id]` is never hidden by open jobs filter.
+- Implemented `window.addCompanyFromExternal(co, stage)` to ensure immediate two-way synchronization between Copilot, Companies directory, and Application Pipeline without duplicate entry.
+
+### 4. Strict Database Backup & Zero Accidental Loss Rule
+- Established strict policy in `AGENTS.md` and `.agents/rules/data-safety.md`:
+  - Mandatory verified backup (`pg_dump`) before executing any script, migration, manual query, or operation that modifies, truncates, drops, or deletes database records or schema.
+  - Zero unsolicited deletions or truncates.

@@ -155,27 +155,29 @@ export default async function companyRoutes(app) {
     if (!b.name?.trim()) return reply.code(400).send({ error: 'name is required' });
 
     const id = b.id || `c_${Date.now()}`;
+    const isFav = !!(b.favourite || b.fav);
     const row = await one(
-      `INSERT INTO companies (id, name, region, roles, pay, description, apply_url, dsa, custom)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, true)
+      `INSERT INTO companies (id, name, region, roles, pay, description, apply_url, dsa, custom, favourite)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, true, $9)
        ON CONFLICT (id) DO UPDATE SET
          name = EXCLUDED.name, region = EXCLUDED.region, roles = EXCLUDED.roles,
          pay = EXCLUDED.pay, description = EXCLUDED.description,
-         apply_url = EXCLUDED.apply_url, dsa = EXCLUDED.dsa, updated_at = now()
+         apply_url = EXCLUDED.apply_url, dsa = EXCLUDED.dsa,
+         favourite = EXCLUDED.favourite, updated_at = now()
        RETURNING ${ROW.replaceAll('c.', '')}`,
       [
         id, b.name.trim(), b.region || 'global',
         Array.isArray(b.roles) && b.roles.length ? b.roles : ['fs'],
         b.pay || 'Market rate', b.desc || b.description || 'Custom company.',
-        b.apply || b.applyUrl || '', !!b.dsa,
+        b.apply || b.applyUrl || '', !!b.dsa, isFav,
       ],
     );
 
     // Adding a company from the UI always means you intend to work it.
     await query(
-      `INSERT INTO tracked_companies (company_id, stage) VALUES ($1, 'new')
-       ON CONFLICT (company_id) DO NOTHING`,
-      [id],
+      `INSERT INTO tracked_companies (company_id, stage) VALUES ($1, $2)
+       ON CONFLICT (company_id) DO UPDATE SET stage = COALESCE($2, tracked_companies.stage), updated_at = now()`,
+      [id, b.stage || 'new'],
     );
 
     return reply.code(201).send({ company: row });
