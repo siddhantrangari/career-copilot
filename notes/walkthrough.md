@@ -122,3 +122,38 @@ Fixed severe formatting issues with downloaded PDFs from the Resume Studio (`/ou
 - Established strict policy in `AGENTS.md` and `.agents/rules/data-safety.md`:
   - Mandatory verified backup (`pg_dump`) before executing any script, migration, manual query, or operation that modifies, truncates, drops, or deletes database records or schema.
   - Zero unsolicited deletions or truncates.
+
+---
+
+## 7. App-Specific Modals, Tailor Resume Redirection & JD Autofill Cleanup
+
+### 1. App-Specific Confirmation & Alert Modals (`appConfirm` & `appAlert`)
+- Replaced raw browser `confirm(...)` and `alert(...)` popups when deleting cards from Companies tab or Pipeline tab.
+- Built `.cc-dialog-overlay` and `.cc-dialog-card` in `web/bridge.css` & `web/bridge.js` matching Career Copilot's dark glassmorphism design system:
+  - Danger (soft red glow), warning (amber), and info (blue) icon headers.
+  - Keyboard accessible: `Enter` confirms, `Escape` or backdrop click cancels.
+  - Smooth scale and opacity transitions.
+- Integrated into:
+  - Companies tab card deletion (`.cc-co-delete` in `web/prototype-actions.js`).
+  - Pipeline Track modal removal (`delTrack()` in `artifacts/job_search_os_main.html`).
+  - Kanban card quick-remove hover button (`removeCompanyFromPipeline()` in `artifacts/job_search_os_main.html`).
+  - Outreach tab saved resume deletion (`deleteSavedResume()` in `artifacts/job_search_os_outreach_resume.html`).
+
+### 2. Tailor Resume Redirection to Outreach & Resume Studio
+- Replaced cramped in-drawer "Tailor resume" sub-view inside the 360px AI Copilot drawer with instant redirection to the full **Resume Studio** in the Outreach tab (`/outreach.html?tab=resume`).
+- Clicking `Tailor resume` from the AI Copilot drawer or `📄 Tailor Resume` from a pipeline card / track modal:
+  - Packages company ID, company name, target role title, and cleaned JD text.
+  - Passes data via `sessionStorage` (`cc_tailor_prefill`) and URL search params (`?tab=resume&company=...&role=...&companyId=...`).
+  - Switches directly to the `Resume Studio` tab.
+  - Autofills `#tailorCompany`, `#tailorRole`, `#tailorJD`, updates character count, and smoothly scrolls the form into view.
+
+### 3. JD HTML Tag & Entity Stripping (`cleanJdText`)
+- Resolved issue where Greenhouse and ATS scraped job descriptions contained escaped HTML tags (`&lt;div class=&quot;content-intro&quot;&gt;...`).
+- Added multi-pass HTML entity decoding (`&quot;`, `&#39;`, `&lt;`, `&gt;`, `&amp;`, `&nbsp;`, numeric entities) and structural tag stripping (`<p>`, `<div>`, `<br>`, `<li>` converted to readable newlines and bullets).
+- Applied in:
+  - `server/src/services/autofill.js`
+  - `server/src/services/discovery.js`
+  - `web/bridge.js`
+  - `artifacts/job_search_os_outreach_resume.html`
+- Updated candidate selection in `autofill.js` to support user-entered JD notes (>= 40 chars) alongside discovered jobs.
+

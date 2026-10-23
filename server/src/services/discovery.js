@@ -1,4 +1,5 @@
 import { many, one, query } from '../db/pool.js';
+import { cleanJdText } from './autofill.js';
 
 /**
  * Job discovery agent.
@@ -27,7 +28,7 @@ const BOARDS = {
       url: j.absolute_url,
       location: j.location?.name || '',
       postedAt: j.updated_at || j.first_published || null,
-      description: (j.content || '').replace(/<[^>]+>/g, ' ').slice(0, 4000),
+      description: cleanJdText(j.content || '').slice(0, 4000),
     })),
   },
   lever: {
@@ -38,7 +39,7 @@ const BOARDS = {
       url: j.hostedUrl,
       location: j.categories?.location || '',
       postedAt: j.createdAt ? new Date(j.createdAt).toISOString() : null,
-      description: (j.descriptionPlain || '').slice(0, 4000),
+      description: cleanJdText(j.descriptionPlain || j.description || '').slice(0, 4000),
     })),
   },
   ashby: {
@@ -49,7 +50,7 @@ const BOARDS = {
       url: j.jobUrl || j.applyUrl,
       location: j.location || '',
       postedAt: j.publishedAt || null,
-      description: (j.descriptionPlain || '').slice(0, 4000),
+      description: cleanJdText(j.descriptionPlain || j.descriptionHtml || '').slice(0, 4000),
     })),
   },
 
@@ -65,7 +66,7 @@ const BOARDS = {
       url: j.url || j.application_url,
       location: [j.city, j.country].filter(Boolean).join(', '),
       postedAt: j.published_on || null,
-      description: (j.description || '').replace(/<[^>]+>/g, ' ').slice(0, 4000),
+      description: cleanJdText(j.description || '').slice(0, 4000),
     })),
   },
   recruitee: {
@@ -76,7 +77,7 @@ const BOARDS = {
       url: j.careers_url || j.careers_apply_url,
       location: [j.city, j.country].filter(Boolean).join(', '),
       postedAt: j.published_at || null,
-      description: (j.description || '').replace(/<[^>]+>/g, ' ').slice(0, 4000),
+      description: cleanJdText(j.description || '').slice(0, 4000),
     })),
   },
   smartrecruiters: {

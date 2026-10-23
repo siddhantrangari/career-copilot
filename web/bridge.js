@@ -261,6 +261,229 @@
     );
   }
 
+  // ── Universal App Modal System (appConfirm & appAlert) ────────────────
+  function showAppDialog(opts) {
+    return new Promise(function (resolve) {
+      opts = typeof opts === 'string' ? { message: opts } : (opts || {});
+      var isAlert = opts.isAlert === true;
+      var type = opts.type || (isAlert ? 'info' : 'danger');
+      var title = opts.title || (isAlert ? 'Notice' : 'Confirmation');
+      var message = opts.message || '';
+      var confirmText = opts.confirmText || (isAlert ? 'OK' : (type === 'danger' ? 'Delete' : 'Confirm'));
+      var cancelText = opts.cancelText || 'Cancel';
+
+      var iconSvg = type === 'danger' ? '⚠️' : (type === 'warning' ? '⚡' : 'ℹ️');
+
+      var overlay = document.createElement('div');
+      overlay.className = 'cc-dialog-overlay';
+      overlay.innerHTML =
+        '<div class="cc-dialog-card" role="dialog" aria-modal="true">' +
+          '<div class="cc-dialog-header">' +
+            '<div class="cc-dialog-icon-wrap ' + esc(type) + '">' + iconSvg + '</div>' +
+            '<div style="flex:1">' +
+              '<h3 class="cc-dialog-title">' + esc(title) + '</h3>' +
+              '<div class="cc-dialog-desc">' + esc(message) + '</div>' +
+            '</div>' +
+          '</div>' +
+          '<div class="cc-dialog-actions">' +
+            (isAlert ? '' : '<button type="button" class="cc-dialog-btn cancel">' + esc(cancelText) + '</button>') +
+            '<button type="button" class="cc-dialog-btn ' + (type === 'danger' ? 'danger' : 'primary') + '">' + esc(confirmText) + '</button>' +
+          '</div>' +
+        '</div>';
+
+      document.body.appendChild(overlay);
+
+      // Trigger animation frame
+      overlay.offsetWidth;
+      overlay.classList.add('cc-dialog-visible');
+
+      var cancelBtn = overlay.querySelector('.cc-dialog-btn.cancel');
+      var confirmBtn = overlay.querySelector('.cc-dialog-btn:not(.cancel)');
+
+      if (confirmBtn) confirmBtn.focus();
+
+      var closed = false;
+      function cleanup(result) {
+        if (closed) return;
+        closed = true;
+        document.removeEventListener('keydown', onKeyDown);
+        overlay.classList.remove('cc-dialog-visible');
+        setTimeout(function () {
+          if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
+        }, 200);
+        resolve(result);
+      }
+
+      function onKeyDown(e) {
+        if (e.key === 'Escape') {
+          e.preventDefault();
+          cleanup(false);
+        } else if (e.key === 'Enter') {
+          e.preventDefault();
+          cleanup(true);
+        }
+      }
+
+      document.addEventListener('keydown', onKeyDown);
+
+      if (cancelBtn) {
+        cancelBtn.addEventListener('click', function () { cleanup(false); });
+      }
+      if (confirmBtn) {
+        confirmBtn.addEventListener('click', function () { cleanup(true); });
+      }
+      overlay.addEventListener('click', function (e) {
+        if (e.target === overlay) cleanup(false);
+      });
+    });
+  }
+
+  window.appConfirm = function (opts) {
+    return showAppDialog(Object.assign({}, typeof opts === 'string' ? { message: opts } : opts, { isAlert: false }));
+  };
+  window.appAlert = function (opts) {
+    return showAppDialog(Object.assign({}, typeof opts === 'string' ? { message: opts } : opts, { isAlert: true }));
+  };
+
+  // ── JD Text Cleaner & Entity Decoder ────────────────────────────────
+  function cleanJdText(raw) {
+    if (!raw || typeof raw !== 'string') return '';
+    var text = raw;
+    for (var i = 0; i < 2; i++) {
+      if (!/&(?:[a-zA-Z]+|#\d+|#x[0-9a-fA-F]+);/.test(text)) break;
+      text = text
+        .replace(/&quot;/g, '"')
+        .replace(/&#39;/g, "'")
+        .replace(/&apos;/g, "'")
+        .replace(/&lt;/g, '<')
+        .replace(/&gt;/g, '>')
+        .replace(/&nbsp;/g, ' ')
+        .replace(/&amp;/g, '&')
+        .replace(/&#(\d+);/g, function (_, dec) { return String.fromCharCode(dec); })
+        .replace(/&#x([0-9a-fA-F]+);/g, function (_, hex) { return String.fromCharCode(parseInt(hex, 16)); });
+    }
+    text = text
+      .replace(/<\/(p|div|h[1-6]|li|tr|section|article)>/gi, '\n')
+      .replace(/<br\s*\/?>/gi, '\n')
+      .replace(/<li[^>]*>/gi, '• ')
+      .replace(/<[^>]+>/g, '')
+      .replace(/\r\n/g, '\n')
+      .replace(/\r/g, '\n');
+    return text
+      .split('\n')
+      .map(function (l) { return l.trim(); })
+      .join('\n')
+      .replace(/\n{3,}/g, '\n\n')
+      .trim();
+  }
+  window.cleanJdText = cleanJdText;
+
+  // ── Navigate to Tailor Resume Flow ──────────────────────────────────
+  function navigateToTailorResume(companyId, roleTitle, directJd) {
+    var companyName = '';
+    var co = null;
+    if (window.__CC_CATALOGUE__) {
+      co = window.__CC_CATALOGUE__.find(function (x) { return x.id === companyId; });
+    }
+    if (!co && typeof COS !== 'undefined' && Array.isArray(COS)) {
+      co = COS.find(function (x) { return x.id === companyId; });
+    }
+    companyName = (co && co.name) || companyId || '';
+
+    var role = roleTitle || (co && (co.roleTitle || (Array.isArray(co.roles) ? co.roles[0] : ''))) || '';
+    var jd = directJd || '';
+
+    try {
+      var tr = (typeof tracked !== 'undefined' && tracked && tracked[companyId]) || {};
+      if (!role && tr.roleTitle) role = tr.roleTitle;
+      if (!jd && (tr.jdText || tr.jd)) {
+        jd = tr.jdText || tr.jd;
+      }
+    } catch (e) {}
+
+    var cleanJd = cleanJdText(jd);
+
+    // If already on outreach page, just switch tab and prefill
+    if (window.location.pathname.indexOf('outreach') !== -1 && typeof window.showTab === 'function') {
+      window.showTab('resume');
+      var compInput = document.getElementById('tailorCompany');
+      var rInput = document.getElementById('tailorRole');
+      var jdArea = document.getElementById('tailorJD');
+      if (compInput && companyName) compInput.value = companyName;
+      if (rInput && role) rInput.value = role;
+      if (jdArea && cleanJd) {
+        jdArea.value = cleanJd;
+        if (typeof window.updateJdCount === 'function') window.updateJdCount();
+      } else if (jdArea && !jdArea.value && companyId) {
+        api('/companies/' + encodeURIComponent(companyId) + '/autofill')
+          .then(function (d) {
+            var fetchedJd = d && d.suggested && d.suggested.jdText;
+            if (fetchedJd && !jdArea.value) {
+              jdArea.value = cleanJdText(fetchedJd);
+              if (typeof window.updateJdCount === 'function') window.updateJdCount();
+            }
+          }).catch(function () {});
+      }
+      var card = document.getElementById('resumeTargetCard');
+      if (card) card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      var drawer = document.querySelector('.cc-drawer');
+      if (drawer) drawer.classList.remove('cc-open');
+      return;
+    }
+
+    var prefillData = {
+      companyId: companyId || '',
+      companyName: companyName || '',
+      role: role || '',
+      jdText: cleanJd || ''
+    };
+
+    try {
+      sessionStorage.setItem('cc_tailor_prefill', JSON.stringify(prefillData));
+    } catch (e) {}
+
+    var targetUrl = '/outreach.html?tab=resume' +
+      (companyName ? '&company=' + encodeURIComponent(companyName) : '') +
+      (role ? '&role=' + encodeURIComponent(role) : '') +
+      (companyId ? '&companyId=' + encodeURIComponent(companyId) : '');
+
+    // If no JD text yet but we have companyId, attempt a quick autofill fetch before redirecting
+    if (!cleanJd && companyId) {
+      var redirected = false;
+      var timer = setTimeout(function () {
+        if (!redirected) {
+          redirected = true;
+          window.location.href = targetUrl;
+        }
+      }, 350);
+
+      api('/companies/' + encodeURIComponent(companyId) + '/autofill')
+        .then(function (d) {
+          if (!redirected) {
+            clearTimeout(timer);
+            redirected = true;
+            var fetchedJd = d && d.suggested && d.suggested.jdText;
+            if (fetchedJd) {
+              prefillData.jdText = cleanJdText(fetchedJd);
+              try { sessionStorage.setItem('cc_tailor_prefill', JSON.stringify(prefillData)); } catch (e) {}
+            }
+            window.location.href = targetUrl;
+          }
+        })
+        .catch(function () {
+          if (!redirected) {
+            clearTimeout(timer);
+            redirected = true;
+            window.location.href = targetUrl;
+          }
+        });
+      return;
+    }
+
+    window.location.href = targetUrl;
+  }
+  window.navigateToTailorResume = navigateToTailorResume;
+
   // ── WIN doc slide viewer ────────────────────────────────────────────
   /**
    * Render a slide from the WIN doc's `slides[]` array. Each `kind` has its
@@ -1026,120 +1249,15 @@
       },
 
       resume: function () {
-        extra.innerHTML =
-          '<div class="cc-jd-note cc-muted" style="margin-bottom:6px;min-height:14px"></div>' +
-          '<textarea class="cc-jd" placeholder="Paste the full job description…"></textarea>' +
-          '<div class="cc-actions">' +
-          '<button class="cc-primary cc-go" type="button">Tailor resume</button>' +
-          '<button class="cc-jd-clear" type="button" style="display:none">Clear & paste fresh</button>' +
-          '</div>';
-
-        var jdEl = extra.querySelector('.cc-jd');
-        var noteEl = extra.querySelector('.cc-jd-note');
-        var clearBtn = extra.querySelector('.cc-jd-clear');
-
-        function acceptJd(text, where) {
-          jdEl.value = text;
-          noteEl.innerHTML = '✓ Auto-filled — ' + esc(where || 'from existing records') +
-            '. Edit or clear before tailoring if this is the wrong one.';
-          clearBtn.style.display = '';
-        }
-
+        extra.innerHTML = '';
         var c;
         try { c = selected(); } catch (e) { c = null; }
-        if (c && c.id && !c.isCustom) {
-          noteEl.textContent = 'Looking for a JD on file…';
-          api('/companies/' + encodeURIComponent(c.id) + '/autofill')
-            .then(function (d) {
-              var jdText = d && d.suggested && d.suggested.jdText;
-              var where  = d && d.provenance && d.provenance.jdText;
-              if (jdText && !jdEl.value) {
-                acceptJd(jdText, where);
-                return;
-              }
-              noteEl.textContent = 'No JD on file — checking ' + c.name + '\'s careers page…';
-              var role = (roleInput.value || '').trim();
-              return api('/companies/' + encodeURIComponent(c.id) +
-                         '/find-jd?role=' + encodeURIComponent(role))
-                .then(function (r) {
-                  if (jdEl.value) return; // user already started typing
-                  var jd = r && r.jd;
-                  if (!jd) return;
-                  var body = (jd.title ? jd.title + '\n' : '') +
-                             (jd.location ? jd.location + '\n\n' : '\n') +
-                             (jd.description || '');
-                  acceptJd(body, 'Live from ' + (jd.source || 'careers page') +
-                                 (jd.url ? ' — ' + jd.url : ''));
-                })
-                .catch(function () {
-                  noteEl.textContent = 'Could not find a JD automatically — paste it below.';
-                });
-            })
-            .catch(function () {
-              noteEl.textContent = '';
-            });
+        var role = (roleInput ? roleInput.value : '').trim();
+        if (c && c.id) {
+          navigateToTailorResume(c.id, role);
+        } else {
+          window.location.href = '/outreach.html?tab=resume';
         }
-
-        clearBtn.addEventListener('click', function () {
-          jdEl.value = '';
-          noteEl.textContent = '';
-          clearBtn.style.display = 'none';
-          jdEl.focus();
-        });
-
-        extra.querySelector('.cc-go').addEventListener('click', function () {
-          var jd = jdEl.value.trim();
-          if (!jd) {
-            out.innerHTML = '<div class="cc-bad">Paste the job description first.</div>';
-            return;
-          }
-          ensureSelectedCompany()
-            .then(function (c) {
-              return job('tailor-resume', { companyId: c.id, jobTitle: roleInput.value, jobDescription: jd },
-                  'Tailoring resume for ' + c.name + ' (includes a fact-check pass)')
-                .then(function (data) {
-                  var r = data.resume;
-                  var v = r.verification || {};
-                  var html = '';
-
-                  if (v.safeToSend === false) {
-                    html += '<div class="cc-bad"><strong>Do not send as-is — ' + v.blockingCount +
-                      ' claim(s) the fact-checker could not verify against your real history.</strong></div>';
-                  } else if (v.clean) {
-                    html += '<div class="cc-ok">Fact-check passed — every claim traces back to your real history.</div>';
-                  }
-
-                  (v.issues || []).forEach(function (i) {
-                    html += '<div class="' + (i.severity === 'minor' ? 'cc-warn' : 'cc-bad') + '">' +
-                      '<strong>' + esc(i.severity) + '</strong> — ' + esc(i.claim) + '<br>' +
-                      esc(i.problem) + '<br><em>Fix: ' + esc(i.correction) + '</em></div>';
-                  });
-
-                  html += '<h4>Match: ' + (r.matchScore || 0) + '/100</h4>';
-                  if (r.dsaSignal && r.dsaSignal.likely) {
-                    html += '<div class="cc-warn"><strong>Possible DSA/LeetCode process.</strong><br>' +
-                      esc(r.dsaSignal.evidence) + '</div>';
-                  }
-                  html += '<h4>Matched keywords</h4><p class="cc-muted">' +
-                    esc((r.keywordsMatched || []).join(' · ')) + '</p>';
-                  if ((r.keywordsMissing || []).length) {
-                    html += '<h4>Gaps — be ready for these</h4>';
-                    (r.keywordsMissing || []).forEach(function (k) {
-                      html += card(typeof k === 'string' ? k : k.keyword,
-                        typeof k === 'string' ? '' : ('Closest you have: ' + (k.closestExperience || '—')));
-                    });
-                  }
-                  if ((r.talkingPoints || []).length) {
-                    html += '<h4>Lead with these</h4>' +
-                      card('', (r.talkingPoints || []).map(function (t) { return '• ' + t; }).join('\n'));
-                  }
-                  html += '<h4>Tailored resume</h4>' + card('', r.tailoredResumeText || '');
-                  out.innerHTML = html;
-                });
-            })
-            .catch(fail);
-        });
-        out.innerHTML = '<p class="cc-muted">Paste the JD above, then tailor. A second pass fact-checks the result against your master resume.</p>';
       },
 
       email: function () {
@@ -1280,6 +1398,10 @@
       pushState: pushState, scheduleSync: scheduleSync,
       openCopilot: function (id, role, act) { if (openCopilot) openCopilot(id, role, act); },
       refreshCompanies: function (id) { if (refreshCompaniesFn) return refreshCompaniesFn(id); },
+      navigateToResume: navigateToTailorResume,
+      cleanJdText: cleanJdText,
+      appConfirm: window.appConfirm,
+      appAlert: window.appAlert,
       // Slide-viewer primitives so the outreach page's Step 4 renders WIN docs
       // the same way as the AI Copilot drawer — one implementation, both UIs.
       renderWinDeck: renderWinDeck,

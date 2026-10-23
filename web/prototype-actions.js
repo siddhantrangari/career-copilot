@@ -781,39 +781,58 @@
     var companyName = btn.getAttribute('data-company-name') || companyId;
     if (!companyId) return;
 
-    if (!confirm('Are you sure you want to permanently delete "' + companyName + '" from your target companies?')) {
-      return;
-    }
+    var runDelete = function () {
+      btn.disabled = true;
+      api('/companies/' + encodeURIComponent(companyId), { method: 'DELETE' })
+        .then(function () {
+          if (window.__CC_CATALOGUE__) {
+            window.__CC_CATALOGUE__ = window.__CC_CATALOGUE__.filter(function (c) { return c.id !== companyId; });
+          }
+          if (typeof COS !== 'undefined' && Array.isArray(COS)) {
+            var idx = COS.findIndex(function (c) { return c.id === companyId; });
+            if (idx !== -1) COS.splice(idx, 1);
+          }
+          if (window.__CC_DISMISSED__) window.__CC_DISMISSED__.delete(companyId);
 
-    btn.disabled = true;
-    api('/companies/' + encodeURIComponent(companyId), { method: 'DELETE' })
-      .then(function () {
-        if (window.__CC_CATALOGUE__) {
-          window.__CC_CATALOGUE__ = window.__CC_CATALOGUE__.filter(function (c) { return c.id !== companyId; });
-        }
-        if (typeof COS !== 'undefined' && Array.isArray(COS)) {
-          var idx = COS.findIndex(function (c) { return c.id === companyId; });
-          if (idx !== -1) COS.splice(idx, 1);
-        }
-        if (window.__CC_DISMISSED__) window.__CC_DISMISSED__.delete(companyId);
+          try {
+            var t = JSON.parse(localStorage.getItem('sr_tracked') || '{}');
+            delete t[companyId];
+            localStorage.setItem('sr_tracked', JSON.stringify(t));
+            var cu = JSON.parse(localStorage.getItem('sr_custom') || '[]');
+            cu = cu.filter(function (c) { return c.id !== companyId; });
+            localStorage.setItem('sr_custom', JSON.stringify(cu));
+          } catch (err) {}
 
-        try {
-          var t = JSON.parse(localStorage.getItem('sr_tracked') || '{}');
-          delete t[companyId];
-          localStorage.setItem('sr_tracked', JSON.stringify(t));
-          var cu = JSON.parse(localStorage.getItem('sr_custom') || '[]');
-          cu = cu.filter(function (c) { return c.id !== companyId; });
-          localStorage.setItem('sr_custom', JSON.stringify(cu));
-        } catch (err) {}
+          if (typeof window.renderCards === 'function') {
+            window.renderCards();
+          }
+          if (typeof window.renderPipeline === 'function') {
+            window.renderPipeline();
+          }
+        })
+        .catch(function (err) {
+          if (window.appAlert) {
+            window.appAlert({ title: 'Could not delete company', message: err.message, type: 'danger' });
+          } else {
+            alert('Could not delete company: ' + err.message);
+          }
+          btn.disabled = false;
+        });
+    };
 
-        if (typeof window.renderCards === 'function') {
-          window.renderCards();
-        }
-      })
-      .catch(function (err) {
-        alert('Could not delete company: ' + err.message);
-        btn.disabled = false;
+    if (window.appConfirm) {
+      window.appConfirm({
+        title: 'Permanently Delete Company?',
+        message: 'Are you sure you want to permanently delete "' + companyName + '" from your target companies? This action cannot be undone.',
+        confirmText: 'Delete Company',
+        cancelText: 'Cancel',
+        type: 'danger'
+      }).then(function (confirmed) {
+        if (confirmed) runDelete();
       });
+    } else if (confirm('Are you sure you want to permanently delete "' + companyName + '" from your target companies?')) {
+      runDelete();
+    }
   });
 
   // Cards re-render on filter change; repaint from cache.

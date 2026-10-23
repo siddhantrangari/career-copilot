@@ -56,7 +56,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);min-heig
 .kcard:hover .cc-drag-handle{color:#cbd5e1}
 .kcard.is-fav{border-left:3px solid #f59e0b!important;border-color:rgba(245,158,11,.45);background:linear-gradient(135deg,rgba(245,158,11,.08) 0%,var(--s2) 100%)!important;box-shadow:0 2px 10px rgba(245,158,11,.15)}
 .kcard.is-fav:hover{border-color:#f59e0b!important;box-shadow:0 4px 14px rgba(245,158,11,.28)}
-.kcard-name{font-weight:600;color:var(--t);margin-bottom:3px;padding-right:48px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.kcard-name{font-weight:600;color:var(--t);margin-bottom:3px;padding-right:68px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .kcard-meta{font-size:10px;color:var(--t3)}
 .kcard-fav-btn{position:absolute;top:6px;right:28px;background:none;border:none;font-size:15px;line-height:1;padding:0 2px;cursor:pointer;color:#7c8ba3;transition:transform .15s,color .15s;z-index:2}
 .kcard-fav-btn:hover{transform:scale(1.25);color:#f59e0b}
@@ -3957,6 +3957,7 @@ function renderKanban(all,filter){
         return `<div class="kcard ${isFav?'is-fav':''}" draggable="true" data-company-id="${c.id}" ondragstart="onKanbanCardDragStart(event,'${c.id}')" ondragend="onKanbanCardDragEnd(event)" onclick="onKanbanCardClick(event,'${c.id}')">
           <span class="cc-drag-handle" title="Drag to move stage">⋮⋮</span>
           <button type="button" class="kcard-fav-btn ${isFav?'active':''}" onclick="toggleCoFav(event,'${c.id}')" title="${isFav?'Priority / Favourite (Click to unmark)':'Mark as Priority / Favourite'}">${isFav?'★':'☆'}</button>
+          <button type="button" class="kcard-remove-btn" onclick="removeCompanyFromPipeline(event,'${c.id}','${escAttr(c.name)}')" title="Remove from pipeline">✕</button>
           <div class="kcard-name">${c.name}</div>
           ${isFav ? `<div style="margin-bottom:3px"><span class="kcard-fav-badge">★ PRIORITY</span></div>` : ''}
           ${role ? `<div class="kcard-meta" style="color:var(--ac);font-weight:500;margin-bottom:2px">${role}</div>` : ''}
@@ -4374,15 +4375,65 @@ function saveTrack(){
 function delTrack(){
   const id=document.getElementById('trackId').value;
   if (!id) return;
-  if (confirm('Remove this company from your tracking pipeline?')) {
+  const tr = tracked[id] || {};
+  const co = (typeof COS !== 'undefined' && Array.isArray(COS)) ? COS.find(c => c.id === id) : null;
+  const name = (co && co.name) || tr.companyName || id;
+
+  const performDelete = () => {
     delete tracked[id];
     if (window.__CC_FAVOURITES__) window.__CC_FAVOURITES__.delete(id);
     saveTr();closeM('trackModal');renderCards();renderPipeline();updateStats();
     if (window.__CC__ && typeof window.__CC__.pushState === 'function') {
       window.__CC__.pushState();
     }
+  };
+
+  if (window.appConfirm) {
+    window.appConfirm({
+      title: 'Remove from Pipeline?',
+      message: `Are you sure you want to remove "${name}" from your tracking pipeline?`,
+      confirmText: 'Remove',
+      cancelText: 'Keep in Pipeline',
+      type: 'danger'
+    }).then(confirmed => {
+      if (confirmed) performDelete();
+    });
+  } else if (confirm(`Remove "${name}" from your tracking pipeline?`)) {
+    performDelete();
   }
 }
+
+function removeCompanyFromPipeline(e, id, name) {
+  if (e) { e.preventDefault(); e.stopPropagation(); }
+  if (!id) return;
+  const tr = tracked[id] || {};
+  const co = (typeof COS !== 'undefined' && Array.isArray(COS)) ? COS.find(c => c.id === id) : null;
+  const companyName = name || (co && co.name) || tr.companyName || id;
+
+  const performDelete = () => {
+    delete tracked[id];
+    if (window.__CC_FAVOURITES__) window.__CC_FAVOURITES__.delete(id);
+    saveTr();renderCards();renderPipeline();updateStats();
+    if (window.__CC__ && typeof window.__CC__.pushState === 'function') {
+      window.__CC__.pushState();
+    }
+  };
+
+  if (window.appConfirm) {
+    window.appConfirm({
+      title: 'Remove from Pipeline?',
+      message: `Are you sure you want to remove "${companyName}" from your tracking pipeline?`,
+      confirmText: 'Remove',
+      cancelText: 'Keep in Pipeline',
+      type: 'danger'
+    }).then(confirmed => {
+      if (confirmed) performDelete();
+    });
+  } else if (confirm(`Remove "${companyName}" from your tracking pipeline?`)) {
+    performDelete();
+  }
+}
+window.removeCompanyFromPipeline = removeCompanyFromPipeline;
 
 // ADD COMPANY
 function addCo(){
@@ -4551,7 +4602,28 @@ window.openCompanyCopilot = openCompanyCopilot;
 function triggerTrackAiAction(action) {
   const id = document.getElementById('trackId') ? document.getElementById('trackId').value : null;
   const role = document.getElementById('tRole') ? document.getElementById('tRole').value : '';
+  const jd = document.getElementById('tJd') ? document.getElementById('tJd').value : '';
   if (!id) return;
+
+  if (action === 'resume') {
+    if (window.__CC__ && typeof window.__CC__.navigateToResume === 'function') {
+      window.__CC__.navigateToResume(id, role, jd);
+      return;
+    }
+    // Fallback direct redirection
+    try {
+      const co = (typeof COS !== 'undefined' && Array.isArray(COS)) ? COS.find(c => c.id === id) : null;
+      sessionStorage.setItem('cc_tailor_prefill', JSON.stringify({
+        companyId: id,
+        companyName: (co && co.name) || id,
+        role: role,
+        jdText: jd
+      }));
+    } catch(e){}
+    window.location.href = `/outreach.html?tab=resume&companyId=${encodeURIComponent(id)}&role=${encodeURIComponent(role)}`;
+    return;
+  }
+
   if (window.__CC__ && typeof window.__CC__.openCopilot === 'function') {
     window.__CC__.openCopilot(id, role || '', action);
   }

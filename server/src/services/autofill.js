@@ -69,32 +69,67 @@ export async function autofillCompany(companyId) {
     provenance.jd = 'Company careers page from the catalogue';
   }
 
+export function cleanJdText(raw) {
+  if (!raw || typeof raw !== 'string') return '';
+  let text = raw;
+  for (let i = 0; i < 2; i++) {
+    if (!/&(?:[a-zA-Z]+|#\d+|#x[0-9a-fA-F]+);/.test(text)) break;
+    text = text
+      .replace(/&quot;/g, '"')
+      .replace(/&#39;/g, "'")
+      .replace(/&apos;/g, "'")
+      .replace(/&lt;/g, '<')
+      .replace(/&gt;/g, '>')
+      .replace(/&nbsp;/g, ' ')
+      .replace(/&amp;/g, '&')
+      .replace(/&#(\d+);/g, (_, dec) => String.fromCharCode(dec))
+      .replace(/&#x([0-9a-fA-F]+);/g, (_, hex) => String.fromCharCode(parseInt(hex, 16)));
+  }
+  text = text
+    .replace(/<\/(p|div|h[1-6]|li|tr|section|article)>/gi, '\n')
+    .replace(/<br\s*\/?>/gi, '\n')
+    .replace(/<li[^>]*>/gi, '• ')
+    .replace(/<[^>]+>/g, '')
+    .replace(/\r\n/g, '\n')
+    .replace(/\r/g, '\n');
+  return text
+    .split('\n')
+    .map((l) => l.trim())
+    .join('\n')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
+}
+
   // ── Job description text ────────────────────────────────────────────
   // Distinct from `jd` (which is a URL). This is the actual pasted JD body
   // that tools like Tailor Resume need — so the user does not re-paste it
   // every time. Preference: what they typed into the tracker → the JD text
   // used in the last tailored resume → the description from a discovered job.
+  const trackedJdText = cleanJdText(tracked?.jdText || tracked?.jd || '');
   const jdCandidates = [
-    { text: tracked?.jd || '', where: 'Job description saved on the tracked company' },
+    { text: trackedJdText, where: 'Job description saved on the tracked company' },
     ...(resumes || [])
-      .filter((r) => r.job_description && r.job_description.length > 200)
       .map((r) => ({
-        text: r.job_description,
+        text: cleanJdText(r.job_description || ''),
         where: `From your last tailored resume${r.job_title ? ` (${r.job_title})` : ''}`,
-      })),
+      }))
+      .filter((c) => c.text.length > 200),
     ...(jobs || [])
-      .filter((j) => (j.description || '').length > 200)
       .map((j) => ({
-        text: j.description,
+        text: cleanJdText(j.description || ''),
         where: `Discovered job posting: ${j.title || 'untitled'}`,
-      })),
+      }))
+      .filter((c) => c.text.length > 200),
   ];
 
   // A bare URL in the tracker's `jd` slot is not JD text — skip it, otherwise
   // the resume tool would try to tailor against "https://…".
-  const jdText = jdCandidates.find(
+  let jdText = jdCandidates.find(
     (c) => c.text && c.text.length > 200 && !/^https?:\/\/\S+$/i.test(c.text.trim()),
   );
+  if (!jdText && trackedJdText && trackedJdText.length >= 40 && !/^https?:\/\/\S+$/i.test(trackedJdText.trim())) {
+    jdText = jdCandidates[0];
+  }
   if (jdText) {
     suggested.jdText = jdText.text;
     provenance.jdText = jdText.where;

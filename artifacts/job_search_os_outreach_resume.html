@@ -2105,23 +2105,39 @@ function downloadPdfForVersion(id){
 }
 
 function deleteSavedResume(id){
-  if (!confirm('Are you sure you want to delete this saved tailored resume?')) return;
-  const apiFn = (window.__CC_RESUME_STUDIO_ACTIONS__ && window.__CC_RESUME_STUDIO_ACTIONS__.api)
-    || (window.__CC__ && window.__CC__.api);
+  const performDelete = () => {
+    const apiFn = (window.__CC_RESUME_STUDIO_ACTIONS__ && window.__CC_RESUME_STUDIO_ACTIONS__.api)
+      || (window.__CC__ && window.__CC__.api);
 
-  if (apiFn) {
-    apiFn('/resumes/' + id, { method: 'DELETE' })
-      .then(() => {
-        savedResumesList = savedResumesList.filter(x => x.id !== id);
-        refreshSavedResumes();
-      })
-      .catch(err => {
-        alert('Delete failed: ' + err.message);
-      });
-  } else {
-    savedResumesList = savedResumesList.filter(x => x.id !== id);
-    try { localStorage.setItem('cc_saved_resumes_cache', JSON.stringify(savedResumesList)); } catch(e){}
-    refreshSavedResumes();
+    if (apiFn) {
+      apiFn('/resumes/' + id, { method: 'DELETE' })
+        .then(() => {
+          savedResumesList = savedResumesList.filter(x => x.id !== id);
+          refreshSavedResumes();
+        })
+        .catch(err => {
+          if (window.appAlert) window.appAlert({ title: 'Delete Failed', message: err.message, type: 'danger' });
+          else alert('Delete failed: ' + err.message);
+        });
+    } else {
+      savedResumesList = savedResumesList.filter(x => x.id !== id);
+      try { localStorage.setItem('cc_saved_resumes_cache', JSON.stringify(savedResumesList)); } catch(e){}
+      refreshSavedResumes();
+    }
+  };
+
+  if (window.appConfirm) {
+    window.appConfirm({
+      title: 'Delete Saved Resume?',
+      message: 'Are you sure you want to delete this saved tailored resume? This action cannot be undone.',
+      confirmText: 'Delete Resume',
+      cancelText: 'Cancel',
+      type: 'danger'
+    }).then(confirmed => {
+      if (confirmed) performDelete();
+    });
+  } else if (confirm('Are you sure you want to delete this saved tailored resume?')) {
+    performDelete();
   }
 }
 
@@ -2172,6 +2188,102 @@ function scrollToSavedResumes(){
 window.triggerTailorResume = triggerTailorResume;
 window.downloadCurrentResumePdf = downloadCurrentResumePdf;
 
+function cleanJdText(raw) {
+  if (!raw || typeof raw !== 'string') return '';
+  let text = raw;
+  for (let i = 0; i < 2; i++) {
+    if (!/&(?:[a-zA-Z]+|#\d+|#x[0-9a-fA-F]+);/.test(text)) break;
+    text = text
+      .replace(/&quot;/g, '"')
+      .replace(/&#39;/g, "'")
+      .replace(/&apos;/g, "'")
+      .replace(/&lt;/g, '<')
+      .replace(/&gt;/g, '>')
+      .replace(/&nbsp;/g, ' ')
+      .replace(/&amp;/g, '&')
+      .replace(/&#(\d+);/g, (_, dec) => String.fromCharCode(dec))
+      .replace(/&#x([0-9a-fA-F]+);/g, (_, hex) => String.fromCharCode(parseInt(hex, 16)));
+  }
+  text = text
+    .replace(/<\/(p|div|h[1-6]|li|tr|section|article)>/gi, '\n')
+    .replace(/<br\s*\/?>/gi, '\n')
+    .replace(/<li[^>]*>/gi, '• ')
+    .replace(/<[^>]+>/g, '')
+    .replace(/\r\n/g, '\n')
+    .replace(/\r/g, '\n');
+  return text
+    .split('\n')
+    .map(l => l.trim())
+    .join('\n')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
+}
+window.cleanJdText = cleanJdText;
+
+function checkTailorPrefill() {
+  try {
+    let prefill = null;
+    const raw = sessionStorage.getItem('cc_tailor_prefill');
+    if (raw) {
+      try {
+        prefill = JSON.parse(raw);
+        sessionStorage.removeItem('cc_tailor_prefill');
+      } catch (e) {}
+    }
+
+    const u = new URL(window.location.href);
+    const qCompany = u.searchParams.get('company');
+    const qRole = u.searchParams.get('role');
+    const qCompanyId = u.searchParams.get('companyId');
+
+    const company = (prefill && prefill.companyName) || qCompany || '';
+    const role = (prefill && prefill.role) || qRole || '';
+    let jdText = (prefill && prefill.jdText) || '';
+    const companyId = (prefill && prefill.companyId) || qCompanyId || '';
+
+    const compEl = document.getElementById('tailorCompany');
+    const roleEl = document.getElementById('tailorRole');
+    const jdEl = document.getElementById('tailorJD');
+
+    let filledAny = false;
+    if (compEl && company) { compEl.value = company; filledAny = true; }
+    if (roleEl && role) { roleEl.value = role; filledAny = true; }
+    if (jdEl && jdText) {
+      jdEl.value = cleanJdText(jdText);
+      if (typeof updateJdCount === 'function') updateJdCount();
+      filledAny = true;
+    } else if (jdEl && !jdEl.value && companyId) {
+      // If no JD was passed in session but we have companyId, fetch it from autofill
+      const apiFn = (window.__CC_RESUME_STUDIO_ACTIONS__ && window.__CC_RESUME_STUDIO_ACTIONS__.api)
+        || (window.__CC__ && window.__CC__.api);
+      if (apiFn) {
+        apiFn('/companies/' + encodeURIComponent(companyId) + '/autofill')
+          .then(d => {
+            const fetched = d && d.suggested && d.suggested.jdText;
+            if (fetched && !jdEl.value) {
+              jdEl.value = cleanJdText(fetched);
+              if (typeof updateJdCount === 'function') updateJdCount();
+            }
+          })
+          .catch(() => {});
+      }
+    }
+
+    if (filledAny) {
+      const card = document.getElementById('resumeTargetCard');
+      if (card) {
+        setTimeout(() => {
+          card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          if (jdEl && !jdEl.value) jdEl.focus();
+        }, 150);
+      }
+    }
+  } catch (err) {
+    console.warn('checkTailorPrefill error', err);
+  }
+}
+window.checkTailorPrefill = checkTailorPrefill;
+
 let resumeStudioInitialized = false;
 function initResumeStudio(){
   if (!resumeStudioInitialized) {
@@ -2183,6 +2295,7 @@ function initResumeStudio(){
     resumeStudioInitialized = true;
   }
   refreshSavedResumes();
+  checkTailorPrefill();
 }
 
 // ── UTILS ──
