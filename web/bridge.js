@@ -367,6 +367,7 @@
       .replace(/<br\s*\/?>/gi, '\n')
       .replace(/<li[^>]*>/gi, '• ')
       .replace(/<[^>]+>/g, '')
+      .replace(/<[^>]*$/, '')
       .replace(/\r\n/g, '\n')
       .replace(/\r/g, '\n');
     return text
