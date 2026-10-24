@@ -401,11 +401,17 @@ Format as a numbered table.</div>
             <input type="text" id="tPay" placeholder="e.g. €90–€130k or $120–$160k">
           </div>
           <div class="fr">
-            <label>Job Link / URL</label>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2px">
+              <label style="margin:0">Job Link / URL</label>
+              <button type="button" id="btnAutoFetchTrackJd" onclick="autoFetchTrackModalJd()" class="btn ac" style="font-size:10px;padding:1px 7px;font-weight:600;display:inline-flex;align-items:center;gap:4px" title="Auto-fetch job description & details from link">
+                <span id="autoFetchTrackJdIcon">⚡</span> <span id="autoFetchTrackJdText">Auto-fetch JD</span>
+              </button>
+            </div>
             <div style="display:flex;gap:6px">
-              <input type="text" id="tJD" placeholder="https://..." style="flex:1">
+              <input type="text" id="tJD" placeholder="https://..." style="flex:1" onchange="checkAutoFetchTrackJd(this.value)">
               <a id="tUrlOpenBtn" href="#" target="_blank" class="btn ac" style="display:none;align-items:center;font-size:11px;padding:0 8px;flex-shrink:0" title="Open Job Link in new tab">Open ↗</a>
             </div>
+            <div id="trackJdFetchNotice" style="display:none;margin-top:4px;font-size:10.5px;padding:4px 8px;border-radius:4px;background:rgba(59,130,246,.12);border:1px solid rgba(59,130,246,.3);color:#93c5fd"></div>
           </div>
           <div class="fr">
             <label>Applied Date (if applied)</label>
@@ -4870,6 +4876,98 @@ function populateActiveRoleFields() {
 }
 window.populateActiveRoleFields = populateActiveRoleFields;
 
+async function autoFetchTrackModalJd() {
+  const urlEl = document.getElementById('tJD');
+  const jdEl = document.getElementById('tJdText');
+  const roleEl = document.getElementById('tRole');
+  const btn = document.getElementById('btnAutoFetchTrackJd');
+  const notice = document.getElementById('trackJdFetchNotice');
+
+  const url = (urlEl?.value || '').trim();
+  if (!url) {
+    if (notice) {
+      notice.style.display = 'block';
+      notice.style.background = 'rgba(239,68,68,.12)';
+      notice.style.borderColor = 'rgba(239,68,68,.3)';
+      notice.style.color = '#fca5a5';
+      notice.textContent = 'Please enter a valid job URL first.';
+    }
+    return;
+  }
+
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = '<span class="cc-spin">◐</span> Fetching…';
+  }
+  if (notice) {
+    notice.style.display = 'block';
+    notice.style.background = 'rgba(59,130,246,.12)';
+    notice.style.borderColor = 'rgba(59,130,246,.3)';
+    notice.style.color = '#93c5fd';
+    notice.innerHTML = `<span class="cc-spin" style="margin-right:4px">◐</span> Connecting to job board & parsing details: <strong>${esc(url.slice(0, 50))}…</strong>`;
+  }
+
+  const apiFn = (window.__CC__ && window.__CC__.api);
+  try {
+    let result = null;
+    if (apiFn) {
+      result = await apiFn('/extract-jd', { method: 'POST', body: { url } });
+    } else {
+      const res = await fetch('/api/extract-jd', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url })
+      });
+      result = await res.json();
+    }
+
+    if (result && result.ok && result.jdText) {
+      if (jdEl) {
+        jdEl.value = result.jdText;
+        updateJdWordCount();
+      }
+      if (roleEl && (!roleEl.value || roleEl.value === 'Target Role' || roleEl.value === 'Senior Engineer') && result.title) {
+        roleEl.value = result.title;
+        if (typeof onActiveRoleTitleChange === 'function') onActiveRoleTitleChange();
+      }
+      syncActiveRoleInputsToMemory();
+
+      if (notice) {
+        notice.style.display = 'block';
+        notice.style.background = 'rgba(16,185,129,.12)';
+        notice.style.borderColor = 'rgba(16,185,129,.35)';
+        notice.style.color = '#6ee7b7';
+        notice.innerHTML = `✓ Fetched <strong>${esc(result.title || 'Job Posting')}</strong> (${result.jdText.length.toLocaleString()} chars) from <em>${esc(result.source || 'web')}</em>!`;
+        setTimeout(() => { if (notice) notice.style.display = 'none'; }, 7000);
+      }
+    } else {
+      throw new Error(result?.error || 'Could not parse job description');
+    }
+  } catch (err) {
+    if (notice) {
+      notice.style.display = 'block';
+      notice.style.background = 'rgba(239,68,68,.12)';
+      notice.style.borderColor = 'rgba(239,68,68,.3)';
+      notice.style.color = '#fca5a5';
+      notice.innerHTML = `⚠️ ${esc(err.message || 'Could not fetch from URL')}`;
+    }
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = '<span>⚡</span> Auto-fetch JD';
+    }
+  }
+}
+window.autoFetchTrackModalJd = autoFetchTrackModalJd;
+
+function checkAutoFetchTrackJd(val) {
+  const jdEl = document.getElementById('tJdText');
+  if (/^https?:\/\/\S+/i.test((val || '').trim()) && jdEl && !jdEl.value.trim()) {
+    autoFetchTrackModalJd();
+  }
+}
+window.checkAutoFetchTrackJd = checkAutoFetchTrackJd;
+
 function updateActiveRoleDocsBar() {
   const bar = document.getElementById('tRoleDocsBar');
   if (!bar) return;
@@ -5416,9 +5514,9 @@ function openCompanyStudio(e, id, role, mode, roleId, directJd) {
     if (!jd) {
       if (roleId && Array.isArray(tr.roles)) {
         const found = tr.roles.find(r => r.id === roleId);
-        if (found) jd = found.jdText || (found.jd && !/^https?:\/\//i.test(found.jd) ? found.jd : '');
+        if (found) jd = found.jdText || found.jobLink || found.jd || '';
       }
-      if (!jd) jd = tr.jdText || (tr.jd && !/^https?:\/\//i.test(tr.jd) ? tr.jd : '');
+      if (!jd) jd = tr.jdText || tr.jobLink || tr.jd || '';
     }
     if (!role && tr.roleTitle) role = tr.roleTitle;
   } catch(err) {}
@@ -5447,7 +5545,9 @@ function triggerTrackAiAction(action) {
   const id = document.getElementById('trackId') ? document.getElementById('trackId').value : null;
   const role = document.getElementById('tRole') ? document.getElementById('tRole').value : '';
   const roleId = document.getElementById('tActiveRoleId') ? document.getElementById('tActiveRoleId').value : '';
-  const jd = document.getElementById('tJdText') ? document.getElementById('tJdText').value : '';
+  let jd = document.getElementById('tJdText') ? document.getElementById('tJdText').value : '';
+  const jobLink = document.getElementById('tJD') ? document.getElementById('tJD').value.trim() : '';
+  if (!jd && jobLink) jd = jobLink;
   if (!id) return;
 
   if (action === 'resume' || action === 'cover-letter') {

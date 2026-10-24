@@ -494,9 +494,15 @@ Now with family settled and a year of intensive AI engineering behind me, I'm re
           <div class="form-row" style="margin-bottom:10px">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
               <label style="margin:0">Job Description</label>
-              <span id="jdWordCount" style="font-size:10px;color:var(--t3)">0 chars</span>
+              <div style="display:flex;align-items:center;gap:8px">
+                <button type="button" id="btnAutoFetchStudioJd" onclick="triggerStudioJdFetch()" class="btn ac" style="display:none;font-size:10px;padding:1px 7px;font-weight:600;align-items:center;gap:4px">
+                  <span id="btnAutoFetchStudioJdIcon">⚡</span> Auto-fetch from URL
+                </button>
+                <span id="jdWordCount" style="font-size:10px;color:var(--t3)">0 chars</span>
+              </div>
             </div>
-            <textarea id="tailorJD" rows="5" placeholder="Paste the full job description here..." oninput="updateJdCount()"></textarea>
+            <textarea id="tailorJD" rows="5" placeholder="Paste the full job description or job posting URL here..." oninput="onJdInput(this)"></textarea>
+            <div id="jdUrlFetchNotice" style="display:none;margin-top:6px;font-size:11px;padding:6px 10px;border-radius:6px;background:rgba(59,130,246,.12);border:1px solid rgba(59,130,246,.3);color:#93c5fd"></div>
           </div>
 
           <div class="form-row" style="margin-bottom:12px">
@@ -1736,6 +1742,141 @@ function updateJdCount(){
   if (countEl) countEl.textContent = `${val.length} chars · ~${val.trim().split(/\s+/).filter(Boolean).length} words`;
 }
 
+let jdFetchTimer = null;
+function onJdInput(el) {
+  updateJdCount();
+  const val = (el.value || '').trim();
+  const notice = document.getElementById('jdUrlFetchNotice');
+  const btn = document.getElementById('btnAutoFetchStudioJd');
+
+  clearTimeout(jdFetchTimer);
+
+  if (/^https?:\/\/\S+$/i.test(val) || (val.length < 250 && /^https?:\/\//i.test(val))) {
+    if (btn) btn.style.display = 'inline-flex';
+    if (notice) {
+      notice.style.display = 'block';
+      notice.style.background = 'rgba(59,130,246,.12)';
+      notice.style.borderColor = 'rgba(59,130,246,.3)';
+      notice.style.color = '#93c5fd';
+      notice.innerHTML = '<span class="cc-spin" style="margin-right:6px">◐</span> Detected job link. Auto-fetching job posting details…';
+    }
+    jdFetchTimer = setTimeout(() => {
+      fetchJdDetailsIntoStudio(val);
+    }, 500);
+  } else {
+    if (btn) btn.style.display = 'none';
+    if (notice && !notice.getAttribute('data-keep')) {
+      notice.style.display = 'none';
+    }
+  }
+}
+window.onJdInput = onJdInput;
+
+function triggerStudioJdFetch() {
+  const jdEl = document.getElementById('tailorJD');
+  const val = (jdEl?.value || '').trim();
+  if (/^https?:\/\/\S+/i.test(val)) {
+    fetchJdDetailsIntoStudio(val);
+  }
+}
+window.triggerStudioJdFetch = triggerStudioJdFetch;
+
+let isFetchingJd = false;
+async function fetchJdDetailsIntoStudio(url) {
+  if (!url || isFetchingJd) return null;
+  const targetUrl = url.trim();
+  if (!/^https?:\/\/\S+/i.test(targetUrl)) return null;
+
+  const notice = document.getElementById('jdUrlFetchNotice');
+  const btn = document.getElementById('btnAutoFetchStudioJd');
+  const jdEl = document.getElementById('tailorJD');
+  const roleEl = document.getElementById('tailorRole');
+  const compEl = document.getElementById('tailorCompany');
+
+  isFetchingJd = true;
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = '<span class="cc-spin">◐</span> Fetching…';
+  }
+  if (notice) {
+    notice.style.display = 'block';
+    notice.style.background = 'rgba(59,130,246,.12)';
+    notice.style.borderColor = 'rgba(59,130,246,.3)';
+    notice.style.color = '#93c5fd';
+    notice.innerHTML = `<span class="cc-spin" style="margin-right:6px">◐</span> Connecting to job board & parsing posting: <strong>${esc(targetUrl.slice(0, 55))}…</strong>`;
+  }
+
+  const apiFn = (window.__CC_RESUME_STUDIO_ACTIONS__ && window.__CC_RESUME_STUDIO_ACTIONS__.api)
+    || (window.__CC__ && window.__CC__.api);
+
+  try {
+    let result = null;
+    if (apiFn) {
+      result = await apiFn('/extract-jd', {
+        method: 'POST',
+        body: { url: targetUrl }
+      });
+    } else {
+      const res = await fetch('/api/extract-jd', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url: targetUrl })
+      });
+      result = await res.json();
+    }
+
+    if (result && result.ok && result.jdText) {
+      if (jdEl) {
+        jdEl.value = result.jdText;
+        updateJdCount();
+      }
+
+      if (roleEl && (!roleEl.value || roleEl.value === 'Senior Engineer' || roleEl.value === 'Target Role') && result.title) {
+        roleEl.value = result.title;
+      }
+      if (compEl && (!compEl.value || compEl.value === 'Target Company' || compEl.value === 'Target company') && result.company) {
+        compEl.value = result.company;
+      }
+
+      if (typeof onTargetChange === 'function') onTargetChange();
+
+      if (notice) {
+        notice.style.display = 'block';
+        notice.setAttribute('data-keep', '1');
+        notice.style.background = 'rgba(16,185,129,.12)';
+        notice.style.borderColor = 'rgba(16,185,129,.35)';
+        notice.style.color = '#6ee7b7';
+        notice.innerHTML = `✓ Successfully fetched <strong>${esc(result.title || 'Job Posting')}</strong> (${result.jdText.length.toLocaleString()} characters) from <em>${esc(result.source || 'web')}</em>. Ready for tailoring!`;
+        setTimeout(() => {
+          notice.removeAttribute('data-keep');
+          notice.style.display = 'none';
+        }, 8000);
+      }
+      if (btn) btn.style.display = 'none';
+      return result;
+    } else {
+      throw new Error(result?.error || 'Could not parse job description');
+    }
+  } catch (err) {
+    console.warn('fetchJdDetailsIntoStudio error:', err);
+    if (notice) {
+      notice.style.display = 'block';
+      notice.style.background = 'rgba(239,68,68,.12)';
+      notice.style.borderColor = 'rgba(239,68,68,.3)';
+      notice.style.color = '#fca5a5';
+      notice.innerHTML = `⚠️ Could not auto-fetch from this URL (${esc(err.message || 'Blocked by site')}). Please paste the job description text directly.`;
+    }
+    return null;
+  } finally {
+    isFetchingJd = false;
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = '<span>⚡</span> Auto-fetch from URL';
+    }
+  }
+}
+window.fetchJdDetailsIntoStudio = fetchJdDetailsIntoStudio;
+
 function onTargetChange(){
   const c = document.getElementById('tailorCompany').value.trim();
   const r = document.getElementById('tailorRole').value.trim();
@@ -2011,16 +2152,35 @@ function applySuggestionChip(text){
 }
 
 // ── TRIGGER TAILOR RESUME (RUN JOB) ──
-function triggerTailorResume(){
-  const company = document.getElementById('tailorCompany').value.trim();
-  const role = document.getElementById('tailorRole').value.trim();
-  const jd = document.getElementById('tailorJD').value.trim();
+async function triggerTailorResume(){
+  let company = document.getElementById('tailorCompany').value.trim();
+  let role = document.getElementById('tailorRole').value.trim();
+  let jd = document.getElementById('tailorJD').value.trim();
   const instructions = document.getElementById('tailorInstructions').value.trim();
 
   if (!jd) {
     alert('Please paste the job description first.');
     document.getElementById('tailorJD').focus();
     return;
+  }
+
+  // If jd is a URL, auto-fetch details first
+  if (/^https?:\/\/\S+$/i.test(jd)) {
+    const btn = document.getElementById('btnTailorResume');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="cc-spin">◐</span> Auto-fetching job details from link…';
+    const fetched = await fetchJdDetailsIntoStudio(jd);
+    if (fetched && fetched.jdText) {
+      jd = fetched.jdText;
+      if (!role && fetched.title) {
+        role = fetched.title;
+        document.getElementById('tailorRole').value = role;
+      }
+      if ((!company || company === 'Target Company') && fetched.company) {
+        company = fetched.company;
+        document.getElementById('tailorCompany').value = company;
+      }
+    }
   }
 
   resumeChatHistory = [];
@@ -2409,16 +2569,36 @@ function submitStudioRefinement() {
 }
 window.submitStudioRefinement = submitStudioRefinement;
 
-function triggerGenerateCoverLetter() {
-  const company = document.getElementById('tailorCompany').value.trim();
-  const role = document.getElementById('tailorRole').value.trim();
-  const jd = document.getElementById('tailorJD').value.trim();
+async function triggerGenerateCoverLetter() {
+  let company = document.getElementById('tailorCompany').value.trim();
+  let role = document.getElementById('tailorRole').value.trim();
+  let jd = document.getElementById('tailorJD').value.trim();
   const instructions = document.getElementById('tailorInstructions').value.trim();
 
   if (!jd) {
     alert('Please paste the job description first.');
     document.getElementById('tailorJD').focus();
     return;
+  }
+
+  // If jd is a URL, auto-fetch details first
+  if (/^https?:\/\/\S+$/i.test(jd)) {
+    const btn = document.getElementById('btnTailorResume');
+    btn.disabled = true;
+    const actionLabel = document.getElementById('btnTailorResumeLabel');
+    if (actionLabel) actionLabel.innerHTML = '<span class="cc-spin">◐</span> Auto-fetching job details from link…';
+    const fetched = await fetchJdDetailsIntoStudio(jd);
+    if (fetched && fetched.jdText) {
+      jd = fetched.jdText;
+      if (!role && fetched.title) {
+        role = fetched.title;
+        document.getElementById('tailorRole').value = role;
+      }
+      if ((!company || company === 'Target Company') && fetched.company) {
+        company = fetched.company;
+        document.getElementById('tailorCompany').value = company;
+      }
+    }
   }
 
   coverLetterChatHistory = [];
@@ -3042,6 +3222,9 @@ function checkTailorPrefill() {
       jdEl.value = cleanJdText(jdText);
       if (typeof updateJdCount === 'function') updateJdCount();
       filledAny = true;
+      if (/^https?:\/\/\S+$/i.test(jdText.trim())) {
+        fetchJdDetailsIntoStudio(jdText.trim());
+      }
     } else if (jdEl && !jdEl.value && companyId) {
       // If no JD was passed in session but we have companyId, fetch it from autofill
       const apiFn = (window.__CC_RESUME_STUDIO_ACTIONS__ && window.__CC_RESUME_STUDIO_ACTIONS__.api)

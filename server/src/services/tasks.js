@@ -17,6 +17,7 @@ import {
   callPrepPrompt,
   linkedInPostPrompt,
 } from './prompts.js';
+import { extractJdFromUrl } from './fetch-jd.js';
 
 /**
  * Every AI capability as a plain async function.
@@ -271,9 +272,49 @@ export async function generateWinDoc(payload = {}, ctx = {}) {
   return { winDoc: result, id: saved?.id || null, companyId: company?.id || null };
 }
 
+// ── Ensure JD Text (auto-fetches real posting if given a URL) ────────
+export async function ensureJdText(rawJd, rawTitle, onStep = () => {}) {
+  let jd = (rawJd || '').trim();
+  let title = (rawTitle || '').trim();
+  let autoFetched = false;
+
+  if (/^https?:\/\/\S+$/i.test(jd) || (jd.length < 200 && /^https?:\/\//i.test(jd))) {
+    const urlMatch = jd.match(/https?:\/\/\S+/i);
+    if (urlMatch) {
+      if (typeof onStep === 'function') {
+        onStep({ phase: 'fetch-jd', status: 'running', message: 'Fetching real job posting details from URL…' });
+      }
+      try {
+        const extracted = await extractJdFromUrl(urlMatch[0]);
+        if (extracted && extracted.ok && extracted.jdText) {
+          jd = extracted.jdText;
+          if (!title && extracted.title) title = extracted.title;
+          autoFetched = true;
+          if (typeof onStep === 'function') {
+            onStep({
+              phase: 'fetch-jd',
+              status: 'done',
+              message: `Loaded job description (${jd.length} chars) from ${extracted.source}`,
+            });
+          }
+        }
+      } catch (err) {
+        console.warn('[ensureJdText] Auto-extract JD error:', err.message);
+      }
+    }
+  }
+
+  return { jd, title, autoFetched };
+}
+
 // ── Tailored resume (+ fact-check pass) ───────────────────────────────
-export async function tailorResume(payload = {}) {
-  const { jobTitle, jobDescription, save = true, verify = true, instructions, comments } = payload;
+export async function tailorResume(payload = {}, ctx = {}) {
+  const onStep = ctx?.onStep || (() => {});
+  const { save = true, verify = true, instructions, comments } = payload;
+  const resolved = await ensureJdText(payload.jobDescription, payload.jobTitle, onStep);
+  const jobDescription = resolved.jd;
+  const jobTitle = resolved.title || 'Senior Engineer';
+
   if (!jobDescription?.trim()) throw new AiError('jobDescription is required', 400);
 
   const company = await resolveCompany(payload);
@@ -369,11 +410,15 @@ export async function refineResume(payload = {}) {
   const company = await resolveCompany(payload);
   const name = company?.name || companyName || 'Target company';
 
+  const resolved = await ensureJdText(jobDescription, jobTitle);
+  const activeJd = resolved.jd;
+  const activeTitle = resolved.title || 'Senior Engineer';
+
   const candidate = await candidateBlock();
   const prompt = refineResumePrompt({
     companyName: name,
-    jobTitle: jobTitle || 'Senior Engineer',
-    jobDescription: jobDescription || '',
+    jobTitle: activeTitle,
+    jobDescription: activeJd,
     currentResumeText,
     feedback: userFeedback,
     chatHistory: Array.isArray(chatHistory) ? chatHistory : [],
@@ -451,8 +496,13 @@ export async function refineResume(payload = {}) {
 }
 
 // ── Tailored cover letter ─────────────────────────────────────────────
-export async function generateCoverLetter(payload = {}) {
-  const { jobTitle, jobDescription, instructions, comments } = payload;
+export async function generateCoverLetter(payload = {}, ctx = {}) {
+  const onStep = ctx?.onStep || (() => {});
+  const { instructions, comments } = payload;
+  const resolved = await ensureJdText(payload.jobDescription, payload.jobTitle, onStep);
+  const jobDescription = resolved.jd;
+  const jobTitle = resolved.title || 'Senior Full-Stack & AI Engineer';
+
   const company = await resolveCompany(payload);
   const name = company?.name || payload.companyName || 'Target Company';
 

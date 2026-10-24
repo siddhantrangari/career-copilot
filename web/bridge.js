@@ -453,8 +453,12 @@
     try {
       var tr = (typeof tracked !== 'undefined' && tracked && tracked[companyId]) || {};
       if (!role && tr.roleTitle) role = tr.roleTitle;
-      if (!jd && (tr.jdText || tr.jd)) {
-        jd = tr.jdText || tr.jd;
+      if (!jd) {
+        if (roleId && Array.isArray(tr.roles)) {
+          var foundRole = tr.roles.find(function (r) { return r.id === roleId; });
+          if (foundRole) jd = foundRole.jdText || foundRole.jobLink || foundRole.jd || '';
+        }
+        if (!jd) jd = tr.jdText || tr.jobLink || tr.jd || '';
       }
     } catch (e) {}
 
@@ -474,6 +478,9 @@
       if (jdArea && cleanJd) {
         jdArea.value = cleanJd;
         if (typeof window.updateJdCount === 'function') window.updateJdCount();
+        if (/^https?:\/\/\S+$/i.test(cleanJd.trim()) && typeof window.fetchJdDetailsIntoStudio === 'function') {
+          window.fetchJdDetailsIntoStudio(cleanJd.trim());
+        }
       } else if (jdArea && !jdArea.value && companyId) {
         api('/companies/' + encodeURIComponent(companyId) + '/autofill')
           .then(function (d) {
@@ -481,6 +488,9 @@
             if (fetchedJd && !jdArea.value) {
               jdArea.value = cleanJdText(fetchedJd);
               if (typeof window.updateJdCount === 'function') window.updateJdCount();
+              if (/^https?:\/\/\S+$/i.test(fetchedJd.trim()) && typeof window.fetchJdDetailsIntoStudio === 'function') {
+                window.fetchJdDetailsIntoStudio(fetchedJd.trim());
+              }
             }
           }).catch(function () {});
       }

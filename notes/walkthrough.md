@@ -284,3 +284,33 @@ Fixed an issue where clicking "Tailor Resume" or "Letter" from a custom-added co
 3. **Verification**:
    - Automated unit test suite [`scratch/test-company-prefill.js`](file:///Users/siddhant/DEV-ENV/AntiGravity/career-copilot-new/scratch/test-company-prefill.js) validates name resolution, fallback handling, and c_ sanitization.
 
+---
+
+## 9. Automatic Job Description Details Fetching from URL (`/api/extract-jd`)
+
+Eliminated the need to manually open job links in a browser and copy-paste text. Entering or passing any job URL now automatically fetches the role title, company name, and full formatted job description before tailoring:
+
+1. **Extraction Engine (`server/src/services/fetch-jd.js`)**:
+   - **Greenhouse Fast-Path**: Supports both `boards.greenhouse.io` and `job-boards.eu.greenhouse.io` URLs (`/v1/boards/{board}/jobs/{id}`), extracting complete HTML content, department, and location, cleaned via `cleanJdText`.
+   - **Lever Fast-Path**: Parses `jobs.lever.co/{board}/{id}`, merging description, requirements bullet points, and additional notes.
+   - **Workable & Ashby Fast-Paths**: Connects to posting APIs or decodes embedded JSON-LD.
+   - **Universal Schema.org JSON-LD Parser**: Inspects any webpage's `<script type="application/ld+json">` for `JobPosting` structured data (standard across Workday, LinkedIn, Google Jobs).
+   - **OpenGraph & Semantic HTML Scraper**: Fallback that strips noise (`nav`, `header`, `footer`, `script`) and extracts from `<main>`, `<article>`, and `[class*="description"]` containers.
+   - **Grounded Web Search Fallback**: If an exotic career page blocks direct GET requests, falls back to web grounding to retrieve role responsibilities and qualifications.
+
+2. **Backend Interceptor (`server/src/services/tasks.js` & `server/src/routes/ai.js`)**:
+   - Added endpoint `POST /api/extract-jd` (`{ url }`).
+   - In `tailorResume`, `generateCoverLetter`, and `refineResume`, `ensureJdText()` inspects incoming `jobDescription`. If a bare URL is provided, it automatically fetches the real posting details before compiling the LLM prompt, ensuring no model ever tailors against a raw URL string.
+
+3. **Frontend Resume Studio Integration (`artifacts/job_search_os_outreach_resume.html`)**:
+   - Typing or pasting a job URL into `#tailorJD` triggers auto-detection with visual progress pill: `◐ Connecting to job board & parsing posting…`.
+   - When returned, `#tailorJD` is populated with the clean text, character counts are updated, and `#tailorRole` and `#tailorCompany` are auto-populated if empty.
+   - When arriving via prefill (`checkTailorPrefill`) with a URL, auto-fetch runs immediately in the background.
+   - `triggerStudioPrimaryAction`: If `#tailorJD` contains a URL, it automatically resolves the posting before triggering the tailoring job.
+
+4. **Track Modal & Pipeline Integration (`artifacts/job_search_os_main.html`)**:
+   - Added `⚡ Auto-fetch JD` button and on-change trigger beside `Job Link / URL` (`#tJD`).
+   - Automatically populates `Detailed Job Description Text` (`#tJdText`) and `Target Role / Job Title` (`#tRole`).
+   - In `openCompanyStudio`, preserves job link URLs so clicking "Tailor Resume" from a card with an apply URL immediately auto-fetches in Studio.
+
+

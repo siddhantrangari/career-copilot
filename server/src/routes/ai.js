@@ -3,6 +3,7 @@ import { TASKS, TASK_KINDS } from '../services/tasks.js';
 import { createJob, getJob } from '../services/jobs.js';
 import { resolveBrand } from '../services/brand.js';
 import { buildWinDocPptx } from '../services/pptx.js';
+import { extractJdFromUrl } from '../services/fetch-jd.js';
 
 /**
  * Every AI capability is exposed twice:
@@ -30,6 +31,19 @@ export default async function aiRoutes(app) {
   syncRoute('/cold-email', 'cold-email');
   syncRoute('/call-prep', 'call-prep');
   syncRoute('/linkedin-post', 'linkedin-post');
+
+  // ── Auto-fetch Job Posting from URL ─────────────────────────────────
+  app.post('/extract-jd', async (request, reply) => {
+    const { url } = request.body || {};
+    if (!url || typeof url !== 'string') {
+      return reply.code(400).send({ error: 'url is required' });
+    }
+    const result = await extractJdFromUrl(url);
+    if (!result || !result.ok) {
+      return reply.code(422).send({ error: result?.error || 'Could not extract job description from URL' });
+    }
+    return result;
+  });
 
   // ── Background jobs ──────────────────────────────────────────────────
   app.post('/tasks', async (request, reply) => {
