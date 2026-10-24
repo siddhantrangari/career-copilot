@@ -65,7 +65,7 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans
 .pipe-table td{padding:9px 10px;border-bottom:1px solid var(--bd);vertical-align:middle}
 .pipe-table tr:hover td{background:rgba(255,255,255,.02)}
 .stage{font-size:10px;font-weight:600;padding:2px 8px;border-radius:10px;white-space:nowrap}
-.s-new{background:rgba(79,142,247,.15);color:var(--ac)}.s-app{background:rgba(56,189,248,.18);color:#38bdf8}.s-net{background:rgba(247,201,72,.15);color:var(--y)}
+.s-new{background:rgba(79,142,247,.15);color:var(--ac)}.s-int-job{background:rgba(251,146,60,.18);color:#fb923c}.s-app{background:rgba(56,189,248,.18);color:#38bdf8}.s-net{background:rgba(247,201,72,.15);color:var(--y)}
 .s-call{background:rgba(181,123,238,.15);color:var(--p)}.s-win{background:rgba(56,217,169,.15);color:var(--g)}
 .s-int{background:rgba(255,107,107,.15);color:var(--r)}.s-off{background:rgba(56,217,169,.3);color:#fff}
 .s-fail{background:rgba(74,85,120,.3);color:var(--t3)}
@@ -219,6 +219,36 @@ input[type=text],input[type=url]{width:100%}
 .res-pdf-print-sheet.fit-compact h2.res-sec-head{font-size:11pt;margin:7pt 0 2.5pt 0}
 .res-pdf-print-sheet.fit-compact .res-bullets li{font-size:9.5pt;margin-bottom:1.8pt}
 
+/* Cover Letter Mode & Document Styling */
+.res-mode-btn{padding:5px 13px;font-size:12px;font-weight:700;border-radius:6px;border:1px solid transparent;background:transparent;color:var(--t2);cursor:pointer;transition:all .15s ease}
+.res-mode-btn:hover{color:var(--t);background:rgba(255,255,255,.05)}
+.res-mode-btn.active{background:var(--ac);color:#ffffff;box-shadow:0 2px 8px rgba(74,124,255,.35)}
+
+.cl-meta-block{margin-bottom:18px;font-size:13px;line-height:1.55;color:#334155}
+.cl-date-line{font-size:12.5px;color:#64748b;margin-bottom:12px;font-weight:500}
+.cl-recipient-box{margin-bottom:14px;color:#0f172a;font-weight:600}
+.cl-subject-box{margin-bottom:16px;padding:8px 12px;background:rgba(37,99,235,.07);border-left:3.5px solid #2563eb;border-radius:4px;font-size:13.5px;font-weight:700;color:#1e3a8a}
+.cl-salutation{font-size:14px;font-weight:700;margin-bottom:12px;color:#0f172a}
+.cl-paragraph{margin-bottom:14px;line-height:1.65;font-size:13.5px;color:#334155;text-align:justify}
+.cl-signoff{margin-top:24px;font-size:13.5px;line-height:1.6;color:#1e293b}
+
+.res-doc-sheet.theme-dark .cl-meta-block{color:#94a3b8}
+.res-doc-sheet.theme-dark .cl-date-line{color:#94a3b8}
+.res-doc-sheet.theme-dark .cl-recipient-box{color:#e2e8f0}
+.res-doc-sheet.theme-dark .cl-subject-box{background:rgba(59,130,246,.15);border-left-color:#60a5fa;color:#93c5fd}
+.res-doc-sheet.theme-dark .cl-salutation{color:#f8fafc}
+.res-doc-sheet.theme-dark .cl-paragraph{color:#cbd5e1}
+.res-doc-sheet.theme-dark .cl-signoff{color:#e2e8f0}
+
+/* PDF Print styles for Cover Letter */
+.res-pdf-print-sheet .cl-meta-block{margin-bottom:14pt;font-size:10pt;line-height:1.45;color:#334155}
+.res-pdf-print-sheet .cl-date-line{font-size:9.5pt;color:#64748b;margin-bottom:10pt}
+.res-pdf-print-sheet .cl-recipient-box{margin-bottom:10pt;color:#0f172a;font-weight:600;font-size:10pt}
+.res-pdf-print-sheet .cl-subject-box{margin-bottom:12pt;padding:5pt 8pt;background:rgba(37,99,235,.06);border-left:3pt solid #2563eb;font-size:10.5pt;font-weight:700;color:#1e3a8a}
+.res-pdf-print-sheet .cl-salutation{font-size:10.5pt;font-weight:700;margin-bottom:8pt;color:#0f172a}
+.res-pdf-print-sheet .cl-paragraph{margin-bottom:10pt;line-height:1.55;font-size:10.2pt;color:#334155;text-align:justify}
+.res-pdf-print-sheet .cl-signoff{margin-top:16pt;font-size:10.2pt;line-height:1.5;color:#1e293b}
+
 .res-lib-card{background:var(--s1);border:1px solid var(--bd);border-radius:12px;padding:18px 20px;margin-top:20px}
 .res-lib-table{width:100%;border-collapse:collapse;font-size:12px;margin-top:12px}
 .res-lib-table th{text-align:left;padding:8px 12px;color:var(--t3);font-size:10px;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--bd)}
@@ -254,7 +284,7 @@ input[type=text],input[type=url]{width:100%}
 
   <div class="tabs">
     <div class="tab active" onclick="showTab('outreach',this)">🚀 Outreach System</div>
-    <div class="tab" onclick="showTab('resume',this)">📄 Resume Studio</div>
+    <div class="tab" onclick="showTab('resume',this)">📄 Resume &amp; Cover Letter Studio</div>
     <div class="tab" onclick="showTab('search',this)">🔍 Job Search</div>
     <div class="tab" onclick="showTab('daily',this)">📅 Daily System</div>
   </div>
@@ -419,18 +449,23 @@ Now with family settled and a year of intensive AI engineering behind me, I'm re
     <!-- HERO STRIP -->
     <div class="res-hero">
       <div>
-        <h2>📄 AI Resume Hub &amp; Live Studio</h2>
-        <p>Tailor your verified history to any JD, chat with AI to tweak tone &amp; bullets, view live PDF preview, and manage versions.</p>
+        <h2 id="studioHeroTitle">📄 AI Resume &amp; Cover Letter Studio</h2>
+        <p id="studioHeroSubtitle">Tailor your verified history to any JD, generate targeted executive cover letters, chat with AI, view live PDF preview, and manage versions.</p>
       </div>
       <div class="res-hero-actions">
+        <!-- MODE TOGGLE -->
+        <div style="display:inline-flex;background:var(--s2);padding:3px;border-radius:8px;border:1px solid var(--bd);gap:3px">
+          <button type="button" id="btnModeResume" class="res-mode-btn active" onclick="switchStudioMode('resume')">📄 Tailored Resume</button>
+          <button type="button" id="btnModeCoverLetter" class="res-mode-btn" onclick="switchStudioMode('cover-letter')">✉️ Cover Letter</button>
+        </div>
         <select id="resumeVersionSelect" onchange="onSelectResumeVersion(this.value)" style="padding:7px 12px;background:var(--s2);border:1px solid var(--bd);color:var(--t);border-radius:7px;font-size:12px;font-weight:600;outline:none">
           <option value="active">✨ Active Working Draft</option>
-          <option value="master">📋 Siddhant's Master Resume</option>
-          <optgroup id="savedResumeOptGroup" label="Saved Tailored Resumes"></optgroup>
+          <option value="master">📋 Siddhant's Master Template</option>
+          <optgroup id="savedResumeOptGroup" label="Saved Resumes &amp; Letters"></optgroup>
         </select>
-        <button class="btn pri" onclick="resetNewTailor()" title="Start fresh tailored draft">➕ New Tailor</button>
-        <button class="btn" onclick="scrollToSavedResumes()" title="View all saved resumes in library">📚 History (<span id="savedCountBadge">0</span>)</button>
-        <button class="btn grn" onclick="downloadCurrentResumePdf()" style="font-weight:700">📥 Download PDF</button>
+        <button class="btn pri" id="btnStudioNew" onclick="resetNewTailor()" title="Start fresh draft">➕ New Draft</button>
+        <button class="btn" onclick="scrollToSavedResumes()" title="View all saved items in library">📚 History (<span id="savedCountBadge">0</span>)</button>
+        <button class="btn grn" onclick="downloadCurrentDocumentPdf()" style="font-weight:700">📥 Download PDF</button>
       </div>
     </div>
 
@@ -441,7 +476,7 @@ Now with family settled and a year of intensive AI engineering behind me, I'm re
         <!-- 1. Target Role & Job Description Form -->
         <div class="res-card" id="resumeTargetCard">
           <div class="res-card-hdr">
-            <div class="res-card-title">🎯 Target Company &amp; Job Description</div>
+            <div class="res-card-title" id="resumeTargetCardTitle">🎯 Target Company &amp; Job Description</div>
             <span class="ndsa" id="resLiveBadge">AI Fact-Checked</span>
           </div>
 
@@ -472,21 +507,21 @@ Now with family settled and a year of intensive AI engineering behind me, I'm re
             <input type="text" id="tailorInstructions" placeholder="e.g. Focus on sub-second latency, Kafka, multi-agent AI, and Staff-level leadership...">
           </div>
 
-          <button id="btnTailorResume" class="btn-glow-primary" onclick="triggerTailorResume()">
-            <span>✨ Tailor My Resume</span>
+          <button id="btnTailorResume" class="btn-glow-primary" onclick="triggerStudioPrimaryAction()">
+            <span id="btnTailorResumeLabel">✨ Tailor My Resume</span>
           </button>
 
           <!-- Tailoring Progress Status -->
           <div id="tailorProgressBox" class="res-progress-box">
             <div style="display:flex;align-items:center;gap:8px">
               <span class="cc-spin" style="font-size:16px;color:var(--ac)">◐</span>
-              <strong id="tailorProgressLabel" style="font-size:12px;color:var(--t)">Tailoring resume against your master history…</strong>
+              <strong id="tailorProgressLabel" style="font-size:12px;color:var(--t)">Processing against your master history…</strong>
             </div>
             <div class="res-progress-steps">
               <div class="res-progress-step" id="pStep1"><span>1.</span> Analyzing JD requirements &amp; keyword density</div>
               <div class="res-progress-step" id="pStep2"><span>2.</span> Rewriting executive summary &amp; ordering verified bullets</div>
               <div class="res-progress-step" id="pStep3"><span>3.</span> Running adversarial fact-check &amp; anti-hallucination audit</div>
-              <div class="res-progress-step" id="pStep4"><span>4.</span> Rendering ATS-compliant PDF document preview</div>
+              <div class="res-progress-step" id="pStep4"><span>4.</span> Rendering ATS-compliant document preview</div>
             </div>
           </div>
         </div>
@@ -494,22 +529,22 @@ Now with family settled and a year of intensive AI engineering behind me, I'm re
         <!-- 2. AI Chat & Refinement Card -->
         <div class="res-card" id="resumeChatCard">
           <div class="res-card-hdr">
-            <div class="res-card-title">💬 Chat with AI to Refine Resume</div>
+            <div class="res-card-title" id="resumeChatTitle">💬 Chat with AI to Refine Document</div>
             <span style="font-size:11px;color:var(--ac);font-weight:600">Live AI Iteration</span>
           </div>
-          <div style="font-size:11.5px;color:var(--t2);line-height:1.5;margin-bottom:10px">
-            Suggest changes, ask to adjust tone, emphasize specific architectures, or condense bullets. Updates the PDF preview instantly.
+          <div id="resumeChatHint" style="font-size:11.5px;color:var(--t2);line-height:1.5;margin-bottom:10px">
+            Suggest changes, ask to adjust tone, emphasize specific architectures, or condense bullets. Updates the live preview instantly.
           </div>
 
           <!-- Chat Stream -->
           <div id="resumeChatMessages" class="res-chat-stream">
             <div class="res-chat-msg ai">
-              👋 <strong>AI Copilot:</strong> Ready to tailor your resume! Enter a company name and paste the JD above, or choose an old tailored resume from the dropdown. Once generated, you can chat with me here to refine bullets, adjust emphasis, or customize sections.
+              👋 <strong>AI Copilot:</strong> Ready to craft your tailored document! Enter a company name and paste the JD above, or choose a draft from the dropdown. Once generated, you can chat with me here to refine text, adjust emphasis, or customize sections.
             </div>
           </div>
 
           <!-- Quick Suggestion Chips -->
-          <div class="res-chips-row">
+          <div class="res-chips-row" id="resumeChipsRow">
             <span class="res-chip" onclick="applySuggestionChip('Emphasize high-throughput Kafka pipelines and sub-second clinical latency')">⚡ Emphasize Kafka &amp; High Scale</span>
             <span class="res-chip" onclick="applySuggestionChip('Rewrite summary to position as Staff / Principal Full-Stack Engineer')">🎯 Staff Engineer Tone</span>
             <span class="res-chip" onclick="applySuggestionChip('Highlight multi-agent LLM failover architecture and MCP integrations')">🤖 Multi-Agent &amp; LLMs</span>
@@ -519,8 +554,8 @@ Now with family settled and a year of intensive AI engineering behind me, I'm re
 
           <!-- Chat Input -->
           <div class="res-chat-input-row">
-            <textarea id="chatRefineInput" rows="2" placeholder="Tell AI what to tweak or improve (e.g. 'Make the Philips bullets punchier', 'Highlight my Python experience')..." onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();submitResumeRefinement();}"></textarea>
-            <button id="btnChatRefine" class="btn pri" onclick="submitResumeRefinement()" style="padding:0 14px;white-space:nowrap;display:flex;align-items:center;gap:4px">
+            <textarea id="chatRefineInput" rows="2" placeholder="Tell AI what to tweak or improve (e.g. 'Make the Philips bullets punchier', 'Highlight my Python experience')..." onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();submitStudioRefinement();}"></textarea>
+            <button id="btnChatRefine" class="btn pri" onclick="submitStudioRefinement()" style="padding:0 14px;white-space:nowrap;display:flex;align-items:center;gap:4px">
               <span>🚀 Refine</span>
             </button>
           </div>
@@ -624,7 +659,7 @@ Now with family settled and a year of intensive AI engineering behind me, I'm re
             <button id="btnToggleSheetTheme" class="btn" onclick="toggleSheetTheme()" title="Switch between ATS White Paper and Dark Mode Preview">🌙 Dark</button>
             <button class="btn" onclick="copyCurrentResumeMarkdown()" title="Copy Markdown text">📋 Copy</button>
             <button class="btn" onclick="printCurrentResume()" title="Print / Native Save as PDF">🖨️ Print</button>
-            <button class="btn grn" onclick="downloadCurrentResumePdf()" style="font-weight:700;box-shadow:0 2px 8px rgba(56,217,169,0.3)">
+            <button class="btn grn" onclick="downloadCurrentDocumentPdf()" style="font-weight:700;box-shadow:0 2px 8px rgba(56,217,169,0.3)">
               📥 Download PDF
             </button>
           </div>
@@ -811,6 +846,8 @@ Now with family settled and a year of intensive AI engineering behind me, I'm re
       <div class="form-row"><label>Stage</label>
         <select id="updateStage">
           <option value="new">New — Added to list</option>
+          <option value="interested">Interested — Shortlisted / Target role</option>
+          <option value="applied">Applied — Application submitted</option>
           <option value="networking">Networking — Connected with people</option>
           <option value="call">Call Scheduled / Had call</option>
           <option value="win">WIN Doc Prepared & Sent</option>
@@ -891,8 +928,8 @@ const COMPANIES = [
 ];
 
 const ROLE_LABELS = {fde:'FDE',ai:'AI Eng',fs:'Full-Stack',se:'Solutions Eng'};
-const STAGE_CSS = {new:'s-new',applied:'s-app',networking:'s-net',call:'s-call',win:'s-win',interview:'s-int',offer:'s-off',failed:'s-fail'};
-const STAGE_LABELS = {new:'New',applied:'Applied',networking:'Networking',call:'Call',win:'WIN Sent',interview:'Interview',offer:'Offer 🎉',failed:'Closed'};
+const STAGE_CSS = {new:'s-new',interested:'s-int-job',applied:'s-app',networking:'s-net',call:'s-call',win:'s-win',interview:'s-int',offer:'s-off',failed:'s-fail'};
+const STAGE_LABELS = {new:'New',interested:'Interested',applied:'Applied',networking:'Networking',call:'Call',win:'WIN Sent',interview:'Interview',offer:'Offer 🎉',failed:'Closed'};
 
 // ── STORAGE ──
 function load(k){try{return JSON.parse(localStorage.getItem(k)||'null')}catch{return null}}
@@ -1195,7 +1232,7 @@ Java Developer | Naresh i Technologies | Jun 2014 – Mar 2016 | Hyderabad, Indi
 
 Freelance Solutions Architect | Growlogic Technologies (Eeko.ai) | May 2024 – Dec 2025 | Remote
 - Designed microservices on Azure AKS (6 Spring Boot services, Azure MySQL, Azure Blob Storage) for an automated social marketing platform.
-- Built a WhatsApp Business API notification pipeline with Spring Batch (chunk size 100) and timezone-aware scheduling — delivered prompts to ~200 paid customers/month with zero missed sends.
+- Built a WhatsApp Business API notification pipeline with Spring Batch (chunk size 100) and timezone-aware scheduling — delivered scheduled prompts with zero missed sends.
 - Established a GitOps pipeline (GitHub → ArgoCD → AKS) with zero-downtime rollouts.
 
 ## INDEPENDENT ENGINEERING PROJECTS | JAN 2026 – SEP 2026
@@ -1219,6 +1256,37 @@ AI Engineer | AnnaRakshak AI (Google "Build with AI" Hackathon) | Sep 2026
 ## EDUCATION & CERTIFICATIONS
 - Diploma in Computer Technology | Late Vasantdada Polytechnic | 2016
 - Java Enterprise Development Certification | NareshIT | 2014`;
+
+const DEFAULT_MASTER_COVER_LETTER = `# SIDDHANT RANGARI
+**Senior Full-Stack & AI Systems Engineer**
+Bangalore / Mumbai, India · +91 86689 88485 · siddhantrangari@gmail.com · linkedin.com/in/siddhant-rangari · siddhantrangari.com
+
+October 24, 2026
+
+**Hiring Team & Engineering Leadership**
+Target Company
+
+**Subject: Application for Senior Full-Stack & AI Systems Engineer**
+
+Dear Hiring Team,
+
+I am writing to express my strong enthusiasm for the engineering opportunity at your team. With over 12 years of end-to-end software delivery experience architecting high-throughput streaming backends, enterprise clinical platforms, and production multi-agent AI systems, I specialize in building resilient distributed systems that solve core performance bottlenecks and accelerate team velocity.
+
+Throughout my career, I have tackled high-stakes scalability and reliability challenges. At Philips Innovation Campus, I engineered a real-time patient monitoring platform using Spring Boot and Apache Kafka, designing a Kafka-to-AWS S3 decoupling pipeline that cut dashboard load times by 70% and delivered critical vital telemetry with sub-second latency for clinicians. I also refactored resource-heavy integration pipelines into Spring Boot microservices, boosting API efficiency by 98% and reducing MTTR by 30–40% with OpenTelemetry, Prometheus, and Grafana.
+
+Recently, as Founding Engineer at MyAgentFirm, I architected a production multi-agent AI platform serving 24 Fastify REST endpoints and 6 background workers with automated LLM provider failover (DeepInfra → Groq → Together AI) and full Model Context Protocol (MCP) tool integration. Earlier at Growlogic Technologies, I deployed 6 Spring Boot microservices on Azure AKS with ArgoCD GitOps and implemented a high-reliability Spring Batch notification pipeline with timezone-aware scheduling and zero missed sends.
+
+I am particularly excited about your mission and technical roadmap. My foundation in distributed event-driven systems, cloud-native container platforms, and pragmatic LLM integrations equips me to contribute immediately to your production engineering efforts. I would welcome the opportunity to discuss how my hands-on background can help achieve your goals.
+
+Sincerely,
+
+**Siddhant Rangari**
+siddhantrangari@gmail.com · +91 86689 88485
+linkedin.com/in/siddhant-rangari · siddhantrangari.com`;
+
+let currentStudioMode = 'resume'; // 'resume' | 'cover-letter'
+let currentCoverLetter = null;
+let coverLetterChatHistory = [];
 
 let currentTailoredResume = {
   id: null,
@@ -1533,6 +1601,135 @@ function renderResumeDocument(md, company, role) {
   }
 }
 
+function parseCoverLetterMarkdown(md) {
+  if (!md) md = DEFAULT_MASTER_COVER_LETTER;
+  const lines = md.split('\n');
+  let html = '';
+  let inHeader = true;
+  let headerHtml = '';
+
+  for (let i = 0; i < lines.length; i++) {
+    const rawLine = lines[i];
+    const line = rawLine.trim();
+    if (!line) continue;
+
+    // Name H1
+    if (line.startsWith('# ')) {
+      const name = cleanPlain(line.slice(2));
+      headerHtml += `<h1 class="res-name">${esc(name)}</h1>`;
+      continue;
+    }
+
+    // Role subtitle under name
+    if (inHeader && line.startsWith('**') && line.endsWith('**') && !line.toLowerCase().startsWith('**subject:') && !line.toLowerCase().startsWith('**hiring')) {
+      const title = cleanPlain(line);
+      headerHtml += `<div class="res-title-line">${esc(title)}</div>`;
+      continue;
+    }
+
+    // Contact info bar
+    if (inHeader && (line.includes('@') || line.includes('linkedin.com') || line.includes('+91') || line.includes('•') || line.includes('·'))) {
+      const items = line.split(/[•·|]/).map(s => s.trim()).filter(Boolean);
+      headerHtml += '<div class="res-contact-bar">';
+      headerHtml += items.map(item => {
+        if (item.includes('@')) {
+          return `<a href="mailto:${esc(item)}" style="color:inherit;text-decoration:none">${esc(item)}</a>`;
+        }
+        if (item.toLowerCase().includes('linkedin.com')) {
+          const url = item.startsWith('http') ? item : 'https://' + item;
+          return `<a href="${esc(url)}" target="_blank" style="color:inherit;text-decoration:none">${esc(item)}</a>`;
+        }
+        return `<span>${esc(item)}</span>`;
+      }).join(' • ');
+      headerHtml += '</div>';
+      html += headerHtml;
+      inHeader = false;
+      continue;
+    }
+
+    if (inHeader) {
+      if (headerHtml) html += headerHtml;
+      inHeader = false;
+    }
+
+    // Date line
+    if (/^[A-Za-z]+\s+\d{1,2},\s+\d{4}$/.test(line) || /^\d{4}-\d{2}-\d{2}$/.test(line)) {
+      html += `<div class="cl-date-line">${esc(line)}</div>`;
+      continue;
+    }
+
+    // Recipient / Company Block
+    if (line.toLowerCase().startsWith('**hiring') || (line.startsWith('**') && (line.toLowerCase().includes('team') || line.toLowerCase().includes('company')) && line.endsWith('**'))) {
+      html += `<div class="cl-recipient-box"><div>${cleanInlineMd(line)}</div>`;
+      if (i + 1 < lines.length && lines[i + 1].trim() && !lines[i + 1].toLowerCase().startsWith('**subject')) {
+        html += `<div>${esc(lines[i + 1].trim())}</div>`;
+        i++;
+      }
+      html += '</div>';
+      continue;
+    }
+
+    // Subject line
+    if (line.toLowerCase().startsWith('**subject:') || line.toLowerCase().startsWith('subject:')) {
+      const subj = cleanInlineMd(line);
+      html += `<div class="cl-subject-box">${subj}</div>`;
+      continue;
+    }
+
+    // Salutation
+    if (/^dear\s+/i.test(line)) {
+      html += `<div class="cl-salutation">${esc(line)}</div>`;
+      continue;
+    }
+
+    // Sign-off
+    if (/^(sincerely|best\s+regards|warm\s+regards|respectfully|regards),?/i.test(line)) {
+      html += `<div class="cl-signoff"><div>${esc(line)}</div>`;
+      for (let j = i + 1; j < lines.length; j++) {
+        const next = lines[j].trim();
+        if (next) {
+          html += `<div style="margin-top:2px">${cleanInlineMd(next)}</div>`;
+        }
+      }
+      html += '</div>';
+      break;
+    }
+
+    // Bullets if any
+    if (/^([•\-\*]|\d+\.)\s+/.test(line)) {
+      const bText = line.replace(/^([•\-\*]|\d+\.)\s+/, '');
+      html += `<div style="margin:4px 0 4px 18px;font-size:13.5px;line-height:1.55;color:#334155">• ${cleanInlineMd(bText)}</div>`;
+      continue;
+    }
+
+    // Paragraph
+    html += `<p class="cl-paragraph">${cleanInlineMd(line)}</p>`;
+  }
+
+  return html;
+}
+window.parseCoverLetterMarkdown = parseCoverLetterMarkdown;
+
+function renderCoverLetterDocument(md, company, role) {
+  const doc = document.getElementById('resumeDocument');
+  if (!doc) return;
+  doc.innerHTML = parseCoverLetterMarkdown(md || DEFAULT_MASTER_COVER_LETTER);
+
+  const raw = document.getElementById('resumeRawView');
+  if (raw) raw.textContent = md || DEFAULT_MASTER_COVER_LETTER;
+
+  const edit = document.getElementById('resumeEditText');
+  if (edit) edit.value = md || DEFAULT_MASTER_COVER_LETTER;
+
+  const title = document.getElementById('viewerDocTitle');
+  if (title) {
+    const c = company || (currentCoverLetter && currentCoverLetter.companyName) || (currentTailoredResume && currentTailoredResume.companyName) || 'Target Company';
+    const r = role || (currentCoverLetter && currentCoverLetter.jobTitle) || (currentTailoredResume && currentTailoredResume.jobTitle) || 'Target Role';
+    title.innerHTML = `✉️ Cover Letter: <strong>${esc(c)}</strong> — <span style="color:var(--t2)">${esc(r)}</span>`;
+  }
+}
+window.renderCoverLetterDocument = renderCoverLetterDocument;
+
 function updateJdCount(){
   const val = document.getElementById('tailorJD').value || '';
   const countEl = document.getElementById('jdWordCount');
@@ -1544,7 +1741,8 @@ function onTargetChange(){
   const r = document.getElementById('tailorRole').value.trim();
   const title = document.getElementById('viewerDocTitle');
   if (title && (c || r)) {
-    title.innerHTML = `📄 Preview: <strong>${esc(c || 'Draft Company')}</strong> — <span style="color:var(--t2)">${esc(r || 'Target Role')}</span>`;
+    const icon = (currentStudioMode === 'cover-letter') ? '✉️ Cover Letter' : '📄 Preview';
+    title.innerHTML = `${icon}: <strong>${esc(c || 'Draft Company')}</strong> — <span style="color:var(--t2)">${esc(r || 'Target Role')}</span>`;
   }
 }
 
@@ -1590,20 +1788,33 @@ function applyManualResumeEdits(){
   const edit = document.getElementById('resumeEditText');
   if (!edit) return;
   const newMd = edit.value.trim();
-  currentTailoredResume.tailoredResumeText = newMd;
-  renderResumeDocument(newMd, currentTailoredResume.companyName, currentTailoredResume.jobTitle);
-  setResumeViewMode('formatted');
-  appendChatMessage('user', '✏️ [Manual Edit Applied to Resume Document]');
-  appendChatMessage('ai', '✅ Live preview updated with your manual edits! You can download the PDF or continue asking AI to refine further.');
+  if (currentStudioMode === 'cover-letter') {
+    if (!currentCoverLetter) currentCoverLetter = { companyName: 'Draft Company', jobTitle: 'Target Role' };
+    currentCoverLetter.coverLetterText = newMd;
+    renderCoverLetterDocument(newMd, currentCoverLetter.companyName, currentCoverLetter.jobTitle);
+    setResumeViewMode('formatted');
+    appendChatMessage('user', '✏️ [Manual Edit Applied to Cover Letter]');
+    appendChatMessage('ai', '✅ Live preview updated with your manual edits! You can download the PDF or continue asking AI to refine further.');
+  } else {
+    currentTailoredResume.tailoredResumeText = newMd;
+    renderResumeDocument(newMd, currentTailoredResume.companyName, currentTailoredResume.jobTitle);
+    setResumeViewMode('formatted');
+    appendChatMessage('user', '✏️ [Manual Edit Applied to Resume Document]');
+    appendChatMessage('ai', '✅ Live preview updated with your manual edits! You can download the PDF or continue asking AI to refine further.');
+  }
 }
 
 function copyCurrentResumeMarkdown(){
-  const md = currentTailoredResume.tailoredResumeText || DEFAULT_MASTER_RESUME;
+  const md = (currentStudioMode === 'cover-letter')
+    ? ((currentCoverLetter && currentCoverLetter.coverLetterText) || DEFAULT_MASTER_COVER_LETTER)
+    : (currentTailoredResume.tailoredResumeText || DEFAULT_MASTER_RESUME);
   navigator.clipboard.writeText(md).then(()=>{
-    const btn = event.target;
-    const old = btn.textContent;
-    btn.textContent = '✓ Copied!';
-    setTimeout(()=>btn.textContent = old, 1800);
+    const btn = (typeof event !== 'undefined' && event && event.target) ? event.target : null;
+    if (btn) {
+      const old = btn.textContent;
+      btn.textContent = '✓ Copied!';
+      setTimeout(()=>btn.textContent = old, 1800);
+    }
   });
 }
 
@@ -1696,6 +1907,66 @@ function generateResumePdfFromMarkdown(markdownText, filename, btn, densityOverr
   }
 }
 
+function generateCoverLetterPdfFromMarkdown(markdownText, filename, btn){
+  const sheet = document.createElement('div');
+  sheet.className = 'res-pdf-print-sheet';
+  sheet.innerHTML = parseCoverLetterMarkdown(markdownText || DEFAULT_MASTER_COVER_LETTER);
+  document.body.appendChild(sheet);
+
+  const opt = {
+    margin: [10, 12, 10, 12],
+    filename: filename || 'Siddhant_Rangari_Cover_Letter.pdf',
+    image: { type: 'jpeg', quality: 0.98 },
+    enableLinks: true,
+    html2canvas: { scale: 2, useCORS: true, letterRendering: true, logging: false, scrollX: 0, scrollY: 0 },
+    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+  };
+
+  const oldHtml = btn ? btn.innerHTML : '';
+  if (btn) btn.innerHTML = '⏳ Exporting...';
+
+  const cleanup = () => { if (sheet.parentNode) sheet.parentNode.removeChild(sheet); };
+
+  if (typeof html2pdf !== 'undefined') {
+    return html2pdf().set(opt).from(sheet).save().then(() => {
+      cleanup();
+      if (btn) {
+        btn.innerHTML = '✓ Downloaded!';
+        setTimeout(() => btn.innerHTML = oldHtml, 2000);
+      }
+    }).catch(err => {
+      cleanup();
+      console.error('PDF generation error:', err);
+      if (btn) btn.innerHTML = oldHtml;
+      window.print();
+    });
+  } else {
+    cleanup();
+    if (btn) btn.innerHTML = oldHtml;
+    window.print();
+  }
+}
+
+function downloadCurrentCoverLetterPdf(){
+  setResumeViewMode('formatted');
+  const comp = ((currentCoverLetter && currentCoverLetter.companyName) || (currentTailoredResume && currentTailoredResume.companyName) || 'Siddhant_Rangari').replace(/[^a-zA-Z0-9_-]/g, '_');
+  const role = ((currentCoverLetter && currentCoverLetter.jobTitle) || (currentTailoredResume && currentTailoredResume.jobTitle) || 'Engineer').replace(/[^a-zA-Z0-9_-]/g, '_');
+  const filename = `Cover_Letter_${comp}_${role}.pdf`;
+  const md = (currentCoverLetter && currentCoverLetter.coverLetterText) ? currentCoverLetter.coverLetterText : DEFAULT_MASTER_COVER_LETTER;
+  const btn = (typeof event !== 'undefined' && event && event.target) ? event.target.closest('button') : null;
+  generateCoverLetterPdfFromMarkdown(md, filename, btn);
+}
+
+function downloadCurrentDocumentPdf(){
+  if (currentStudioMode === 'cover-letter') {
+    downloadCurrentCoverLetterPdf();
+  } else {
+    downloadCurrentResumePdf();
+  }
+}
+window.downloadCurrentDocumentPdf = downloadCurrentDocumentPdf;
+window.downloadCurrentCoverLetterPdf = downloadCurrentCoverLetterPdf;
+
 function downloadCurrentResumePdf(){
   setResumeViewMode('formatted');
   const comp = (currentTailoredResume.companyName || 'Siddhant_Rangari').replace(/[^a-zA-Z0-9_-]/g, '_');
@@ -1735,7 +2006,7 @@ function applySuggestionChip(text){
   const input = document.getElementById('chatRefineInput');
   if (input) {
     input.value = text;
-    submitResumeRefinement();
+    submitStudioRefinement();
   }
 }
 
@@ -1780,7 +2051,10 @@ function triggerTailorResume(){
     if (secs > 35 && s3 && s4) { s3.className = 'res-progress-step done'; s4.className = 'res-progress-step active'; }
   };
 
+  const targetInfo = window.__CURRENT_TAILOR_TARGET__ || {};
   const payload = {
+    companyId: targetInfo.companyId || '',
+    roleId: targetInfo.roleId || '',
     companyName: company || 'Target Company',
     jobTitle: role || 'Senior Full-Stack & AI Engineer',
     jobDescription: jd,
@@ -1838,6 +2112,63 @@ function handleTailorSuccess(res, payload){
   updateAuditDisplay(currentTailoredResume);
 
   appendChatMessage('ai', `🎯 Tailored resume generated for ${payload.companyName} (${payload.jobTitle}) with ${currentTailoredResume.matchScore}% JD match! Every metric and bullet traces to your verified history. Use the chat box below to suggest any changes, tweak bullets, or alter the tone.`);
+
+  // 1. Cache to cc_saved_resumes_cache with role_id & company_id
+  const targetInfo = window.__CURRENT_TAILOR_TARGET__ || {};
+  const companyId = payload.companyId || targetInfo.companyId;
+  const roleId = payload.roleId || targetInfo.roleId;
+
+  const resumeEntry = {
+    id: res.id || ('res-' + Date.now()),
+    company_id: companyId || null,
+    company_name: payload.companyName,
+    job_title: payload.jobTitle,
+    role_id: roleId || null,
+    job_description: payload.jobDescription,
+    tailored_text: currentTailoredResume.tailoredResumeText,
+    tailoredResumeText: currentTailoredResume.tailoredResumeText,
+    match_score: currentTailoredResume.matchScore,
+    keywords_matched: currentTailoredResume.keywordsMatched,
+    keywords_missing: currentTailoredResume.keywordsMissing,
+    created_at: new Date().toISOString()
+  };
+
+  try {
+    let cached = JSON.parse(localStorage.getItem('cc_saved_resumes_cache') || '[]');
+    cached = [resumeEntry, ...cached.filter(x => x.id !== resumeEntry.id)];
+    localStorage.setItem('cc_saved_resumes_cache', JSON.stringify(cached));
+  } catch(e) {}
+
+  // 2. Update tracked roles in localStorage['sr_tracked']
+  try {
+    const trRaw = localStorage.getItem('sr_tracked');
+    if (trRaw && companyId) {
+      const trData = JSON.parse(trRaw);
+      if (trData[companyId]) {
+        const tr = trData[companyId];
+        if (!Array.isArray(tr.roles) || tr.roles.length === 0) {
+          tr.roles = [{
+            id: roleId || 'role-primary',
+            title: payload.jobTitle,
+            stage: tr.stage || 'new',
+            isPrimary: true
+          }];
+        }
+        let targetRole = roleId ? tr.roles.find(r => r.id === roleId) : tr.roles.find(r => (r.title||'').toLowerCase() === (payload.jobTitle||'').toLowerCase());
+        if (!targetRole && tr.roles.length > 0) targetRole = tr.roles[0];
+        if (targetRole) {
+          targetRole.tailoredResumeId = resumeEntry.id;
+          targetRole.tailoredResumeScore = resumeEntry.match_score;
+          targetRole.tailoredResumeText = resumeEntry.tailored_text;
+          targetRole.tailoredResumeAt = new Date().toISOString();
+        }
+        localStorage.setItem('sr_tracked', JSON.stringify(trData));
+        if (window.__CC__ && typeof window.__CC__.pushState === 'function') {
+          window.__CC__.pushState();
+        }
+      }
+    }
+  } catch(e) { console.warn('Failed to bind resume to role', e); }
 
   refreshSavedResumes();
   setResumeViewMode('formatted');
@@ -1981,6 +2312,373 @@ function updateAuditDisplay(data){
     }
   }
 }
+
+// ── COVER LETTER STUDIO ENGINE ──
+function switchStudioMode(mode) {
+  currentStudioMode = (mode === 'cover-letter') ? 'cover-letter' : 'resume';
+  const btnR = document.getElementById('btnModeResume');
+  const btnC = document.getElementById('btnModeCoverLetter');
+  if (btnR && btnC) {
+    if (currentStudioMode === 'cover-letter') {
+      btnR.classList.remove('active');
+      btnC.classList.add('active');
+    } else {
+      btnR.classList.add('active');
+      btnC.classList.remove('active');
+    }
+  }
+
+  const hTitle = document.getElementById('studioHeroTitle');
+  const hSub = document.getElementById('studioHeroSubtitle');
+  const actionLabel = document.getElementById('btnTailorResumeLabel');
+  const resCardTitle = document.getElementById('resumeTargetCardTitle');
+  const chatTitle = document.getElementById('resumeChatTitle');
+  const chatHint = document.getElementById('resumeChatHint');
+  const chatInput = document.getElementById('chatRefineInput');
+  const chipsRow = document.getElementById('resumeChipsRow');
+
+  const comp = document.getElementById('tailorCompany') ? document.getElementById('tailorCompany').value.trim() : '';
+  const role = document.getElementById('tailorRole') ? document.getElementById('tailorRole').value.trim() : '';
+
+  if (currentStudioMode === 'cover-letter') {
+    if (hTitle) hTitle.innerHTML = '✉️ AI Executive Cover Letter Studio';
+    if (hSub) hSub.textContent = 'Generate targeted, narrative cover letters mapping your verified achievements to any JD, chat with AI to refine, and export single-page PDFs.';
+    if (resCardTitle) resCardTitle.textContent = '🎯 Target Company & Role for Cover Letter';
+    if (actionLabel) actionLabel.textContent = '✉️ Generate Cover Letter';
+    if (chatTitle) chatTitle.textContent = '💬 Chat with AI to Refine Cover Letter';
+    if (chatHint) chatHint.textContent = 'Adjust tone, expand technical details, emphasize specific stories (Philips, MyAgentFirm, Growlogic), or condense paragraphs.';
+    if (chatInput) chatInput.placeholder = 'e.g. Emphasize sub-second latency from Philips and multi-agent failover from MyAgentFirm...';
+
+    if (chipsRow) {
+      chipsRow.innerHTML = `
+        <span class="res-chip" onclick="applySuggestionChip('Lead with Philips Kafka & sub-second latency vitals telemetry story')">⚡ Philips Kafka Story</span>
+        <span class="res-chip" onclick="applySuggestionChip('Emphasize production multi-agent LLM systems, MCP tool-calling, and failover')">🤖 Multi-Agent LLMs</span>
+        <span class="res-chip" onclick="applySuggestionChip('Adopt a confident Staff / Principal Engineering tone focused on business impact')">🎯 Staff Engineer Tone</span>
+        <span class="res-chip" onclick="applySuggestionChip('Highlight Azure AKS 6-microservices, ArgoCD GitOps, and zero missed sends')">☁️ Cloud &amp; AKS GitOps</span>
+        <span class="res-chip" onclick="applySuggestionChip('Keep executive letter crisp and under 300 words for rapid hiring manager scanning')">📄 Concise (&lt; 300 Words)</span>
+      `;
+    }
+
+    const clText = (currentCoverLetter && currentCoverLetter.coverLetterText) ? currentCoverLetter.coverLetterText : DEFAULT_MASTER_COVER_LETTER;
+    renderCoverLetterDocument(clText, comp, role);
+    renderCoverLetterAudit();
+
+  } else {
+    if (hTitle) hTitle.innerHTML = '📄 AI Resume Hub &amp; Live Studio';
+    if (hSub) hSub.textContent = 'Tailor your verified history to any JD, chat with AI to tweak tone & bullets, view live PDF preview, and manage versions.';
+    if (resCardTitle) resCardTitle.textContent = '🎯 Target Company & Job Description';
+    if (actionLabel) actionLabel.textContent = '✨ Tailor My Resume';
+    if (chatTitle) chatTitle.textContent = '💬 Chat with AI to Refine Document';
+    if (chatHint) chatHint.textContent = 'Suggest changes, ask to adjust tone, emphasize specific architectures, or condense bullets. Updates the live preview instantly.';
+    if (chatInput) chatInput.placeholder = 'e.g. Emphasize high-throughput Kafka pipelines and sub-second clinical latency...';
+
+    if (chipsRow) {
+      chipsRow.innerHTML = `
+        <span class="res-chip" onclick="applySuggestionChip('Emphasize high-throughput Kafka pipelines and sub-second clinical latency')">⚡ Emphasize Kafka &amp; High Scale</span>
+        <span class="res-chip" onclick="applySuggestionChip('Rewrite summary to position as Staff / Principal Full-Stack Engineer')">🎯 Staff Engineer Tone</span>
+        <span class="res-chip" onclick="applySuggestionChip('Highlight multi-agent LLM failover architecture and MCP integrations')">🤖 Multi-Agent &amp; LLMs</span>
+        <span class="res-chip" onclick="applySuggestionChip('Tighten bullet points and condense to fit strictly on 1 page')">📄 Condense to 1 Page</span>
+        <span class="res-chip" onclick="applySuggestionChip('Emphasize Docker, Kubernetes, AKS GitOps and AWS cloud infrastructure')">☁️ Cloud &amp; Kubernetes</span>
+      `;
+    }
+
+    const resText = (currentTailoredResume && currentTailoredResume.tailoredResumeText) ? currentTailoredResume.tailoredResumeText : DEFAULT_MASTER_RESUME;
+    renderResumeDocument(resText, comp, role);
+    updateAuditDisplay(currentTailoredResume);
+  }
+
+  setResumeViewMode('formatted');
+}
+window.switchStudioMode = switchStudioMode;
+
+function triggerStudioPrimaryAction() {
+  if (currentStudioMode === 'cover-letter') {
+    triggerGenerateCoverLetter();
+  } else {
+    triggerTailorResume();
+  }
+}
+window.triggerStudioPrimaryAction = triggerStudioPrimaryAction;
+
+function submitStudioRefinement() {
+  if (currentStudioMode === 'cover-letter') {
+    submitCoverLetterRefinement();
+  } else {
+    submitResumeRefinement();
+  }
+}
+window.submitStudioRefinement = submitStudioRefinement;
+
+function triggerGenerateCoverLetter() {
+  const company = document.getElementById('tailorCompany').value.trim();
+  const role = document.getElementById('tailorRole').value.trim();
+  const jd = document.getElementById('tailorJD').value.trim();
+  const instructions = document.getElementById('tailorInstructions').value.trim();
+
+  if (!jd) {
+    alert('Please paste the job description first.');
+    document.getElementById('tailorJD').focus();
+    return;
+  }
+
+  coverLetterChatHistory = [];
+
+  const btn = document.getElementById('btnTailorResume');
+  const actionLabel = document.getElementById('btnTailorResumeLabel');
+  const pBox = document.getElementById('tailorProgressBox');
+  const pLabel = document.getElementById('tailorProgressLabel');
+
+  btn.disabled = true;
+  if (actionLabel) actionLabel.innerHTML = '<span class="cc-spin">◐</span> Composing Cover Letter…';
+  pBox.style.display = 'block';
+
+  const s1 = document.getElementById('pStep1');
+  const s2 = document.getElementById('pStep2');
+  const s3 = document.getElementById('pStep3');
+  const s4 = document.getElementById('pStep4');
+
+  if (s1) s1.innerHTML = '<span>1.</span> Analyzing JD core competencies &amp; requirements';
+  if (s2) s2.innerHTML = '<span>2.</span> Mapping proven CAR stories &amp; real performance metrics';
+  if (s3) s3.innerHTML = '<span>3.</span> Composing executive narrative &amp; call to action';
+  if (s4) s4.innerHTML = '<span>4.</span> Rendering ATS-compliant printable cover letter';
+
+  [s1, s2, s3, s4].forEach(s => s && (s.className = 'res-progress-step'));
+  if (s1) s1.className = 'res-progress-step active';
+
+  const runner = (window.__CC_RESUME_STUDIO_ACTIONS__ && window.__CC_RESUME_STUDIO_ACTIONS__.runJob)
+    || (window.__CC__ && window.__CC__.runJob);
+
+  const onTick = (secs, status) => {
+    if (pLabel) pLabel.textContent = `Composing cover letter (${secs}s) — ${status}…`;
+    if (secs > 5 && s1 && s2) { s1.className = 'res-progress-step done'; s2.className = 'res-progress-step active'; }
+    if (secs > 15 && s2 && s3) { s2.className = 'res-progress-step done'; s3.className = 'res-progress-step active'; }
+    if (secs > 30 && s3 && s4) { s3.className = 'res-progress-step done'; s4.className = 'res-progress-step active'; }
+  };
+
+  const targetInfo = window.__CURRENT_TAILOR_TARGET__ || {};
+  const payload = {
+    companyId: targetInfo.companyId || '',
+    roleId: targetInfo.roleId || '',
+    companyName: company || 'Target Company',
+    jobTitle: role || 'Senior Full-Stack & AI Engineer',
+    jobDescription: jd,
+    instructions: instructions
+  };
+
+  const onSuccess = (res) => {
+    if (pBox) pBox.style.display = 'none';
+    const letter = res.coverLetter || res.letter || res;
+
+    currentCoverLetter = {
+      id: res.id || null,
+      companyName: payload.companyName,
+      jobTitle: payload.jobTitle,
+      jobDescription: payload.jobDescription,
+      coverLetterText: letter.coverLetterText || DEFAULT_MASTER_COVER_LETTER,
+      subject: letter.subject || `Application for ${payload.jobTitle}`,
+      keyHighlights: letter.keyHighlights || [],
+      fitSummary: letter.fitSummary || ''
+    };
+
+    renderCoverLetterDocument(currentCoverLetter.coverLetterText, currentCoverLetter.companyName, currentCoverLetter.jobTitle);
+    renderCoverLetterAudit();
+
+    // 1. Cache to cc_saved_cover_letters_cache
+    const companyId = payload.companyId || targetInfo.companyId;
+    const roleId = payload.roleId || targetInfo.roleId;
+
+    const letterEntry = {
+      id: res.id || ('cl-' + Date.now()),
+      company_id: companyId || null,
+      company_name: payload.companyName,
+      job_title: payload.jobTitle,
+      role_id: roleId || null,
+      cover_letter_text: currentCoverLetter.coverLetterText,
+      subject: currentCoverLetter.subject,
+      fit_summary: currentCoverLetter.fitSummary,
+      created_at: new Date().toISOString()
+    };
+
+    try {
+      let cachedLetters = JSON.parse(localStorage.getItem('cc_saved_cover_letters_cache') || '[]');
+      cachedLetters = [letterEntry, ...cachedLetters.filter(x => x.id !== letterEntry.id)];
+      localStorage.setItem('cc_saved_cover_letters_cache', JSON.stringify(cachedLetters));
+    } catch(e) {}
+
+    // 2. Update tracked roles in localStorage['sr_tracked']
+    try {
+      const trRaw = localStorage.getItem('sr_tracked');
+      if (trRaw && companyId) {
+        const trData = JSON.parse(trRaw);
+        if (trData[companyId]) {
+          const tr = trData[companyId];
+          if (!Array.isArray(tr.roles) || tr.roles.length === 0) {
+            tr.roles = [{
+              id: roleId || 'role-primary',
+              title: payload.jobTitle,
+              stage: tr.stage || 'new',
+              isPrimary: true
+            }];
+          }
+          let targetRole = roleId ? tr.roles.find(r => r.id === roleId) : tr.roles.find(r => (r.title||'').toLowerCase() === (payload.jobTitle||'').toLowerCase());
+          if (!targetRole && tr.roles.length > 0) targetRole = tr.roles[0];
+          if (targetRole) {
+            targetRole.coverLetterId = letterEntry.id;
+            targetRole.coverLetterText = letterEntry.cover_letter_text;
+            targetRole.coverLetterAt = new Date().toISOString();
+          }
+          localStorage.setItem('sr_tracked', JSON.stringify(trData));
+          if (window.__CC__ && typeof window.__CC__.pushState === 'function') {
+            window.__CC__.pushState();
+          }
+        }
+      }
+    } catch(e) { console.warn('Failed to bind cover letter to role', e); }
+
+    appendChatMessage('ai', `✉️ Targeted executive cover letter generated for ${payload.companyName}! It highlights your verified systems impact (Philips Kafka sub-second latency, MyAgentFirm LLM failover, Growlogic AKS zero-missed sends). Use the chat box below to refine the tone, expand on specific topics, or tweak paragraphs.`);
+  };
+
+  const onError = (err) => {
+    if (pBox) pBox.style.display = 'none';
+    alert('Cover letter generation failed: ' + (err.message || 'Unknown error'));
+    appendChatMessage('ai', '❌ Cover letter generation error: ' + (err.message || 'Please check backend logs.'));
+  };
+
+  const onFinish = () => {
+    btn.disabled = false;
+    if (actionLabel) actionLabel.innerHTML = '✉️ Generate Cover Letter';
+  };
+
+  if (runner) {
+    runner('cover-letter', payload, onTick)
+      .then(onSuccess)
+      .catch(onError)
+      .finally(onFinish);
+  } else {
+    fetch('/api/cover-letter', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + (localStorage.getItem('cc_token')||'') },
+      body: JSON.stringify(payload)
+    })
+    .then(r => r.json())
+    .then(onSuccess)
+    .catch(onError)
+    .finally(onFinish);
+  }
+}
+window.triggerGenerateCoverLetter = triggerGenerateCoverLetter;
+
+function submitCoverLetterRefinement() {
+  const input = document.getElementById('chatRefineInput');
+  const btn = document.getElementById('btnChatRefine');
+  const feedback = (input.value || '').trim();
+  if (!feedback) return;
+
+  appendChatMessage('user', feedback);
+  input.value = '';
+
+  btn.disabled = true;
+  btn.innerHTML = '<span class="cc-spin">◐</span> Refining…';
+
+  const runner = (window.__CC_RESUME_STUDIO_ACTIONS__ && window.__CC_RESUME_STUDIO_ACTIONS__.runJob)
+    || (window.__CC__ && window.__CC__.runJob);
+
+  const payload = {
+    coverLetterId: currentCoverLetter ? currentCoverLetter.id : null,
+    currentLetterText: (currentCoverLetter && currentCoverLetter.coverLetterText) ? currentCoverLetter.coverLetterText : DEFAULT_MASTER_COVER_LETTER,
+    feedback: feedback,
+    jobDescription: (currentCoverLetter && currentCoverLetter.jobDescription) || document.getElementById('tailorJD').value.trim(),
+    companyName: (currentCoverLetter && currentCoverLetter.companyName) || document.getElementById('tailorCompany').value.trim() || 'Target Company',
+    jobTitle: (currentCoverLetter && currentCoverLetter.jobTitle) || document.getElementById('tailorRole').value.trim() || 'Target Role'
+  };
+
+  const onSuccess = (res) => {
+    const letter = res.coverLetter || res.letter || res;
+    if (!currentCoverLetter) {
+      currentCoverLetter = {
+        companyName: payload.companyName,
+        jobTitle: payload.jobTitle,
+        jobDescription: payload.jobDescription
+      };
+    }
+    currentCoverLetter.coverLetterText = letter.coverLetterText || payload.currentCoverLetterText;
+    if (letter.subject) currentCoverLetter.subject = letter.subject;
+    if (letter.keyHighlights) currentCoverLetter.keyHighlights = letter.keyHighlights;
+    if (letter.fitSummary) currentCoverLetter.fitSummary = letter.fitSummary;
+
+    renderCoverLetterDocument(currentCoverLetter.coverLetterText, currentCoverLetter.companyName, currentCoverLetter.jobTitle);
+    renderCoverLetterAudit();
+
+    appendChatMessage('ai', `✅ Cover letter updated with your instructions: "${feedback}". Live document preview refreshed!`);
+    setResumeViewMode('formatted');
+  };
+
+  const onError = (err) => {
+    alert('Cover letter refinement failed: ' + (err.message || 'Unknown error'));
+    appendChatMessage('ai', '❌ Refinement error: ' + (err.message || 'Please try again.'));
+  };
+
+  const onFinish = () => {
+    btn.disabled = false;
+    btn.innerHTML = '<span>🚀 Refine</span>';
+  };
+
+  if (runner) {
+    runner('refine-cover-letter', payload, null)
+      .then(onSuccess)
+      .catch(onError)
+      .finally(onFinish);
+  } else {
+    fetch('/api/refine-cover-letter', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + (localStorage.getItem('cc_token')||'') },
+      body: JSON.stringify(payload)
+    })
+    .then(r => r.json())
+    .then(onSuccess)
+    .catch(onError)
+    .finally(onFinish);
+  }
+}
+window.submitCoverLetterRefinement = submitCoverLetterRefinement;
+
+function renderCoverLetterAudit() {
+  const card = document.getElementById('resumeAuditCard');
+  if (!card) return;
+  const title = card.querySelector('.res-card-title');
+  if (title) title.innerHTML = '✉️ Strategic Highlights &amp; Narrative Alignment';
+
+  const banner = document.getElementById('factCheckBanner');
+  if (banner) {
+    banner.className = 'cc-ok';
+    banner.innerHTML = `🛡️ <strong>Verified Stories:</strong> Highlights Philips Kafka latency reduction, MyAgentFirm multi-agent routing, and Growlogic AKS reliability.`;
+  }
+
+  const dsaBanner = document.getElementById('dsaWarningBanner');
+  if (dsaBanner) dsaBanner.style.display = 'none';
+
+  const kMatched = document.getElementById('keywordsMatchedList');
+  if (kMatched) {
+    const highlights = (currentCoverLetter && currentCoverLetter.keyHighlights && currentCoverLetter.keyHighlights.length)
+      ? currentCoverLetter.keyHighlights
+      : ['Philips Kafka 70% load cut', 'Sub-second clinical vitals', 'MyAgentFirm LLM failover', '24 REST APIs & 6 workers', 'Azure AKS 6 microservices', 'Spring Batch zero missed sends'];
+    kMatched.innerHTML = highlights.map(h => `<span class="rb gulf">${esc(h)}</span>`).join('');
+  }
+
+  const kMissing = document.getElementById('keywordsMissingList');
+  if (kMissing) {
+    kMissing.innerHTML = '<span style="font-size:11px;color:var(--t3)">Executive cover letter maps direct competencies</span>';
+  }
+
+  const tpList = document.getElementById('talkingPointsList');
+  if (tpList) {
+    const fit = (currentCoverLetter && currentCoverLetter.fitSummary)
+      ? currentCoverLetter.fitSummary
+      : 'Connects your deep background in resilient distributed systems directly to target architecture challenges.';
+    tpList.innerHTML = `<li style="list-style:none;margin-left:-16px;color:var(--t2);line-height:1.55">${esc(fit)}</li>`;
+  }
+}
+window.renderCoverLetterAudit = renderCoverLetterAudit;
 
 // ── SAVED RESUMES LIBRARY ──
 function refreshSavedResumes(){
@@ -2142,41 +2840,75 @@ function deleteSavedResume(id){
 }
 
 function onSelectResumeVersion(val){
-  if (val === 'active') {
-    renderResumeDocument(currentTailoredResume.tailoredResumeText, currentTailoredResume.companyName, currentTailoredResume.jobTitle);
-  } else if (val === 'master') {
-    renderResumeDocument(DEFAULT_MASTER_RESUME, 'Siddhant Rangari', 'Master Profile');
+  if (currentStudioMode === 'cover-letter') {
+    if (val === 'master') {
+      renderCoverLetterDocument(DEFAULT_MASTER_COVER_LETTER, 'Siddhant Rangari', 'Master Template');
+    } else if (val === 'active') {
+      const text = (currentCoverLetter && currentCoverLetter.coverLetterText) ? currentCoverLetter.coverLetterText : DEFAULT_MASTER_COVER_LETTER;
+      renderCoverLetterDocument(text, currentCoverLetter ? currentCoverLetter.companyName : 'Draft Company', currentCoverLetter ? currentCoverLetter.jobTitle : 'Target Role');
+    } else {
+      loadSavedResume(val);
+    }
   } else {
-    loadSavedResume(val);
+    if (val === 'active') {
+      renderResumeDocument(currentTailoredResume.tailoredResumeText, currentTailoredResume.companyName, currentTailoredResume.jobTitle);
+    } else if (val === 'master') {
+      renderResumeDocument(DEFAULT_MASTER_RESUME, 'Siddhant Rangari', 'Master Profile');
+    } else {
+      loadSavedResume(val);
+    }
   }
 }
 
 function resetNewTailor(){
-  currentTailoredResume = {
-    id: null,
-    companyName: '',
-    jobTitle: '',
-    jobDescription: '',
-    tailoredResumeText: DEFAULT_MASTER_RESUME,
-    matchScore: 0,
-    keywordsMatched: [],
-    keywordsMissing: [],
-    dsaSignal: { likely: false },
-    talkingPoints: [],
-    verification: { clean: true, safeToSend: true, issues: [] }
-  };
+  if (currentStudioMode === 'cover-letter') {
+    currentCoverLetter = {
+      id: null,
+      companyName: '',
+      jobTitle: '',
+      jobDescription: '',
+      coverLetterText: DEFAULT_MASTER_COVER_LETTER,
+      subject: 'Application for Target Role',
+      keyHighlights: [],
+      fitSummary: ''
+    };
+    document.getElementById('tailorCompany').value = '';
+    document.getElementById('tailorRole').value = '';
+    document.getElementById('tailorJD').value = '';
+    document.getElementById('tailorInstructions').value = '';
+    updateJdCount();
+    const sel = document.getElementById('resumeVersionSelect');
+    if (sel) sel.value = 'active';
+    renderCoverLetterDocument(DEFAULT_MASTER_COVER_LETTER, 'Draft Company', 'Target Role');
+    renderCoverLetterAudit();
+    appendChatMessage('ai', 'Started fresh cover letter draft. Paste your target company and JD above to begin!');
+  } else {
+    currentTailoredResume = {
+      id: null,
+      companyName: '',
+      jobTitle: '',
+      jobDescription: '',
+      tailoredResumeText: DEFAULT_MASTER_RESUME,
+      matchScore: 0,
+      keywordsMatched: [],
+      keywordsMissing: [],
+      dsaSignal: { likely: false },
+      talkingPoints: [],
+      verification: { clean: true, safeToSend: true, issues: [] }
+    };
 
-  document.getElementById('tailorCompany').value = '';
-  document.getElementById('tailorRole').value = '';
-  document.getElementById('tailorJD').value = '';
-  document.getElementById('tailorInstructions').value = '';
-  updateJdCount();
+    document.getElementById('tailorCompany').value = '';
+    document.getElementById('tailorRole').value = '';
+    document.getElementById('tailorJD').value = '';
+    document.getElementById('tailorInstructions').value = '';
+    updateJdCount();
 
-  const sel = document.getElementById('resumeVersionSelect');
-  if (sel) sel.value = 'active';
+    const sel = document.getElementById('resumeVersionSelect');
+    if (sel) sel.value = 'active';
 
-  renderResumeDocument(DEFAULT_MASTER_RESUME, 'Draft Company', 'Target Role');
-  appendChatMessage('ai', 'Started fresh tailored resume draft. Paste your target company and JD above to begin!');
+    renderResumeDocument(DEFAULT_MASTER_RESUME, 'Draft Company', 'Target Role');
+    appendChatMessage('ai', 'Started fresh tailored resume draft. Paste your target company and JD above to begin!');
+  }
 }
 
 function scrollToSavedResumes(){
@@ -2236,18 +2968,75 @@ function checkTailorPrefill() {
     const qCompany = u.searchParams.get('company');
     const qRole = u.searchParams.get('role');
     const qCompanyId = u.searchParams.get('companyId');
+    const qRoleId = u.searchParams.get('roleId');
+    const qMode = u.searchParams.get('mode');
 
-    const company = (prefill && prefill.companyName) || qCompany || '';
+    let company = (prefill && prefill.companyName) || qCompany || '';
     const role = (prefill && prefill.role) || qRole || '';
     let jdText = (prefill && prefill.jdText) || '';
     const companyId = (prefill && prefill.companyId) || qCompanyId || '';
+    const roleId = (prefill && prefill.roleId) || qRoleId || '';
+    const mode = (prefill && prefill.mode) || qMode || 'resume';
+
+    // Auto-resolve human company name if it was passed as an internal ID (starts with c_ or matches companyId)
+    const targetId = companyId || (/^c_\d+/i.test(company) ? company : '');
+    if (targetId && (!company || /^c_\d+/i.test(company) || company === targetId)) {
+      let resolvedName = '';
+      if (typeof customCompanies !== 'undefined' && Array.isArray(customCompanies)) {
+        const found = customCompanies.find(x => x.id === targetId);
+        if (found && found.name) resolvedName = found.name;
+      }
+      if (!resolvedName) {
+        try {
+          const cu = JSON.parse(localStorage.getItem('sr_custom') || '[]');
+          if (Array.isArray(cu)) {
+            const found = cu.find(x => x.id === targetId);
+            if (found && found.name) resolvedName = found.name;
+          }
+        } catch (e) {}
+      }
+      if (!resolvedName && window.__CC_CATALOGUE__) {
+        const found = window.__CC_CATALOGUE__.find(x => x.id === targetId);
+        if (found && found.name) resolvedName = found.name;
+      }
+      if (!resolvedName && typeof COS !== 'undefined' && Array.isArray(COS)) {
+        const found = COS.find(x => x.id === targetId);
+        if (found && found.name) resolvedName = found.name;
+      }
+      if (!resolvedName) {
+        try {
+          const tr = JSON.parse(localStorage.getItem('sr_tracked') || '{}');
+          if (tr && tr[targetId] && tr[targetId].name) resolvedName = tr[targetId].name;
+        } catch (e) {}
+      }
+      if (resolvedName) {
+        company = resolvedName;
+      } else if (/^c_\d+/i.test(company)) {
+        company = '';
+      }
+    }
+
+    window.__CURRENT_TAILOR_TARGET__ = { companyId: companyId || targetId, roleId, companyName: company, role };
+
+    if (mode === 'cover-letter') {
+      switchStudioMode('cover-letter');
+    } else {
+      switchStudioMode('resume');
+    }
 
     const compEl = document.getElementById('tailorCompany');
     const roleEl = document.getElementById('tailorRole');
     const jdEl = document.getElementById('tailorJD');
 
     let filledAny = false;
-    if (compEl && company) { compEl.value = company; filledAny = true; }
+    if (compEl) {
+      if (company && !/^c_\d+/i.test(company)) {
+        compEl.value = company;
+        filledAny = true;
+      } else if (/^c_\d+/i.test(compEl.value)) {
+        compEl.value = '';
+      }
+    }
     if (roleEl && role) { roleEl.value = role; filledAny = true; }
     if (jdEl && jdText) {
       jdEl.value = cleanJdText(jdText);

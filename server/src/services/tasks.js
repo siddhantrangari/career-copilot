@@ -11,6 +11,8 @@ import {
   tailorResumePrompt,
   refineResumePrompt,
   verifyResumePrompt,
+  coverLetterPrompt,
+  refineCoverLetterPrompt,
   coldEmailPrompt,
   callPrepPrompt,
   linkedInPostPrompt,
@@ -259,7 +261,7 @@ export async function generateWinDoc(payload = {}, ctx = {}) {
     );
     await query(
       `UPDATE tracked_companies SET win_status = 'drafted', stage =
-         CASE WHEN stage IN ('new','applied','networking','call') THEN 'win' ELSE stage END,
+         CASE WHEN stage IN ('new','interested','applied','networking','call') THEN 'win' ELSE stage END,
          updated_at = now()
        WHERE company_id = $1`,
       [company.id],
@@ -448,6 +450,78 @@ export async function refineResume(payload = {}) {
   return { resume: result, id: savedId };
 }
 
+// ── Tailored cover letter ─────────────────────────────────────────────
+export async function generateCoverLetter(payload = {}) {
+  const { jobTitle, jobDescription, instructions, comments } = payload;
+  const company = await resolveCompany(payload);
+  const name = company?.name || payload.companyName || 'Target Company';
+
+  const candidate = await candidateBlock();
+  const prompt = coverLetterPrompt({
+    companyName: name,
+    jobTitle: jobTitle || 'Senior Full-Stack & AI Engineer',
+    jobDescription: jobDescription || '',
+    instructions: instructions || comments || '',
+    candidate,
+  });
+
+  const result = await chatJson({
+    kind: 'cover-letter',
+    companyId: company?.id,
+    system: prompt.system,
+    user: prompt.user,
+    maxTokens: 8_000,
+    input: { companyName: name, jobTitle },
+  });
+
+  return {
+    coverLetter: result,
+    companyName: name,
+    jobTitle: jobTitle || 'Senior Full-Stack & AI Engineer',
+  };
+}
+
+export async function refineCoverLetter(payload = {}) {
+  const {
+    currentLetterText,
+    feedback,
+    comments,
+    companyName,
+    jobTitle,
+  } = payload;
+
+  const userFeedback = feedback || comments;
+  if (!userFeedback?.trim()) throw new AiError('feedback or comments is required to refine cover letter', 400);
+  if (!currentLetterText?.trim()) throw new AiError('currentLetterText is required', 400);
+
+  const company = await resolveCompany(payload);
+  const name = company?.name || companyName || 'Target Company';
+
+  const candidate = await candidateBlock();
+  const prompt = refineCoverLetterPrompt({
+    companyName: name,
+    jobTitle: jobTitle || 'Senior Full-Stack & AI Engineer',
+    currentLetterText,
+    userFeedback,
+    candidate,
+  });
+
+  const result = await chatJson({
+    kind: 'refine-cover-letter',
+    companyId: company?.id,
+    system: prompt.system,
+    user: prompt.user,
+    maxTokens: 8_000,
+    input: { companyName: name, jobTitle, feedback: userFeedback },
+  });
+
+  return {
+    coverLetter: result,
+    companyName: name,
+    jobTitle: jobTitle || 'Senior Full-Stack & AI Engineer',
+  };
+}
+
 // ── Cold email ────────────────────────────────────────────────────────
 export async function coldEmail(payload = {}) {
   const { roleName, recipient } = payload;
@@ -571,6 +645,8 @@ export const TASKS = {
   'generate-win-doc': generateWinDoc,
   'tailor-resume': tailorResume,
   'refine-resume': refineResume,
+  'cover-letter': generateCoverLetter,
+  'refine-cover-letter': refineCoverLetter,
   'cold-email': coldEmail,
   'call-prep': callPrep,
   'linkedin-post': linkedInPost,

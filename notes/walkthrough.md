@@ -157,3 +157,130 @@ Fixed severe formatting issues with downloaded PDFs from the Resume Studio (`/ou
   - `artifacts/job_search_os_outreach_resume.html`
 - Updated candidate selection in `autofill.js` to support user-entered JD notes (>= 40 chars) alongside discovered jobs.
 
+---
+
+## 8. Cover Letter Studio & Direct Card Navigation with Autofill
+
+### 1. Master Resume & CAR Achievement Bank Cleanup
+- **Complete Elimination**: Removed all mentions of `"serving ~200 paid customers/month at peak"` from:
+  - `server/data/profile.json` (Growlogic role and Selected Achievements).
+  - `server/data/achievements.json` (`growlogic-aks` result & metrics updated to `"zero missed sends"`).
+  - `artifacts/job_search_os_outreach_resume.html` (`DEFAULT_MASTER_RESUME`).
+  - `SIDDHANT_CONTEXT.md`.
+- **Negative Prompt Hardening**: Added explicit negative constraints to all AI prompts (`tailorResumePrompt`, `refineResumePrompt`, `coverLetterPrompt`, and `refineCoverLetterPrompt` in `server/src/services/prompts.js`) ensuring LLMs never hallucinate or include this metric in future tailored documents.
+
+### 2. Executive Cover Letter Studio
+- Added first-class **Cover Letter Studio** mode within the Resume Studio tab on `/outreach.html`:
+  - **Mode Toggle Buttons**: `[ 📄 Tailored Resume ]` and `[ ✉️ Cover Letter ]` in the studio hero header.
+  - **Single-Page Executive Layout**: Dedicated `.cl-*` styles formatting contact bars, date, addressee blocks, subject lines, punchy narrative paragraphs, and formal sign-offs.
+  - **Live Preview & Editor**: Supports Formatted A4 view, Raw Markdown view, in-place text editing, and PDF download (`Cover_Letter_[Company]_[Role].pdf`).
+  - **AI Generation & Iterative Chat**:
+    - Backend task `'cover-letter'` and synchronous endpoint `POST /api/cover-letter` mapping verified CAR stories (Philips Kafka 70% load reduction, MyAgentFirm multi-agent LLM failover, Growlogic AKS zero missed sends).
+    - Iterative chat refinement via `'refine-cover-letter'` and `POST /api/refine-cover-letter`.
+
+### 3. Direct Navigation from Every Company Card with Autofill
+- **Directory Grid Cards**: Added `📄 Resume` and `✉️ Cover Letter` quick-action buttons to each company card.
+- **Pipeline Kanban Board**: Added `📄 Resume` and `✉️ Letter` buttons in `.kcard-actions` on every board card.
+- **Pipeline Table**: Added `📄 Resume` and `✉️ Letter` buttons in the table actions cell.
+- **Track Modal**: Added `✉️ Cover Letter` action alongside `📄 Tailor Resume`.
+- **Automated Prefill (`openCompanyStudio`)**:
+  - Automatically reads the company name, target role title, and attached JD text (from tracked state or `/api/companies/:id/autofill`).
+  - Persists prefill in `sessionStorage` (`cc_tailor_prefill`) with target mode (`resume` or `cover-letter`).
+  - Navigates directly to `/outreach.html?tab=resume&mode=...`, toggles the requested studio mode, populates all form fields, and scrolls smoothly into view.
+
+---
+
+## 9. Interested Pipeline Stage & Progression Flow
+
+Implemented a dedicated **Interested** stage in the pipeline (`new` → `interested` → `applied` → `networking` → `call` → `win` → `interview` → `offer` → `failed`):
+
+1. **Pipeline Kanban Board**:
+   - Added a 9th column: **INTERESTED** (`#fb923c` warm orange/coral accent) positioned immediately between `NEW` and `APPLIED`.
+   - Updated Kanban grid to `repeat(9, minmax(160px, 1fr))` for smooth responsive horizontal layout.
+   - 0ms native drag-and-drop support: drag cards into `INTERESTED`, or advance from `INTERESTED` into `APPLIED`, `NETWORKING`, etc.
+   - Quick 1-click progression buttons inside card actions:
+     - On `NEW` cards: `⭐ Interested ➔` (instantly moves to `interested`)
+     - On `INTERESTED` cards: `📨 Applied ➔` (instantly moves to `applied`)
+     - On `APPLIED` cards: `🤝 Network ➔` (instantly moves to `networking`)
+
+2. **Target Companies Directory**:
+   - Added quick `⭐ Interested` toggle button to every company card in the directory.
+   - Displays `⭐ Interested ✓` in coral when active, clicking toggles between `new` and `interested`.
+   - Added `⭐ Interested` quick-filter pill in the directory toolbar to immediately view all shortlisted target roles.
+   - Card badge displays `<span class="stage s-interested">Interested</span>`.
+
+3. **Modals & Filter Dropdowns**:
+   - Added `Interested` to the Pipeline Stage filter dropdown (`#pf`).
+   - Added `Interested (Target / Shortlisted)` to the Track Modal stage dropdown (`#tStage`).
+   - Added `Interested (Target / Shortlisted)` to the Add Company Modal initial stage dropdown (`#aStage`).
+   - Added `Interested` to Outreach Studio's pipeline update modal (`#updateStage`).
+
+4. **Backend & Data Integrity**:
+   - Updated `server/src/routes/tracked.js` and `server/src/routes/pipeline.js` STAGES lists.
+   - Updated `server/src/services/autofill.js` `STAGE_RANK`: `{ new: 0, interested: 1, applied: 2, networking: 3, ... }`.
+   - Updated `server/src/services/tasks.js` WIN document stage promotion case check.
+   - Updated `web/prototype-actions.js` STAGES, STAGE_LABELS, and Kanban card stage pickers.
+   - All changes compiled via `scripts/build-web.js` into `server/public/index.html` and `server/public/outreach.html`.
+---
+
+## 7. Multi-Role Tracking & Tailored Documents Pipeline
+
+Added full end-to-end multi-role tracking for companies in the pipeline, allowing candidates to track multiple relevant openings per employer with dedicated JDs, tailored resumes, cover letters, and outreach logs.
+
+### Features & Capabilities
+
+1. **Company Cards in Pipeline (Kanban & Table Views)**:
+   - **Multi-Role Sub-Cards**: Each role open at the company is displayed directly on the company card with its own role title, primary badge (`★`), stage badge (e.g. `[Applied]`, `[Interested]`), applied date (`📅 Applied: 24 Oct 2026`), outreach note (`✉️ 1 DM sent to EM, reply received`), and pay range.
+   - **Direct Document Action Chips**:
+     - `📄 Resume (Score%)`: 1-click opens the Quick Document Viewer Modal previewing the tailored resume for this specific role and match percentage.
+     - `✉️ Letter ✓`: 1-click preview of the role-specific cover letter.
+     - `📋 JD`: 1-click modal preview of the job description.
+     - `📄 +Tailor Resume` / `✉️ +Letter`: If not yet generated, direct navigation to Resume & Cover Letter Studio pre-filled with the exact role title, JD, and `roleId`.
+     - `Apply ↗`: Opens the external application URL.
+     - `+ Track Another Role`: Immediately adds a new tracked opening to this company.
+
+2. **Track Modal Multi-Role Manager (`#trackModal`)**:
+   - **Role Tabs Bar**: Switch seamlessly between tracked openings (`role-1`, `role-2`, etc.) or click `+ Track Another Role`.
+   - **Active Role Attributes**:
+     - Target Role / Job Title
+     - Role Application Stage (`Interested`, `Applied`, `Networking`, `Interview`, etc.)
+     - Role Pay Range & Job Application Link
+     - Applied Date (if applied)
+     - Role-Specific Outreach & Messaging Log
+     - Role Context Notes & Primary Role toggle (`★ Set as Primary Role for Pipeline Cards`)
+   - **Connected Document Status Bar**:
+     - Shows current status for Tailored Resume (with score & preview/re-tailor buttons) and Cover Letter (with view/edit buttons).
+   - **Discovered Job Openings Importer**: 1-click import from live scraped openings (`window.__CC_BADGE_CACHE__`).
+
+3. **Quick Document Viewer Modal (`#roleDocModal`)**:
+   - Instant formatted markdown and plain-text preview without navigating away from the Kanban board.
+   - 1-click actions:
+     - `📋 Copy`: Copies document text to clipboard.
+     - `📥 Download PDF`: Generates clean, ATS-compliant PDF document directly in browser.
+     - `✏️ Open in Studio`: Jumps to Resume & Cover Letter Studio for comprehensive editing.
+
+4. **Resume & Cover Letter Studio Integration (`job_search_os_outreach_resume.html`)**:
+   - Accepts `roleId` and company parameters from card chips or session storage.
+   - Generated tailored resumes and cover letters automatically bind to the specific `roleId` in `cc_saved_resumes_cache`, `cc_saved_cover_letters_cache`, and `sr_tracked[companyId].roles`.
+
+5. **Storage, Serialization & Zero Data Loss**:
+   - Strictly compliant with `AGENTS.md` and `accidental-data-loss-prevention`.
+   - Serializes `roles` array into database `notes` column using safe metadata comments (`<!--CC_ROLES:[...]-->`), enabling multi-device persistence without destructive schema migrations.
+   - Backward-compatible: primary role properties (`stage`, `roleTitle`, `jobLink`, `pay`, `jd`) remain populated on the top-level company object so existing search filters, analytics, and drag-and-drop operate flawlessly.
+   - Metric Hallucination Guard: `"serving ~200 paid customers/month at peak"` is strictly forbidden and filtered from all tailored outputs.
+
+---
+
+## 8. Custom Company Auto-Resolution & Studio Prefill Fix
+
+Fixed an issue where clicking "Tailor Resume" or "Letter" from a custom-added company card in the pipeline would pass the company's internal ID (`c_<timestamp>`, e.g. `c_1792024921292`) into the Company Name input field instead of its real human name (e.g. "Eli Lilly"):
+
+1. **Sender-Side Resolution (`artifacts/job_search_os_main.html` & `web/bridge.js`)**:
+   - `openCompanyStudio` and `navigateToTailorResume` now query `allCos()`, `custom`, `sr_custom`, and `sr_tracked` to resolve the human name for custom company records.
+   - Strict ID guard (`!/^c_\d+/i.test(...)`) prevents internal identifiers from ever being assigned to `companyName` or appended as `&company=`.
+2. **Receiver-Side Auto-Resolution & Sanitization (`artifacts/job_search_os_outreach_resume.html`)**:
+   - In `checkTailorPrefill`, if `company` arrives as an internal ID or equals `companyId`, it automatically looks up the matching company record from `customCompanies` or `sr_custom` to resolve the actual company name.
+   - If an unrecognized `c_...` ID is encountered, the field is cleared rather than displaying the raw internal ID.
+3. **Verification**:
+   - Automated unit test suite [`scratch/test-company-prefill.js`](file:///Users/siddhant/DEV-ENV/AntiGravity/career-copilot-new/scratch/test-company-prefill.js) validates name resolution, fallback handling, and c_ sanitization.
+

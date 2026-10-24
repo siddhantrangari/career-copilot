@@ -251,6 +251,7 @@ STRICT LENGTH CONSTRAINTS (MUST FIT WITHIN 1.5 TO 2 PAGES MAX — 650 TO 780 WOR
   * All other verified roles (GE Healthcare, Cropdata, Ajanta, NareshIT, ChalOnline, TradingOS, AnnaRakshak): exactly 1 concise, metric-heavy one-liner bullet each.
   * Bullet length: 15–25 words max per bullet.
   * DO NOT include a separate redundant 'SELECTED ACHIEVEMENTS' or 'OPEN TO' section — achievements are already proven inside the role bullets. This avoids repetition and saves 20 lines.
+  * NEVER mention '~200 paid customers/month' or any variation of '200 paid customers' in Growlogic or anywhere in the resume (user explicitly excluded this metric).
 
 MARKDOWN FORMATTING & SYNTAX CONSTRAINTS (NO '###' SYMBOLS):
 - For section headers, use: '## PROFESSIONAL EXPERIENCE', '## TECHNICAL SKILLS', etc.
@@ -369,6 +370,7 @@ STRICT LENGTH CONSTRAINTS (MUST FIT WITHIN 1.5 TO 2 PAGES MAX — 650 TO 780 WOR
   * All other verified roles (GE Healthcare, Cropdata, Ajanta, NareshIT, ChalOnline, TradingOS, AnnaRakshak): exactly 1 concise, metric-heavy one-liner bullet each.
   * Bullet length: 15–25 words max per bullet.
   * DO NOT include a separate redundant 'SELECTED ACHIEVEMENTS' or 'OPEN TO' section — achievements are already proven inside the role bullets. This avoids repetition and saves 20 lines.
+  * NEVER mention '~200 paid customers/month' or any variation of '200 paid customers' in Growlogic or anywhere in the resume (user explicitly excluded this metric).
 
 MARKDOWN FORMATTING & SYNTAX CONSTRAINTS (NO '###' SYMBOLS):
 - For role headers, use clean single-line text with pipe delimiters:
@@ -427,6 +429,101 @@ Return JSON exactly in this shape:
     { "claim": "the exact text from the tailored resume", "problem": "what is wrong", "severity": "critical|moderate|minor", "correction": "how to say it truthfully" }
   ],
   "verdict": "one sentence — is this safe to send?"
+}
+`,
+});
+
+export const coverLetterPrompt = ({ companyName, jobTitle, jobDescription, candidate, instructions }) => ({
+  system: `${CONSULTANT_STANCE}
+
+You are an expert executive technical career consultant drafting a compelling, consultant-grade Cover Letter for a Senior Full-Stack & AI Engineer candidate.
+Absolute rule: never invent experience, employers, dates, or metrics. You may only select, re-word, and emphasize from what is verified in the candidate's master history and CAR achievement bank. Return valid JSON only.`,
+
+  user: `CANDIDATE BACKGROUND:
+${candidate}
+
+TARGET COMPANY:
+${companyName}
+
+TARGET ROLE:
+${jobTitle || 'Senior Full-Stack & AI Engineer'}
+
+JOB DESCRIPTION:
+${jobDescription || '(none provided — reason from target company and target role)'}
+${instructions ? `\nUSER SPECIFIC GUIDANCE:\n${instructions}\n` : ''}
+
+COVER LETTER CRAFTING REQUIREMENTS:
+1. VOICE & TONE:
+   - Senior, confident, consultative, and authentic. No generic clichés ("I am writing to eagerly apply for...", "I believe I am the ideal candidate for this opening...").
+   - Lead with immediate technical value and direct alignment with what this company solves.
+
+2. STRUCTURE (SINGLE-PAGE LETTER — 320 TO 420 WORDS TOTAL):
+   - Header:
+     # SIDDHANT RANGARI
+     Senior Full-Stack & AI Engineer | siddhantrangari@gmail.com | +91 86689 88485 | linkedin.com/in/siddhant-rangari • siddhantrangari.com • Bangalore, India
+   - Date line: [Current Date or month/year, e.g. October 2026]
+   - Addressee block:
+     Hiring Team & Engineering Leadership
+     ${companyName}
+   - Reference line:
+     **RE: Application for ${jobTitle || 'Senior Engineering Role'}**
+   - Salutation: Dear Hiring Team,
+   - Opening Hook (1 concise paragraph):
+     Acknowledge the company's core technical mission and state clearly why Siddhant's 12+ years of full-stack systems and production AI engineering make him an immediate contributor.
+   - Core Value & Flagship Evidence (2-3 focused paragraphs):
+     * Directly link 2-3 of his verified flagship achievements to the key requirements in the JD (e.g. Philips Kafka decoupling & real-time streaming vitals; MyAgentFirm multi-agent orchestration, LLM failover routing, and MCP protocol integration; Growlogic Azure AKS microservices with ArgoCD GitOps).
+     * NEVER mention '~200 paid customers/month' or any variation of '200 paid customers' (user explicitly excluded this metric).
+     * Connect his lived experience directly to the architectural problems they face.
+   - Closing & Availability (1 punchy paragraph):
+     Reiterate pragmatic ownership, high-velocity delivery, and readiness to contribute immediately without handholding.
+   - Sign-off:
+     Sincerely,
+
+     Siddhant Rangari
+
+3. CRITICAL JSON FORMATTING:
+   Return valid JSON only in this exact structure:
+   {
+     "coverLetterText": "full formatted cover letter in clean markdown",
+     "subject": "Application for ${jobTitle || 'Senior Full-Stack & AI Engineer'} - Siddhant Rangari",
+     "keyHighlights": [
+       "3 punchy bullet points summarizing why he fits this role"
+     ],
+     "fitSummary": "one-sentence consultant summary of the fit"
+   }`,
+});
+
+export const refineCoverLetterPrompt = ({
+  companyName,
+  jobTitle,
+  currentLetterText,
+  userFeedback,
+  candidate,
+}) => ({
+  system: `${CONSULTANT_STANCE}
+
+You are an expert executive career consultant refining an existing tailored cover letter based on user feedback.
+Absolute rule: never invent experience or metrics. Keep all real metrics. Return valid JSON only.`,
+
+  user: `CANDIDATE BACKGROUND:
+${candidate}
+
+TARGET COMPANY: ${companyName}
+TARGET ROLE: ${jobTitle}
+
+CURRENT COVER LETTER:
+${currentLetterText}
+
+USER REQUESTED ADJUSTMENTS:
+${userFeedback}
+
+Refine the cover letter while keeping it under 420 words total (single-page printable format) and adhering strictly to verified history.
+NEVER include '~200 paid customers/month' or any variation of '200 paid customers'.
+
+Return JSON:
+{
+  "coverLetterText": "full refined cover letter in clean markdown",
+  "changesMade": "summary of edits made"
 }`,
 });
 

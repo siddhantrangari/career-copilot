@@ -1525,7 +1525,7 @@
   }
 
   // ── Drag a company between pipeline columns ─────────────────────────
-  var STAGES = ['new', 'applied', 'networking', 'call', 'win', 'interview', 'offer', 'failed'];
+  var STAGES = ['new', 'interested', 'applied', 'networking', 'call', 'win', 'interview', 'offer', 'failed'];
 
   function wireBoard() {
     // Native drag-and-drop is cleanly integrated into renderKanban() with
@@ -1649,9 +1649,9 @@
 (function () {
   'use strict';
 
-  var STAGES = ['new', 'applied', 'networking', 'call', 'win', 'interview', 'offer', 'failed'];
+  var STAGES = ['new', 'interested', 'applied', 'networking', 'call', 'win', 'interview', 'offer', 'failed'];
   var STAGE_LABELS = {
-    new: 'New', applied: 'Applied', networking: 'Networking', call: 'Call',
+    new: 'New', interested: 'Interested', applied: 'Applied', networking: 'Networking', call: 'Call',
     win: 'WIN Sent', interview: 'Interview', offer: 'Offer 🎉', failed: 'Closed',
   };
 
@@ -1930,7 +1930,7 @@
         if (!id) return;
         card.dataset.ccPicker = '1';
 
-        var current = STAGES[colIdx] || 'new';
+        var current = col.getAttribute('data-stage') || STAGES[colIdx] || 'new';
         var picker = makeStagePicker(id, current);
         picker.style.marginTop = '6px';
         card.appendChild(picker);

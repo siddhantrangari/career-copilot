@@ -1,6 +1,6 @@
 import { many, one, query } from '../db/pool.js';
 
-const STAGES = ['new', 'applied', 'networking', 'call', 'win', 'interview', 'offer', 'failed'];
+const STAGES = ['new', 'interested', 'applied', 'networking', 'call', 'win', 'interview', 'offer', 'failed'];
 const CONN_STATUSES = ['req', 'dm', 'reply', 'fu1', 'fu2', 'fu3', 'win', 'call', 'ref', 'ab'];
 const CONN_TYPES = ['peer', 'hm', 'hr', 'indian', 'other'];
 
@@ -40,6 +40,12 @@ export default async function trackedRoutes(app) {
       return reply.code(400).send({ error: `stage must be one of: ${STAGES.join(', ')}` });
     }
 
+    let notesToSave = b.notes ?? null;
+    if (Array.isArray(b.roles) && b.roles.length) {
+      notesToSave = (notesToSave || '').replace(/<!--CC_ROLES:[\s\S]*?-->/g, '').trim();
+      notesToSave += (notesToSave ? '\n\n' : '') + `<!--CC_ROLES:${JSON.stringify(b.roles)}-->`;
+    }
+
     const row = await one(
       `INSERT INTO tracked_companies (company_id, stage, win_status, msgs, jd, job_link, notes)
        VALUES ($1, COALESCE($2, 'new'), COALESCE($3, 'none'), COALESCE($4, ''), COALESCE($5, ''), COALESCE($6, ''), COALESCE($7, ''))
@@ -59,7 +65,7 @@ export default async function trackedRoutes(app) {
         b.msgs ?? null,
         b.jd ?? null,
         b.jobLink ?? b.job_link ?? null,
-        b.notes ?? null,
+        notesToSave,
       ],
     );
 

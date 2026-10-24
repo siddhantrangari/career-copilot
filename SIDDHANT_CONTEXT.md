@@ -75,7 +75,7 @@
 - WhatsApp Business API notification pipeline via Spring Batch (100-record JDBC paging chunks, UTC→IST timezone scheduling)
 - GitOps pipeline: GitHub → CI Build → ArgoCD → AKS cluster (zero-downtime deployments)
 - React + Next.js frontend with Razorpay subscription management
-- ~200 paid customers/month at peak before budget issues closed it
+- Automated design-prompt delivery with zero missed sends before budget issues closed it
 
 ### MyAgentFirm (Mar 2026 – Aug 2026) — Independent
 **Project: Multi-Tenant AI Agent Platform**

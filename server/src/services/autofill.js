@@ -15,7 +15,7 @@ import { many, one } from '../db/pool.js';
  */
 
 const STAGE_RANK = {
-  new: 0, applied: 1, networking: 2, call: 3, win: 4, interview: 5, offer: 6, failed: 7,
+  new: 0, interested: 1, applied: 2, networking: 3, call: 4, win: 5, interview: 6, offer: 7, failed: 8,
 };
 
 export function cleanJdText(raw) {

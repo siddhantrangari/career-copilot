@@ -153,7 +153,31 @@
       var state = results[0] || {};
       var companies = (results[1] && results[1].companies) || [];
 
-      localStorage.setItem('sr_tracked', JSON.stringify(state.tracked || {}));
+      var localTracked = {};
+      try { localTracked = JSON.parse(localStorage.getItem('sr_tracked') || '{}'); } catch(e){}
+      var mergedTracked = state.tracked || {};
+      for (var k in localTracked) {
+        if (!mergedTracked[k]) {
+          mergedTracked[k] = localTracked[k];
+        } else {
+          if (localTracked[k].roles && Array.isArray(localTracked[k].roles) && localTracked[k].roles.length) {
+            if (!mergedTracked[k].roles || !mergedTracked[k].roles.length) {
+              mergedTracked[k].roles = localTracked[k].roles;
+            }
+          }
+          if (localTracked[k].roleTitle && !mergedTracked[k].roleTitle) {
+            mergedTracked[k].roleTitle = localTracked[k].roleTitle;
+          }
+          if (localTracked[k].jdText && !mergedTracked[k].jdText) {
+            mergedTracked[k].jdText = localTracked[k].jdText;
+          }
+          if (localTracked[k].jdFile && !mergedTracked[k].jdFile) {
+            mergedTracked[k].jdFile = localTracked[k].jdFile;
+          }
+        }
+      }
+
+      localStorage.setItem('sr_tracked', JSON.stringify(mergedTracked));
       localStorage.setItem('sr_custom', JSON.stringify(state.custom || []));
 
       // Map to the shape the prototype's COS entries use. Catalogue rows
@@ -379,17 +403,49 @@
   }
   window.cleanJdText = cleanJdText;
 
-  // ── Navigate to Tailor Resume Flow ──────────────────────────────────
-  function navigateToTailorResume(companyId, roleTitle, directJd) {
-    var companyName = '';
+  // ── Navigate to Tailor Resume / Cover Letter Flow ──────────────────
+  function navigateToTailorResume(companyId, roleTitle, directJd, mode, roleId, explicitCompanyName) {
+    var studioMode = (mode === 'cover-letter') ? 'cover-letter' : 'resume';
+    var companyName = explicitCompanyName || '';
     var co = null;
-    if (window.__CC_CATALOGUE__) {
-      co = window.__CC_CATALOGUE__.find(function (x) { return x.id === companyId; });
+
+    if (!companyName || /^c_\d+/i.test(companyName)) {
+      if (typeof window.allCos === 'function') {
+        try {
+          var all = window.allCos();
+          if (Array.isArray(all)) co = all.find(function (x) { return x.id === companyId; });
+        } catch (e) {}
+      }
+      if (!co && window.__CC_CATALOGUE__) {
+        co = window.__CC_CATALOGUE__.find(function (x) { return x.id === companyId; });
+      }
+      if (!co) {
+        try {
+          var customList = JSON.parse(localStorage.getItem('sr_custom') || '[]');
+          if (Array.isArray(customList)) co = customList.find(function (x) { return x.id === companyId; });
+        } catch (e) {}
+      }
+      if (!co && typeof COS !== 'undefined' && Array.isArray(COS)) {
+        co = COS.find(function (x) { return x.id === companyId; });
+      }
+      if (!co) {
+        try {
+          var trackedMap = JSON.parse(localStorage.getItem('sr_tracked') || '{}');
+          if (trackedMap && trackedMap[companyId] && trackedMap[companyId].name) {
+            companyName = trackedMap[companyId].name;
+          }
+        } catch (e) {}
+      }
+      if (co && co.name) {
+        companyName = co.name;
+      }
+      if (!companyName && !/^c_\d+/i.test(companyId)) {
+        companyName = companyId;
+      }
+      if (/^c_\d+/i.test(companyName)) {
+        companyName = '';
+      }
     }
-    if (!co && typeof COS !== 'undefined' && Array.isArray(COS)) {
-      co = COS.find(function (x) { return x.id === companyId; });
-    }
-    companyName = (co && co.name) || companyId || '';
 
     var role = roleTitle || (co && (co.roleTitle || (Array.isArray(co.roles) ? co.roles[0] : ''))) || '';
     var jd = directJd || '';
@@ -404,9 +460,12 @@
 
     var cleanJd = cleanJdText(jd);
 
-    // If already on outreach page, just switch tab and prefill
+    // If already on outreach page, just switch tab, toggle studio mode and prefill
     if (window.location.pathname.indexOf('outreach') !== -1 && typeof window.showTab === 'function') {
       window.showTab('resume');
+      if (typeof window.switchStudioMode === 'function') {
+        window.switchStudioMode(studioMode);
+      }
       var compInput = document.getElementById('tailorCompany');
       var rInput = document.getElementById('tailorRole');
       var jdArea = document.getElementById('tailorJD');
@@ -425,6 +484,7 @@
             }
           }).catch(function () {});
       }
+      if (typeof window.onTargetChange === 'function') window.onTargetChange();
       var card = document.getElementById('resumeTargetCard');
       if (card) card.scrollIntoView({ behavior: 'smooth', block: 'start' });
       var drawer = document.querySelector('.cc-drawer');
@@ -436,7 +496,9 @@
       companyId: companyId || '',
       companyName: companyName || '',
       role: role || '',
-      jdText: cleanJd || ''
+      roleId: roleId || '',
+      jdText: cleanJd || '',
+      mode: studioMode
     };
 
     try {
@@ -444,8 +506,10 @@
     } catch (e) {}
 
     var targetUrl = '/outreach.html?tab=resume' +
+      '&mode=' + encodeURIComponent(studioMode) +
       (companyName ? '&company=' + encodeURIComponent(companyName) : '') +
       (role ? '&role=' + encodeURIComponent(role) : '') +
+      (roleId ? '&roleId=' + encodeURIComponent(roleId) : '') +
       (companyId ? '&companyId=' + encodeURIComponent(companyId) : '');
 
     // If no JD text yet but we have companyId, attempt a quick autofill fetch before redirecting
@@ -1400,6 +1464,7 @@
       openCopilot: function (id, role, act) { if (openCopilot) openCopilot(id, role, act); },
       refreshCompanies: function (id) { if (refreshCompaniesFn) return refreshCompaniesFn(id); },
       navigateToResume: navigateToTailorResume,
+      navigateToCoverLetter: function (id, role, jd, roleId, explicitCompanyName) { return navigateToTailorResume(id, role, jd, 'cover-letter', roleId, explicitCompanyName); },
       cleanJdText: cleanJdText,
       appConfirm: window.appConfirm,
       appAlert: window.appAlert,

@@ -94,6 +94,13 @@ so it does **not** auto-run. `bridge.js` then:
 Edit an artifact, re-run `npm run build:web`, and the wiring re-applies. Both pages share
 the same keys, so they share state through the server.
 
+### Multi-Role & Studio Integration
+- **Multi-Role Tracking per Company**: Companies in the pipeline support tracking multiple open roles simultaneously, with individual application stages (`Interested`, `Applied`, `Networking`, etc.), JDs, applied dates, and outreach logs.
+- **Role-Specific Documents**: Directly links to tailored resumes, cover letters, and JDs on every company card via interactive chips (`📄 Resume (Score%)`, `✉️ Letter ✓`, `📋 JD`, `Apply ↗`).
+- **Quick Document Viewer**: Preview formatted documents and download clean PDFs in one click without leaving the Kanban board.
+- **Safe Persistence**: Stores multi-role records in database `notes` via safe `<!--CC_ROLES:...-->` metadata, adhering strictly to zero accidental data loss guidelines.
+- **Custom Company Auto-Resolution**: Automatically maps custom company identifiers (`c_<timestamp>`) to human-readable names when opening Resume & Cover Letter Studio.
+
 ---
 
 ## API

@@ -26,13 +26,26 @@ const toTrackedBlob = (rows, connections) => {
 
   const blob = {};
   for (const r of rows) {
+    let roles = [];
+    let cleanNotes = r.notes || '';
+    if (cleanNotes.includes('<!--CC_ROLES:')) {
+      try {
+        const m = cleanNotes.match(/<!--CC_ROLES:([\s\S]*?)-->/);
+        if (m) {
+          roles = JSON.parse(m[1]);
+          cleanNotes = cleanNotes.replace(/<!--CC_ROLES:[\s\S]*?-->/g, '').trim();
+        }
+      } catch (e) {}
+    }
+
     blob[r.company_id] = {
       stage: r.stage,
       win: r.win_status,
       msgs: r.msgs,
       jd: r.jd,
       jobLink: r.job_link,
-      notes: r.notes,
+      notes: cleanNotes,
+      roles: Array.isArray(roles) ? roles : [],
       connections: byCompany.get(r.company_id) || [],
       updated: new Date(r.updated_at).toLocaleDateString(),
     };
@@ -96,6 +109,12 @@ export default async function stateRoutes(app) {
         const exists = await client.query('SELECT 1 FROM companies WHERE id = $1', [companyId]);
         if (!exists.rowCount) continue;
 
+        let notesToSave = t.notes || '';
+        if (Array.isArray(t.roles) && t.roles.length) {
+          notesToSave = notesToSave.replace(/<!--CC_ROLES:[\s\S]*?-->/g, '').trim();
+          notesToSave += (notesToSave ? '\n\n' : '') + `<!--CC_ROLES:${JSON.stringify(t.roles)}-->`;
+        }
+
         await client.query(
           `INSERT INTO tracked_companies (company_id, stage, win_status, msgs, jd, job_link, notes)
            VALUES ($1, $2, $3, $4, $5, $6, $7)
@@ -105,7 +124,7 @@ export default async function stateRoutes(app) {
              updated_at = now()`,
           [
             companyId, t.stage || 'new', t.win || 'none', t.msgs || '',
-            t.jd || '', t.jobLink || '', t.notes || '',
+            t.jd || '', t.jobLink || '', notesToSave,
           ],
         );
 
