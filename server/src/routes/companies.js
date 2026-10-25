@@ -165,7 +165,7 @@ export default async function companyRoutes(app) {
          pay = EXCLUDED.pay, description = EXCLUDED.description,
          apply_url = EXCLUDED.apply_url, dsa = EXCLUDED.dsa,
          favourite = EXCLUDED.favourite, updated_at = now()
-       RETURNING ${ROW.replaceAll('c.', '')}`,
+       RETURNING ${ROW.replaceAll('c.', 'companies.')}`, // keep columns qualified: subqueries have their own name columns
       [
         id, b.name.trim(), b.region || 'global',
         Array.isArray(b.roles) && b.roles.length ? b.roles : ['fs'],
