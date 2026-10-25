@@ -497,3 +497,7 @@ CREATE TABLE IF NOT EXISTS bot_state (
   value       JSONB NOT NULL,
   updated_at  TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+
+-- Prompt-cache hits per AI call, so the saving from a stable prompt prefix
+-- is measured rather than assumed.
+ALTER TABLE ai_runs ADD COLUMN IF NOT EXISTS cached_tokens INTEGER NOT NULL DEFAULT 0;

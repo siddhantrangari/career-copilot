@@ -134,7 +134,7 @@ export const config = {
     enabled: process.env.BOT_ENABLED !== 'false',
     model: process.env.BOT_MODEL || 'openai/gpt-5.6-luna',
     maxToolRounds: int(process.env.BOT_MAX_TOOL_ROUNDS, 8),
-    historyMessages: int(process.env.BOT_HISTORY_MESSAGES, 30),
+    historyMessages: int(process.env.BOT_HISTORY_MESSAGES, 12), // text messages only (6 exchanges)
   },
 
   auth: {

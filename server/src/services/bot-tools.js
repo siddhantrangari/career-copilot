@@ -176,11 +176,11 @@ async function listPipeline({ stage, query: q } = {}) {
   );
   return {
     count: rows.length,
-    companies: rows.map((r) => ({
-      id: r.company_id, name: r.name, stage: r.stage, contacts: r.contacts,
-      lastActivity: r.activity_at || undefined, trackedSince: r.created_at,
-      roles: splitNotes(r.notes).roles.map((x) => `${x.title} [${x.stage || 'new'}]${x.interviewAt ? ` interview ${x.interviewAt}` : ''}`),
-    })),
+    // One line per company keeps a 40-company pipeline to a few hundred tokens.
+    companies: rows.map((r) => {
+      const roles = splitNotes(r.notes).roles.map((x) => `${x.title} (${x.stage || 'new'}${x.interviewAt ? `, interview ${x.interviewAt}` : ''})`);
+      return `${r.name} [${r.stage}]${r.contacts ? ` ${r.contacts} contacts` : ''}${roles.length ? ` — ${roles.join('; ')}` : ''}`;
+    }),
   };
 }
 
@@ -233,7 +233,7 @@ async function findCompanies({ query: q, region, trackedOnly, limit = 15 } = {})
 }
 
 async function searchJobs({
-  query: q, company, minMatch = 60, postedWithinDays = 7, favouritesOnly = false, limit = 10,
+  query: q, company, minMatch = 60, postedWithinDays = 7, favouritesOnly = false, limit = 5,
 } = {}) {
   let companyId = null;
   if (company) companyId = (await findCompany(company)).id;
@@ -253,7 +253,10 @@ async function searchJobs({
     [Number(minMatch) || 0, Math.min(Number(postedWithinDays) || 7, 120), q || null, companyId,
       Boolean(favouritesOnly), Math.min(Number(limit) || 10, 25)],
   );
-  return { count: rows.length, jobs: rows };
+  return {
+    count: rows.length,
+    jobs: rows.map(({ no_dsa: noDsa, ...j }) => ({ ...j, dsaSignals: noDsa === false })),
+  };
 }
 
 async function searchGigs({ query: q, limit = 10 } = {}) {
@@ -602,7 +605,10 @@ const TASK_KINDS = {
 };
 
 async function startAiTask(args) {
-  const { task, company, role, jobDescription, instructions, contactName, problems, topic, round, force } = args;
+  const { task, company, role, jobDescription, instructions, contactName, problems, topic, round, force, confirmedByUser } = args;
+  if (confirmedByUser !== true) {
+    throw new ToolError('Not started: AI tasks cost money. Offer it and start only when he asks or says yes.');
+  }
   const kind = TASK_KINDS[task];
   if (!kind) throw new ToolError(`task must be one of ${Object.keys(TASK_KINDS).join(', ')}`);
   if (round && !ROUNDS.includes(round)) throw new ToolError(`round must be one of ${ROUNDS.join(', ')}`);
@@ -650,42 +656,47 @@ async function sendDigestNow() {
 
 // ── Registry ──────────────────────────────────────────────────────────
 
-const str = (description) => ({ type: 'string', description });
-const S = (properties, required = []) => ({ type: 'object', properties, required, additionalProperties: false });
-const companyArg = str('Company name or id, e.g. "Adyen"');
-const stageArg = { type: 'string', enum: STAGES, description: 'Pipeline stage (failed = closed)' };
+// Tool definitions are re-sent with every request, so they are kept terse:
+// a short description, plain parameter names, and enums only where the value
+// set is closed. Every extra word here is paid for on every message.
+const str = (description) => (description ? { type: 'string', description } : { type: 'string' });
+const S = (properties, required = []) => ({ type: 'object', properties, required });
+const companyArg = str('name or id');
+const stageArg = { type: 'string', enum: STAGES };
+const int = { type: 'integer' };
+const bool = { type: 'boolean' };
+const DOC_TYPES = ['resume', 'win_doc', 'interview_prep', 'mock_interview'];
+const REGION = str('eu|gulf|global|in_remote|blr_hybrid|blr_onsite|global_onsite');
 
 const TOOLS = [
-  ['get_overview', 'Headline numbers: pipeline by stage, documents, open/new matching jobs, last job scan and digest.', S({}), getOverview],
-  ['list_pipeline', 'Tracked companies with stage, roles and contact counts. Filter by stage or name.', S({ stage: stageArg, query: str('Name filter') }), listPipeline],
-  ['get_company', 'Everything about one company: tracking, roles, contacts, research, documents (ids), open jobs.', S({ company: companyArg }, ['company']), getCompany],
-  ['find_companies', 'Search the company catalogue (tracked and untracked).', S({ query: str('Name or keyword'), region: str('eu, gulf, global, in_remote, blr_hybrid, blr_onsite or global_onsite'), trackedOnly: { type: 'boolean' }, limit: { type: 'integer' } }), findCompanies],
-  ['search_jobs', 'Search discovered full-time job postings. match = relevance 0–100.', S({ query: str('Keyword in title/location/description'), company: companyArg, minMatch: { type: 'integer' }, postedWithinDays: { type: 'integer' }, favouritesOnly: { type: 'boolean' }, limit: { type: 'integer' } }), searchJobs],
-  ['search_gigs', 'Search freelance / contract / part-time gigs.', S({ query: str('Keyword'), limit: { type: 'integer' } }), searchGigs],
-  ['get_followups_and_interviews', 'Interviews in the next 7 days, follow-ups due, and new matching jobs not yet sent in a digest.', S({}), getFollowupsAndInterviews],
-  ['list_documents', 'List tailored resumes, WIN docs, interview prep guides and mock interviews (with ids).', S({ company: companyArg, type: { type: 'string', enum: ['resume', 'win_doc', 'interview_prep', 'mock_interview'] } }), listDocuments],
-  ['get_document', 'Fetch a document. format "file" sends it to the chat as an attachment (default); "text" returns a short excerpt; "pptx" sends a WIN doc as a PowerPoint deck.', S({ type: { type: 'string', enum: ['resume', 'win_doc', 'interview_prep', 'mock_interview'] }, id: str('Document id'), format: { type: 'string', enum: ['file', 'text', 'pptx'] } }, ['type', 'id']), getDocument],
-  ['get_profile', "The user's profile and achievement bank.", S({}), getProfile],
-  ['get_ai_task', 'Status of a background AI task.', S({ taskId: str('Task id') }, ['taskId']), getTask],
-  ['track_company', 'Start tracking a company in the pipeline.', S({ company: companyArg, stage: stageArg }, ['company']), trackCompany],
-  ['set_stage', "Move a company (or one of its roles) to a pipeline stage. Sets the applied date automatically when moving a role to applied.", S({ company: companyArg, stage: stageArg, role: str('Role title, if the company has several') }, ['company', 'stage']), setStage],
-  ['add_role', 'Add a role (job opening) to a tracked company.', S({ company: companyArg, title: str('Role title'), jobLink: str('Job posting URL'), stage: stageArg, pay: str('Pay range') }, ['company', 'title']), addRole],
-  ['update_role', "Update a role's details: applied date, interview time (IST), pay, link, outreach summary, notes.", S({ company: companyArg, role: str('Role title'), appliedAt: str('e.g. "25 Oct 2026"'), interviewAtIst: str('Interview time in IST as "YYYY-MM-DD HH:mm"'), clearInterview: { type: 'boolean' }, pay: str('Pay'), jobLink: str('URL'), outreachSent: str('Outreach summary'), notes: str('Role notes') }, ['company']), updateRole],
-  ['add_note', "Append a dated note to a company's notes.", S({ company: companyArg, text: str('Note') }, ['company', 'text']), addNote],
-  ['log_outreach', "Append a dated entry to a company's outreach log (messages sent, replies).", S({ company: companyArg, text: str('What happened') }, ['company', 'text']), logOutreach],
-  ['add_contact', 'Add a networking contact at a company.', S({ company: companyArg, name: str('Full name'), role: str('Their job title'), type: { type: 'string', enum: CONN_TYPES, description: 'peer, hm (hiring manager), hr, indian, other' }, linkedinUrl: str('LinkedIn URL'), status: { type: 'string', enum: CONN_STATUSES, description: 'req=request sent, dm=DM sent, reply, fu1-3=follow-ups, win=WIN shared, call=call done, ref=referred, ab=abandoned' }, notes: str('Notes') }, ['company', 'name']), addContact],
-  ['update_contact', "Update a contact's status, role, LinkedIn URL or notes.", S({ company: companyArg, contact: str('Contact name'), status: { type: 'string', enum: CONN_STATUSES }, role: str('Job title'), linkedinUrl: str('URL'), notes: str('Notes (replaces)') }, ['company', 'contact']), updateContact],
-  ['set_job_flag', 'Mark a discovered job as favourite (also tracks its company) or "not for me" (hidden, not deleted).', S({ jobId: str('Job id from search_jobs'), favourite: { type: 'boolean' }, notForMe: { type: 'boolean' } }, ['jobId']), setJobFlag],
-  ['add_company', 'Add a company that is not in the catalogue, and start tracking it.', S({ name: str('Company name'), website: str('Website'), region: str('eu, gulf, global, in_remote, blr_hybrid, blr_onsite or global_onsite'), applyUrl: str('Careers/job URL'), description: str('One line') }, ['name']), addCompany],
-  ['start_ai_task', 'Start a background AI task; its result is messaged when done. tailor_resume / cover_letter use the role\'s saved JD or job link unless jobDescription (text or URL) is given. win_doc can take confirmed problems from a call.', S({
+  ['get_overview', 'Counts: pipeline by stage, documents, open/new jobs, last scan and digest. Use for "how many".', S({}), getOverview],
+  ['list_pipeline', 'Tracked companies with stage and roles.', S({ stage: stageArg, query: str('name filter') }), listPipeline],
+  ['get_company', 'One company: tracking, roles, contacts, research, document ids, open jobs.', S({ company: companyArg }, ['company']), getCompany],
+  ['find_companies', 'Search the company catalogue.', S({ query: str(), region: REGION, trackedOnly: bool, limit: int }), findCompanies],
+  ['search_jobs', 'Discovered full-time jobs. match = relevance 0-100.', S({ query: str('keyword'), company: companyArg, minMatch: int, postedWithinDays: int, favouritesOnly: bool, limit: int }), searchJobs],
+  ['search_gigs', 'Freelance/contract gigs.', S({ query: str(), limit: int }), searchGigs],
+  ['get_followups_and_interviews', 'Interviews in 7 days, follow-ups due, new jobs not yet in a digest.', S({}), getFollowupsAndInterviews],
+  ['list_documents', 'Resumes, WIN docs, interview preps, mock interviews (ids).', S({ company: companyArg, type: { type: 'string', enum: DOC_TYPES } }), listDocuments],
+  ['get_document', 'Send a document as a file (default), "text" excerpt, or WIN doc as "pptx".', S({ type: { type: 'string', enum: DOC_TYPES }, id: str(), format: { type: 'string', enum: ['file', 'text', 'pptx'] } }, ['type', 'id']), getDocument],
+  ['get_profile', 'His profile and achievement bank.', S({}), getProfile],
+  ['get_ai_task', 'Status of a background task.', S({ taskId: str() }, ['taskId']), getTask],
+  ['track_company', 'Start tracking a company.', S({ company: companyArg, stage: stageArg }, ['company']), trackCompany],
+  ['set_stage', 'Move a company or one role to a stage (sets applied date when moving to applied).', S({ company: companyArg, stage: stageArg, role: str('role title') }, ['company', 'stage']), setStage],
+  ['add_role', 'Add a role to a company.', S({ company: companyArg, title: str(), jobLink: str(), stage: stageArg, pay: str() }, ['company', 'title']), addRole],
+  ['update_role', 'Edit a role: applied date, interview time, pay, link, outreach, notes.', S({ company: companyArg, role: str('title'), appliedAt: str('e.g. 25 Oct 2026'), interviewAtIst: str('YYYY-MM-DD HH:mm IST'), clearInterview: bool, pay: str(), jobLink: str(), outreachSent: str(), notes: str() }, ['company']), updateRole],
+  ['add_note', 'Append a dated note to a company.', S({ company: companyArg, text: str() }, ['company', 'text']), addNote],
+  ['log_outreach', 'Append a dated entry to the outreach log.', S({ company: companyArg, text: str() }, ['company', 'text']), logOutreach],
+  ['add_contact', 'Add a contact. type: hm=hiring manager. status: req=request, dm, reply, fu1-3, win, call, ref=referred, ab=abandoned.', S({ company: companyArg, name: str(), role: str('their title'), type: { type: 'string', enum: CONN_TYPES }, linkedinUrl: str(), status: { type: 'string', enum: CONN_STATUSES }, notes: str() }, ['company', 'name']), addContact],
+  ['update_contact', "Update a contact's status, title, URL or notes.", S({ company: companyArg, contact: str('name'), status: { type: 'string', enum: CONN_STATUSES }, role: str(), linkedinUrl: str(), notes: str() }, ['company', 'contact']), updateContact],
+  ['set_job_flag', 'Favourite a job (tracks its company) or mark it not for me.', S({ jobId: str(), favourite: bool, notForMe: bool }, ['jobId']), setJobFlag],
+  ['add_company', 'Add a new company and track it.', S({ name: str(), website: str(), region: REGION, applyUrl: str(), description: str() }, ['name']), addCompany],
+  ['start_ai_task', 'Background AI task; result is messaged when done. Costs money: only when his message asks for it or agrees to your offer. Resume/cover letter use the saved JD unless jobDescription (text or URL) is given.', S({
     task: { type: 'string', enum: Object.keys(TASK_KINDS) },
-    company: companyArg, role: str('Role title'),
-    jobDescription: str('JD text or job URL'), instructions: str('Extra instructions for resume / cover letter'),
-    contactName: str('Contact (cold email recipient, call prep, WIN doc)'),
-    problems: { type: 'array', items: { type: 'string' }, description: 'Problems the company confirmed on a call (WIN doc)' },
-    topic: str('LinkedIn post topic'), round: { type: 'string', enum: ROUNDS }, force: { type: 'boolean', description: 'Re-run research even if cached' },
-  }, ['task']), startAiTask],
-  ['send_digest_now', "Send today's morning digest to this chat now (its roles are marked as sent).", S({}), sendDigestNow],
+    confirmedByUser: { type: 'boolean', description: 'true only if his latest message asks for this task or says yes to it' },
+    company: companyArg, role: str(), jobDescription: str(), instructions: str(), contactName: str(),
+    problems: { type: 'array', items: { type: 'string' } }, topic: str(), round: { type: 'string', enum: ROUNDS }, force: bool,
+  }, ['task', 'confirmedByUser']), startAiTask],
+  ['send_digest_now', "Send today's digest now.", S({}), sendDigestNow],
 ];
 
 export const toolSchemas = TOOLS.map(([name, description, parameters]) => ({

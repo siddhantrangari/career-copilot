@@ -23,7 +23,63 @@ let log = console;
 let queue = Promise.resolve();
 
 const myChat = () => String(config.digest.telegram.chatId || '');
-const MAX_TOOL_CONTENT = 6000;
+const MAX_TOOL_CONTENT = 4000;
+
+// ── Keeping requests small and replies grounded ───────────────────────
+
+const ISO = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2}(\.\d+)?)?(Z|[+-]\d{2}:?\d{2})$/;
+const istFmt = new Intl.DateTimeFormat('en-GB', {
+  timeZone: config.digest.timeZone, day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', hourCycle: 'h23',
+});
+
+/**
+ * Tool output as the model sees it: empty fields dropped, and timestamps
+ * already in IST so the model never does time-zone arithmetic (a common
+ * source of wrong interview times).
+ */
+export function compactForModel(value) {
+  if (Array.isArray(value)) return value.map(compactForModel).filter((v) => v !== undefined);
+  if (value instanceof Date) return `${istFmt.format(value)} IST`;
+  if (typeof value === 'string') return ISO.test(value) ? `${istFmt.format(new Date(value))} IST` : value;
+  if (value && typeof value === 'object') {
+    const out = {};
+    for (const [k, v] of Object.entries(value)) {
+      const c = compactForModel(v);
+      if (c === undefined || c === null || c === '' || c === false) continue;
+      if (Array.isArray(c) && !c.length) continue;
+      if (typeof c === 'object' && !Array.isArray(c) && !Object.keys(c).length) continue;
+      out[k] = c;
+    }
+    return out;
+  }
+  return value;
+}
+
+const URL_RE = /https?:\/\/[^\s<>"')\]]+/g;
+const tidy = (u) => u.replace(/&amp;/g, '&').replace(/[.,;:!?]+$/, '');
+export const linksIn = (text) => (String(text || '').match(URL_RE) || []).map(tidy);
+
+/**
+ * Last line of defence against invented links: any URL that never appeared in
+ * his data is removed before the reply is sent. A markdown link keeps its
+ * label; a bare URL becomes a note.
+ */
+export function guardLinks(text, allowed) {
+  const ok = (u) => allowed.has(tidy(u)) || [...allowed].some((a) => a.length > 20 && tidy(u).startsWith(a));
+  let removed = 0;
+  let out = text.replace(/\[([^\]\n]+)\]\((https?:\/\/[^)\s]+)\)/g, (m, label, url) => {
+    if (ok(url)) return m;
+    removed += 1;
+    return label;
+  });
+  out = out.replace(URL_RE, (url) => {
+    if (ok(url)) return url;
+    removed += 1;
+    return '(link not in your data)';
+  });
+  if (removed) log.warn(`[bot] removed ${removed} link(s) not found in tool results`);
+  return out;
+}
 
 // ── Persistence ───────────────────────────────────────────────────────
 
@@ -48,60 +104,65 @@ async function remember(chatId, { role, content = null, toolCalls = null, toolCa
 }
 
 /**
- * Recent turns since the last /new, as chat-completions messages. The window
- * is trimmed to start at a user message, and an assistant tool call whose
- * results never got stored (a crash mid-turn) is dropped, since providers
- * reject a tool call without its answer.
+ * Earlier turns since the last /new, as text only: what he said and what the
+ * assistant answered. Tool calls and raw tool output from earlier turns are
+ * not replayed — they were the bulk of every request and went stale anyway;
+ * the model re-reads current data with a tool when it needs a detail. The
+ * current turn's tool exchange is added live in converse().
  */
 async function history(chatId) {
   const rows = (await many(
-    `SELECT role, content, tool_calls, tool_call_id FROM bot_messages
-     WHERE chat_id = $1 AND id > COALESCE((SELECT max(id) FROM bot_messages WHERE chat_id = $1 AND role = 'reset'), 0)
+    `SELECT role, content FROM bot_messages
+     WHERE chat_id = $1 AND role IN ('user', 'assistant') AND tool_calls IS NULL AND content IS NOT NULL
+       AND id > COALESCE((SELECT max(id) FROM bot_messages WHERE chat_id = $1 AND role = 'reset'), 0)
      ORDER BY id DESC LIMIT $2`,
     [chatId, config.bot.historyMessages],
   )).reverse();
   while (rows.length && rows[0].role !== 'user') rows.shift();
-
-  const out = [];
-  for (let i = 0; i < rows.length; i++) {
-    const r = rows[i];
-    if (r.role === 'assistant' && r.tool_calls?.length) {
-      const ids = new Set(r.tool_calls.map((c) => c.id));
-      const answers = [];
-      let j = i + 1;
-      while (j < rows.length && rows[j].role === 'tool') { answers.push(rows[j]); j += 1; }
-      if (answers.filter((a) => ids.has(a.tool_call_id)).length !== ids.size) { i = j - 1; continue; }
-      out.push({ role: 'assistant', content: r.content || null, tool_calls: r.tool_calls });
-      for (const a of answers) out.push({ role: 'tool', tool_call_id: a.tool_call_id, content: a.content || '' });
-      i = j - 1;
-    } else if (r.role === 'user' || r.role === 'assistant') {
-      out.push({ role: r.role, content: r.content || '' });
-    }
-  }
-  return out;
+  return rows.map((r) => ({ role: r.role, content: r.content }));
 }
 
 // ── The assistant ─────────────────────────────────────────────────────
 
-function systemPrompt() {
+/**
+ * The fixed part of every request. It must not change between calls — no
+ * clock, no counts — because the provider caches a stable prefix (system
+ * prompt + tool definitions) and bills cached input at a tenth of the price.
+ * The current time goes in a separate note just before the latest message.
+ */
+const SYSTEM_PROMPT = `You are Career Copilot, Siddhant Rangari's personal job-search assistant in Telegram. You operate his Career Copilot app through tools: pipeline (companies, roles, stages, contacts, notes, outreach log), discovered jobs and freelance gigs, documents (tailored resumes, WIN docs, interview prep, mock interview reports), the morning digest, and background AI tasks.
+
+Grounding — the most important rule:
+- Every fact about his pipeline, companies, people, jobs, dates, numbers and links must come from a tool result. If a tool did not return it, you do not know it: say it is not in Career Copilot and offer the tool that would get it.
+- Facts about a company (what it does, news, challenges, culture) come only from its research in get_company. If research is empty, say so and offer to run research. Never answer from general knowledge.
+- Do not write outreach messages, emails, cover letters, resume text or LinkedIn posts yourself. Offer the matching AI task (outreach_messages, cold_email, cover_letter, tailor_resume, linkedin_post): it uses his real achievement bank and research.
+- Never put a link in a reply unless it appeared in a tool result.
+- You may refer back to items you listed earlier, but call the tool again before quoting details you did not show, and before changing data.
+
+Spending: research, WIN doc and interview prep run paid web searches. Start an AI task only when he asks for it or agrees to your offer.
+
+His playbook (use it instead of generic advice):
+- Research a company before any outreach; the outreach generator uses that research.
+- LinkedIn DM with no reply: one follow-up on day 4, with something new.
+- Application quiet for 7 days: nudge the recruiter or ask a contact there for a referral.
+- After a call where problems were confirmed: WIN doc with those problems.
+- Before an interview: interview prep, then a mock in the web app.
+
+How to reply:
+- Do what he asks straight away, chaining tools as needed. After a change, state exactly what changed (before → after).
+- You cannot delete anything. For a delete request, point to the web app (${config.digest.appUrl}) and offer the soft option: stage "failed" (closed), or mark a job "not for me".
+- AI tasks run in the background: say it started and the result will arrive here. Do not poll.
+- If a company, role or contact is ambiguous, ask one short question.
+- Phone-sized: short, bullets, **bold** for key items, links as [Apply](url) / [Open](url) rather than bare URLs. Label opinions as suggestions. No tables, no preamble, no sign-off.
+
+Pipeline stages: new, interested, applied, networking, call, win (WIN doc sent), interview, offer, failed (closed). Times are IST unless he says otherwise.`;
+
+function nowNote() {
   const now = new Intl.DateTimeFormat('en-IN', {
     timeZone: config.digest.timeZone, weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
     hour: 'numeric', minute: '2-digit',
   }).format(new Date());
-  return `You are Career Copilot, Siddhant Rangari's personal job-search assistant, talking to him in Telegram. You operate his Career Copilot app through tools: the pipeline (companies, roles, stages, contacts, notes, outreach log), discovered jobs and freelance gigs, documents (tailored resumes, WIN docs, interview prep guides, mock interview reports), the morning digest, and background AI tasks (company research, resume tailoring, cover letters, outreach messages, cold emails, call prep, WIN docs, interview prep, LinkedIn posts, job scans).
-
-Now: ${now} (IST). Times he gives are IST unless he says otherwise.
-
-How to work:
-- Use tools for every fact. Never invent companies, jobs, numbers, dates, people or links. If a tool returns an error, fix the call or ask him.
-- Do what he asks straight away, chaining tools as needed. After any change, say exactly what changed (before → after) in a line or two.
-- You cannot delete anything. If he asks to delete or remove something, say deletions are done in the web app (${config.digest.appUrl}) and offer the soft option: move it to stage "failed" (closed), or mark a job "not for me".
-- AI tasks run in the background: tell him it has started and that the result will arrive in this chat. Do not wait for it or poll it.
-- If a company, role or contact is ambiguous, ask one short question.
-- He reads on a phone: short and scannable, bullets, **bold** for the key items, links for jobs and documents. No tables, no preamble, no sign-off.
-
-Pipeline stages: new, interested, applied, networking, call, win (WIN doc sent), interview, offer, failed (closed).
-Web app: ${config.digest.appUrl}`;
+  return { role: 'system', content: `Current time: ${now} IST.` };
 }
 
 /** Keep Telegram's "typing…" indicator alive while a turn runs. */
@@ -133,12 +194,17 @@ async function converse(chatId, userContent) {
   await remember(chatId, { role: 'user', content: userContent });
   const stopTyping = typing(chatId);
   try {
-    const messages = [{ role: 'system', content: systemPrompt() }, ...(await history(chatId))];
+    const past = await history(chatId);
+    const current = past.pop(); // the message just stored
+    const messages = [{ role: 'system', content: SYSTEM_PROMPT }, ...past, nowNote(), current];
+    // Links the reply may use: ones from tool results this turn, ones already
+    // in the conversation (his own pastes, earlier checked replies), the app.
+    const allowedLinks = new Set([config.digest.appUrl, ...past.flatMap((m) => linksIn(m.content)), ...linksIn(current?.content)]);
     for (let round = 0; round < config.bot.maxToolRounds; round++) {
       const { message } = await chatWithTools({ messages, tools: toolSchemas, model: config.bot.model });
       const calls = message.tool_calls || [];
       if (!calls.length) {
-        const text = (message.content || '').trim() || 'Done.';
+        const text = guardLinks((message.content || '').trim() || 'Done.', allowedLinks);
         await remember(chatId, { role: 'assistant', content: text });
         await sendMarkdown(chatId, text);
         return;
@@ -151,7 +217,8 @@ async function converse(chatId, userContent) {
         let result = await runTool(call.function?.name, call.function?.arguments);
         result = await deliverFile(chatId, result);
         if (result?.taskId) watchTask(chatId, result.taskId);
-        let content = JSON.stringify(result);
+        let content = JSON.stringify(compactForModel(result));
+        linksIn(content).forEach((u) => allowedLinks.add(u));
         if (content.length > MAX_TOOL_CONTENT) content = `${content.slice(0, MAX_TOOL_CONTENT)}… [truncated]`;
         messages.push({ role: 'tool', tool_call_id: call.id, content });
         await remember(chatId, { role: 'tool', content, toolCallId: call.id });

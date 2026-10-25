@@ -120,14 +120,14 @@ export async function logRun({
   try {
     await pool.query(
       `INSERT INTO ai_runs (kind, company_id, model, ok, error, duration_ms, input, output,
-                            tokens_in, tokens_out, cost_usd, session_id)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`,
+                            tokens_in, tokens_out, cost_usd, session_id, cached_tokens)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)`,
       [
         kind, companyId || null, model || 'unknown', ok, error || null, durationMs,
         input ? JSON.stringify(input) : null,
         output ? JSON.stringify(output) : null,
         tokensIn, tokensOut, estimateCost(model, tokensIn, tokensOut, cachedIn),
-        sessionId || null,
+        sessionId || null, cachedIn || 0,
       ],
     );
   } catch (err) {
