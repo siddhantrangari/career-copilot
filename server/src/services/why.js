@@ -45,15 +45,13 @@ ${wins}`;
 const RULES = `Rules:
 - Use ONLY facts in CANDIDATE and the item. Never invent products, customers, funding, culture, team size, tech stack or candidate skills.
 - One line, at most 22 words. Plain and specific — name the concrete overlap. No hype ("perfect fit", "exciting"), no emoji, no quotes.
-- Role with no JD: judge from the title against his target roles and start the line with "Title only:".
-- Company with a thin description: use its open roles and his tracked roles there; never guess what the company does.
-- Only if even that gives nothing to say, return an empty string.
+- Only if the item gives nothing to say, return an empty string.
 Return JSON only: {"items":[{"id":"<id>","why":"<line>"}]}`;
 
 async function writeLines(kind, candidate, items) {
   const system = kind === 'role'
-    ? `You write a one-line "why this role" note for Siddhant's job search: which of his real strengths match this role, and the main gap if the JD clearly needs something he lacks (e.g. "…; gap: Go").\n${RULES}`
-    : `You write a one-line "why this company" note for Siddhant's job search: what the company does (only from its description/research) and why it is worth his time (his target roles, location, the open roles there).\n${RULES}`;
+    ? `You write a one-line "why this role" note for Siddhant's job search: which of his real strengths match this role, and the main gap if the JD clearly needs something he lacks (e.g. "…; gap: Go"). If there is no JD, judge from the title against his target roles and start the line with "Title only:".\n${RULES}`
+    : `You write a one-line "why this company" note for Siddhant's job search: what the company does (only from its description/research) and why it is worth his time (his target roles, location, the open roles there). With no description, never guess what the company does: say what it is hiring for (openRoles, trackedRoles) and why that suits him. Never start with "Title only:".\n${RULES}`;
   const res = await chatJson({
     kind: `why-${kind}`,
     model: MODEL,
@@ -117,7 +115,7 @@ export async function generateWhyLines({ maxJobs = 120, maxCompanies = 40, onSte
              AND NOT j.dismissed AND j.relevance >= 40 ORDER BY j.relevance DESC LIMIT 4) x
        ) AS open_roles
      FROM names n
-     WHERE NOT EXISTS (SELECT 1 FROM company_why w WHERE w.key = lower(trim(n.name)))
+     WHERE NOT EXISTS (SELECT 1 FROM company_why w WHERE w.key = lower(trim(n.name)) AND w.why NOT LIKE 'Title only:%')
      ORDER BY n.tracked DESC, (SELECT count(*) FROM jobs j WHERE lower(j.company_name) = lower(n.name) AND j.closed_at IS NULL AND j.relevance >= 40) DESC
      LIMIT $1`,
     [maxCompanies],
@@ -173,7 +171,11 @@ export async function generateWhyLines({ maxJobs = 120, maxCompanies = 40, onSte
         const why = lines.get(String(k)) || '';
         // An empty line marks "tried, nothing groundable"; every surface treats it as absent.
         await query(
-          `INSERT INTO company_why (key, name, why) VALUES ($1, $2, $3) ON CONFLICT (key) DO NOTHING`,
+          // Replaces only a line from the earlier prompt that wrongly used the
+          // role-only "Title only:" prefix; a good line is never overwritten.
+          `INSERT INTO company_why (key, name, why) VALUES ($1, $2, $3)
+           ON CONFLICT (key) DO UPDATE SET why = EXCLUDED.why, generated_at = now()
+           WHERE company_why.why LIKE 'Title only:%'`,
           [companyKey(c.name), c.name, why],
         );
         if (why) comps += 1; else skipped += 1;
@@ -194,6 +196,6 @@ export async function whyBacklog() {
           AND relevance >= 40 AND why_role IS NULL
           AND (why_role_at IS NULL OR why_role_at < now() - interval '7 days'))::int AS roles,
        (SELECT count(*) FROM companies c WHERE NOT COALESCE(c.dismissed,false) AND NOT c.freelance
-          AND NOT EXISTS (SELECT 1 FROM company_why w WHERE w.key = lower(trim(c.name))))::int AS companies`,
+          AND NOT EXISTS (SELECT 1 FROM company_why w WHERE w.key = lower(trim(c.name)) AND w.why NOT LIKE 'Title only:%'))::int AS companies`,
   );
 }
