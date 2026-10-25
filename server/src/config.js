@@ -117,7 +117,8 @@ export const config = {
     hour: int(process.env.DIGEST_HOUR, 8),
     minute: int(process.env.DIGEST_MINUTE, 0),
     timeZone: process.env.DIGEST_TZ || 'Asia/Kolkata',
-    minRelevance: int(process.env.DIGEST_MIN_RELEVANCE, 75),
+    minRelevance: int(process.env.DIGEST_MIN_RELEVANCE, 75), // title score, for roles not yet fit-scored
+    minFit: int(process.env.DIGEST_MIN_FIT, 70),
     maxJobs: int(process.env.DIGEST_MAX_JOBS, 10),
     appUrl: (process.env.APP_URL || 'https://career.myagentfirm.com').replace(/\/$/, ''),
     telegram: {
@@ -128,13 +129,10 @@ export const config = {
     },
   },
 
-  // India discovery: Workday + SmartRecruiters public APIs need no key; the
-  // aggregators stay off until their key is set.
+  // India discovery: Workday + SmartRecruiters public posting APIs, no key.
   india: {
     enabled: process.env.INDIA_DISCOVERY_ENABLED !== 'false',
     intervalHours: Math.max(6, int(process.env.INDIA_DISCOVERY_INTERVAL_HOURS, 12)),
-    adzuna: { appId: process.env.ADZUNA_APP_ID || '', appKey: process.env.ADZUNA_APP_KEY || '' },
-    jsearch: { apiKey: process.env.JSEARCH_API_KEY || '', host: process.env.JSEARCH_HOST || 'jsearch.p.rapidapi.com' },
   },
 
   // Telegram assistant — chat with the whole app from the same bot that

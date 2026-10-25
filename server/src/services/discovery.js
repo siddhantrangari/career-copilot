@@ -421,7 +421,11 @@ export async function listJobs({
 
   const order = {
     recent: 'dismissed ASC, posted_at DESC NULLS LAST, discovered_at DESC',
-    match: 'dismissed ASC, relevance DESC, posted_at DESC NULLS LAST',
+    // An unscored role ranks as fit <= 70 until scored, so a fresh title match
+    // never jumps above a known strong fit.
+    match: 'dismissed ASC, COALESCE(fit_score, LEAST(relevance, 70)) DESC, posted_at DESC NULLS LAST',
+    // Fresh roles first (speed matters), best fit first within them.
+    best: `dismissed ASC, (COALESCE(posted_at, discovered_at) > now() - interval '7 days') DESC, COALESCE(fit_score, LEAST(relevance, 70)) DESC, posted_at DESC NULLS LAST`,
     pay: "dismissed ASC, COALESCE((meta->>'usdMax')::numeric, (meta->>'usdMin')::numeric, 0) DESC, relevance DESC",
   }[sort] || 'dismissed ASC, posted_at DESC NULLS LAST, discovered_at DESC';
 
@@ -430,7 +434,7 @@ export async function listJobs({
             discovered_at, relevance, matched_roles, no_dsa, closed_at, favourite, dismissed,
             engagement, rate_min, rate_max, rate_unit, currency, skills, meta,
             app_status, app_status_at, (proposal IS NOT NULL) AS has_proposal,
-            left(description, 420) AS snippet, why_role,
+            left(description, 420) AS snippet, why_role, fit_score,
             (SELECT w.why FROM company_why w WHERE w.key = lower(trim(company_name))) AS why_company
      FROM jobs
      WHERE ${where.join(' AND ')}
@@ -466,13 +470,13 @@ export async function latestPostings() {
               (
                 SELECT json_agg(j_sub)
                 FROM (
-                  SELECT id, title, url, location, relevance, posted_at, why_role
+                  SELECT id, title, url, location, relevance, posted_at, why_role, fit_score
                   FROM jobs j2
                   WHERE j2.company_id = j.company_id
                     AND j2.closed_at IS NULL
                     AND NOT j2.dismissed
                     AND j2.relevance >= 40
-                  ORDER BY j2.relevance DESC, j2.posted_at DESC NULLS LAST
+                  ORDER BY COALESCE(j2.fit_score, LEAST(j2.relevance, 70)) DESC, j2.posted_at DESC NULLS LAST
                   LIMIT 5
                 ) j_sub
               ),

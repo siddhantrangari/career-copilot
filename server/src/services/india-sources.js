@@ -1,5 +1,4 @@
-import { many, one, query } from '../db/pool.js';
-import { config } from '../config.js';
+import { one, query } from '../db/pool.js';
 import { scoreJob } from './discovery.js';
 import { cleanJdText } from './autofill.js';
 
@@ -11,16 +10,12 @@ import { cleanJdText } from './autofill.js';
  *   workday          Public career-site API (/wday/cxs/…) of large Bangalore
  *                    employers. robots.txt allows the career-site paths. No key.
  *   smartrecruiters  Documented public Posting API. No key.
- *   adzuna           Official job-search API with an India index. Free key
- *                    (ADZUNA_APP_ID / ADZUNA_APP_KEY); silent without one.
- *   jsearch          Google-for-Jobs aggregator on RapidAPI (LinkedIn, Naukri,
- *                    Indeed, Glassdoor, Instahyre postings Google indexes).
- *                    JSEARCH_API_KEY; silent without one.
  *
- * Deliberately NOT here: Instahyre, Naukri, LinkedIn and foundit. Their terms
- * forbid automated extraction (Instahyre: "crawl or spider any part of the
- * Platform"), and doing it would risk his own accounts. Those are reached via
- * search links he opens himself (see portalSearchLinks).
+ * Deliberately NOT here: Instahyre, Naukri, LinkedIn, foundit, Indeed and
+ * Google itself. Their terms forbid automated extraction (Instahyre: "crawl or
+ * spider any part of the Platform"), and doing it would risk his own accounts.
+ * Those are reached through Google boolean and portal search links he opens
+ * himself (see search-links.js).
  *
  * Writes are upserts into jobs; nothing is deleted. A role missing from a
  * board that was fetched completely is marked closed, never removed.
@@ -56,12 +51,6 @@ export const SMARTRECRUITERS_COMPANIES = [
   { company: 'ServiceNow', id: 'ServiceNow' },
   { company: 'Freshworks', id: 'Freshworks' },
   { company: 'Canva', id: 'Canva' },
-];
-
-// What the keyed aggregators are asked, once each per run.
-const AGGREGATOR_QUERIES = [
-  'AI engineer', 'machine learning engineer', 'LLM engineer', 'full stack engineer',
-  'forward deployed engineer', 'backend engineer',
 ];
 
 // ── Workday ───────────────────────────────────────────────────────────
@@ -174,61 +163,6 @@ async function fetchSmartRecruiters(sr) {
   return [...byId.values()];
 }
 
-// ── Keyed aggregators (silent without a key) ──────────────────────────
-
-async function fetchAdzuna() {
-  const { appId, appKey } = config.india.adzuna;
-  const out = [];
-  for (const what of AGGREGATOR_QUERIES) {
-    const url = new URL('https://api.adzuna.com/v1/api/jobs/in/search/1');
-    Object.entries({
-      app_id: appId, app_key: appKey, what, where: 'Bangalore', max_days_old: '14',
-      results_per_page: '50', sort_by: 'date', 'content-type': 'application/json',
-    }).forEach(([k, v]) => url.searchParams.set(k, v));
-    const res = await fetch(url, { headers: { 'User-Agent': UA }, signal: AbortSignal.timeout(25_000) });
-    if (!res.ok) throw new Error(`Adzuna returned ${res.status}`);
-    const d = await res.json();
-    for (const r of d.results || []) {
-      if (!r.redirect_url || !r.title) continue;
-      out.push({
-        externalId: String(r.id), title: r.title, url: r.redirect_url,
-        company: r.company?.display_name || '', location: r.location?.display_name || 'India',
-        postedAt: r.created ? new Date(r.created) : null, description: r.description || '',
-      });
-    }
-    await sleep(500);
-  }
-  return out;
-}
-
-async function fetchJSearch() {
-  const { apiKey, host } = config.india.jsearch;
-  const out = [];
-  for (const q of AGGREGATOR_QUERIES) {
-    const url = new URL(`https://${host}/search`);
-    Object.entries({ query: `${q} in Bangalore, India`, page: '1', num_pages: '1', country: 'in', date_posted: 'week' })
-      .forEach(([k, v]) => url.searchParams.set(k, v));
-    const res = await fetch(url, {
-      headers: { 'X-RapidAPI-Key': apiKey, 'X-RapidAPI-Host': host, 'User-Agent': UA },
-      signal: AbortSignal.timeout(30_000),
-    });
-    if (!res.ok) throw new Error(`JSearch returned ${res.status}`);
-    const d = await res.json();
-    for (const j of d.data || []) {
-      const link = j.job_apply_link || j.job_google_link;
-      if (!link || !j.job_title) continue;
-      out.push({
-        externalId: j.job_id, title: j.job_title, url: link, company: j.employer_name || '',
-        location: [j.job_city, j.job_state, j.job_country, j.job_is_remote ? 'Remote' : null].filter(Boolean).join(', ') || 'India',
-        postedAt: j.job_posted_at_datetime_utc ? new Date(j.job_posted_at_datetime_utc) : null,
-        description: j.job_description || '', publisher: j.job_publisher || '',
-      });
-    }
-    await sleep(500);
-  }
-  return out;
-}
-
 // ── Storing ───────────────────────────────────────────────────────────
 
 const DSA_SIGNALS = /leetcode|data structures and algorithms|algorithmic (interview|assessment)|hackerrank|codesignal|competitive programming/i;
@@ -293,8 +227,6 @@ export function indiaSourcesStatus() {
   return {
     workday: WORKDAY_BOARDS.length,
     smartrecruiters: SMARTRECRUITERS_COMPANIES.length,
-    adzuna: Boolean(config.india.adzuna.appId && config.india.adzuna.appKey),
-    jsearch: Boolean(config.india.jsearch.apiKey),
   };
 }
 
@@ -313,9 +245,6 @@ export async function runIndiaDiscovery({ trigger = 'manual', minRelevance = 40 
     ...WORKDAY_BOARDS.map((b) => ({ source: 'workday', company: b.company, key: b.host, fetch: () => fetchWorkday(b), describe: (j) => describeWorkday(b, j) })),
     ...SMARTRECRUITERS_COMPANIES.map((s) => ({ source: 'smartrecruiters', company: s.company, key: s.id, fetch: () => fetchSmartRecruiters(s), describe: (j) => describeSmartRecruiters(s, j) })),
   ];
-  const { adzuna, jsearch } = indiaSourcesStatus();
-  if (adzuna) boards.push({ source: 'adzuna', company: null, aggregator: true, fetch: fetchAdzuna });
-  if (jsearch) boards.push({ source: 'jsearch', company: null, aggregator: true, fetch: fetchJSearch });
 
   try {
     for (const b of boards) {
@@ -325,16 +254,14 @@ export async function runIndiaDiscovery({ trigger = 'manual', minRelevance = 40 
         seen += relevant;
         added += n;
         // A company board was read in full, so a role it no longer lists has
-        // closed. Marked, never deleted. Aggregators are partial; they age out.
-        if (!b.aggregator) {
-          const res = await query(
-            `UPDATE jobs SET closed_at = now()
-             WHERE source = $1 AND company_name = $2 AND closed_at IS NULL AND seen_at < $3`,
-            [b.source, b.company, run.started_at],
-          );
-          closed += res.rowCount || 0;
-        }
-        detail.push({ source: b.source, company: b.company || '(aggregator)', fetched: jobs.length, relevant, new: n });
+        // closed. Marked, never deleted.
+        const res = await query(
+          `UPDATE jobs SET closed_at = now()
+           WHERE source = $1 AND company_name = $2 AND closed_at IS NULL AND seen_at < $3`,
+          [b.source, b.company, run.started_at],
+        );
+        closed += res.rowCount || 0;
+        detail.push({ source: b.source, company: b.company, fetched: jobs.length, relevant, new: n });
       } catch (err) {
         errors.push({ source: b.source, company: b.company, error: err.message });
       }
@@ -352,23 +279,3 @@ export async function runIndiaDiscovery({ trigger = 'manual', minRelevance = 40 
   }
 }
 
-// ── Portals he opens himself ──────────────────────────────────────────
-
-const slug = (s) => String(s || '').toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
-
-/**
- * Search links for the portals whose terms forbid automated reading. Opening
- * a search page is ordinary use; nothing here fetches them.
- */
-export function portalSearchLinks(role = 'AI Engineer', location = 'Bangalore') {
-  const q = encodeURIComponent;
-  const loc = location || 'Bangalore';
-  return [
-    { name: 'Instahyre', url: `https://www.instahyre.com/${slug(role)}-jobs-in-${slug(loc)}/` },
-    { name: 'Naukri', url: `https://www.naukri.com/${slug(role)}-jobs-in-${slug(loc)}?jobAge=7` },
-    { name: 'LinkedIn', url: `https://www.linkedin.com/jobs/search/?keywords=${q(role)}&location=${q(`${loc}, India`)}&f_TPR=r604800` },
-    { name: 'foundit', url: `https://www.foundit.in/srp/results?query=${q(role)}&locations=${q(loc)}` },
-    { name: 'Indeed India', url: `https://in.indeed.com/jobs?q=${q(role)}&l=${q(loc)}&fromage=7` },
-    { name: 'Wellfound', url: `https://wellfound.com/role/l/${slug(role)}/${slug(loc)}` },
-  ];
-}

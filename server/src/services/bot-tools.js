@@ -194,8 +194,8 @@ async function getCompany({ company }) {
     many(`SELECT id, contact_name, created_at FROM win_docs WHERE company_id = $1 ORDER BY created_at DESC LIMIT 3`, [c.id]),
     many(`SELECT id, role_title, round, created_at FROM interview_preps WHERE company_id = $1 ORDER BY created_at DESC LIMIT 3`, [c.id]),
     many(`SELECT id, round, status, report->>'readiness' AS readiness, started_at FROM interview_sessions WHERE company_id = $1 ORDER BY started_at DESC LIMIT 3`, [c.id]),
-    many(`SELECT id, title, location, relevance, url, why_role, COALESCE(posted_at, discovered_at) AS posted FROM jobs
-          WHERE company_id = $1 AND closed_at IS NULL AND NOT dismissed ORDER BY relevance DESC, posted_at DESC NULLS LAST LIMIT 6`, [c.id]),
+    many(`SELECT id, title, location, fit_score AS fit, url, why_role, COALESCE(posted_at, discovered_at) AS posted FROM jobs
+          WHERE company_id = $1 AND closed_at IS NULL AND NOT dismissed ORDER BY COALESCE(fit_score, LEAST(relevance, 70)) DESC, posted_at DESC NULLS LAST LIMIT 6`, [c.id]),
   ]);
   const r = c.research || null;
   return {
@@ -348,11 +348,12 @@ async function searchJobs({
     if (count) return (await one(`SELECT count(*)::int AS n ${from} ${where}`, params)).n;
     params.push(Math.min(Number(limit) || 5, 25));
     return many(
-      `SELECT j.id, j.title, COALESCE(NULLIF(c.name,''), j.company_name) AS company, j.location, j.relevance AS match,
+      `SELECT j.id, j.title, COALESCE(NULLIF(c.name,''), j.company_name) AS company, j.location, j.fit_score AS fit, j.relevance AS title_match,
               j.url, j.favourite, j.no_dsa, COALESCE(j.posted_at, j.discovered_at) AS posted, t.stage AS tracked_stage,
               j.why_role AS why_role, (SELECT w.why FROM company_why w WHERE w.key = lower(trim(COALESCE(NULLIF(c.name,''), j.company_name)))) AS why_company
        ${from} ${where}
-       ORDER BY j.favourite DESC, COALESCE(j.posted_at, j.discovered_at) DESC, j.relevance DESC
+       -- Best fit first among what matched, freshest breaking ties.
+       ORDER BY j.favourite DESC, COALESCE(j.fit_score, LEAST(j.relevance, 70)) DESC, COALESCE(j.posted_at, j.discovered_at) DESC
        LIMIT $${params.length}`,
       params,
     );
@@ -769,11 +770,12 @@ async function startAiTask(args) {
   };
 }
 
-async function portalLinks({ query: q = 'AI Engineer', location = 'Bangalore' } = {}) {
-  const { portalSearchLinks } = await import('./india-sources.js');
+async function webSearchLinks({ query: q = 'AI Engineer', location = 'Bangalore', period = 'week' } = {}) {
+  const { googleBooleanLinks, portalSearchLinks } = await import('./search-links.js');
   return {
-    note: 'Instahyre, Naukri, LinkedIn and foundit forbid automated reading, so these are search links for him to open.',
-    links: portalSearchLinks(q, location),
+    note: 'Links for him to open — the portals and Google forbid automated reading.',
+    google: googleBooleanLinks(q, location, period).map(({ name, url }) => ({ name, url })),
+    portals: portalSearchLinks(q, location),
   };
 }
 
@@ -801,7 +803,7 @@ const TOOLS = [
   ['list_pipeline', 'Tracked companies with stage and roles.', S({ stage: stageArg, query: str('name filter') }), listPipeline],
   ['get_company', 'One company: tracking, roles, contacts, research, document ids, open jobs.', S({ company: companyArg }, ['company']), getCompany],
   ['find_companies', 'Search the company catalogue.', S({ query: str(), region: REGION, trackedOnly: bool, limit: int }), findCompanies],
-  ['search_jobs', 'Discovered full-time jobs, newest first. query = title words, "or" for alternatives (synonyms handled: AI/ML/LLM, fullstack/full stack, engineer/developer). location = place (Bangalore=Bengaluru, India, remote, Europe…). match = relevance 0-100; leave minMatch unset unless he asks.', S({ query: str('e.g. AI engineer or fullstack'), location: str('e.g. Bangalore'), company: companyArg, minMatch: int, postedWithinDays: int, favouritesOnly: bool, limit: int }), searchJobs],
+  ['search_jobs', 'Discovered full-time jobs, newest first. query = title words, "or" for alternatives (synonyms handled: AI/ML/LLM, fullstack/full stack, engineer/developer). location = place (Bangalore=Bengaluru, India, remote, Europe…). Ranked by fit (0-100, JD vs his profile; show it as "fit 82"); title_match is the title score. leave minMatch unset unless he asks.', S({ query: str('e.g. AI engineer or fullstack'), location: str('e.g. Bangalore'), company: companyArg, minMatch: int, postedWithinDays: int, favouritesOnly: bool, limit: int }), searchJobs],
   ['search_gigs', 'Freelance/contract gigs.', S({ query: str(), limit: int }), searchGigs],
   ['get_followups_and_interviews', 'Interviews in 7 days, follow-ups due, new jobs not yet in a digest.', S({}), getFollowupsAndInterviews],
   ['list_documents', 'Resumes, WIN docs, interview preps, mock interviews (ids).', S({ company: companyArg, type: { type: 'string', enum: DOC_TYPES } }), listDocuments],
@@ -824,7 +826,7 @@ const TOOLS = [
     company: companyArg, role: str(), jobDescription: str(), instructions: str(), contactName: str(),
     problems: { type: 'array', items: { type: 'string' } }, topic: str(), round: { type: 'string', enum: ROUNDS }, force: bool,
   }, ['task', 'confirmedByUser']), startAiTask],
-  ['portal_links', 'Search links for Instahyre, Naukri, LinkedIn, foundit, Indeed India, Wellfound (not read automatically — he opens them). Offer when search_jobs is thin.', S({ query: str('role'), location: str() }), portalLinks],
+  ['web_search_links', 'Google boolean searches (past week by default) across LinkedIn, Naukri, Instahyre, foundit, Indeed, Wellfound, Cutshort, Hirist, ATS boards and careers pages, plus the portals\' own search pages. Links he opens. Offer when search_jobs is thin or he asks to search the web.', S({ query: str('role'), location: str(), period: { type: 'string', enum: ['day', 'week', 'month'] } }), webSearchLinks],
   ['send_digest_now', "Send today's digest now.", S({}), sendDigestNow],
 ];
 

@@ -517,3 +517,10 @@ CREATE TABLE IF NOT EXISTS company_why (
   why          TEXT NOT NULL,
   generated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+
+-- Fit score 0–100 from the same grounded call as why_role: how well the JD
+-- matches his proven skills, target role types and target locations. The
+-- feed, digest, bot and Track modal rank by it; relevance (title match)
+-- remains the discovery filter.
+ALTER TABLE jobs ADD COLUMN IF NOT EXISTS fit_score SMALLINT;
+CREATE INDEX IF NOT EXISTS jobs_fit_idx ON jobs (fit_score DESC NULLS LAST) WHERE closed_at IS NULL;

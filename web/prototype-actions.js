@@ -866,7 +866,7 @@
 
     function renderJobs() {
       body.innerHTML = '<p class="cc-muted">Loading roles…</p>';
-      api('/jobs/discovered?limit=60&minRelevance=50')
+      api('/jobs/discovered?limit=60&minRelevance=50&sort=best')
         .then(function (d) {
           var jobs = d.jobs || [];
           if (!jobs.length) {
@@ -874,7 +874,7 @@
             return;
           }
           document.getElementById('cc-feed-sub').textContent =
-            jobs.length + ' matching roles · newest first · real posted dates from each company’s job board';
+            jobs.length + ' matching roles · last 7 days first, best fit first · fit = JD vs your profile';
 
           body.innerHTML = jobs.map(function (j) {
             var when = ago(j.posted_at);
@@ -887,7 +887,7 @@
               'style="color:#e7ecf3;text-decoration:none;font-weight:600">' + esc(j.title) + '</a>' +
               '<div class="cc-muted" style="font-size:11px">' + esc(j.company_name) +
               (j.location ? ' · ' + esc(j.location) : '') +
-              ' · match ' + j.relevance +
+              (j.fit_score != null ? ' · <b style="color:' + (j.fit_score >= 75 ? '#7ee0a8' : j.fit_score >= 55 ? '#ffd166' : '#ff8787') + '">fit ' + j.fit_score + '</b>' : ' · match ' + j.relevance) +
               (j.no_dsa === false ? ' · <span style="color:#ffb020">DSA signals</span>' : '') +
               '</div>' +
               (j.why_role ? '<div style="font-size:11px;color:#9fd3ff;margin-top:2px" title="Why this role">💡 ' + esc(j.why_role) + '</div>' : '') +
@@ -1060,10 +1060,60 @@
     refreshStatus();
   }
 
+  // ── Web search panel: Google boolean + portal searches he opens ──────
+  // LinkedIn, Naukri, Instahyre and the rest forbid automated reading, so
+  // these are links; one site: query covers each portal for the past week.
+  function buildWebSearchPanel() {
+    var host = document.getElementById('discovery') || document.getElementById('jobs');
+    var feed = document.getElementById('cc-feed');
+    if (!host || !feed || host.querySelector('#cc-websearch')) return;
+
+    var panel = document.createElement('div');
+    panel.id = 'cc-websearch';
+    panel.style.cssText =
+      'background:#141822;border:1px solid #232a38;border-radius:14px;padding:16px 20px;margin-bottom:16px';
+    var field = 'background:#0f131b;border:1px solid #232a38;border-radius:8px;color:#e7ecf3;padding:7px 10px;font-size:12.5px';
+    panel.innerHTML =
+      '<strong style="font-size:15px">🔎 Web search</strong>' +
+      '<div class="cc-muted" style="margin-bottom:10px">Google boolean searches across LinkedIn, Naukri, Instahyre, foundit, Indeed, Wellfound, Cutshort, Hirist, ATS boards and careers pages — opened by you.</div>' +
+      '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">' +
+      '<input id="cc-ws-role" value="AI Engineer" placeholder="Role" style="' + field + ';min-width:180px">' +
+      '<select id="cc-ws-loc" style="' + field + '"><option value="">Bangalore or Remote India</option><option>Bangalore</option><option>Remote India</option></select>' +
+      '<select id="cc-ws-period" style="' + field + '"><option value="day">Past 24h</option><option value="week" selected>Past week</option><option value="month">Past month</option></select>' +
+      '<button class="btn pri" id="cc-ws-go" type="button">Build searches</button>' +
+      '</div><div id="cc-ws-body" style="margin-top:12px"></div>';
+    host.insertBefore(panel, feed);
+
+    var body = document.getElementById('cc-ws-body');
+    var btn = function (l) {
+      return '<a class="btn" target="_blank" rel="noopener" style="font-size:11px;padding:4px 9px;margin:0 6px 6px 0;display:inline-block" href="' +
+        esc(l.url) + '"' + (l.query ? ' title="' + esc(l.query) + '"' : '') + '>' + esc(l.name.replace(/^Google · /, '')) + ' ↗</a>';
+    };
+    function build() {
+      var role = document.getElementById('cc-ws-role').value.trim() || 'AI Engineer';
+      var loc = document.getElementById('cc-ws-loc').value;
+      var period = document.getElementById('cc-ws-period').value;
+      body.innerHTML = '<p class="cc-muted">Building…</p>';
+      api('/jobs/search-links?role=' + encodeURIComponent(role) + '&location=' + encodeURIComponent(loc || 'India') + '&period=' + period)
+        .then(function (d) {
+          var w = d.web || { google: [], portals: [] };
+          body.innerHTML =
+            '<div class="cc-muted" style="font-size:11px;margin-bottom:4px">Google (' + esc(period === 'day' ? 'past 24h' : 'past ' + period) + ')</div>' +
+            w.google.map(btn).join('') +
+            '<div class="cc-muted" style="font-size:11px;margin:6px 0 4px">Portal search pages</div>' +
+            w.portals.map(btn).join('');
+        })
+        .catch(function (e) { body.innerHTML = '<div class="cc-bad">' + esc(e.message) + '</div>'; });
+    }
+    document.getElementById('cc-ws-go').addEventListener('click', build);
+    build();
+  }
+
   buildFeed();
   buildDigestPanel();
+  buildWebSearchPanel();
   // The Job Discovery section may only exist once its tab is opened.
-  document.addEventListener('click', function () { setTimeout(function () { buildFeed(); buildDigestPanel(); }, 120); });
+  document.addEventListener('click', function () { setTimeout(function () { buildFeed(); buildDigestPanel(); buildWebSearchPanel(); }, 120); });
 })();
 
 /* ────────────────────────────────────────────────────────────────────

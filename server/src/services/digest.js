@@ -1,6 +1,7 @@
 import { many, one } from '../db/pool.js';
 import { config } from '../config.js';
 import { tg } from './telegram.js';
+import { dailySearches } from './search-links.js';
 
 /**
  * Morning digest.
@@ -119,14 +120,16 @@ const latest = (...dates) => dates.filter(Boolean).reduce((a, b) => (b > a ? b :
 // ── Building the digest ───────────────────────────────────────────────
 
 async function freshJobs(now) {
-  const { minRelevance, maxJobs } = config.digest;
+  const { minRelevance, minFit, maxJobs } = config.digest;
   const where = `
     COALESCE(j.engagement, 'fte') = 'fte'
     AND NOT j.dismissed AND j.closed_at IS NULL
     AND NOT COALESCE(c.dismissed, false)
     AND COALESCE(t.stage, '') <> 'failed'
     AND COALESCE(j.posted_at, j.discovered_at) > $1
-    AND j.relevance >= $2
+    -- Scored roles qualify on fit (JD vs profile); unscored ones on the title
+    -- score until the next why-lines pass scores them.
+    AND CASE WHEN j.fit_score IS NOT NULL THEN j.fit_score >= $3 ELSE j.relevance >= $2 END
     AND NOT EXISTS (
       SELECT 1 FROM digest_runs d WHERE d.status = 'sent' AND j.id = ANY (d.job_ids)
     )`;
@@ -136,16 +139,27 @@ async function freshJobs(now) {
     LEFT JOIN tracked_companies t ON t.company_id = j.company_id`;
   const since = new Date(now.getTime() - 72 * HOUR);
 
-  const jobs = await many(
-    `SELECT j.id, j.title, j.url, j.location, j.relevance, j.favourite, j.no_dsa, j.why_role,
+  const candidates = await many(
+    `SELECT j.id, j.title, j.url, j.location, j.relevance, j.fit_score, j.favourite, j.no_dsa, j.why_role,
             COALESCE(j.posted_at, j.discovered_at) AS posted_at,
             COALESCE(NULLIF(c.name, ''), j.company_name) AS company, t.stage AS tracked_stage
      ${from} WHERE ${where}
-     ORDER BY j.favourite DESC, j.relevance DESC, COALESCE(j.posted_at, j.discovered_at) DESC
-     LIMIT $3`,
-    [since, minRelevance, maxJobs],
+     ORDER BY j.favourite DESC, COALESCE(j.fit_score, LEAST(j.relevance, 70)) DESC, COALESCE(j.posted_at, j.discovered_at) DESC
+     LIMIT $4`,
+    [since, minRelevance, minFit, maxJobs * 6],
   );
-  const total = await one(`SELECT count(*)::int AS n ${from} WHERE ${where}`, [since, minRelevance]);
+  // At most two roles per company, so one employer posting a batch cannot
+  // take over the morning list; the rest stay unsent for later digests.
+  const perCompany = new Map();
+  const jobs = [];
+  for (const j of candidates) {
+    const n = perCompany.get(j.company) || 0;
+    if (n >= 2) continue;
+    perCompany.set(j.company, n + 1);
+    jobs.push(j);
+    if (jobs.length >= maxJobs) break;
+  }
+  const total = await one(`SELECT count(*)::int AS n ${from} WHERE ${where}`, [since, minRelevance, minFit]);
   return { jobs, total: total?.n ?? jobs.length };
 }
 
@@ -299,7 +313,7 @@ export function renderDigest(d, now = new Date(d.generatedAt)) {
       ].filter(Boolean).join(' · ');
       lines.push(
         `• ${link(j.url, j.title)} — ${esc(j.company)}` +
-        `${j.location ? ` · ${esc(clip(j.location, 40))}` : ''} · match ${j.relevance} · ${esc(ago(new Date(j.posted_at), now))}` +
+        `${j.location ? ` · ${esc(clip(j.location, 40))}` : ''} · ${j.fit_score != null ? `fit ${j.fit_score}` : `match ${j.relevance}`} · ${esc(ago(new Date(j.posted_at), now))}` +
         `${tags ? ` · ${esc(tags)}` : ''}`,
       );
       if (j.why_role) lines.push(`   💡 <i>${esc(j.why_role)}</i>`);
@@ -334,6 +348,10 @@ export function renderDigest(d, now = new Date(d.generatedAt)) {
   } else {
     sections.push(['📬 <b>Follow-ups</b> — none due']);
   }
+
+  // Standing web searches (past 24h) — reach LinkedIn, Naukri, Instahyre and
+  // the rest in one tap without anything reading those sites automatically.
+  sections.push([`🔎 <b>Today on the web</b>: ${dailySearches().map((s) => link(s.url, s.label)).join(' · ')}`]);
 
   sections.push([link(app, 'Open Career Copilot')]);
 

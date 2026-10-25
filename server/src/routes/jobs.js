@@ -265,8 +265,12 @@ export default async function jobRoutes(app) {
         { name: 'EU Remote Jobs', url: `https://euremotejobs.com/?s=${q(role)}` },
         { name: 'Otta', url: 'https://app.otta.com/jobs' },
       ],
-      // Portals whose terms forbid automated reading — links only.
-      india: (await import('../services/india-sources.js')).portalSearchLinks(role, location === 'Remote' ? 'Bangalore' : location),
+      // Google boolean + portal searches — links only; their terms forbid automated reading.
+      web: await (async () => {
+        const { googleBooleanLinks, portalSearchLinks } = await import('../services/search-links.js');
+        const loc = location === 'Remote' ? 'Bangalore' : location;
+        return { google: googleBooleanLinks(role, loc, request.query?.period), portals: portalSearchLinks(role, loc) };
+      })(),
     };
   });
 

@@ -50,7 +50,15 @@ Return JSON only: {"items":[{"id":"<id>","why":"<line>"}]}`;
 
 async function writeLines(kind, candidate, items) {
   const system = kind === 'role'
-    ? `You write a one-line "why this role" note for Siddhant's job search: which of his real strengths match this role, and the main gap if the JD clearly needs something he lacks (e.g. "…; gap: Go"). If there is no JD, judge from the title against his target roles and start the line with "Title only:".\n${RULES}`
+    ? `You write a one-line "why this role" note for Siddhant's job search: which of his real strengths match this role, and the main gap if the JD clearly needs something he lacks (e.g. "…; gap: Go"). If there is no JD, judge from the title against his target roles and start the line with "Title only:".
+Also give "fit", an integer 0-100 for how well this role suits him, from the same evidence:
+- 85-100: one of his target role types, most required skills proven in his work, location acceptable.
+- 70-84: target role type, many skills proven, one or two real gaps.
+- 50-69: adjacent role, or several gaps in required skills.
+- 30-49: major gap in core stack or domain (e.g. a language or platform he has never used).
+- 0-29: not his field (mobile-native, hardware/firmware, sales, pure research).
+Location: Bangalore/Bengaluru, India-remote, EU-remote, Gulf and global remote are acceptable; other on-site cities lower fit by 10-20. Title only (no JD): at most 60.
+${RULES.replace('{"id":"<id>","why":"<line>"}', '{"id":"<id>","why":"<line>","fit":<0-100>}')}`
     : `You write a one-line "why this company" note for Siddhant's job search: what the company does (only from its description/research) and why it is worth his time (his target roles, location, the open roles there). With no description, never guess what the company does: say what it is hiring for (openRoles, trackedRoles) and why that suits him. Never start with "Title only:".\n${RULES}`;
   const res = await chatJson({
     kind: `why-${kind}`,
@@ -61,8 +69,10 @@ async function writeLines(kind, candidate, items) {
   });
   const out = new Map();
   for (const it of res?.items || []) {
-    const why = clean(it?.why, MAX_LEN);
-    if (it?.id && why) out.set(String(it.id), why);
+    if (!it?.id) continue;
+    const why = clean(it.why, MAX_LEN);
+    const fit = Number.isFinite(Number(it.fit)) ? Math.max(0, Math.min(100, Math.round(Number(it.fit)))) : null;
+    if (why || fit !== null) out.set(String(it.id), { why, fit });
   }
   return out;
 }
@@ -85,9 +95,9 @@ export async function generateWhyLines({ maxJobs = 120, maxCompanies = 40, onSte
     `SELECT id, title, company_name, location, left(description, 3000) AS jd
      FROM jobs
      WHERE closed_at IS NULL AND COALESCE(engagement, 'fte') = 'fte' AND NOT dismissed
-       AND relevance >= 40 AND why_role IS NULL
+       AND relevance >= 40 AND fit_score IS NULL
        -- a role the model could not ground is retried weekly, not every pass
-       AND (why_role_at IS NULL OR why_role_at < now() - interval '7 days')
+       AND (why_role IS NOT NULL OR why_role_at IS NULL OR why_role_at < now() - interval '7 days')
        -- these sources fetch the JD right after listing; wait for it
        AND NOT (source IN ('workday', 'smartrecruiters') AND COALESCE(description, '') = '')
      ORDER BY COALESCE(posted_at, discovered_at) DESC LIMIT $1`,
@@ -143,13 +153,15 @@ export async function generateWhyLines({ maxJobs = 120, maxCompanies = 40, onSte
         jd: clean(cleanJdText(j.jd || ''), 900),
       })));
       for (const { lead, ids } of batch) {
-        const why = lines.get(lead.id);
-        // A blank is recorded as attempted (why_role stays NULL) so it is not re-asked every pass.
+        const got = lines.get(lead.id) || {};
+        // Blank: recorded as attempted so it is not re-asked every pass. An
+        // existing line is kept if this pass returned none.
         await query(
-          `UPDATE jobs SET why_role = $2, why_role_at = now() WHERE id = ANY ($1::uuid[]) AND why_role IS NULL`,
-          [ids, why || null],
+          `UPDATE jobs SET why_role = COALESCE($2, why_role), fit_score = $3, why_role_at = now()
+           WHERE id = ANY ($1::uuid[]) AND fit_score IS NULL`,
+          [ids, got.why || null, got.fit ?? null],
         );
-        if (why) roles += ids.length; else skipped += ids.length;
+        if (got.why || got.fit !== undefined) roles += ids.length; else skipped += ids.length;
       }
     } catch (err) {
       skipped += batch.reduce((n, g) => n + g.ids.length, 0);
@@ -168,7 +180,7 @@ export async function generateWhyLines({ maxJobs = 120, maxCompanies = 40, onSte
         trackedRoles: trackedRoleTitles(c.tracked_roles),
       })));
       for (const [k, c] of batch.entries()) {
-        const why = lines.get(String(k)) || '';
+        const why = lines.get(String(k))?.why || '';
         // An empty line marks "tried, nothing groundable"; every surface treats it as absent.
         await query(
           // Replaces only a line from the earlier prompt that wrongly used the
@@ -193,8 +205,8 @@ export async function whyBacklog() {
   return one(
     `SELECT
        (SELECT count(*) FROM jobs WHERE closed_at IS NULL AND COALESCE(engagement,'fte')='fte' AND NOT dismissed
-          AND relevance >= 40 AND why_role IS NULL
-          AND (why_role_at IS NULL OR why_role_at < now() - interval '7 days'))::int AS roles,
+          AND relevance >= 40 AND fit_score IS NULL
+          AND (why_role IS NOT NULL OR why_role_at IS NULL OR why_role_at < now() - interval '7 days'))::int AS roles,
        (SELECT count(*) FROM companies c WHERE NOT COALESCE(c.dismissed,false) AND NOT c.freelance
           AND NOT EXISTS (SELECT 1 FROM company_why w WHERE w.key = lower(trim(c.name)) AND w.why NOT LIKE 'Title only:%'))::int AS companies`,
   );
