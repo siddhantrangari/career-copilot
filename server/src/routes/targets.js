@@ -3,6 +3,8 @@ import { outreachPlan, listTargets, loadNavigator, logActivity, ACTIVITY_KINDS }
 import { buildToday } from '../services/today.js';
 import { companyDetail, addToList, draftOutreach } from '../services/company-detail.js';
 import { buildWeeklyReview, sendWeeklyReview } from '../services/weekly-review.js';
+import { listFollowups, actOnFollowup, draftNudge } from '../services/followups.js';
+import { suggestAngles, draftPost } from '../services/linkedin-post.js';
 
 export default async function targetRoutes(app) {
   app.addHook('onRequest', app.auth);
@@ -43,6 +45,18 @@ export default async function targetRoutes(app) {
     const r = await draftOutreach(ref(b), { name: String(c.name || '').slice(0, 120), role: String(c.role || '').slice(0, 160), type: ['hm', 'peer', 'hr', 'indian', 'other'].includes(c.type) ? c.type : 'peer' });
     return r || reply.code(404).send({ error: 'Company not found' });
   });
+
+  // Follow-up triage: everything due, and one decision each (nothing is deleted).
+  app.get('/followups', async () => listFollowups());
+  app.post('/followups/act', async (request) => {
+    const b = request.body || {};
+    return actOnFollowup(String(b.key || ''), b.action, { days: b.days, as: b.as });
+  });
+  app.post('/followups/draft', async (request) => draftNudge(String(request.body?.key || '')));
+
+  // LinkedIn post helper: angles from his real week, or a draft from his material.
+  app.post('/post/angles', async () => suggestAngles());
+  app.post('/post/draft', async (request) => draftPost({ material: request.body?.material, bucket: request.body?.bucket }));
 
   /** The Sunday review: preview it, or send it to Telegram now. */
   app.get('/weekly-review', async () => buildWeeklyReview());

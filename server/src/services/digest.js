@@ -171,14 +171,15 @@ export async function pipeline() {
      WHERE t.stage NOT IN ('failed', 'offer') AND NOT COALESCE(c.dismissed, false)`,
   );
   const contacts = await many(
-    `SELECT n.company_id, n.name, n.type, n.status, n.linkedin_url,
+    `SELECT n.id, n.company_id, n.name, n.type, n.status, n.linkedin_url,
             COALESCE(n.status_changed_at, n.created_at) AS since, c.name AS company
      FROM connections n
      JOIN tracked_companies t ON t.company_id = n.company_id
      JOIN companies c ON c.id = n.company_id
      WHERE n.status = 'dm' AND t.stage NOT IN ('failed', 'offer')`,
   );
-  return { tracked, contacts };
+  const snoozed = new Set((await many(`SELECT key FROM followup_snoozes WHERE until > now()`)).map((r) => r.key));
+  return { tracked, contacts, snoozed };
 }
 
 export function interviewsFrom(tracked, now) {
@@ -207,13 +208,19 @@ export function interviewsFrom(tracked, now) {
   return { upcoming, undated };
 }
 
-export function followUpsFrom(tracked, contacts, now) {
+/** The follow-up's identity, stable across days: kind:companyId:role-or-contact. */
+export const followUpKey = (f) => [f.kind, f.companyId || '', String(f.role || f.name || '').toLowerCase().trim()].join(':');
+
+export function followUpsFrom(tracked, contacts, now, { snoozed = new Set(), limit = MAX_FOLLOWUPS } = {}) {
   const due = [];
   let parked = 0;
+  let waiting = 0;
 
   const consider = (item, lastTouch, threshold) => {
     const days = daysSince(lastTouch, now);
     if (days < threshold) return;
+    item.key = followUpKey(item);
+    if (snoozed.has(item.key)) { waiting += 1; return; }
     if (days > STALE_LIMIT_DAYS) { parked += 1; return; }
     due.push({ ...item, days });
   };
@@ -232,22 +239,22 @@ export function followUpsFrom(tracked, contacts, now) {
         const applied = parseLooseDate(r.appliedAt)
           || (t.stage_changed_at ? new Date(t.stage_changed_at) : created);
         consider(
-          { kind: 'applied', company: t.company, role: r.title || '', applied },
+          { kind: 'applied', company: t.company, companyId: t.company_id, role: r.title || '', applied },
           latest(applied, activity),
           APPLIED_NUDGE_DAYS,
         );
       }
     } else if (t.stage === 'applied') {
       const applied = t.stage_changed_at ? new Date(t.stage_changed_at) : created;
-      consider({ kind: 'applied', company: t.company, role: '', applied }, latest(applied, activity), APPLIED_NUDGE_DAYS);
+      consider({ kind: 'applied', company: t.company, companyId: t.company_id, role: '', applied }, latest(applied, activity), APPLIED_NUDGE_DAYS);
     } else if (t.stage === 'networking') {
-      consider({ kind: 'networking', company: t.company, sinceTracking: !activity }, activity || created, NETWORKING_QUIET_DAYS);
+      consider({ kind: 'networking', company: t.company, companyId: t.company_id, sinceTracking: !activity }, activity || created, NETWORKING_QUIET_DAYS);
     }
   }
 
   for (const c of contacts) {
     consider(
-      { kind: 'dm', company: c.company, name: c.name, url: c.linkedin_url },
+      { kind: 'dm', company: c.company, companyId: c.company_id, contactId: c.id, name: c.name, url: c.linkedin_url },
       new Date(c.since),
       DM_FOLLOWUP_DAYS,
     );
@@ -257,12 +264,12 @@ export function followUpsFrom(tracked, contacts, now) {
   // then networking. Within a kind, the oldest silence first.
   const rank = { dm: 0, applied: 1, networking: 2 };
   due.sort((a, b) => rank[a.kind] - rank[b.kind] || b.days - a.days);
-  return { items: due.slice(0, MAX_FOLLOWUPS), total: due.length, parked };
+  return { items: due.slice(0, limit), total: due.length, parked, waiting };
 }
 
 /** Everything the message needs, as data. Pure read. */
 export async function buildDigest(now = new Date()) {
-  const [{ jobs, total }, { tracked, contacts }] = await Promise.all([freshJobs(now), pipeline()]);
+  const [{ jobs, total }, { tracked, contacts, snoozed }] = await Promise.all([freshJobs(now), pipeline()]);
   let searchUsage = null;
   try {
     const gj = await import('./google-jobs.js');
@@ -281,7 +288,7 @@ export async function buildDigest(now = new Date()) {
     plan,
     interviews: interviewsFrom(tracked, now),
     jobs: { items: jobs, total },
-    followUps: followUpsFrom(tracked, contacts, now),
+    followUps: followUpsFrom(tracked, contacts, now, { snoozed }),
   };
 }
 

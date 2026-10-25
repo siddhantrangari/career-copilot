@@ -130,8 +130,8 @@ export async function buildToday(now = new Date()) {
 
   // 2. Follow-ups due (DM day 4, applications quiet 7 days) — the two oldest.
   const idOf = new Map(pipe.tracked.map((t) => [t.company, t.company_id]));
-  for (const f of followUpsFrom(pipe.tracked, pipe.contacts, now).items.slice(0, 2)) {
-    push({ key: key('follow', f.company, f.role || f.name), type: 'follow_up', icon: '📬', company: f.company, companyId: idOf.get(f.company) || null,
+  for (const f of followUpsFrom(pipe.tracked, pipe.contacts, now, { snoozed: pipe.snoozed }).items.slice(0, 2)) {
+    push({ key: key('follow', f.company, f.role || f.name), fkey: f.key, type: 'follow_up', icon: '📬', company: f.company, companyId: idOf.get(f.company) || null,
       role: f.role || '', title: f.kind === 'dm' ? `Follow up with ${f.name}` : f.kind === 'applied' ? 'Nudge the recruiter or ask for a referral' : 'Send the next networking message',
       detail: `Quiet for ${f.days} days`, logKind: f.kind === 'applied' ? 'referral_ask' : 'follow_up', url: f.url || null });
   }
@@ -168,5 +168,6 @@ export async function buildToday(now = new Date()) {
     week: { ...targets(cWeek, 5), calls: { done: cWeek.calls, target: g.weeklyCalls, stretch: g.weeklyCallsStretch, label: 'Calls' } },
     actions: actions.slice(0, 10),
     priorityTargets: (await one(`SELECT count(*)::int AS n FROM company_targets WHERE priority`))?.n || 0,
+    followUpsDue: followUpsFrom(pipe.tracked, pipe.contacts, now, { snoozed: pipe.snoozed }).total,
   };
 }

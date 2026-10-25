@@ -602,3 +602,12 @@ CREATE TABLE IF NOT EXISTS outreach_activity (
   note          TEXT
 );
 CREATE INDEX IF NOT EXISTS outreach_activity_at_idx ON outreach_activity (at DESC);
+
+-- Follow-ups he parked ("waiting — remind me in 7 days"). Hidden from the
+-- Today board, digest and weekly review until `until`; nothing is deleted.
+-- key = kind:companyId:role-or-contact, as built in digest.followUpsFrom.
+CREATE TABLE IF NOT EXISTS followup_snoozes (
+  key         TEXT PRIMARY KEY,
+  until       TIMESTAMPTZ NOT NULL,
+  created_at  TIMESTAMPTZ NOT NULL DEFAULT now()
+);

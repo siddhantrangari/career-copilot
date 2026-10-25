@@ -2562,6 +2562,7 @@
     '#cc-today .td-a .ab{display:flex;flex-direction:column;gap:4px;flex:none}' +
     '#cc-today .td-a .ab a,#cc-today .td-a .ab button{font-size:10.5px;padding:3px 8px;text-align:center;background:#1a2030;border:1px solid #2a3244;color:#c9d4e3;border-radius:6px;cursor:pointer;text-decoration:none}' +
     '#cc-today .td-a .ab .ok{border-color:rgba(56,217,169,.5);color:#38d9a9}' +
+    '#cc-today .td-a .ab.grid{display:grid;grid-template-columns:auto auto}' +
     '#cc-today .td-tag{font-size:9px;font-weight:800;margin-left:5px}' +
     '#cc-today .td-foot{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-top:8px;font-size:11px;color:#7c8ba3}' +
     '#cc-today .td-foot a{color:#9fd3ff;cursor:pointer}' +
@@ -2582,7 +2583,8 @@
 
   function meter(k, m) {
     var pct = m.target ? Math.min(100, Math.round(m.done / m.target * 100)) : 0;
-    return '<div class="td-m' + (m.done >= m.target ? ' hit' : '') + '"><div class="l">' + esc(m.label) + '</div>' +
+    return '<div class="td-m' + (m.done >= m.target ? ' hit' : '') + '"><div class="l">' + esc(m.label) +
+      (k === 'posts' ? ' <a data-post="1" style="float:right;color:#9fd3ff;cursor:pointer;text-transform:none;letter-spacing:0" title="Draft today’s post in your LinkedIn rules">✍️ Draft</a>' : '') + '</div>' +
       '<div class="n">' + m.done + ' <span>/ ' + m.target + (m.done >= m.target ? ' ✓' : '') + '</span></div>' +
       '<div class="td-bar"><i style="width:' + pct + '%"></i></div>' +
       '<div class="b">' + STEP[k].map(function (n) { return '<button type="button" data-log="' + k + '" data-n="' + n + '">+' + n + '</button>'; }).join('') + '</div></div>';
@@ -2598,12 +2600,17 @@
       (a.whyCompany ? '<div class="w" title="' + esc(a.whyCompany) + '">💡 Why this company: ' + esc(a.whyCompany) + '</div>' : '') +
       (a.whyRole ? '<div class="w" title="' + esc(a.whyRole) + '">🎯 Why this role: ' + esc(a.whyRole) + '</div>' : '') +
       (a.whyNowLine ? '<div class="w" style="color:#d6b25e" title="' + esc(a.whyNowLine) + '">📈 ' + esc(a.whyNowLine) + '</div>' : '') +
-      '</div><div class="ab">' +
+      '</div><div class="ab' + (a.fkey ? ' grid' : '') + '">' +
       (a.url && a.type === 'apply' ? '<a target="_blank" rel="noopener" href="' + esc(a.url) + '">Apply ↗</a>' : '') +
       (a.url && a.type === 'follow_up' ? '<a target="_blank" rel="noopener" href="' + esc(a.url) + '">Open ↗</a>' : '') +
       (a.type === 'outreach' ? '<button type="button" data-detail-name="' + esc(a.company) + '" title="People to reach, news, and DM drafts">👥 People</button>' : '') +
       (a.companyId && typeof window.openTrack === 'function' ? '<button type="button" data-open="' + esc(a.companyId) + '">Track</button>' : '') +
-      '<button type="button" class="ok" data-done="' + i + '" title="Mark done — logs it and hides it for today">Done ✓</button>' +
+      (a.fkey
+        ? '<button type="button" data-nudge="' + esc(a.fkey) + '" title="Draft the follow-up (one AI call)">✍️ Draft</button>' +
+          '<button type="button" class="ok" data-fact="sent" data-fk="' + esc(a.fkey) + '" title="You followed up — the clock restarts">✓ Sent</button>' +
+          '<button type="button" data-fact="snooze" data-fk="' + esc(a.fkey) + '" title="Waiting on them — hide for 7 days">💤 7d</button>' +
+          '<button type="button" data-fact="close" data-fk="' + esc(a.fkey) + '" title="It is over — moves to Closed, history kept">✕ Close</button>'
+        : '<button type="button" class="ok" data-done="' + i + '" title="Mark done — logs it and hides it for today">Done ✓</button>') +
       '</div></div>';
   }
 
@@ -2624,7 +2631,7 @@
             (more ? 'Show fewer' : 'Show ' + (data.actions.length - SHOWN) + ' more actions') + '</a>' : '')
         : '<p class="cc-muted" style="margin:10px 0 0">Nothing urgent left today — send connection requests to your Outreach companies.</p>';
       html += '<div class="td-foot"><span>Targets from your Daily System · ⭐ Priority → Apply → Outreach · ' + data.priorityTargets + ' priority companies</span>' +
-        '<a data-all="1">All target companies →</a></div>';
+        '<span>' + (data.followUpsDue ? '<a data-triage="1">📬 Triage ' + data.followUpsDue + ' follow-ups →</a> · ' : '') + '<a data-all="1">All target companies →</a></span></div>';
     }
     box.innerHTML = html;
   }
@@ -2655,6 +2662,15 @@
     }
     if ((b = el.closest('[data-open]'))) { window.openTrack(b.getAttribute('data-open')); return; }
     if (el.closest('[data-more]')) { more = !more; render(); return; }
+    if (el.closest('[data-triage]')) { if (window.ccTriage) window.ccTriage(); return; }
+    if (el.closest('[data-post]')) { if (window.ccPostHelper) window.ccPostHelper(); return; }
+    if ((b = el.closest('[data-nudge]'))) { if (window.ccTriage) window.ccTriage(b.getAttribute('data-nudge')); return; }
+    if ((b = el.closest('[data-fact]'))) {
+      b.disabled = true;
+      api('/targets/followups/act', { method: 'POST', body: { key: b.getAttribute('data-fk'), action: b.getAttribute('data-fact') } })
+        .then(load).catch(function (err) { b.disabled = false; window.alert(err.message); });
+      return;
+    }
     if (el.closest('[data-detail-name]')) return;
     // Clicking an action's text shows its why lines in full.
     if ((b = el.closest('.td-a .t')) && !el.closest('a')) { b.parentNode.classList.toggle('full'); return; }
@@ -2915,4 +2931,218 @@
     e.preventDefault();
     window.ccCompanyDetail({ key: el.getAttribute('data-detail-key'), id: el.getAttribute('data-detail-id'), name: el.getAttribute('data-detail-name') });
   });
+})();
+
+/* ────────────────────────────────────────────────────────────────────
+ * Follow-up triage and the LinkedIn post helper — two modals opened from
+ * the Today board. Triage: every follow-up due, one decision each (sent /
+ * waiting 7 days / close; nothing is deleted) with a drafted nudge on
+ * demand. Posts: angles from his real week, then a draft in his LinkedIn
+ * rules with hooks whose lengths are checked.
+ * ──────────────────────────────────────────────────────────────────── */
+(function () {
+  'use strict';
+
+  var CC = window.__CC__;
+  if (!CC) return;
+  var api = CC.api, esc = CC.esc;
+
+  var css = document.createElement('style');
+  css.textContent =
+    '.cc-md{position:fixed;inset:0;z-index:9000;background:rgba(5,8,14,.72);display:flex;align-items:flex-start;justify-content:center;padding:28px 16px;overflow:auto}' +
+    '.cc-md .cd{background:#141822;border:1px solid #2a3244;border-radius:14px;width:100%;max-width:880px;padding:18px 22px;color:#c9d4e3;font-size:12.5px}' +
+    '.cc-md h3{margin:0;font-size:18px;color:#e7ecf3}' +
+    '.cc-md .muted{color:#7c8ba3}' +
+    '.cc-md .b{font-size:11px;padding:4px 10px;border-radius:7px;border:1px solid #2a3244;background:#1a2030;color:#c9d4e3;cursor:pointer}' +
+    '.cc-md .b.pri{border-color:rgba(56,217,169,.55);color:#38d9a9}' +
+    '.cc-md .fu{display:flex;gap:10px;align-items:flex-start;padding:9px 0;border-bottom:1px solid #1e2430}' +
+    '.cc-md .fu .t{flex:1;min-width:0}' +
+    '.cc-md .fu .a{display:flex;gap:5px;flex-wrap:wrap;flex:none;justify-content:flex-end;max-width:320px}' +
+    '.cc-md .msg{white-space:pre-wrap;background:#0f131b;border:1px solid #232a38;border-radius:8px;padding:9px 11px;margin-top:6px;line-height:1.5}' +
+    '.cc-md textarea,.cc-md select{background:#0f131b;border:1px solid #2a3244;border-radius:8px;color:#e7ecf3;padding:8px 10px;font-size:12.5px;font-family:inherit}' +
+    '.cc-md .hk{border:1px solid #232a38;border-radius:8px;padding:8px 10px;margin-top:6px;cursor:pointer}' +
+    '.cc-md .hk.sel{border-color:rgba(56,217,169,.6);background:rgba(56,217,169,.06)}' +
+    '.cc-md .tabs{display:flex;gap:6px;margin:10px 0 4px;flex-wrap:wrap}';
+  document.head.appendChild(css);
+
+  function modal(id) {
+    var m = document.getElementById(id);
+    if (!m) {
+      m = document.createElement('div');
+      m.id = id; m.className = 'cc-md';
+      m.addEventListener('click', function (e) { if (e.target === m) m.remove(); });
+      document.body.appendChild(m);
+      var onKey = function (e) { if (e.key === 'Escape') { m.remove(); document.removeEventListener('keydown', onKey); } };
+      document.addEventListener('keydown', onKey);
+    }
+    return m;
+  }
+  var refreshToday = function () { if (window.ccRefreshToday) window.ccRefreshToday(); };
+  var copyBtn = '<button class="b" data-copy="1" type="button" style="padding:2px 8px;font-size:10.5px">Copy</button>';
+  function wireCopy(root) {
+    root.addEventListener('click', function (e) {
+      var b = e.target.closest && e.target.closest('[data-copy]');
+      if (!b) return;
+      var box = b.parentNode.querySelector('.msg') || b.parentNode.parentNode.querySelector('.msg');
+      navigator.clipboard.writeText(box.textContent).then(function () { b.textContent = '✓ Copied'; setTimeout(function () { b.textContent = 'Copy'; }, 1600); });
+    });
+  }
+
+  // ── Follow-up triage ─────────────────────────────────────────────────
+  var KIND = { applied: '📨 Application', dm: '💬 DM', networking: '🤝 Networking' };
+  var fu = { items: [], filter: 'all' };
+
+  function triageRender(m) {
+    var items = fu.items.filter(function (i) { return fu.filter === 'all' || i.kind === fu.filter; });
+    var count = function (k) { return fu.items.filter(function (i) { return k === 'all' || i.kind === k; }).length; };
+    m.innerHTML = '<div class="cd"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px">' +
+      '<div><h3>📬 Follow-up triage</h3><div class="muted">' + fu.items.length + ' due' + (fu.waiting ? ' · ' + fu.waiting + ' waiting (snoozed)' : '') + (fu.parked ? ' · ' + fu.parked + ' quiet over 45 days, not shown' : '') +
+      ' · one decision each — nothing is deleted</div></div><button class="b" data-x="1" type="button">✕</button></div>' +
+      '<div class="tabs">' + ['all', 'applied', 'dm', 'networking'].map(function (k) {
+        return '<button class="b' + (fu.filter === k ? ' pri' : '') + '" data-f="' + k + '" type="button">' + (k === 'all' ? 'All' : KIND[k]) + ' (' + count(k) + ')</button>';
+      }).join('') + '</div>' +
+      (items.length ? items.map(function (i) {
+        var what = i.kind === 'applied' ? (i.role ? esc(i.role) : 'Application') : i.kind === 'dm' ? 'DM to ' + esc(i.name) : 'Networking gone quiet';
+        return '<div class="fu" data-row="' + esc(i.key) + '"><div class="t"><b style="color:#e7ecf3">' + esc(i.company) + '</b> · ' + (KIND[i.kind] || '') +
+          '<div>' + what + ' · <span style="color:' + (i.days >= 14 ? '#ff8787' : '#fbbf24') + '">quiet ' + i.days + ' days</span></div>' +
+          '<div class="drafts"></div></div><div class="a">' +
+          '<button class="b" data-draft="1" type="button" title="One AI call">✍️ Draft</button>' +
+          '<button class="b pri" data-act="sent" type="button" title="You followed up — the clock restarts">✓ Sent</button>' +
+          (i.kind === 'applied' ? '<button class="b pri" data-act="sent" data-as="referral" type="button" title="You asked someone for a referral">🤝 Asked referral</button>' : '') +
+          '<button class="b" data-act="snooze" type="button" title="Waiting on them — back in 7 days">💤 7 days</button>' +
+          '<button class="b" data-act="close" type="button" title="It is over — Closed (role/company) or no reply (contact); history kept">✕ Close</button>' +
+          (i.companyId && typeof window.openTrack === 'function' ? '<button class="b" data-track="' + esc(i.companyId) + '" type="button">📊</button>' : '') +
+          '</div></div>';
+      }).join('') : '<p class="muted" style="margin-top:12px">Nothing due here. 🎉</p>') + '</div>';
+  }
+
+  function triageLoad(m, openKey) {
+    m.innerHTML = '<div class="cd"><span class="muted">Loading follow-ups…</span></div>';
+    return api('/targets/followups').then(function (d) {
+      fu.items = d.items; fu.waiting = d.waiting; fu.parked = d.parked;
+      triageRender(m);
+      if (openKey) { var b = m.querySelector('[data-row="' + CSS.escape(openKey) + '"] [data-draft]'); if (b) { b.scrollIntoView({ block: 'center' }); b.click(); } }
+    }).catch(function (e) { m.innerHTML = '<div class="cd"><div class="cc-bad">' + esc(e.message) + '</div></div>'; });
+  }
+
+  window.ccTriage = function (openKey) {
+    var m = modal('cc-triage');
+    if (!m.__wired) {
+      m.__wired = true;
+      wireCopy(m);
+      m.addEventListener('click', function (e) {
+        var el = e.target.closest ? e.target : null;
+        if (!el) return;
+        var b;
+        if (el.closest('[data-x]')) { m.remove(); return; }
+        if ((b = el.closest('[data-f]'))) { fu.filter = b.getAttribute('data-f'); triageRender(m); return; }
+        if ((b = el.closest('[data-track]'))) { var id = b.getAttribute('data-track'); m.remove(); window.openTrack(id); return; }
+        var row = el.closest('[data-row]');
+        if (!row) return;
+        var key = row.getAttribute('data-row');
+        if ((b = el.closest('[data-act]'))) {
+          b.disabled = true;
+          api('/targets/followups/act', { method: 'POST', body: { key: key, action: b.getAttribute('data-act'), as: b.getAttribute('data-as') || undefined } })
+            .then(function (r) {
+              fu.items = fu.items.filter(function (i) { return i.key !== key; });
+              if (b.getAttribute('data-act') === 'snooze') fu.waiting = (fu.waiting || 0) + 1;
+              row.innerHTML = '<div class="muted">✓ ' + esc(r.item.company) + ' — ' + esc(r.done) + '</div>';
+              setTimeout(function () { triageRender(m); }, 900);
+              refreshToday();
+            })
+            .catch(function (err) { b.disabled = false; window.alert(err.message); });
+          return;
+        }
+        if ((b = el.closest('[data-draft]'))) {
+          var out = row.querySelector('.drafts');
+          b.disabled = true; out.innerHTML = '<div class="muted">Drafting…</div>';
+          api('/targets/followups/draft', { method: 'POST', body: { key: key } }).then(function (r) {
+            var d = r.drafts || {};
+            var block = function (label, text) { return text ? '<div style="margin-top:8px"><b>' + label + '</b> ' + copyBtn + '<div class="msg">' + esc(text) + '</div></div>' : ''; };
+            out.innerHTML = block('Recruiter / hiring-manager nudge', d.recruiterNudge) + block('Referral ask', d.referralAsk) + block('Message', d.message) +
+              (d.tip ? '<div class="muted" style="margin-top:6px">💡 ' + esc(d.tip) + '</div>' : '');
+            b.disabled = false;
+          }).catch(function (err) { out.innerHTML = '<div class="cc-bad">' + esc(err.message) + '</div>'; b.disabled = false; });
+        }
+      });
+    }
+    triageLoad(m, openKey);
+  };
+
+  // ── LinkedIn post helper ─────────────────────────────────────────────
+  var post = { result: null, hook: null };
+
+  function postRender(m) {
+    var r = post.result;
+    var hooks = r ? r.hooks.map(function (h) {
+      return '<div class="hk' + (post.hook === h.format ? ' sel' : '') + '" data-hook="' + h.format + '">' +
+        '<div class="muted" style="font-size:11px">' + esc(h.label) + ' · ' + h.chars + ' chars · ' + h.lines + ' line' + (h.lines === 1 ? '' : 's') + ' · ' +
+        (h.ok ? '<span style="color:#38d9a9">fits the format</span>' : '<span style="color:#ff8787">outside the format — edit before using</span>') +
+        (r.recommended === h.format ? ' · <b style="color:#fbbf24">recommended</b>' : '') + '</div>' +
+        '<div style="white-space:pre-wrap;color:#e7ecf3;margin-top:3px">' + esc(h.text) + '</div></div>';
+    }).join('') : '';
+    var sel = r && (r.hooks.find(function (h) { return h.format === post.hook; }) || r.hooks[0]);
+    var full = r ? (sel ? sel.text + '\n\n' : '') + r.body : '';
+    m.querySelector('#cc-post-out').innerHTML = r
+      ? '<div style="margin-top:14px"><b>Pick a hook</b> <span class="muted">(written last, from the sharpest detail)</span>' + hooks +
+        (r.why ? '<div class="muted" style="margin-top:4px">Why: ' + esc(r.why) + '</div>' : '') + '</div>' +
+        (r.warnings && r.warnings.length ? '<div style="color:#fbbf24;margin-top:8px">⚠️ Check these before posting: ' + esc(r.warnings.join(', ')) + '</div>' : '') +
+        '<div style="margin-top:12px"><b>Full post</b> ' + copyBtn + ' <button class="b pri" data-posted="1" type="button" title="Counts toward today’s 1 post">✓ Posted</button><div class="msg">' + esc(full) + '</div></div>' +
+        '<div class="muted" style="margin-top:6px">A strong first draft, not a final: read it once on your phone before posting.</div>'
+      : '';
+  }
+
+  window.ccPostHelper = function () {
+    var m = modal('cc-post');
+    post = { result: null, hook: null };
+    m.innerHTML = '<div class="cd"><div style="display:flex;justify-content:space-between;align-items:center">' +
+      '<div><h3>✍️ Today’s LinkedIn post</h3><div class="muted">Your rules: never from a blank page. Write the real moment, or pick an angle from your week.</div></div>' +
+      '<button class="b" data-x="1" type="button">✕</button></div>' +
+      '<textarea id="cc-post-mat" rows="6" style="width:100%;margin-top:12px;box-sizing:border-box" placeholder="What happened, what you built or what you noticed. Numbers, names, the real detail. e.g. Built an LLM router with failover across 3 providers; cut errors from X to Y…"></textarea>' +
+      '<div style="display:flex;gap:8px;align-items:center;margin-top:8px;flex-wrap:wrap">' +
+      '<select id="cc-post-bucket"><option value="authority">Authority — a system or result you built</option><option value="growth">Growth — a take or pattern you have seen</option><option value="personal">Personal — a real moment</option></select>' +
+      '<button class="b" data-angles="1" type="button" title="One AI call: 3 angles from your achievements and this week">💡 Suggest angles</button>' +
+      '<button class="b pri" data-go="1" type="button" title="One AI call">Draft post</button><span class="muted" id="cc-post-status"></span></div>' +
+      '<div id="cc-post-angles"></div><div id="cc-post-out"></div></div>';
+    var status = function (t) { m.querySelector('#cc-post-status').textContent = t || ''; };
+    wireCopy(m);
+    m.addEventListener('click', function (e) {
+      var el = e.target.closest ? e.target : null;
+      if (!el) return;
+      var b;
+      if (el.closest('[data-x]')) { m.remove(); return; }
+      if ((b = el.closest('[data-hook]'))) { post.hook = b.getAttribute('data-hook'); postRender(m); return; }
+      if ((b = el.closest('[data-angle]'))) {
+        var a = JSON.parse(b.getAttribute('data-angle'));
+        m.querySelector('#cc-post-bucket').value = a.bucket || 'authority';
+        var ta = m.querySelector('#cc-post-mat');
+        ta.value = 'Angle: ' + a.title + '\nBased on: ' + a.basedOn + '\n' + (a.question ? 'Q: ' + a.question + '\nMy answer: ' : 'My detail: ');
+        ta.focus(); ta.setSelectionRange(ta.value.length, ta.value.length);
+        return;
+      }
+      if ((b = el.closest('[data-angles]'))) {
+        b.disabled = true; status('Finding angles…');
+        api('/targets/post/angles', { method: 'POST', body: {} }).then(function (r) {
+          m.querySelector('#cc-post-angles').innerHTML = (r.angles || []).map(function (a) {
+            return '<div class="hk" data-angle="' + esc(JSON.stringify(a)) + '"><b style="color:#e7ecf3">' + esc(a.title) + '</b> <span class="muted">· ' + esc(a.bucket) + '</span>' +
+              '<div class="muted">Based on: ' + esc(a.basedOn) + '</div>' + (a.question ? '<div>❓ ' + esc(a.question) + '</div>' : '') + '</div>';
+          }).join('') + '<div class="muted" style="margin-top:4px">Click one, then add your real detail below the question.</div>';
+          status(''); b.disabled = false;
+        }).catch(function (err) { status(err.message); b.disabled = false; });
+        return;
+      }
+      if ((b = el.closest('[data-go]'))) {
+        b.disabled = true; status('Drafting (~15s)…');
+        api('/targets/post/draft', { method: 'POST', body: { material: m.querySelector('#cc-post-mat').value, bucket: m.querySelector('#cc-post-bucket').value } })
+          .then(function (r) { post.result = r; post.hook = r.recommended || (r.hooks[0] && r.hooks[0].format); postRender(m); status(''); b.disabled = false; })
+          .catch(function (err) { status(err.message); b.disabled = false; });
+        return;
+      }
+      if ((b = el.closest('[data-posted]'))) {
+        b.disabled = true;
+        api('/targets/activity', { method: 'POST', body: { kind: 'post', count: 1 } }).then(function () { b.textContent = '✓ Logged'; refreshToday(); })
+          .catch(function (err) { b.disabled = false; window.alert(err.message); });
+      }
+    });
+  };
 })();

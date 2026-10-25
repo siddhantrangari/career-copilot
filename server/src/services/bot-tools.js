@@ -631,7 +631,7 @@ async function addContact(args) {
   if (!name) throw new ToolError('name is required');
   if (!CONN_TYPES.includes(type)) throw new ToolError(`type must be one of ${CONN_TYPES.join(', ')}`);
   if (!CONN_STATUSES.includes(status)) throw new ToolError(`status must be one of ${CONN_STATUSES.join(', ')}`);
-  const c = await findCompany(company);
+  const c = await findCompanyOrTarget(company);
   await ensureTracked(c.id, 'networking');
   const dupe = await one(
     `SELECT id FROM connections WHERE company_id = $1 AND (lower(name) = lower($2) OR ($3 <> '' AND linkedin_url = $3))`,
@@ -838,6 +838,131 @@ async function listTargetsTool({ tag, priorityOnly = false, limit = 10 } = {}) {
   };
 }
 
+/**
+ * A catalogue company, or a target found by discovery (Thomson Reuters,
+ * LinkedIn…) — which is added to his Companies list so it can be worked.
+ */
+async function findCompanyOrTarget(q) {
+  try {
+    return await findCompany(q);
+  } catch (err) {
+    const { addToList } = await import('./company-detail.js');
+    const r = await addToList({ name: q }, { stage: 'new' });
+    if (!r) throw err;
+    await audit('add_to_companies', { company: q }, r.companyId, null, { created: r.created });
+    return { id: r.companyId, name: r.name };
+  }
+}
+
+// ── Today, company detail, follow-ups, posts, weekly review ─────────────
+
+async function getToday() {
+  const { buildToday } = await import('./today.js');
+  const t = await buildToday();
+  const line = (o) => Object.fromEntries(Object.entries(o).map(([k, m]) => [k, `${m.done}/${m.target}${m.stretch ? `–${m.stretch}` : ''}`]));
+  return {
+    today: line(t.today), thisWeek: line(t.week),
+    actions: t.actions.map((a) => ({ type: a.type, company: a.company, priority: !!a.priority, what: a.title, role: a.role || undefined,
+      detail: a.detail || undefined, whyCompany: a.whyCompany || undefined, whyRole: a.whyRole || undefined, url: a.url || undefined })),
+  };
+}
+
+async function getCompanyDetail({ company } = {}) {
+  if (!company) throw new ToolError('company is required');
+  const { companyDetail } = await import('./company-detail.js');
+  const d = await companyDetail({ name: company });
+  if (!d) throw new ToolError(`No company or target matches "${company}". Try find_companies or list_targets.`);
+  const t = d.target || {};
+  return {
+    company: d.name, inCompaniesList: d.inList, pipelineStage: d.pipeline?.stage || null,
+    tag: t.tag, priority: t.priority, rank: t.rank, hiring: t.hiring, fit: t.fit, whyNow: t.whyNow,
+    whyCompany: d.whyCompany, nextAction: d.nextAction,
+    layoffsLast6Months: !!t.research?.layoffs,
+    researchedSignals: (t.research?.signals || []).slice(0, 6).map((x) => ({ text: x.text, date: x.date, source: x.source })),
+    openRoles: d.roles.slice(0, 6).map((j) => ({ title: j.title, fit: j.fit_score, location: j.location, url: j.url, whyRole: j.why_role })),
+    contacts: d.contacts.map((c) => ({ name: c.name, role: c.role, status: c.status })),
+    newsSearches: d.links.news.slice(0, 6).map((l) => ({ name: l.name, url: l.url })),
+    peopleSearches: d.links.people.slice(0, 5).map((l) => ({ name: l.name, url: l.url })),
+    note: 'Stored data only. newsSearches/peopleSearches are Google searches he opens; nothing was searched now.',
+  };
+}
+
+async function addToCompaniesTool({ company, interested } = {}) {
+  if (!company) throw new ToolError('company is required');
+  const { addToList } = await import('./company-detail.js');
+  const r = await addToList({ name: company }, { stage: interested ? 'interested' : 'new' });
+  if (!r) throw new ToolError(`No company or target matches "${company}".`);
+  await audit('add_to_companies', { company, interested }, r.companyId, null, r);
+  return { company: r.name, changed: `${r.created ? 'added to' : 'already in'} your Companies list · pipeline stage ${r.stage}` };
+}
+
+async function draftOutreachTool({ company, contactName, contactRole, contactType, confirmedByUser } = {}) {
+  if (confirmedByUser !== true) throw new ToolError('Not drafted: it is an AI call. Offer it and draft only when he asks or says yes.');
+  const { draftOutreach } = await import('./company-detail.js');
+  const r = await draftOutreach({ name: company }, { name: contactName || '', role: contactRole || '', type: contactType || 'peer' });
+  if (!r) throw new ToolError(`No company or target matches "${company}".`);
+  return { company: r.company, ...r.messages, groundedInResearch: r.grounded.research };
+}
+
+async function getWeeklyReviewTool() {
+  const { buildWeeklyReview } = await import('./weekly-review.js');
+  const { text } = await buildWeeklyReview();
+  return { review: text.replace(/<[^>]+>/g, '').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>') };
+}
+
+async function listFollowupsTool({ limit = 15 } = {}) {
+  const { listFollowups } = await import('./followups.js');
+  const f = await listFollowups();
+  return {
+    total: f.total, waitingSnoozed: f.waiting, quietOver45Days: f.parked,
+    items: f.items.slice(0, Math.min(Number(limit) || 15, 40)).map((i) => ({ key: i.key, company: i.company, kind: i.kind, role: i.role || undefined, contact: i.name || undefined, daysQuiet: i.days })),
+    howTo: 'act_on_followup with the key: sent (he followed up), snooze (waiting, N days), close (it is over; moves to Closed, history kept).',
+  };
+}
+
+async function actOnFollowupTool(args) {
+  const { key, action, days, asReferral } = args;
+  if (!['sent', 'snooze', 'close'].includes(action)) throw new ToolError('action must be sent, snooze or close');
+  const { actOnFollowup } = await import('./followups.js');
+  try {
+    const r = await actOnFollowup(String(key || ''), action, { days, as: asReferral ? 'referral' : null });
+    await audit('act_on_followup', args, r.item.companyId, null, { action, done: r.done });
+    return { company: r.item.company, changed: r.done };
+  } catch (err) {
+    throw new ToolError(err.message);
+  }
+}
+
+async function draftNudgeTool({ key, confirmedByUser } = {}) {
+  if (confirmedByUser !== true) throw new ToolError('Not drafted: it is an AI call. Offer it and draft only when he asks or says yes.');
+  const { draftNudge } = await import('./followups.js');
+  try {
+    const r = await draftNudge(String(key || ''));
+    return { company: r.item.company, ...r.drafts };
+  } catch (err) {
+    throw new ToolError(err.message);
+  }
+}
+
+async function linkedinPostTool({ material, bucket, confirmedByUser } = {}) {
+  if (confirmedByUser !== true) throw new ToolError('Not drafted: it is an AI call. Offer it and draft only when he asks or says yes.');
+  const { suggestAngles, draftPost } = await import('./linkedin-post.js');
+  if (!material || String(material).trim().length < 20) {
+    const { angles } = await suggestAngles();
+    return { needMaterial: 'Ask him for the real moment behind one of these (his rules: never write from a blank page).', angles };
+  }
+  try {
+    const p = await draftPost({ material, bucket });
+    const best = p.hooks.find((h) => h.format === p.recommended) || p.hooks[0];
+    return { post: `${best ? `${best.text}
+
+` : ''}${p.body}`, hooks: p.hooks.map((h) => ({ format: h.label, text: h.text, chars: h.chars, fitsFormat: h.ok })), why: p.why, warnings: p.warnings,
+      after: 'When he posts it, log_activity kind "post".' };
+  } catch (err) {
+    throw new ToolError(err.message);
+  }
+}
+
 async function getOutreachPlan() {
   const { outreachPlan, progressLine } = await import('./targets.js');
   const plan = await outreachPlan({ limit: 8 });
@@ -934,6 +1059,15 @@ const TOOLS = [
   ['get_navigator', 'His evidence-based target niche, strengths and title aliases.', S({}), getNavigator],
   ['run_navigator', 'Regenerate the target niche and title aliases from his profile.', S({ confirmedByUser: { type: 'boolean' } }, ['confirmedByUser']), runNavigatorTool],
   ['send_digest_now', "Send today's digest now.", S({}), sendDigestNow],
+  ['get_today', "Today's board: Daily System targets (connections, DMs, applications, posts, referral asks) with today's and this week's counts, and today's actions with why lines. For \"what's on today / what should I do today\".", S({}), getToday],
+  ['get_company_detail', 'Everything stored about one company — catalogue or found by discovery: tag, priority, hiring signals, why this company, open roles with fit and why, contacts, next action, plus Google news and people searches he can open. No search is run.', S({ company: companyArg }, ['company']), getCompanyDetail],
+  ['add_to_companies', 'Add a company found by discovery to his Companies list; interested=true also puts it in the pipeline as Interested.', S({ company: companyArg, interested: bool }, ['company']), addToCompaniesTool],
+  ['draft_outreach', 'Draft a connection note (≤300 chars), first DM, peer DM and day-4 follow-up for one person at a company. One AI call.', S({ company: companyArg, contactName: str(), contactRole: str(), contactType: { type: 'string', enum: CONN_TYPES }, confirmedByUser: { type: 'boolean', description: 'true only if his latest message asks for drafts or says yes' } }, ['company', 'confirmedByUser']), draftOutreachTool],
+  ['get_weekly_review', 'The weekly review: the week against his targets, what moved, what stalled, next week\'s top 5.', S({}), getWeeklyReviewTool],
+  ['list_followups', 'Every follow-up due (applications quiet 7+ days, DMs on day 4, networking gone quiet), with keys for act_on_followup.', S({ limit: int }), listFollowupsTool],
+  ['act_on_followup', 'Decide one follow-up by key: sent (he followed up — clock restarts; asReferral if it was a referral ask), snooze (waiting on them, days default 7), close (over: Closed / no reply, history kept). Only when he says what happened.', S({ key: str(), action: { type: 'string', enum: ['sent', 'snooze', 'close'] }, days: int, asReferral: bool }, ['key', 'action']), actOnFollowupTool],
+  ['draft_followup', 'Draft the follow-up for one due item by key (recruiter nudge + referral ask for an application, day-4 DM, or next networking message). One AI call.', S({ key: str(), confirmedByUser: { type: 'boolean' } }, ['key', 'confirmedByUser']), draftNudgeTool],
+  ['draft_linkedin_post', 'LinkedIn post for his 1-a-day target, in his rules (hooks in 4 checked formats). Needs his material (what happened / what he built or noticed); without it returns 3 angles from his real week to ask him about. One AI call.', S({ material: str('his brain dump or the angle plus his detail'), bucket: { type: 'string', enum: ['growth', 'authority', 'personal'] }, confirmedByUser: { type: 'boolean' } }, ['confirmedByUser']), linkedinPostTool],
 ];
 
 export const toolSchemas = TOOLS.map(([name, description, parameters]) => ({

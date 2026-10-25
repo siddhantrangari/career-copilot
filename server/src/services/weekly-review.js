@@ -36,7 +36,7 @@ export async function buildWeeklyReview(now = new Date()) {
     [tz],
   );
   const pipe = await pipeline();
-  const stalled = followUpsFrom(pipe.tracked, pipe.contacts, now);
+  const stalled = followUpsFrom(pipe.tracked, pipe.contacts, now, { snoozed: pipe.snoozed });
   const top = await listTargets({ limit: 5 });
   const researched = await one(
     `SELECT count(*)::int AS n FROM company_targets WHERE research_at >= now() - interval '7 days'`,
@@ -71,7 +71,7 @@ export async function buildWeeklyReview(now = new Date()) {
     const who = f.kind === 'dm' ? `DM to ${f.name}` : f.kind === 'applied' ? `application${f.role ? ` (${f.role})` : ''}` : 'networking';
     lines.push(`• ${esc(f.company)} — ${esc(who)}, quiet ${f.days} days`);
   }
-  if (stalled.parked) lines.push(`<i>${stalled.parked} older than 21 days left out.</i>`);
+  if (stalled.parked) lines.push(`<i>${stalled.parked} quiet for over 45 days left out — close them in the follow-up triage.</i>`);
 
   lines.push('');
   lines.push('<b>Next week — top 5</b>');
