@@ -240,7 +240,10 @@ async function scoreAndTag() {
       : tag === 'apply'
         ? (roles ? `${roles} new relevant role${roles === 1 ? '' : 's'} in 30 days, best fit ${t.best_fit}` : `${t.open_fit75} open fit-75+ role${t.open_fit75 === 1 ? '' : 's'}`)
         : roles ? `Hiring (${roles} relevant role${roles === 1 ? '' : 's'} in 30 days) but none fit-75+ — network into the right team` : null;
-    return { key: t.key, hiring, fit, tag, priority, whyNow, sort: (priority ? 1000 : 0) + hiring * 0.5 + fit * 0.5 };
+    // ⭐ Priority first (apply before outreach within it), then Apply, then
+    // Outreach; the hiring/fit blend orders companies inside each group.
+    const group = priority ? (tag === 'apply' ? 4 : 3) : tag === 'apply' ? 2 : tag === 'outreach' ? 1 : 0;
+    return { key: t.key, hiring, fit, tag, priority, whyNow, sort: group * 1000 + hiring * 0.5 + fit * 0.5 };
   });
   scored.sort((a, b) => b.sort - a.sort);
   let rank = 0;
@@ -283,7 +286,8 @@ export async function listTargets({ tag = null, priorityOnly = false, limit = 20
   return many(
     `SELECT t.key, t.name, t.company_id, t.in_catalogue, t.tag, t.priority, t.rank, t.hiring_score, t.company_fit,
             t.why_now, t.open_fit75, t.new_30d, t.best_fit, t.research_at,
-            j.title AS best_role, j.url AS best_role_url,
+            j.title AS best_role, j.url AS best_role_url, j.why_role AS why_role,
+            NULLIF((SELECT w.why FROM company_why w WHERE w.key = t.key), '') AS why_company,
             tc.stage AS pipeline_stage,
             (SELECT count(*) FROM connections n WHERE n.company_id = t.company_id)::int AS contacts
      FROM company_targets t
@@ -307,7 +311,7 @@ export async function suggestedCompanies(limit = 5) {
 
 // ── Outreach loop ─────────────────────────────────────────────────────
 
-export const ACTIVITY_KINDS = ['connection_request', 'dm', 'follow_up', 'call', 'referral_ask', 'win_doc_sent', 'application'];
+export const ACTIVITY_KINDS = ['connection_request', 'dm', 'follow_up', 'call', 'referral_ask', 'win_doc_sent', 'application', 'post', 'action_done'];
 
 export async function logActivity({ companyId = null, companyName = '', kind, count = 1, note = null }) {
   if (!ACTIVITY_KINDS.includes(kind)) throw new Error(`kind must be one of ${ACTIVITY_KINDS.join(', ')}`);
@@ -337,16 +341,16 @@ export async function outreachProgress() {
   const g = config.targets;
   return {
     connections: Number(row.connections), connectionsTarget: g.weeklyConnections,
-    messages: Number(row.messages), calls: Number(row.calls), callsTarget: g.weeklyCalls,
+    messages: Number(row.messages), calls: Number(row.calls), callsTarget: g.weeklyCalls, callsStretch: g.weeklyCallsStretch,
     referrals: Number(row.referrals), applications: Number(row.applications),
   };
 }
 
 export const progressLine = (p) =>
-  `${p.connections}/${p.connectionsTarget} connection requests · ${p.messages} messages · ${p.calls}/${p.callsTarget} calls · ${p.referrals} referrals`;
+  `${p.connections}/${p.connectionsTarget} connection requests · ${p.messages} messages · ${p.calls}/${p.callsTarget}${p.callsStretch > p.callsTarget ? `–${p.callsStretch}` : ''} calls · ${p.referrals} referrals`;
 
 /** What to do next at one company, from its tag and the state of outreach there. */
-async function nextAction(t) {
+export async function nextAction(t) {
   if (t.tag === 'apply') {
     const role = t.best_role ? `"${t.best_role}"${t.best_fit ? ` (fit ${t.best_fit})` : ''}` : 'the best-fit role';
     if (['applied', 'networking', 'call', 'win', 'interview'].includes(t.pipeline_stage)) {
@@ -380,11 +384,10 @@ export async function outreachPlan({ limit = 8 } = {}) {
     listTargets({ tag: 'outreach', limit: limit - half || 1 }),
     suggestedCompanies(3),
   ]);
-  const targets = [];
-  for (let i = 0; i < Math.max(apply.length, outreach.length); i++) {
-    if (apply[i]) targets.push(apply[i]);
-    if (outreach[i]) targets.push(outreach[i]);
-  }
+  // Rank order — priority, then apply, then outreach — while keeping at
+  // least one outreach company in view so that half of the method is not lost.
+  const targets = [...apply, ...outreach].sort((a, b) => a.rank - b.rank).slice(0, limit);
+  if (!targets.some((t) => t.tag === 'outreach') && outreach[0]) targets[targets.length - 1] = outreach[0];
   for (const t of targets) t.nextAction = await nextAction(t);
-  return { progress, targets: targets.slice(0, limit), suggested };
+  return { progress, targets, suggested };
 }

@@ -973,6 +973,33 @@
     renderJobs();
   }
 
+  // ── Collapsible panels, so the feed is reachable without scrolling ──
+  // The first child is the header; clicking it shows or hides the rest.
+  // [data-fold-hide] inside the header (its buttons) hides with the body.
+  function fold(panel, key, defaultOpen) {
+    var head = panel.firstElementChild;
+    var saved = null;
+    try { saved = localStorage.getItem(key); } catch (e) { /* private window */ }
+    var isOpen = saved == null ? defaultOpen : saved === '1';
+    var mark = document.createElement('span');
+    mark.style.cssText = 'font-size:11px;color:#7c8ba3;margin-left:8px;cursor:pointer;flex:none';
+    head.style.cursor = 'pointer';
+    head.appendChild(mark);
+    function apply() {
+      Array.prototype.forEach.call(panel.children, function (c) { if (c !== head) c.style.display = isOpen ? '' : 'none'; });
+      head.querySelectorAll('[data-fold-hide]').forEach(function (c) { c.style.display = isOpen ? '' : 'none'; });
+      mark.textContent = isOpen ? '▾ hide' : '▸ show';
+      panel.style.padding = isOpen ? '' : '10px 20px';
+    }
+    head.addEventListener('click', function (e) {
+      if (e.target.closest && e.target.closest('button,a,input,select')) return;
+      isOpen = !isOpen;
+      try { localStorage.setItem(key, isOpen ? '1' : '0'); } catch (err) { /* private window */ }
+      apply();
+    });
+    apply();
+  }
+
   // ── Morning digest panel, above the live feed ───────────────────────
   function buildDigestPanel() {
     var host = document.getElementById('discovery') || document.getElementById('jobs');
@@ -987,12 +1014,13 @@
       '<div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">' +
       '<div><strong style="font-size:15px">☀️ Morning digest</strong>' +
       '<div class="cc-muted" id="cc-digest-sub">Loading…</div></div>' +
-      '<div style="display:flex;gap:7px;flex-wrap:wrap">' +
+      '<div style="display:flex;gap:7px;flex-wrap:wrap" data-fold-hide="1">' +
       '<button class="btn" id="cc-digest-chat" type="button">Find my chat id</button>' +
       '<button class="btn" id="cc-digest-preview" type="button">Preview</button>' +
       '<button class="btn pri" id="cc-digest-send" type="button">Send now</button>' +
-      '</div></div><div id="cc-digest-body" style="margin-top:12px;display:none"></div>';
+      '</div></div><div><div id="cc-digest-body" style="margin-top:12px;display:none"></div></div>';
     host.insertBefore(panel, feed);
+    fold(panel, 'cc_fold_digest', false);
 
     var sub = document.getElementById('cc-digest-sub');
     var body = document.getElementById('cc-digest-body');
@@ -1076,8 +1104,9 @@
       'background:#141822;border:1px solid #232a38;border-radius:14px;padding:16px 20px;margin-bottom:16px';
     var field = 'background:#0f131b;border:1px solid #232a38;border-radius:8px;color:#e7ecf3;padding:7px 10px;font-size:12.5px';
     panel.innerHTML =
-      '<strong style="font-size:15px">🔎 Web search</strong>' +
-      '<div class="cc-muted" style="margin-bottom:10px">Google boolean searches across LinkedIn, Naukri, Instahyre, foundit, Indeed, Wellfound, Cutshort, Hirist, ATS boards and careers pages — opened by you.</div>' +
+      '<div style="display:flex;align-items:center"><strong style="font-size:15px">🔎 Web search</strong>' +
+      '<span class="cc-muted" style="font-size:11px;margin-left:10px;flex:1">Google boolean searches you open — LinkedIn, Naukri, ATS boards, careers pages</span></div>' +
+      '<div class="cc-muted" style="margin:8px 0 10px">Google boolean searches across LinkedIn, Naukri, Instahyre, foundit, Indeed, Wellfound, Cutshort, Hirist, ATS boards and careers pages — opened by you.</div>' +
       '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">' +
       '<input id="cc-ws-role" value="AI Engineer" placeholder="Role" style="' + field + ';min-width:180px">' +
       '<select id="cc-ws-loc" style="' + field + '"><option value="">Bangalore or Remote India</option><option>Bangalore</option><option>Remote India</option></select>' +
@@ -1085,6 +1114,7 @@
       '<button class="btn pri" id="cc-ws-go" type="button">Build searches</button>' +
       '</div><div id="cc-ws-body" style="margin-top:12px"></div>';
     host.insertBefore(panel, feed);
+    fold(panel, 'cc_fold_websearch', false);
 
     var body = document.getElementById('cc-ws-body');
     var btn = function (l) {
@@ -1122,45 +1152,60 @@
 
     var panel = document.createElement('div');
     panel.id = 'cc-targets';
+    if (!document.getElementById('cc-tg-css')) {
+      var st = document.createElement('style');
+      st.id = 'cc-tg-css';
+      st.textContent = '#cc-targets .tg-w{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}#cc-targets .tg-row.full .tg-w{white-space:normal}';
+      document.head.appendChild(st);
+    }
     panel.style.cssText = 'background:#141822;border:1px solid #232a38;border-radius:14px;padding:16px 20px;margin-bottom:16px';
     panel.innerHTML =
       '<div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">' +
       '<div><strong style="font-size:15px">🎯 Target companies</strong>' +
       '<div class="cc-muted" id="cc-tg-sub">Loading…</div></div>' +
-      '<div style="display:flex;gap:6px;flex-wrap:wrap" id="cc-tg-filters">' +
+      '<div style="display:flex;gap:6px;flex-wrap:wrap" id="cc-tg-filters" data-fold-hide="1">' +
       ['all', 'priority', 'apply', 'outreach'].map(function (f) {
         return '<button class="btn' + (f === 'all' ? ' pri' : '') + '" type="button" data-f="' + f + '" style="font-size:11px;padding:4px 10px">' +
           { all: 'All', priority: '⭐ Priority', apply: 'Apply', outreach: 'Outreach' }[f] + '</button>';
       }).join('') +
       '</div></div><div id="cc-tg-body" style="margin-top:12px"></div>';
     host.insertBefore(panel, first);
+    fold(panel, 'cc_fold_targets', false);
 
     var sub = document.getElementById('cc-tg-sub');
     var body = document.getElementById('cc-tg-body');
     var data = null;
     var filter = 'all';
+    var showAll = false;
     var badge = function (t) {
       return (t.priority ? '<span style="font-size:9.5px;font-weight:800;color:#fbbf24;margin-right:6px">⭐ PRIORITY</span>' : '') +
         '<span style="font-size:9.5px;font-weight:800;color:' + (t.tag === 'apply' ? '#34d399' : '#c4b5fd') + '">' + (t.tag === 'apply' ? 'APPLY' : 'OUTREACH') + '</span>';
     };
     function render() {
       if (!data) return;
-      var rows = data.targets.filter(function (t) { return filter === 'all' || (filter === 'priority' ? t.priority : t.tag === filter); });
+      var matching = data.targets.filter(function (t) { return filter === 'all' || (filter === 'priority' ? t.priority : t.tag === filter); });
+      var rows = showAll ? matching : matching.slice(0, 5);
       body.innerHTML = rows.length ? rows.map(function (t) {
-        return '<div style="display:flex;gap:12px;padding:9px 0;border-bottom:1px solid #1e2430;align-items:flex-start">' +
+        return '<div class="tg-row" style="display:flex;gap:12px;padding:8px 0;border-bottom:1px solid #1e2430;align-items:flex-start;cursor:pointer" title="Click to show the why lines in full">' +
           '<span style="flex:none;width:30px;font-size:12px;font-weight:800;color:#7c8ba3">#' + t.rank + '</span>' +
           '<div style="flex:1;min-width:0">' +
           '<div><b style="color:#e7ecf3">' + esc(t.name) + '</b> ' + badge(t) +
           '<span class="cc-muted" style="font-size:11px"> · hiring ' + t.hiring_score + ' · fit ' + t.company_fit +
           (t.in_catalogue ? '' : ' · not in your list') + (t.pipeline_stage ? ' · ' + esc(t.pipeline_stage) : '') + '</span></div>' +
+          (t.why_company ? '<div class="tg-w" style="font-size:11.5px;color:#9aa6b8;margin-top:2px">💡 Why this company: ' + esc(t.why_company) + '</div>' : '') +
           (t.why_now ? '<div style="font-size:11.5px;color:#fbbf24;margin-top:2px">📈 ' + esc(t.why_now) + '</div>' : '') +
           (t.best_role ? '<div style="font-size:11.5px;margin-top:2px"><a target="_blank" rel="noopener" style="color:#9fd3ff" href="' + esc(t.best_role_url || '#') + '">' + esc(t.best_role) + '</a>' + (t.best_fit ? ' <span class="cc-muted">fit ' + t.best_fit + '</span>' : '') + '</div>' : '') +
+          (t.best_role && t.why_role ? '<div class="tg-w" style="font-size:11.5px;color:#9aa6b8;margin-top:2px">🎯 Why this role: ' + esc(t.why_role) + '</div>' : '') +
           '<div style="font-size:11.5px;color:#c9d4e3;margin-top:3px">→ ' + esc(t.nextAction || '') + '</div>' +
           '</div>' +
           (t.company_id && typeof window.openTrack === 'function'
             ? '<button class="btn" type="button" data-open="' + esc(t.company_id) + '" style="font-size:11px;padding:4px 9px;flex:none">Open</button>' : '') +
           '</div>';
       }).join('') : '<p class="cc-muted">No companies in this view yet.</p>';
+      if (matching.length > 5) {
+        body.innerHTML += '<button class="btn" type="button" data-more="1" style="font-size:11px;padding:4px 10px;margin-top:8px">' +
+          (showAll ? 'Show top 5' : 'Show all ' + matching.length) + '</button>';
+      }
       if (data.suggested && data.suggested.length) {
         body.innerHTML += '<div class="cc-muted" style="font-size:11.5px;margin-top:10px">➕ Worth adding to your list (found by discovery, strong fit): ' +
           data.suggested.map(function (s) { return '<b style="color:#e7ecf3">' + esc(s.name) + '</b> (fit ' + s.best_fit + ')'; }).join(', ') + '</div>';
@@ -1175,13 +1220,16 @@
       }
       var o = e.target.closest ? e.target.closest('[data-open]') : null;
       if (o) window.openTrack(o.getAttribute('data-open'));
+      if (e.target.closest && e.target.closest('[data-more]')) { showAll = !showAll; render(); return; }
+      var row = e.target.closest && !e.target.closest('a,button') ? e.target.closest('.tg-row') : null;
+      if (row) row.classList.toggle('full');
     });
-    api('/targets/plan?limit=30').then(function (d) {
+    api('/targets/plan?limit=40').then(function (d) {
       data = d;
       var p = d.progress;
       var prio = d.targets.filter(function (t) { return t.priority; }).length;
       sub.innerHTML = 'This week: <b>' + p.connections + '/' + p.connectionsTarget + '</b> connection requests · ' +
-        p.messages + ' messages · <b>' + p.calls + '/' + p.callsTarget + '</b> calls · ' + p.referrals + ' referrals · ' +
+        p.messages + ' messages · <b>' + p.calls + '/' + p.callsTarget + (p.callsStretch > p.callsTarget ? '–' + p.callsStretch : '') + '</b> calls · ' + p.referrals + ' referrals · ' +
         prio + ' priority targets';
       render();
     }).catch(function (e) { sub.textContent = 'Could not load: ' + e.message; });
@@ -2442,4 +2490,170 @@
   render();
   // Discovery tab only mounts when visited — re-check on nav clicks.
   document.addEventListener('click', function () { setTimeout(render, 100); });
+})();
+
+/* ────────────────────────────────────────────────────────────────────
+ * Today board: his Daily System as a live tracker and action plan.
+ *
+ * Sits above the Companies / Pipeline / Job Discovery tabs so today's
+ * targets and next actions are visible without scrolling. Counts are what
+ * actually happened (logged outreach, contacts added or moved, roles
+ * applied); +1 logs one, Done logs an action and hides it for the day.
+ * ──────────────────────────────────────────────────────────────────── */
+(function () {
+  'use strict';
+
+  var CC = window.__CC__;
+  if (!CC) return;
+  var api = CC.api, esc = CC.esc;
+  var main = document.querySelector('.main');
+  // Only on Companies & Pipeline — the page with the companies tab.
+  if (!main || !document.getElementById('companies') || document.getElementById('cc-today')) return;
+
+  var store = {
+    get: function (k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
+    set: function (k, v) { try { localStorage.setItem(k, v); } catch (e) { /* private window */ } },
+  };
+
+  var css = document.createElement('style');
+  css.textContent =
+    '#cc-today{background:#141822;border:1px solid #232a38;border-radius:14px;padding:12px 16px;margin-bottom:14px}' +
+    '#cc-today .td-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap;cursor:pointer;user-select:none}' +
+    '#cc-today .td-week{font-size:11.5px;color:#9aa6b8;flex:1;min-width:200px}' +
+    '#cc-today .td-week b{color:#e7ecf3}' +
+    '#cc-today .td-meters{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin-top:10px}' +
+    '#cc-today .td-m{background:#0f131b;border:1px solid #232a38;border-radius:10px;padding:8px 10px}' +
+    '#cc-today .td-m .l{font-size:10.5px;color:#9aa6b8;text-transform:uppercase;letter-spacing:.04em}' +
+    '#cc-today .td-m .n{font-size:17px;font-weight:800;color:#e7ecf3;margin:2px 0 4px}' +
+    '#cc-today .td-m .n span{font-size:11px;color:#7c8ba3;font-weight:600}' +
+    '#cc-today .td-bar{height:4px;background:#232a38;border-radius:3px;overflow:hidden}' +
+    '#cc-today .td-bar i{display:block;height:100%;background:#38d9a9}' +
+    '#cc-today .td-m.hit .td-bar i{background:#fbbf24}' +
+    '#cc-today .td-m .b{display:flex;gap:4px;margin-top:6px}' +
+    '#cc-today .td-m .b button{flex:1;font-size:10.5px;padding:2px 0;background:#1a2030;border:1px solid #2a3244;color:#c9d4e3;border-radius:6px;cursor:pointer}' +
+    '#cc-today .td-m .b button:hover{border-color:#38d9a9;color:#38d9a9}' +
+    '#cc-today .td-acts{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:8px;margin-top:10px}' +
+    '#cc-today .td-a{background:#0f131b;border:1px solid #232a38;border-radius:10px;padding:8px 10px;display:flex;gap:9px;align-items:flex-start}' +
+    '#cc-today .td-a.prio{border-color:rgba(251,191,36,.45)}' +
+    '#cc-today .td-a .i{font-size:16px;line-height:1.2}' +
+    '#cc-today .td-a .t{flex:1;min-width:0;font-size:12px;color:#c9d4e3}' +
+    '#cc-today .td-a .t b{color:#e7ecf3}' +
+    '#cc-today .td-a .w{font-size:11px;color:#9aa6b8;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}' +
+    '#cc-today .td-a.full .w{white-space:normal}' +
+    '#cc-today .td-a .ab{display:flex;flex-direction:column;gap:4px;flex:none}' +
+    '#cc-today .td-a .ab a,#cc-today .td-a .ab button{font-size:10.5px;padding:3px 8px;text-align:center;background:#1a2030;border:1px solid #2a3244;color:#c9d4e3;border-radius:6px;cursor:pointer;text-decoration:none}' +
+    '#cc-today .td-a .ab .ok{border-color:rgba(56,217,169,.5);color:#38d9a9}' +
+    '#cc-today .td-tag{font-size:9px;font-weight:800;margin-left:5px}' +
+    '#cc-today .td-foot{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-top:8px;font-size:11px;color:#7c8ba3}' +
+    '#cc-today .td-foot a{color:#9fd3ff;cursor:pointer}' +
+    '@media (max-width:600px){#cc-today .td-acts{grid-template-columns:1fr}}';
+  document.head.appendChild(css);
+
+  var box = document.createElement('div');
+  box.id = 'cc-today';
+  main.insertBefore(box, main.firstChild);
+
+  var open = store.get('cc_today_open') !== '0';
+  var more = false;
+  var SHOWN = 6;
+  var data = null;
+
+  var KIND = { connections: 'connection_request', dms: 'dm', applications: 'application', posts: 'post', referrals: 'referral_ask' };
+  var STEP = { connections: [1, 5], dms: [1, 5], applications: [1], posts: [1], referrals: [1] };
+
+  function meter(k, m) {
+    var pct = m.target ? Math.min(100, Math.round(m.done / m.target * 100)) : 0;
+    return '<div class="td-m' + (m.done >= m.target ? ' hit' : '') + '"><div class="l">' + esc(m.label) + '</div>' +
+      '<div class="n">' + m.done + ' <span>/ ' + m.target + (m.done >= m.target ? ' ✓' : '') + '</span></div>' +
+      '<div class="td-bar"><i style="width:' + pct + '%"></i></div>' +
+      '<div class="b">' + STEP[k].map(function (n) { return '<button type="button" data-log="' + k + '" data-n="' + n + '">+' + n + '</button>'; }).join('') + '</div></div>';
+  }
+
+  function action(a, i) {
+    var tag = a.priority ? '<span class="td-tag" style="color:#fbbf24">⭐ PRIORITY</span>' : '';
+    var role = a.role ? (a.url ? '<a target="_blank" rel="noopener" style="color:#9fd3ff" href="' + esc(a.url) + '">' + esc(a.role) + '</a>' : esc(a.role)) : '';
+    return '<div class="td-a' + (a.priority ? ' prio' : '') + '"><div class="i">' + a.icon + '</div><div class="t">' +
+      '<div><b>' + esc(a.company) + '</b>' + tag + ' · ' + esc(a.title) + '</div>' +
+      (role ? '<div style="margin-top:2px">' + role + '</div>' : '') +
+      (a.detail ? '<div style="margin-top:2px">→ ' + esc(a.detail) + '</div>' : '') +
+      (a.whyCompany ? '<div class="w" title="' + esc(a.whyCompany) + '">💡 Why this company: ' + esc(a.whyCompany) + '</div>' : '') +
+      (a.whyRole ? '<div class="w" title="' + esc(a.whyRole) + '">🎯 Why this role: ' + esc(a.whyRole) + '</div>' : '') +
+      (a.whyNowLine ? '<div class="w" style="color:#d6b25e" title="' + esc(a.whyNowLine) + '">📈 ' + esc(a.whyNowLine) + '</div>' : '') +
+      '</div><div class="ab">' +
+      (a.url && a.type === 'apply' ? '<a target="_blank" rel="noopener" href="' + esc(a.url) + '">Apply ↗</a>' : '') +
+      (a.url && a.type === 'follow_up' ? '<a target="_blank" rel="noopener" href="' + esc(a.url) + '">Open ↗</a>' : '') +
+      (a.companyId && typeof window.openTrack === 'function' ? '<button type="button" data-open="' + esc(a.companyId) + '">Track</button>' : '') +
+      '<button type="button" class="ok" data-done="' + i + '" title="Mark done — logs it and hides it for today">Done ✓</button>' +
+      '</div></div>';
+  }
+
+  function render() {
+    var w = data && data.week;
+    var weekLine = !w ? 'Loading…'
+      : 'This week: <b>' + w.connections.done + '/' + w.connections.target + '</b> connections · <b>' + w.dms.done + '/' + w.dms.target + '</b> DMs · <b>' +
+        w.applications.done + '/' + w.applications.target + '</b> applications · <b>' + w.referrals.done + '/' + w.referrals.target + '</b> referral asks · <b>' +
+        w.calls.done + '/' + w.calls.target + '–' + w.calls.stretch + '</b> calls';
+    var html = '<div class="td-head" data-toggle="1"><strong style="font-size:14px">📅 Today</strong>' +
+      '<span class="td-week">' + weekLine + '</span>' +
+      '<span style="font-size:11px;color:#7c8ba3">' + (data ? data.actions.length + ' actions · ' : '') + (open ? '▾ hide' : '▸ show') + '</span></div>';
+    if (open && data) {
+      html += '<div class="td-meters">' + Object.keys(KIND).map(function (k) { return meter(k, data.today[k]); }).join('') + '</div>';
+      html += data.actions.length
+        ? '<div class="td-acts">' + (more ? data.actions : data.actions.slice(0, SHOWN)).map(action).join('') + '</div>' +
+          (data.actions.length > SHOWN ? '<a data-more="1" style="display:inline-block;margin-top:6px;font-size:11px;color:#9fd3ff;cursor:pointer">' +
+            (more ? 'Show fewer' : 'Show ' + (data.actions.length - SHOWN) + ' more actions') + '</a>' : '')
+        : '<p class="cc-muted" style="margin:10px 0 0">Nothing urgent left today — send connection requests to your Outreach companies.</p>';
+      html += '<div class="td-foot"><span>Targets from your Daily System · ⭐ Priority → Apply → Outreach · ' + data.priorityTargets + ' priority companies</span>' +
+        '<a data-all="1">All target companies →</a></div>';
+    }
+    box.innerHTML = html;
+  }
+
+  function load() {
+    return api('/targets/today').then(function (d) { data = d; render(); })
+      .catch(function (e) { box.innerHTML = '<div class="cc-muted">📅 Today — could not load: ' + esc(e.message) + '</div>'; });
+  }
+
+  function log(body) { return api('/targets/activity', { method: 'POST', body: body }).then(load); }
+
+  box.addEventListener('click', function (e) {
+    var el = e.target.closest ? e.target : null;
+    if (!el) return;
+    var b;
+    if ((b = el.closest('[data-log]'))) {
+      b.disabled = true;
+      log({ kind: KIND[b.getAttribute('data-log')], count: Number(b.getAttribute('data-n')) })
+        .catch(function (err) { b.disabled = false; window.alert(err.message); });
+      return;
+    }
+    if ((b = el.closest('[data-done]'))) {
+      var a = data.actions[Number(b.getAttribute('data-done'))];
+      b.disabled = true;
+      log({ kind: a.logKind || 'action_done', companyId: a.companyId || undefined, company: a.company, actionKey: a.key })
+        .catch(function (err) { b.disabled = false; window.alert(err.message); });
+      return;
+    }
+    if ((b = el.closest('[data-open]'))) { window.openTrack(b.getAttribute('data-open')); return; }
+    if (el.closest('[data-more]')) { more = !more; render(); return; }
+    // Clicking an action's text shows its why lines in full.
+    if ((b = el.closest('.td-a .t')) && !el.closest('a')) { b.parentNode.classList.toggle('full'); return; }
+    if (el.closest('[data-all]')) {
+      if (typeof window.showTab === 'function') window.showTab('discovery');
+      setTimeout(function () {
+        var t = document.getElementById('cc-targets');
+        if (!t) return;
+        if (t.lastElementChild.style.display === 'none') t.firstElementChild.click();
+        t.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 250);
+      return;
+    }
+    if (el.closest('a')) return;
+    if (el.closest('[data-toggle]')) { open = !open; store.set('cc_today_open', open ? '1' : '0'); render(); }
+  });
+
+  render();
+  load();
+  // Keep it current: when he comes back to the tab, and every 10 minutes.
+  document.addEventListener('visibilitychange', function () { if (!document.hidden) load(); });
+  setInterval(function () { if (!document.hidden) load(); }, 600000);
 })();

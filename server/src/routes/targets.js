@@ -1,5 +1,6 @@
 import { many } from '../db/pool.js';
 import { outreachPlan, listTargets, loadNavigator, logActivity, ACTIVITY_KINDS } from '../services/targets.js';
+import { buildToday } from '../services/today.js';
 
 export default async function targetRoutes(app) {
   app.addHook('onRequest', app.auth);
@@ -17,6 +18,9 @@ export default async function targetRoutes(app) {
 
   app.get('/navigator', async () => ({ navigator: await loadNavigator() }));
 
+  /** The Today board: daily targets with live counts, this week, and today's actions. */
+  app.get('/today', async () => buildToday());
+
   /** Log an outreach action, e.g. { company, kind: 'connection_request', count: 5 }. */
   app.post('/activity', async (request, reply) => {
     const b = request.body || {};
@@ -24,6 +28,8 @@ export default async function targetRoutes(app) {
     const company = b.companyId
       ? (await many('SELECT id, name FROM companies WHERE id = $1', [b.companyId]))[0]
       : null;
-    return { logged: await logActivity({ companyId: company?.id || null, companyName: company?.name || b.company || '', kind: b.kind, count: b.count, note: b.note }) };
+    // An action marked done from the Today board carries its key in the note.
+    const note = b.actionKey ? `action:${String(b.actionKey).slice(0, 300)}` : b.note;
+    return { logged: await logActivity({ companyId: company?.id || null, companyName: company?.name || b.company || '', kind: b.kind, count: b.count, note }) };
   });
 }

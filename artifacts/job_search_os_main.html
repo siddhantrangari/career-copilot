@@ -175,6 +175,9 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);min-heig
   <div class="ss">45 pre-loaded · No DSA/LeetCode · All pay well in EU + Gulf + Global Remote</div>
   <div class="frow">
     <button class="fb active" onclick="filterC('all',this)">All</button>
+    <button class="fb" onclick="filterC('priority',this)" style="border-color:rgba(251,191,36,.45);color:#fbbf24" title="Strong hiring signals and best fit — act on these first">⭐ Priority</button>
+    <button class="fb" onclick="filterC('apply',this)" style="border-color:rgba(56,217,169,.4);color:#38d9a9" title="An open role that fits — apply and ask for a referral">🚀 Apply</button>
+    <button class="fb" onclick="filterC('outreach',this)" style="border-color:rgba(129,140,248,.45);color:#818cf8" title="Good fit, no matching role yet — network into the hidden market">🔭 Outreach</button>
     <button class="fb" onclick="filterC('eu',this)">🇪🇺 Europe</button>
     <button class="fb" onclick="filterC('gulf',this)">🌙 Gulf</button>
     <button class="fb" onclick="filterC('global',this)">🌐 Global Remote</button>
@@ -3570,6 +3573,8 @@ function renderCards(filter) {
     }
 
     if (currentF === "all") return true;
+    if (currentF === "priority") return Boolean(c.target && c.target.priority);
+    if (currentF === "apply" || currentF === "outreach") return Boolean(c.target && c.target.tag === currentF);
     if (currentF === "gulf") {
       if (c.region === "gulf") return true;
       if (info && info.jobs && info.jobs.some(j => /(dubai|uae|riyadh|saudi|abu dhabi|qatar|doha)/i.test(j.location || ""))) return true;
@@ -3598,6 +3603,11 @@ function renderCards(filter) {
     updateStats();
     return;
   }
+
+  // ⭐ Priority first, then Apply, then Outreach, then the rest; by target rank within each.
+  const group = (t) => !t ? 0 : t.priority ? (t.tag === 'apply' ? 4 : 3) : t.tag === 'apply' ? 2 : t.tag === 'outreach' ? 1 : 0;
+  list.sort((a, b) => group(b.target) - group(a.target)
+    || ((a.target && a.target.rank) || 1e9) - ((b.target && b.target.rank) || 1e9));
 
   grid.innerHTML = list.map(c => {
     const tr = tracked[c.id];

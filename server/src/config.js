@@ -160,8 +160,17 @@ export const config = {
   // at most researchPerWeek companies.
   targets: {
     researchPerWeek: Math.min(int(process.env.TARGETS_RESEARCH_PER_WEEK, 20), 40),
-    weeklyConnections: int(process.env.OUTREACH_WEEKLY_CONNECTIONS, 100),
-    weeklyCalls: int(process.env.OUTREACH_WEEKLY_CALLS, 3),
+    // Daily targets from his Daily System (weekdays); weekly = daily x 5.
+    daily: {
+      connections: int(process.env.DAILY_CONNECTIONS, 50),
+      dms: int(process.env.DAILY_DMS, 10),
+      applications: int(process.env.DAILY_APPLICATIONS, 5),
+      posts: int(process.env.DAILY_POSTS, 1),
+      referrals: int(process.env.DAILY_REFERRALS, 3),
+    },
+    weeklyConnections: int(process.env.OUTREACH_WEEKLY_CONNECTIONS, int(process.env.DAILY_CONNECTIONS, 50) * 5),
+    weeklyCalls: int(process.env.OUTREACH_WEEKLY_CALLS, 5),
+    weeklyCallsStretch: int(process.env.OUTREACH_WEEKLY_CALLS_STRETCH, 8),
   },
 
   // Telegram assistant — chat with the whole app from the same bot that

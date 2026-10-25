@@ -163,7 +163,7 @@ async function freshJobs(now) {
   return { jobs, total: total?.n ?? jobs.length };
 }
 
-async function pipeline() {
+export async function pipeline() {
   const tracked = await many(
     `SELECT t.company_id, t.stage, t.notes, t.created_at, t.stage_changed_at, t.activity_at,
             c.name AS company
@@ -181,7 +181,7 @@ async function pipeline() {
   return { tracked, contacts };
 }
 
-function interviewsFrom(tracked, now) {
+export function interviewsFrom(tracked, now) {
   const upcoming = [];
   const undated = [];
   for (const t of tracked) {
@@ -207,7 +207,7 @@ function interviewsFrom(tracked, now) {
   return { upcoming, undated };
 }
 
-function followUpsFrom(tracked, contacts, now) {
+export function followUpsFrom(tracked, contacts, now) {
   const due = [];
   let parked = 0;
 
