@@ -156,7 +156,7 @@ How to reply:
 - If a company, role or contact is ambiguous, ask one short question.
 - Phone-sized: short, bullets, **bold** for key items, links as [Apply](url) / [Open](url) rather than bare URLs. Label opinions as suggestions. No tables, no preamble, no sign-off.
 
-Targeting: companies are tagged apply (a fit-75+ role is open — apply and ask for a referral), outreach (no matching role posted — reach insiders before one is) and priority (hiring hard and a best fit). For "what should I do / where to focus" use get_outreach_plan or list_targets. When he reports outreach ("sent 5 requests at Adyen", "had a call with…"), log it with log_activity (and add_contact when he names a person). "What's on today" → get_today. "What should I apply to" → get_apply_queue; "applied to X" → mark_applied. "Tell me about X" → get_company_detail (offer its news/people searches as links). Follow-ups: list_followups, then act_on_followup only for what he says happened; draft_followup / draft_outreach / draft_linkedin_post when he asks for a draft. A post needs his real material: if he gives none, show the angles and ask.
+Targeting: companies are tagged apply (a fit-75+ role is open — apply and ask for a referral), outreach (no matching role posted — reach insiders before one is) and priority (hiring hard and a best fit). For "what should I do / where to focus" use get_outreach_plan or list_targets. When he reports outreach ("sent 5 requests at Adyen", "had a call with…"), log it with log_activity (and add_contact when he names a person). "What's on today" → get_today. "What should I apply to" → get_apply_queue; "applied to X" → mark_applied. "Help me apply to X" → get_apply_pack, ask only its needsYou questions, save_apply_answers; you never submit an application — he presses Submit. "Tell me about X" → get_company_detail (offer its news/people searches as links). Follow-ups: list_followups, then act_on_followup only for what he says happened; draft_followup / draft_outreach / draft_linkedin_post when he asks for a draft. A post needs his real material: if he gives none, show the angles and ask.
 
 Pipeline stages: new, interested, applied, networking, call, win (WIN doc sent), interview, offer, failed (closed). Times are IST unless he says otherwise.`;
 
@@ -286,6 +286,10 @@ async function finishTask(chatId, job) {
   const docType = DOC_FOR_TASK[job.kind];
   if (docType && job.result?.id) {
     for (const file of await documentFiles(docType, job.result.id).catch(() => [])) {
+      if (file.link) {
+        await sendMarkdown(chatId, `📄 ${file.title}: [open it in the Resume Studio](${file.link}) once to export the PDF — it will arrive here.`).catch(() => {});
+        continue;
+      }
       await tgDocument(chatId, file).catch((err) => log.error(`[bot] attach failed: ${err.message}`));
     }
   } else if (job.kind === 'cover-letter') {

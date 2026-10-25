@@ -447,6 +447,20 @@ const slug = (s) => String(s || 'doc').toLowerCase().replace(/[^a-z0-9]+/g, '-')
 async function getDocument({ type, id, format = 'file' }) {
   if (!id) throw new ToolError('id is required — get it from list_documents or get_company');
   let title; let markdown; let file = null;
+  // A resume goes out as the Resume Studio's own PDF. If the Studio hasn't
+  // exported that version yet, he gets a one-tap link that exports it, and
+  // the PDF is sent here as soon as it is saved.
+  if (type === 'resume' && format !== 'text') {
+    const { pdfForVersion, requestPdf } = await import('./resume-pdf.js');
+    const r = await pdfForVersion(id);
+    if (!r) throw new ToolError('Resume not found');
+    if (r.pdf) {
+      return { title: r.label, file: { filename: r.pdf.filename, content: r.pdf.pdf, mime: 'application/pdf', caption: `📄 ${r.label} — from the Resume Studio` } };
+    }
+    await requestPdf({ versionId: id, chatId: config.digest.telegram.chatId });
+    return { title: r.label, pdfNotReady: true, openToExport: r.link,
+      note: 'The Studio has not exported this PDF yet. Give him the link: one tap opens the Studio, exports it, and the PDF arrives in this chat automatically.' };
+  }
   if (type === 'resume') {
     const r = await one('SELECT * FROM resume_versions WHERE id = $1', [id]);
     if (!r) throw new ToolError('Resume not found');
@@ -491,6 +505,7 @@ export async function documentFiles(type, id) {
   const files = [];
   const md = await getDocument({ type, id, format: 'file' });
   if (md.file) files.push(md.file);
+  if (md.openToExport) files.push({ link: md.openToExport, title: md.title });
   if (type === 'win_doc') {
     const deck = await getDocument({ type, id, format: 'pptx' });
     if (deck.file) files.push(deck.file);
@@ -994,6 +1009,34 @@ async function skipRoleTool({ jobId } = {}) {
   } catch (err) { throw new ToolError(err.message); }
 }
 
+async function getApplyPack({ jobId } = {}) {
+  if (!jobId) throw new ToolError('jobId is required — from get_apply_queue or search_jobs');
+  const { buildPack, resumeForJob } = await import('./guided-apply.js');
+  let p;
+  try { p = await buildPack(String(jobId)); } catch (err) { throw new ToolError(err.message); }
+  const job = await one(`SELECT j.id, j.title, j.company_id, COALESCE(c.name, j.company_name) AS company FROM jobs j LEFT JOIN companies c ON c.id = j.company_id WHERE j.id = $1`, [jobId]);
+  const r = await resumeForJob(job);
+  const out = {
+    company: p.company, title: p.title, applyUrl: p.applyUrl, formSource: p.source,
+    needsYou: p.questions.filter((q) => q.answer.needsYou).map((q) => ({ questionId: q.id, question: q.label, options: q.options?.length ? q.options.slice(0, 12) : undefined, note: q.answer.note || undefined })),
+    prepared: p.questions.filter((q) => !q.answer.needsYou && q.answer.value).map((q) => ({ question: q.label, answer: String(q.answer.value).slice(0, 220), from: q.answer.source })),
+    resume: r.pdf ? r.label : 'no Studio PDF yet',
+    howTo: 'Ask him only the needsYou questions (one message), then save_apply_answers. He opens applyUrl; the browser extension fills the form; he presses Submit himself, then mark_applied.',
+  };
+  if (r.pdf) out.file = { filename: r.pdf.filename, content: r.pdf.pdf, mime: 'application/pdf', caption: `📄 ${r.label} — for ${p.company}` };
+  return out;
+}
+
+async function saveApplyAnswers({ jobId, answers } = {}) {
+  if (!jobId || !answers || typeof answers !== 'object') throw new ToolError('jobId and answers {questionId: answer} are required');
+  const { saveAnswers } = await import('./guided-apply.js');
+  try {
+    const p = await saveAnswers(String(jobId), answers);
+    await audit('save_apply_answers', { jobId, questions: Object.keys(answers) }, null, null, { banked: p.banked });
+    return { company: p.company, changed: `saved ${Object.keys(answers).length} answer(s)${p.banked ? `, ${p.banked} kept for future applications` : ''}`, stillNeeded: p.needsYou };
+  } catch (err) { throw new ToolError(err.message); }
+}
+
 async function getOutreachPlan() {
   const { outreachPlan, progressLine } = await import('./targets.js');
   const plan = await outreachPlan({ limit: 8 });
@@ -1061,7 +1104,7 @@ const TOOLS = [
   ['search_gigs', 'Freelance/contract gigs.', S({ query: str(), limit: int }), searchGigs],
   ['get_followups_and_interviews', 'Interviews in 7 days, follow-ups due, new jobs not yet in a digest.', S({}), getFollowupsAndInterviews],
   ['list_documents', 'Resumes, WIN docs, interview preps, mock interviews (ids).', S({ company: companyArg, type: { type: 'string', enum: DOC_TYPES } }), listDocuments],
-  ['get_document', 'Send a document as a file (default), "text" excerpt, or WIN doc as "pptx".', S({ type: { type: 'string', enum: DOC_TYPES }, id: str(), format: { type: 'string', enum: ['file', 'text', 'pptx'] } }, ['type', 'id']), getDocument],
+  ['get_document', 'Send a document as a file (default), "text" excerpt, or WIN doc as "pptx". A resume is sent as the Resume Studio\'s own PDF (id "master" = master resume); if the Studio has not exported it yet you get openToExport — give him that link, and the PDF arrives in the chat once he opens it.', S({ type: { type: 'string', enum: DOC_TYPES }, id: str(), format: { type: 'string', enum: ['file', 'text', 'pptx'] } }, ['type', 'id']), getDocument],
   ['get_profile', 'His profile and achievement bank.', S({}), getProfile],
   ['get_ai_task', 'Status of a background task.', S({ taskId: str() }, ['taskId']), getTask],
   ['track_company', 'Start tracking a company.', S({ company: companyArg, stage: stageArg }, ['company']), trackCompany],
@@ -1093,6 +1136,8 @@ const TOOLS = [
   ['get_apply_queue', 'The next roles to apply to, best first (target 20–100 a day): Bangalore, remote open to India, abroad with visa sponsorship / relocation in the JD (Gulf counts). With jobIds for mark_applied.', S({ scope: { type: 'string', enum: ['all', 'bangalore', 'remote', 'abroad'] }, minFit: int, limit: int }), getApplyQueue],
   ['mark_applied', 'Mark a discovered role applied (adds it to his pipeline; counts toward today). Only when he says he applied.', S({ jobId: str() }, ['jobId']), markAppliedTool],
   ['skip_role', 'Hide a role from the queue as not for me (reversible).', S({ jobId: str() }, ['jobId']), skipRoleTool],
+  ['get_apply_pack', 'Guided apply for one role: the form\'s real questions with answers prepared from his profile and answer bank, the ones that need him, the apply link, and his Studio resume PDF (sent as a file). Never submits — he does.', S({ jobId: str() }, ['jobId']), getApplyPack],
+  ['save_apply_answers', 'Save his answers to guided-apply questions {questionId: answer}; reusable ones (notice period, salary, work authorisation…) are kept for future applications.', S({ jobId: str(), answers: { type: 'object', additionalProperties: { type: 'string' } } }, ['jobId', 'answers']), saveApplyAnswers],
   ['get_today', "Today's board: Daily System targets (connections, DMs, applications, posts, referral asks) with today's and this week's counts, and today's actions with why lines. For \"what's on today / what should I do today\".", S({}), getToday],
   ['get_company_detail', 'Everything stored about one company — catalogue or found by discovery: tag, priority, hiring signals, why this company, open roles with fit and why, contacts, next action, plus Google news and people searches he can open. No search is run.', S({ company: companyArg }, ['company']), getCompanyDetail],
   ['add_to_companies', 'Add a company found by discovery to his Companies list; interested=true also puts it in the pipeline as Interested.', S({ company: companyArg, interested: bool }, ['company']), addToCompaniesTool],

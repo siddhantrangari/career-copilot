@@ -6,6 +6,7 @@ import { buildWeeklyReview, sendWeeklyReview } from '../services/weekly-review.j
 import { listFollowups, actOnFollowup, draftNudge } from '../services/followups.js';
 import { suggestAngles, draftPost } from '../services/linkedin-post.js';
 import { applyQueue, markApplied, skipRole } from '../services/apply-queue.js';
+import { buildPack, saveAnswers, newAutofillKey } from '../services/guided-apply.js';
 
 export default async function targetRoutes(app) {
   app.addHook('onRequest', app.auth);
@@ -67,6 +68,13 @@ export default async function targetRoutes(app) {
   });
   app.post('/apply-queue/applied', async (request) => markApplied(String(request.body?.jobId || ''), { tailored: request.body?.tailored === true }));
   app.post('/apply-queue/skip', async (request) => skipRole(String(request.body?.jobId || ''), { undo: request.body?.undo === true }));
+
+  // Guided apply: the form's questions with answers prepared. Never submits.
+  app.post('/apply-pack', async (request) => buildPack(String(request.body?.jobId || ''), { rebuild: request.body?.rebuild === true }));
+  app.put('/apply-pack', async (request) => saveAnswers(String(request.body?.jobId || ''), request.body?.answers || {}));
+  app.get('/apply-answers', async () => ({ answers: await many(`SELECT category, answer, question, updated_at FROM application_answers ORDER BY category`) }));
+  /** A new key for the browser extension (shown once; the previous key stops working). */
+  app.post('/autofill-key', async () => newAutofillKey());
 
   /** The Sunday review: preview it, or send it to Telegram now. */
   app.get('/weekly-review', async () => buildWeeklyReview());

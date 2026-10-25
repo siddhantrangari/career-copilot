@@ -1987,6 +1987,33 @@ function onDensityChange(){
   if (sel) currentPdfDensity = sel.value;
 }
 
+/**
+ * Keep a copy of an exported resume PDF on the server, keyed by the sha256
+ * of the markdown it was rendered from — the same text the server stores for
+ * each saved version — so the bot can send this exact PDF. Best effort: the
+ * download never waits on it or fails because of it.
+ */
+function saveResumePdfToServer(blob, markdownText, filename){
+  try {
+    const md = String(markdownText || DEFAULT_MASTER_RESUME);
+    const kind = md === DEFAULT_MASTER_RESUME ? 'master'
+      : (typeof savedResumesList !== 'undefined' && savedResumesList.some(r => r.tailored_text === md)) ? 'tailored' : 'draft';
+    let token = null;
+    try { token = localStorage.getItem('cc_token'); } catch (e) {}
+    if (!token || !window.crypto || !crypto.subtle) return;
+    crypto.subtle.digest('SHA-256', new TextEncoder().encode(md)).then((buf) => {
+      const hash = Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+      return fetch('/api/resume-pdfs', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/pdf', Authorization: 'Bearer ' + token, 'x-content-hash': hash, 'x-resume-kind': kind, 'x-filename': encodeURIComponent(filename || 'resume.pdf') },
+        body: blob,
+      });
+    }).then((res) => res && res.json()).then((r) => {
+      if (r && r.delivered && window.appAlert) window.appAlert({ title: 'Sent to Telegram', message: 'The bot was waiting for this PDF — it is in your chat now.' });
+    }).catch(() => {});
+  } catch (e) { /* the download already happened */ }
+}
+
 function generateResumePdfFromMarkdown(markdownText, filename, btn, densityOverride){
   const density = densityOverride || currentPdfDensity || 'standard';
   const sheet = document.createElement('div');
@@ -2030,7 +2057,12 @@ function generateResumePdfFromMarkdown(markdownText, filename, btn, densityOverr
   };
 
   if (typeof html2pdf !== 'undefined') {
-    return html2pdf().set(opt).from(sheet).save().then(() => {
+    // Same PDF as before, kept as bytes too: it is saved to the server so the
+    // Telegram bot and the autofill can send this exact file.
+    return html2pdf().set(opt).from(sheet).toPdf().get('pdf').then((pdf) => {
+      const blob = pdf.output('blob');
+      pdf.save(opt.filename);
+      saveResumePdfToServer(blob, markdownText, opt.filename);
       cleanup();
       if (btn) {
         btn.innerHTML = '✓ Downloaded!';
@@ -2861,6 +2893,29 @@ function renderCoverLetterAudit() {
 }
 window.renderCoverLetterAudit = renderCoverLetterAudit;
 
+// ── One-tap PDF from the Telegram bot ──
+// The bot links to ?tab=resume&pdf=<version id | master> when it has no PDF
+// of that resume yet. Opening the link exports it once (the same export as
+// the Download PDF button), which saves it and sends it to the chat.
+let requestedPdfDone = false;
+function exportRequestedPdfOnce(){
+  if (requestedPdfDone) return;
+  const want = new URLSearchParams(location.search).get('pdf');
+  if (!want) return;
+  if (want === 'master') {
+    requestedPdfDone = true;
+    appendChatMessage('ai', 'Exporting your master resume PDF for Telegram…');
+    generateResumePdfFromMarkdown(DEFAULT_MASTER_RESUME, 'Siddhant_Rangari_Master_Resume.pdf', null);
+    return;
+  }
+  const r = savedResumesList.find(x => x.id === want);
+  if (!r) return; // the list may not have loaded yet; this runs again when it does
+  requestedPdfDone = true;
+  loadSavedResume(want);
+  appendChatMessage('ai', `Exporting the PDF for ${r.company_name || 'this resume'} (${r.job_title || 'role'}) — it will be sent to Telegram.`);
+  downloadPdfForVersion(want);
+}
+
 // ── SAVED RESUMES LIBRARY ──
 function refreshSavedResumes(){
   const apiFn = (window.__CC_RESUME_STUDIO_ACTIONS__ && window.__CC_RESUME_STUDIO_ACTIONS__.api)
@@ -2868,6 +2923,7 @@ function refreshSavedResumes(){
 
   const handleResumes = (data) => {
     savedResumesList = data.resumes || [];
+    setTimeout(exportRequestedPdfOnce, 300);
     try { localStorage.setItem('cc_saved_resumes_cache', JSON.stringify(savedResumesList)); } catch(e){}
 
     const tbody = document.getElementById('savedResumesTableBody');

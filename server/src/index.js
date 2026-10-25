@@ -24,6 +24,8 @@ import interviewRoutes from './routes/interview.js';
 import linkedInRoutes from './routes/linkedin.js';
 import digestRoutes from './routes/digest.js';
 import targetRoutes from './routes/targets.js';
+import resumePdfRoutes from './routes/resume-pdfs.js';
+import autofillRoutes from './routes/autofill.js';
 
 const app = Fastify({
   logger: {
@@ -93,6 +95,8 @@ await app.register(interviewRoutes, { prefix: '/api/interview' });
 await app.register(linkedInRoutes, { prefix: '/api/linkedin' });
 await app.register(digestRoutes, { prefix: '/api/digest' });
 await app.register(targetRoutes, { prefix: '/api/targets' });
+await app.register(resumePdfRoutes, { prefix: '/api/resume-pdfs' });
+await app.register(autofillRoutes, { prefix: '/api/autofill' });
 
 app.setErrorHandler((err, request, reply) => {
   const status = err.statusCode && err.statusCode >= 400 ? err.statusCode : 500;

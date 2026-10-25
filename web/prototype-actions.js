@@ -2621,6 +2621,7 @@
       (a.whyNowLine ? '<div class="w" style="color:#d6b25e" title="' + esc(a.whyNowLine) + '">📈 ' + esc(a.whyNowLine) + '</div>' : '') +
       '</div><div class="ab' + (a.fkey ? ' grid' : '') + '">' +
       (a.url && a.type === 'apply' ? '<a target="_blank" rel="noopener" href="' + esc(a.url) + '">Apply ↗</a>' : '') +
+      (a.type === 'apply' && a.jobId ? '<button type="button" data-guide="' + esc(a.jobId) + '" title="Guided apply">🧭 Guided</button>' : '') +
       (a.type === 'apply' && a.jobId ? '<button type="button" data-tailor="' + esc(a.jobId) + '" data-co="' + esc(a.company) + '" data-role="' + esc(a.role || '') + '" data-url="' + esc(a.url || '') + '" title="Tailor your resume to this role first">📄 Tailor</button>' : '') +
       (a.type === 'interview' && a.prepId ? '<a href="/interview.html?prep=' + esc(a.prepId) + '" title="Your prep guide">📘 Prep guide</a>' : '') +
       (a.type === 'interview' && a.companyId ? '<a href="/interview.html?company=' + encodeURIComponent(a.companyId) + (a.role ? '&role=' + encodeURIComponent(a.role) : '') + '" title="' + (a.prepId ? 'Run a mock round' : 'Build the prep guide, then run a mock round') + '">' + (a.prepId ? '🎙 Mock' : '🧠 Prep & mock') + '</a>' : '') +
@@ -2695,6 +2696,7 @@
     if (el.closest('[data-triage]')) { if (window.ccTriage) window.ccTriage(); return; }
     if (el.closest('[data-queue]')) { if (window.ccApplyQueue) window.ccApplyQueue(); return; }
     if ((b = el.closest('[data-tailor]'))) { if (window.ccTailor) window.ccTailor(b); return; }
+    if ((b = el.closest('[data-guide]'))) { if (window.ccGuidedApply) window.ccGuidedApply(b.getAttribute('data-guide')); return; }
     if ((b = el.closest('[data-applied]'))) {
       b.disabled = true;
       api('/targets/apply-queue/applied', { method: 'POST', body: { jobId: b.getAttribute('data-applied') } })
@@ -3248,6 +3250,7 @@
       (j.whyNow ? '<div class="w" style="color:#d6b25e" title="' + esc(j.whyNow) + '">📈 ' + esc(j.whyNow) + '</div>' : '') + ev +
       '</div><div class="a">' +
       '<a class="b" target="_blank" rel="noopener" data-open-role="' + esc(j.id) + '" href="' + esc(j.url) + '" style="text-decoration:none">Open ↗</a>' +
+      '<button class="b" data-guide="' + esc(j.id) + '" type="button" title="Form questions answered, resume PDF ready, autofill in your browser — you press Submit">🧭 Guided</button>' +
       '<button class="b pri" data-ap="' + esc(j.id) + '" type="button" title="Mark applied — counts toward today">✓ Applied</button>' +
       ((j.fit || 0) >= 85 || j.priority ? '<button class="b" data-tailor="' + esc(j.id) + '" data-co="' + esc(j.company) + '" data-role="' + esc(j.title) + '" data-url="' + esc(j.url) + '" type="button" title="Worth a tailored resume: fit 85+ or a priority company">📄 Tailor</button>' : '') +
       '<button class="b" data-skip="' + esc(j.id) + '" type="button" title="Not for me — hidden (reversible)">Skip</button>' +
@@ -3311,6 +3314,7 @@
         if (el.closest('[data-more]')) { st.limit += 40; load(m); return; }
         if (el.closest('[data-detail-name]')) return;
         if ((b = el.closest('[data-tailor]'))) { window.ccTailor(b); return; }
+        if ((b = el.closest('[data-guide]'))) { if (window.ccGuidedApply) window.ccGuidedApply(b.getAttribute('data-guide')); return; }
         if ((b = el.closest('[data-ap]')) || (b = el.closest('[data-skip]'))) {
           var applied = b.hasAttribute('data-ap');
           var id = b.getAttribute(applied ? 'data-ap' : 'data-skip');
@@ -3337,5 +3341,144 @@
       document.addEventListener('keydown', onKey);
     }
     st.data = null; render(m); load(m);
+  };
+})();
+
+/* ────────────────────────────────────────────────────────────────────
+ * Guided apply: one role's application form, prepared.
+ *
+ * The form's real questions (Greenhouse) or the standard set, answered from
+ * his profile, his answer bank and one AI draft; what only he can answer is
+ * flagged at the top. The Career Copilot extension fills the form in his
+ * own browser with these answers and his Studio PDF. He presses Submit.
+ * ──────────────────────────────────────────────────────────────────── */
+(function () {
+  'use strict';
+
+  var CC = window.__CC__;
+  if (!CC) return;
+  var api = CC.api, esc = CC.esc;
+
+  var css = document.createElement('style');
+  css.textContent =
+    '#cc-guide .qq{padding:8px 0;border-bottom:1px solid #1e2430}' +
+    '#cc-guide .qq.need{background:rgba(251,191,36,.06);border-left:3px solid #fbbf24;padding-left:9px}' +
+    '#cc-guide .ql{font-size:12px;color:#e7ecf3;margin-bottom:4px}' +
+    '#cc-guide .src{font-size:9.5px;font-weight:700;padding:1px 6px;border-radius:8px;border:1px solid #2a3244;margin-left:6px;color:#9aa6b8}' +
+    '#cc-guide .src.ai{color:#c4b5fd;border-color:rgba(196,181,253,.5)}#cc-guide .src.you{color:#38d9a9;border-color:rgba(56,217,169,.5)}' +
+    '#cc-guide .src.default{color:#fbbf24;border-color:rgba(251,191,36,.5)}' +
+    '#cc-guide input[type=text],#cc-guide select,#cc-guide textarea{width:100%;box-sizing:border-box;background:#0f131b;border:1px solid #2a3244;border-radius:7px;color:#e7ecf3;padding:6px 9px;font-size:12.5px;font-family:inherit}' +
+    '#cc-guide .box{background:#0f131b;border:1px solid #232a38;border-radius:10px;padding:10px 12px;margin-top:10px}' +
+    '#cc-guide code{background:#0f131b;border:1px solid #2a3244;border-radius:5px;padding:1px 5px;font-size:11.5px}';
+  document.head.appendChild(css);
+
+  var st = { pack: null, dirty: {} };
+  var SRC = { profile: 'profile', bank: 'saved answer', default: 'default — check', ai: 'AI draft — read it', you: 'yours', file: 'Studio PDF' };
+
+  function control(q) {
+    var v = q.answer.value || '';
+    var name = 'data-q="' + esc(q.id) + '"';
+    if (q.type === 'input_file') return '<div class="muted">📄 ' + esc(v || 'Your Studio PDF') + '</div>';
+    if (q.options && q.options.length && q.options.length <= 60) {
+      return '<select ' + name + '><option value="">— pick —</option>' + q.options.map(function (o) {
+        return '<option' + (o === v ? ' selected' : '') + '>' + esc(o) + '</option>';
+      }).join('') + '</select>';
+    }
+    if (q.options && q.options.length > 60) return '<input type="text" ' + name + ' value="' + esc(v) + '" placeholder="Type to match one of ' + q.options.length + ' options (e.g. India)">';
+    if (q.type === 'textarea' || String(v).length > 90 || q.answer.category === 'why_company') return '<textarea rows="4" ' + name + '>' + esc(v) + '</textarea>';
+    return '<input type="text" ' + name + ' value="' + esc(v) + '">';
+  }
+
+  function qrow(q) {
+    var a = q.answer;
+    return '<div class="qq' + (a.needsYou ? ' need' : '') + '"><div class="ql">' + esc(q.label) + (q.required ? ' <span style="color:#ff8787">*</span>' : '') +
+      (a.source ? '<span class="src ' + esc(a.source) + '">' + esc(SRC[a.source] || a.source) + '</span>' : '') +
+      (a.note ? ' <span class="muted" style="font-size:11px">· ' + esc(a.note) + '</span>' : '') + '</div>' + control(q) + '</div>';
+  }
+
+  function render(m) {
+    var p = st.pack;
+    if (!p) { m.innerHTML = '<div class="cd"><div class="muted">Reading the application form and preparing answers…</div></div>'; return; }
+    var need = p.questions.filter(function (q) { return q.answer.needsYou; });
+    var rest = p.questions.filter(function (q) { return !q.answer.needsYou; });
+    var r = p.resume;
+    var resumeLine = r.ready
+      ? '✅ <b>' + esc(r.label) + '</b> <span class="muted">(' + esc(r.filename || '') + ')</span> — attached by the autofill' +
+        (r.tailoredNotExported ? ' · <a style="color:#9fd3ff" href="/outreach.html?tab=resume&pdf=' + encodeURIComponent(r.tailoredNotExported) + '">export the tailored one instead</a>' : '')
+      : '⚠️ No Studio PDF yet — <a style="color:#9fd3ff" href="/outreach.html?tab=resume&pdf=' + encodeURIComponent(r.tailoredNotExported || 'master') + '">export it once in the Resume Studio</a>';
+    m.innerHTML = '<div class="cd" style="max-width:860px"><div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start">' +
+      '<div><h3>🧭 Guided apply</h3><div class="muted"><b style="color:#e7ecf3">' + esc(p.company) + '</b> · ' + esc(p.title) + ' · ' +
+      (p.source === 'greenhouse' ? 'the form’s real questions' : 'standard questions (this site doesn’t publish its form)') + '</div></div>' +
+      '<button class="b" data-x="1" type="button">✕</button></div>' +
+      '<div class="box">' + resumeLine + '</div>' +
+      (need.length ? '<h4 style="margin:14px 0 4px;font-size:12px;color:#fbbf24">NEEDS YOU (' + need.length + ')</h4>' + need.map(qrow).join('') : '<div class="muted" style="margin-top:10px">✓ Nothing needs you — every question has an answer.</div>') +
+      '<h4 style="margin:14px 0 4px;font-size:12px;color:#9aa6b8">PREPARED (' + rest.length + ')</h4>' + rest.map(qrow).join('') +
+      '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;align-items:center">' +
+      '<button class="b pri" data-save="1" type="button">Save answers</button>' +
+      '<a class="b" target="_blank" rel="noopener" href="' + esc(p.applyUrl) + '" style="text-decoration:none">Open application ↗</a>' +
+      '<button class="b pri" data-applied="1" type="button" title="After you pressed Submit">✓ I submitted it</button>' +
+      '<button class="b" data-rebuild="1" type="button" title="Re-read the form and redraft (keeps your own answers)">↻ Rebuild</button>' +
+      '<span class="muted" id="cc-guide-status"></span></div>' +
+      '<div class="box"><b>How it fills</b><div class="muted" style="margin-top:4px">Open the application, click <b>⚡ Fill with Career Copilot</b> (bottom-left of the form), check the highlighted fields, tick the consent boxes yourself, and press Submit. The extension never submits.</div>' +
+      '<details style="margin-top:6px"><summary style="cursor:pointer;color:#9fd3ff">Autofill setup (once)</summary><div class="muted" style="margin-top:6px;line-height:1.6">' +
+      '1. In Chrome open <code>chrome://extensions</code>, turn on <b>Developer mode</b>, click <b>Load unpacked</b> and pick the <code>extension</code> folder in your career-copilot repo.<br>' +
+      '2. <button class="b" data-key="1" type="button">Create autofill key</button> <span id="cc-guide-key"></span><br>' +
+      '3. Click the extension’s icon, paste the key, Save. The key can only read your prepared answers and resume PDF; creating a new key retires the old one.</div></details></div></div>';
+  }
+
+  function load(m, jobId, rebuild) {
+    st.pack = null; st.dirty = {}; render(m);
+    return api('/targets/apply-pack', { method: 'POST', body: { jobId: jobId, rebuild: !!rebuild } })
+      .then(function (p) { st.pack = p; render(m); })
+      .catch(function (e) { m.innerHTML = '<div class="cd"><div class="cc-bad">' + esc(e.message) + '</div><button class="b" data-x="1" type="button">Close</button></div>'; });
+  }
+
+  window.ccGuidedApply = function (jobId) {
+    var m = document.getElementById('cc-guide');
+    if (!m) {
+      m = document.createElement('div');
+      m.id = 'cc-guide'; m.className = 'cc-md';
+      document.body.appendChild(m);
+      var status = function (t, bad) { var e = document.getElementById('cc-guide-status'); if (e) { e.textContent = t; e.style.color = bad ? '#ff8787' : ''; } };
+      m.addEventListener('input', function (e) { var q = e.target.getAttribute && e.target.getAttribute('data-q'); if (q) st.dirty[q] = e.target.value; });
+      m.addEventListener('change', function (e) { var q = e.target.getAttribute && e.target.getAttribute('data-q'); if (q) st.dirty[q] = e.target.value; });
+      m.addEventListener('click', function (e) {
+        if (e.target === m) { m.remove(); return; }
+        var el = e.target.closest ? e.target : null;
+        if (!el) return;
+        var b;
+        if (el.closest('[data-x]')) { m.remove(); return; }
+        if ((b = el.closest('[data-save]'))) {
+          if (!Object.keys(st.dirty).length) { status('Nothing changed'); return; }
+          b.disabled = true; status('Saving…');
+          api('/targets/apply-pack', { method: 'PUT', body: { jobId: st.pack.jobId, answers: st.dirty } }).then(function (p) {
+            st.pack = p; st.dirty = {}; render(m);
+            status('Saved' + (p.banked ? ' · ' + p.banked + ' kept for future applications' : ''));
+          }).catch(function (err) { b.disabled = false; status(err.message, true); });
+          return;
+        }
+        if (el.closest('[data-rebuild]')) { load(m, st.pack.jobId, true); return; }
+        if ((b = el.closest('[data-applied]'))) {
+          b.disabled = true;
+          api('/targets/apply-queue/applied', { method: 'POST', body: { jobId: st.pack.jobId } }).then(function () {
+            status('✓ Marked applied'); if (window.ccRefreshToday) window.ccRefreshToday();
+          }).catch(function (err) { b.disabled = false; status(err.message, true); });
+          return;
+        }
+        if ((b = el.closest('[data-key]'))) {
+          b.disabled = true;
+          api('/targets/autofill-key', { method: 'POST', body: {} }).then(function (r) {
+            document.getElementById('cc-guide-key').innerHTML = '<code style="user-select:all">' + esc(r.key) + '</code> <button class="b" data-copykey="' + esc(r.key) + '" type="button">Copy</button> <span style="color:#fbbf24">shown once</span>';
+          }).catch(function (err) { b.disabled = false; window.alert(err.message); });
+          return;
+        }
+        if ((b = el.closest('[data-copykey]'))) {
+          navigator.clipboard.writeText(b.getAttribute('data-copykey')).then(function () { b.textContent = '✓ Copied'; });
+        }
+      });
+      var onKey = function (e) { if (e.key === 'Escape' && document.getElementById('cc-guide')) { m.remove(); document.removeEventListener('keydown', onKey); } };
+      document.addEventListener('keydown', onKey);
+    }
+    load(m, jobId, false);
   };
 })();

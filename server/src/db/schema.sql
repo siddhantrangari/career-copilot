@@ -611,3 +611,57 @@ CREATE TABLE IF NOT EXISTS followup_snoozes (
   until       TIMESTAMPTZ NOT NULL,
   created_at  TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+
+-- PDFs exactly as the Resume Studio exported them. The Studio renders every
+-- resume from its markdown, so content_hash (sha256 of that markdown) ties a
+-- PDF to the resume version it came from; kind 'master' is the master
+-- resume. New exports add rows — nothing is overwritten or deleted.
+CREATE TABLE IF NOT EXISTS resume_pdfs (
+  id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  content_hash  TEXT NOT NULL,
+  kind          TEXT NOT NULL DEFAULT 'tailored',   -- tailored | master | draft
+  filename      TEXT NOT NULL DEFAULT 'resume.pdf',
+  pdf           BYTEA NOT NULL,
+  size          INTEGER NOT NULL DEFAULT 0,
+  created_at    TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS resume_pdfs_hash_idx ON resume_pdfs (content_hash, created_at DESC);
+CREATE INDEX IF NOT EXISTS resume_pdfs_kind_idx ON resume_pdfs (kind, created_at DESC);
+
+-- A PDF the bot was asked for before the Studio had exported it. When the
+-- Studio uploads that PDF, it is sent to the chat and the request is closed.
+CREATE TABLE IF NOT EXISTS resume_pdf_requests (
+  id            BIGSERIAL PRIMARY KEY,
+  content_hash  TEXT,
+  kind          TEXT NOT NULL DEFAULT 'tailored',
+  chat_id       TEXT NOT NULL,
+  label         TEXT NOT NULL DEFAULT '',
+  created_at    TIMESTAMPTZ NOT NULL DEFAULT now(),
+  fulfilled_at  TIMESTAMPTZ
+);
+
+-- Guided apply. application_answers is his reusable answer bank (notice
+-- period, salary, work authorisation…) keyed by category; application_packs
+-- holds one job's real form questions and the answers prepared for it. He
+-- reviews them and presses Submit himself — nothing here submits anything.
+CREATE TABLE IF NOT EXISTS application_answers (
+  category    TEXT PRIMARY KEY,
+  answer      TEXT NOT NULL,
+  question    TEXT NOT NULL DEFAULT '',
+  updated_at  TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE TABLE IF NOT EXISTS application_packs (
+  job_id      UUID PRIMARY KEY,
+  questions   JSONB NOT NULL DEFAULT '[]'::jsonb,
+  answers     JSONB NOT NULL DEFAULT '{}'::jsonb,
+  source      TEXT NOT NULL DEFAULT 'standard',   -- greenhouse | standard
+  created_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at  TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+-- Keys for the browser autofill extension: read-only access to packs and
+-- resume PDFs. Only a hash is stored; a new key retires the old one.
+CREATE TABLE IF NOT EXISTS autofill_keys (
+  key_hash    TEXT PRIMARY KEY,
+  created_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
+  revoked_at  TIMESTAMPTZ
+);
