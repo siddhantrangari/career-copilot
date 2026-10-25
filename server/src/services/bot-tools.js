@@ -779,6 +779,26 @@ async function webSearchLinks({ query: q = 'AI Engineer', location = 'Bangalore'
   };
 }
 
+/** Live Google Jobs search (SerpAPI, one search from the monthly quota), stored like any discovery. */
+async function searchGoogleJobs({ query: q, location = 'Bangalore' } = {}) {
+  if (!q) throw new ToolError('query is required, e.g. "AI Engineer"');
+  const { googleJobsReady, runGoogleJobs } = await import('./google-jobs.js');
+  if (!googleJobsReady()) throw new ToolError('Google Jobs is not configured (SERPAPI_KEY).');
+  const remote = /remote/i.test(`${q} ${location}`);
+  const where = remote || /india/i.test(location) && !/bangalore|bengaluru/i.test(location) ? 'India' : 'Bengaluru, Karnataka, India';
+  const term = remote && !/remote/i.test(q) ? `Remote ${q}` : q;
+  const run = await runGoogleJobs({ trigger: 'bot', queries: [{ q: term, location: where }], reserve: 5 });
+  if (!run.searches) throw new ToolError('Not run: the monthly Google Jobs quota is nearly used up.');
+  const found = await searchJobs({ query: q.replace(/remote/ig, '').trim(), location: remote ? 'remote' : 'Bangalore', postedWithinDays: 30, limit: 8 });
+  return {
+    searched: `${term} — ${where}`,
+    newRolesStored: run.jobsNew,
+    quotaLeft: run.quotaBefore - run.searches,
+    note: 'New roles get their fit score and why line within 30 minutes.',
+    jobs: found.jobs,
+  };
+}
+
 async function sendDigestNow() {
   const { counts } = await runDigest({ trigger: 'manual' });
   return { sent: true, counts };
@@ -827,6 +847,7 @@ const TOOLS = [
     problems: { type: 'array', items: { type: 'string' } }, topic: str(), round: { type: 'string', enum: ROUNDS }, force: bool,
   }, ['task', 'confirmedByUser']), startAiTask],
   ['web_search_links', 'Google boolean searches (past week by default) across LinkedIn, Naukri, Instahyre, foundit, Indeed, Wellfound, Cutshort, Hirist, ATS boards and careers pages, plus the portals\' own search pages. Links he opens. Offer when search_jobs is thin or he asks to search the web.', S({ query: str('role'), location: str(), period: { type: 'string', enum: ['day', 'week', 'month'] } }), webSearchLinks],
+  ['search_google_jobs', 'Live Google Jobs search (covers LinkedIn, Naukri, Indeed, Instahyre, company sites) for Bangalore or remote India; stores new roles. Uses 1 of ~250 monthly searches — only when he asks to search Google/the web live, or search_jobs found too little and he agrees.', S({ query: str('role, e.g. AI Engineer'), location: str('Bangalore or remote India') }, ['query']), searchGoogleJobs],
   ['send_digest_now', "Send today's digest now.", S({}), sendDigestNow],
 ];
 

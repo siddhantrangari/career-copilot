@@ -216,7 +216,7 @@ const LOCATION_OK = /remote|hybrid|onsite|on-site|emea|europe|london|berlin|amst
  * remote ("Bangalore, Hyderabad" and "Pune (Remote)" stay). A bare "India"
  * with no city is kept: it usually means country-wide or remote.
  */
-const INDIA_OTHER_CITY = /\b(mumbai|bombay|thane|navi mumbai|delhi|new delhi|ncr|gurgaon|gurugram|noida|ghaziabad|faridabad|hyderabad|secunderabad|pune|chennai|kolkata|calcutta|ahmedabad|gandhinagar|kochi|cochin|trivandrum|thiruvananthapuram|jaipur|chandigarh|mohali|indore|coimbatore|mysore|mysuru|visakhapatnam|vizag|bhubaneswar|nagpur|lucknow|vadodara|surat|goa|kerala)\b/i;
+const INDIA_OTHER_CITY = /\b(mumbai|bombay|thane|navi mumbai|delhi|new delhi|ncr|gurgaon|gurugram|noida|ghaziabad|faridabad|hyderabad|secunderabad|pune|chennai|kolkata|calcutta|ahmedabad|gandhinagar|kochi|cochin|trivandrum|thiruvananthapuram|jaipur|chandigarh|mohali|indore|coimbatore|mysore|mysuru|visakhapatnam|vizag|bhubaneswar|nagpur|lucknow|vadodara|surat|goa|kerala|tamil nadu|telangana|maharashtra|uttar pradesh|haryana|west bengal|gujarat|andhra pradesh|rajasthan|punjab|madhya pradesh|odisha|uttarakhand|bihar|jharkhand|assam)\b/i;
 const BANGALORE_OR_REMOTE = /bangalore|bengaluru|bengalore|remote|work from home|\bwfh\b|anywhere/i;
 
 export const outsideIndiaTarget = (location = '') =>

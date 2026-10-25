@@ -135,6 +135,20 @@ export const config = {
     intervalHours: Math.max(6, int(process.env.INDIA_DISCOVERY_INTERVAL_HOURS, 12)),
   },
 
+  // Google Jobs via SerpAPI — one page per standing query each morning,
+  // before the digest. The free plan is 250 searches a month; `reserve`
+  // searches are always left for on-demand bot searches.
+  googleJobs: {
+    enabled: process.env.GOOGLE_JOBS_ENABLED !== 'false',
+    apiKey: process.env.SERPAPI_KEY || '',
+    hour: int(process.env.GOOGLE_JOBS_HOUR, 7),
+    minute: int(process.env.GOOGLE_JOBS_MINUTE, 15),
+    reserve: int(process.env.GOOGLE_JOBS_RESERVE, 30),
+    queries: (() => {
+      try { return process.env.GOOGLE_JOBS_QUERIES ? JSON.parse(process.env.GOOGLE_JOBS_QUERIES) : null; } catch { return null; }
+    })(),
+  },
+
   // Telegram assistant — chat with the whole app from the same bot that
   // sends the digest. Answers only TELEGRAM_CHAT_ID.
   bot: {

@@ -676,6 +676,11 @@ async function gigDiscovery(payload, ctx) {
   return runGigDiscovery({ trigger: 'manual', ...(payload || {}), onStep: ctx?.onStep });
 }
 
+async function googleJobs(payload) {
+  const { runGoogleJobs } = await import('./google-jobs.js');
+  return runGoogleJobs({ trigger: 'manual', ...(payload || {}) });
+}
+
 async function whyLines(payload, ctx) {
   const { generateWhyLines } = await import('./why.js');
   return generateWhyLines({ ...(payload || {}), onStep: ctx?.onStep });
@@ -696,6 +701,7 @@ export const TASKS = {
   'job-discovery': jobDiscovery,
   'india-discovery': indiaDiscovery,
   'why-lines': whyLines,
+  'google-jobs': googleJobs,
   'gig-discovery': gigDiscovery,
   'recording-upload': recordingUpload,
   'linkedin-resolve': linkedinResolve,

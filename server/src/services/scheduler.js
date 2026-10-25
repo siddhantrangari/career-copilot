@@ -124,12 +124,35 @@ export function startScheduler(log) {
     }
   };
 
+  // Google Jobs: once a day after 07:15 local time, ahead of the 08:00 digest.
+  const googleTick = async () => {
+    try {
+      const { googleJobsReady, runGoogleJobs } = await import('./google-jobs.js');
+      if (!googleJobsReady()) return;
+      const { localDate, localMinutes } = await import('./digest.js');
+      const { hour, minute } = config.googleJobs;
+      if (localMinutes() < hour * 60 + minute) return;
+      const done = await one(
+        `SELECT 1 FROM agent_runs WHERE kind = 'google-jobs' AND trigger = 'scheduled' AND status = 'done'
+           AND (started_at AT TIME ZONE $1)::date = $2::date`,
+        [config.digest.timeZone, localDate()],
+      );
+      if (done) return;
+      log.info('[agent] Google Jobs starting');
+      const res = await runGoogleJobs({ trigger: 'scheduled' });
+      log.info(`[agent] Google Jobs done — ${res.searches} searches, ${res.jobsNew} new, quota before ${res.quotaBefore}`);
+    } catch (err) {
+      log.error(`[agent] Google Jobs failed: ${err.message}`);
+    }
+  };
+
   // A short delay on boot keeps startup fast and avoids a thundering restart.
   setTimeout(tick, 60_000);
+  setTimeout(googleTick, 150_000);
   setTimeout(whyTick, 240_000);
   setTimeout(gigTick, 120_000);
   setTimeout(indiaTick, 180_000);
-  timer = setInterval(() => { tick(); gigTick(); indiaTick(); whyTick(); }, 30 * 60_000); // dueForRun gates each
+  timer = setInterval(() => { tick(); gigTick(); indiaTick(); whyTick(); googleTick(); }, 30 * 60_000); // dueForRun gates each
   log.info(
     `[agent] job discovery every ${config.discovery.intervalHours}h, ` +
     `gig discovery every ${config.discovery.gigIntervalHours}h`,
