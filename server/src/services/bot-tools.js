@@ -232,31 +232,146 @@ async function findCompanies({ query: q, region, trackedOnly, limit = 15 } = {})
   return { count: rows.length, companies: rows };
 }
 
+// ── Job search: words, synonyms, places ───────────────────────────────
+//
+// The first version matched the whole query as one substring of the title,
+// location or description, so "AI Engineer Bangalore" matched nothing — no
+// single field contains that phrase — and Bangalore never matched
+// "Bengaluru". Now the query is split into alternatives ("AI engineer or
+// fullstack"), each alternative into words, every word must appear in the
+// title (with synonyms), and place names go to a separate location filter.
+
+const PLACES = [
+  { words: ['bangalore', 'bengaluru', 'bengalore', 'blr'], re: 'bangalore|bengaluru|bengalore' },
+  { words: ['hyderabad'], re: 'hyderabad' },
+  { words: ['pune'], re: 'pune' },
+  { words: ['mumbai', 'bombay'], re: 'mumbai|bombay' },
+  { words: ['delhi', 'ncr', 'gurgaon', 'gurugram', 'noida'], re: 'delhi|ncr|gurgaon|gurugram|noida' },
+  { words: ['chennai'], re: 'chennai' },
+  { words: ['india', 'indian'], re: 'india|bangalore|bengaluru|hyderabad|pune|mumbai|delhi|gurgaon|gurugram|noida|chennai' },
+  { words: ['remote'], re: 'remote|anywhere|worldwide' },
+  { words: ['europe', 'eu', 'emea'], re: 'europe|emea|\\meu\\M|london|berlin|amsterdam|paris|dublin|madrid|lisbon|munich|zurich|stockholm|warsaw' },
+  { words: ['uae', 'dubai', 'gulf'], re: 'dubai|abu dhabi|uae|united arab emirates|riyadh|saudi|doha|qatar' },
+  { words: ['uk', 'london'], re: 'london|united kingdom|\\muk\\M' },
+  { words: ['us', 'usa'], re: 'united states|\\musa?\\M|new york|san francisco|seattle|austin|boston' },
+];
+
+const TITLE_SYNONYMS = {
+  ai: 'ai|ml|llm|genai|gen ai|machine learning|artificial intelligence|applied ai',
+  ml: 'ml|machine learning|ai|llm',
+  llm: 'llm|genai|gen ai|ai',
+  genai: 'genai|gen ai|llm|ai',
+  fullstack: 'full[- ]?stack',
+  'full-stack': 'full[- ]?stack',
+  frontend: 'front[- ]?end',
+  backend: 'back[- ]?end',
+  engineer: 'engineer|engineering|developer|swe',
+  engineers: 'engineer|engineering|developer|swe',
+  developer: 'developer|engineer|swe',
+  swe: 'swe|software engineer|software developer',
+  fde: 'forward[- ]deployed|fde',
+  sr: 'sr\\.?|senior',
+  senior: 'senior|sr\\.?',
+};
+
+// Words that describe the request, not the job title.
+const NOISE = new Set(['job', 'jobs', 'role', 'roles', 'opening', 'openings', 'position', 'positions', 'vacancy',
+  'vacancies', 'open', 'recent', 'new', 'latest', 'posted', 'any', 'the', 'a', 'an', 'for', 'in', 'at', 'of', 'with',
+  'and', 'me', 'my', 'show', 'find', 'list', 'this', 'week', 'month', 'today', 'based', 'onsite', 'hybrid', 'links']);
+
+const reEscape = (w) => w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+/**
+ * Turn free text into title patterns (OR of ANDs) and a location pattern.
+ * Exported for tests. "full stack" is joined first so it stays one idea.
+ */
+export function parseJobQuery(query = '', location = '') {
+  const placeRes = new Set();
+  const addPlace = (word) => {
+    const p = PLACES.find((x) => x.words.includes(word));
+    if (p) { placeRes.add(p.re); return true; }
+    return false;
+  };
+  const locText = String(location || '').toLowerCase();
+  if (locText) {
+    const words = locText.split(/[^a-z]+/).filter(Boolean);
+    const known = words.filter(addPlace);
+    if (!known.length) placeRes.add(reEscape(locText.trim()));
+  }
+
+  const alternatives = String(query || '').toLowerCase()
+    .replace(/\bfull\s+stack\b/g, 'fullstack').replace(/\bfront\s+end\b/g, 'frontend').replace(/\bback\s+end\b/g, 'backend')
+    .replace(/\bforward\s+deployed\b/g, 'fde').replace(/\bmachine\s+learning\b/g, 'ml')
+    .split(/\s+or\s+|[,/|]/)
+    .map((alt) => alt.split(/[^a-z0-9+#.-]+/).map((w) => w.replace(/^[.-]+|[.-]+$/g, '')).filter(Boolean)
+      .filter((w) => !NOISE.has(w) && !addPlace(w))
+      .map((w) => `\\m(${TITLE_SYNONYMS[w] || reEscape(w)})\\M`))
+    .filter((words) => words.length);
+
+  return {
+    titleAlternatives: alternatives,
+    locationRe: placeRes.size ? [...placeRes].join('|') : null,
+  };
+}
+
 async function searchJobs({
-  query: q, company, minMatch = 60, postedWithinDays = 7, favouritesOnly = false, limit = 5,
+  query: q, location, company, minMatch, postedWithinDays = 7, favouritesOnly = false, limit = 5,
 } = {}) {
   let companyId = null;
   if (company) companyId = (await findCompany(company)).id;
-  const rows = await many(
-    `SELECT j.id, j.title, COALESCE(NULLIF(c.name,''), j.company_name) AS company, j.location, j.relevance AS match,
-            j.url, j.favourite, j.no_dsa, COALESCE(j.posted_at, j.discovered_at) AS posted, t.stage AS tracked_stage
-     FROM jobs j LEFT JOIN companies c ON c.id = j.company_id
-     LEFT JOIN tracked_companies t ON t.company_id = j.company_id
-     WHERE COALESCE(j.engagement,'fte') = 'fte' AND j.closed_at IS NULL AND NOT j.dismissed
-       AND j.relevance >= $1
-       AND COALESCE(j.posted_at, j.discovered_at) > now() - make_interval(days => $2::int)
-       AND ($3::text IS NULL OR j.title ILIKE '%' || $3 || '%' OR j.location ILIKE '%' || $3 || '%' OR j.description ILIKE '%' || $3 || '%')
-       AND ($4::text IS NULL OR j.company_id = $4)
-       AND (NOT $5 OR j.favourite)
-     ORDER BY j.favourite DESC, j.relevance DESC, COALESCE(j.posted_at, j.discovered_at) DESC
-     LIMIT $6`,
-    [Number(minMatch) || 0, Math.min(Number(postedWithinDays) || 7, 120), q || null, companyId,
-      Boolean(favouritesOnly), Math.min(Number(limit) || 10, 25)],
-  );
-  return {
+  const { titleAlternatives, locationRe } = parseJobQuery(q, location);
+  // Words already narrow the search, so the relevance floor drops when present.
+  const floor = Number.isFinite(Number(minMatch)) && minMatch !== undefined ? Number(minMatch) : (titleAlternatives.length ? 40 : 60);
+  const days = Math.min(Number(postedWithinDays) || 7, 120);
+
+  const run = async ({ withTitle = true, withinDays = days, count = false } = {}) => {
+    const params = [floor, withinDays, companyId, Boolean(favouritesOnly), locationRe];
+    let titleSql = '';
+    if (withTitle && titleAlternatives.length) {
+      const ors = titleAlternatives.map((words) => `(${words.map((w) => {
+        params.push(w);
+        return `j.title ~* $${params.length}`;
+      }).join(' AND ')})`);
+      titleSql = `AND (${ors.join(' OR ')})`;
+    }
+    const where = `
+      WHERE COALESCE(j.engagement,'fte') = 'fte' AND j.closed_at IS NULL AND NOT j.dismissed
+        AND j.relevance >= $1
+        AND COALESCE(j.posted_at, j.discovered_at) > now() - make_interval(days => $2::int)
+        AND ($3::text IS NULL OR j.company_id = $3)
+        AND (NOT $4 OR j.favourite)
+        AND ($5::text IS NULL OR j.location ~* $5)
+        ${titleSql}`;
+    const from = `FROM jobs j LEFT JOIN companies c ON c.id = j.company_id LEFT JOIN tracked_companies t ON t.company_id = j.company_id`;
+    if (count) return (await one(`SELECT count(*)::int AS n ${from} ${where}`, params)).n;
+    params.push(Math.min(Number(limit) || 5, 25));
+    return many(
+      `SELECT j.id, j.title, COALESCE(NULLIF(c.name,''), j.company_name) AS company, j.location, j.relevance AS match,
+              j.url, j.favourite, j.no_dsa, COALESCE(j.posted_at, j.discovered_at) AS posted, t.stage AS tracked_stage
+       ${from} ${where}
+       ORDER BY j.favourite DESC, COALESCE(j.posted_at, j.discovered_at) DESC, j.relevance DESC
+       LIMIT $${params.length}`,
+      params,
+    );
+  };
+
+  const rows = await run();
+  const total = rows.length ? await run({ count: true }) : 0;
+  const result = {
+    searched: { query: q || undefined, location: location || undefined, postedWithinDays: days, minMatch: floor },
     count: rows.length,
+    totalMatching: total,
     jobs: rows.map(({ no_dsa: noDsa, ...j }) => ({ ...j, dsaSignals: noDsa === false })),
   };
+  // An empty result carries the evidence for what to try next, so the
+  // answer is "0 for X, but N in that place / M over 30 days", not a guess.
+  if (!rows.length) {
+    result.nearby = {
+      sameWindowAnyTitle: locationRe ? await run({ withTitle: false, count: true }) : undefined,
+      last30Days: days < 30 ? await run({ withinDays: 30, count: true }) : undefined,
+    };
+  }
+  return result;
 }
 
 async function searchGigs({ query: q, limit = 10 } = {}) {
@@ -673,7 +788,7 @@ const TOOLS = [
   ['list_pipeline', 'Tracked companies with stage and roles.', S({ stage: stageArg, query: str('name filter') }), listPipeline],
   ['get_company', 'One company: tracking, roles, contacts, research, document ids, open jobs.', S({ company: companyArg }, ['company']), getCompany],
   ['find_companies', 'Search the company catalogue.', S({ query: str(), region: REGION, trackedOnly: bool, limit: int }), findCompanies],
-  ['search_jobs', 'Discovered full-time jobs. match = relevance 0-100.', S({ query: str('keyword'), company: companyArg, minMatch: int, postedWithinDays: int, favouritesOnly: bool, limit: int }), searchJobs],
+  ['search_jobs', 'Discovered full-time jobs, newest first. query = title words, "or" for alternatives (synonyms handled: AI/ML/LLM, fullstack/full stack, engineer/developer). location = place (Bangalore=Bengaluru, India, remote, Europe…). match = relevance 0-100; leave minMatch unset unless he asks.', S({ query: str('e.g. AI engineer or fullstack'), location: str('e.g. Bangalore'), company: companyArg, minMatch: int, postedWithinDays: int, favouritesOnly: bool, limit: int }), searchJobs],
   ['search_gigs', 'Freelance/contract gigs.', S({ query: str(), limit: int }), searchGigs],
   ['get_followups_and_interviews', 'Interviews in 7 days, follow-ups due, new jobs not yet in a digest.', S({}), getFollowupsAndInterviews],
   ['list_documents', 'Resumes, WIN docs, interview preps, mock interviews (ids).', S({ company: companyArg, type: { type: 'string', enum: DOC_TYPES } }), listDocuments],
