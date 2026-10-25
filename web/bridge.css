@@ -457,3 +457,35 @@
   opacity: 1 !important; color: #ef4444; background: rgba(239, 68, 68, 0.15);
 }
 
+
+/* ── Phones ─────────────────────────────────────────────────────────
+ * The prototype pages were laid out for a desktop. On a phone:
+ *  - the nav uses short labels and leaves room for the Synced pill;
+ *  - grid and flex items may shrink below their content (min-width:0),
+ *    so a long title or a nowrap button can't push the page sideways;
+ *  - form controls, media and tables stay inside the screen;
+ *  - buttons wrap instead of widening their row.
+ * Horizontal scrollers that are meant to scroll (the kanban board) keep
+ * their own overflow. */
+@media (max-width: 600px) {
+  #cc-nav { padding: 0 6px !important; padding-right: 118px !important; gap: 2px !important; overflow-x: auto; white-space: nowrap; scrollbar-width: none; }
+  #cc-nav::-webkit-scrollbar { display: none; }
+  #cc-nav a[data-short] { font-size: 0 !important; padding: 5px 9px !important; }
+  #cc-nav a[data-short]::after { content: attr(data-short); font-size: 11.5px; }
+  .cc-pill { right: 6px; }
+
+  .main, .sec, .card, .cc, .track-grid > *, .cgrid > *, .res-split-grid > *, .res-form-grid > *, .fr, .frow > * { min-width: 0; }
+  select, input, textarea { max-width: 100%; box-sizing: border-box; }
+  img, video, canvas, iframe { max-width: 100%; height: auto; }
+  pre, code { white-space: pre-wrap; overflow-wrap: anywhere; }
+  table { display: block; max-width: 100%; overflow-x: auto; }
+  .btn { white-space: normal; }
+  .card, .cc, .sec { overflow-wrap: anywhere; }
+  .step-flow { grid-template-columns: 1fr 1fr !important; }
+  .frow { flex-wrap: wrap; }
+  #coSearch { min-width: 0 !important; flex: 1 1 100%; }
+  .res-studio, .res-hero, .res-hero-actions, .res-hero-actions > * { min-width: 0; max-width: 100%; }
+  #resumeVersionSelect { width: 100%; }
+  /* Two-column forms (Track modal, studio) become one column. */
+  [style*="grid-template-columns:1fr 1fr"], [style*="grid-template-columns: 1fr 1fr"] { grid-template-columns: 1fr !important; }
+}

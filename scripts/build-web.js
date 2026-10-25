@@ -27,9 +27,9 @@ const NAV = `
 <div id="cc-nav" style="position:fixed;top:0;left:0;right:0;height:36px;z-index:9997;display:flex;align-items:center;gap:4px;
      padding:0 14px;background:rgba(10,13,18,.96);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
      border-bottom:1px solid #232a38;font:600 12px -apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;box-sizing:border-box">
-  <a href="/" style="padding:4px 12px;border-radius:6px;color:#a9b6c9;text-decoration:none">Companies &amp; Pipeline</a>
-  <a href="/outreach.html" style="padding:4px 12px;border-radius:6px;color:#a9b6c9;text-decoration:none">Outreach &amp; Studio</a>
-  <a href="/interview.html" style="padding:4px 12px;border-radius:6px;color:#a9b6c9;text-decoration:none">Interview Room</a>
+  <a href="/" data-short="Companies" style="padding:4px 12px;border-radius:6px;color:#a9b6c9;text-decoration:none">Companies &amp; Pipeline</a>
+  <a href="/outreach.html" data-short="Studio" style="padding:4px 12px;border-radius:6px;color:#a9b6c9;text-decoration:none">Outreach &amp; Studio</a>
+  <a href="/interview.html" data-short="Interview" style="padding:4px 12px;border-radius:6px;color:#a9b6c9;text-decoration:none">Interview Room</a>
 </div>
 <script>
   (function () {
