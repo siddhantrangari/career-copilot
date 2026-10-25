@@ -11,13 +11,18 @@ import { cleanJdText } from './autofill.js';
  * to query it programmatically, so the server reads SerpAPI's structured
  * results and never opens Google, LinkedIn or Naukri itself.
  *
- * The free plan is 250 searches a month. A morning run spends one search per
- * standing query (one page of ten), and the account's remaining searches are
- * checked first — that check is free — so the run never eats the reserve
- * left for on-demand searches from the bot.
+ * Spending is capped and logged. Every search goes through spend(), which
+ * (one call at a time) reads SerpAPI's usage counter, refuses if the day,
+ * week or month cap would be passed, makes the call, reads the counter again
+ * to record whether it was billed or served free from cache, and logs it in
+ * serp_calls. Nothing — not the morning run, not the bot — bypasses it.
+ * The counter read is free and does not count as a search.
+ *
+ * The server never sends a request to google.com: searches go to SerpAPI,
+ * and when a cap is reached the fallback is boolean links he opens himself.
  */
 
-const SERP = 'https://serpapi.com';
+const SERP = config.googleJobs.apiBase;
 const DAY = 86_400_000;
 
 // Standing searches. Bengaluru is the only Indian city he targets; the remote
@@ -37,14 +42,137 @@ const BOARD_HOSTS = /linkedin|naukri|indeed|foundit|monster|shine|instahyre|glas
 
 export const googleJobsReady = () => Boolean(config.googleJobs.enabled && config.googleJobs.apiKey);
 
-/** Free: remaining searches on the SerpAPI plan. */
+/** Free: SerpAPI's own counters for this key (shared with other projects). */
 export async function serpQuota() {
   const res = await fetch(`${SERP}/account.json?api_key=${encodeURIComponent(config.googleJobs.apiKey)}`, {
     signal: AbortSignal.timeout(20_000),
   });
   if (!res.ok) throw new Error(`SerpAPI account check returned ${res.status}`);
   const d = await res.json();
-  return { left: Number(d.plan_searches_left ?? d.total_searches_left ?? 0), perMonth: d.searches_per_month, plan: d.plan_name };
+  return {
+    left: Number(d.plan_searches_left ?? d.total_searches_left ?? 0),
+    used: Number(d.this_month_usage ?? 0),
+    perMonth: Number(d.searches_per_month ?? 0),
+    plan: d.plan_name,
+  };
+}
+
+// ── Caps and the call log ─────────────────────────────────────────────
+
+/** Billed searches today and this week (IST calendar), from the log. */
+async function loggedUsage() {
+  const tz = config.digest.timeZone;
+  return one(
+    `SELECT
+       count(*) FILTER (WHERE (at AT TIME ZONE $1)::date = (now() AT TIME ZONE $1)::date)::int AS today,
+       count(*) FILTER (WHERE date_trunc('week', at AT TIME ZONE $1) = date_trunc('week', now() AT TIME ZONE $1))::int AS week,
+       count(*) FILTER (WHERE date_trunc('month', at AT TIME ZONE $1) = date_trunc('month', now() AT TIME ZONE $1))::int AS month
+     FROM serp_calls WHERE billed IS NOT FALSE`,
+    [tz],
+  );
+}
+
+/**
+ * Where usage stands against every cap. The month uses the larger of
+ * SerpAPI's counter and the log, so another project on the same key still
+ * counts. If the counter cannot be read, nothing may be spent.
+ */
+export async function searchUsage() {
+  const { dailyCap, weeklyCap, monthlyCap } = config.googleJobs;
+  const logged = await loggedUsage();
+  let account = null;
+  try { account = await serpQuota(); } catch { account = null; }
+  const month = Math.max(account?.used ?? 0, logged.month);
+  const allowance = account
+    ? Math.max(0, Math.min(dailyCap - logged.today, weeklyCap - logged.week, monthlyCap - month))
+    : 0;
+  const blockedBy = !account ? 'SerpAPI usage could not be read'
+    : logged.today >= dailyCap ? 'daily' : logged.week >= weeklyCap ? 'weekly' : month >= monthlyCap ? 'monthly' : null;
+  return {
+    today: logged.today, dailyCap, week: logged.week, weeklyCap, month, monthlyCap,
+    planLeft: account?.left ?? null, planPerMonth: account?.perMonth ?? null,
+    allowance, blockedBy,
+  };
+}
+
+export const usageLine = (u) =>
+  `today ${u.today}/${u.dailyCap} · week ${u.week}/${u.weeklyCap} · month ${u.month}/${u.monthlyCap}`;
+
+// One search at a time, app-wide, so two callers cannot both pass the check.
+let spendChain = Promise.resolve();
+
+/** The only way a search is made. Returns { results } or { blocked, usage }. */
+async function spend({ q, location }, trigger) {
+  const turn = spendChain.then(async () => {
+    const usage = await searchUsage();
+    if (usage.allowance < 1) {
+      // A real cap is announced once per period; an unreadable counter just blocks.
+      if (['daily', 'weekly', 'monthly'].includes(usage.blockedBy)) await noticeCap(usage);
+      return { blocked: usage.blockedBy || 'cap', usage };
+    }
+    const before = usage.month;
+    let results = []; let error = null; let searchId = null; let ok = true;
+    try {
+      ({ results, searchId } = await searchPage({ q, location }));
+    } catch (err) {
+      ok = false; error = err.message;
+    }
+    let after = null;
+    try { after = (await serpQuota()).used; } catch { after = null; }
+    const billed = after === null ? null : after > before;
+    await query(
+      `INSERT INTO serp_calls (trigger, query, location, ok, billed, results, month_usage, search_id, error)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
+      [trigger, q, location || '', ok, billed, results.length, after, searchId, error],
+    );
+    await noticeMonth80();
+    if (!ok) throw new Error(error);
+    return { results, billed };
+  });
+  spendChain = turn.catch(() => {});
+  return turn;
+}
+
+// ── Telegram notices ─────────────────────────────────────────────────
+
+async function tell(text) {
+  if (!config.digest.telegram.botToken || !config.digest.telegram.chatId) return;
+  const { sendMarkdown } = await import('./telegram.js');
+  await sendMarkdown(config.digest.telegram.chatId, text).catch(() => {});
+}
+
+/** Run fn once per key (e.g. once per day for "daily cap reached"). */
+async function once(key, fn) {
+  const row = await one(`INSERT INTO serp_notices (key) VALUES ($1) ON CONFLICT (key) DO NOTHING RETURNING key`, [key]);
+  if (row) await fn();
+}
+
+const istDate = () => new Intl.DateTimeFormat('en-CA', { timeZone: config.digest.timeZone }).format(new Date());
+
+/** Monday of the current IST week, YYYY-MM-DD — the same week the cap counts. */
+function istMonday() {
+  const d = new Date(`${istDate()}T00:00:00Z`);
+  d.setUTCDate(d.getUTCDate() - ((d.getUTCDay() + 6) % 7));
+  return d.toISOString().slice(0, 10);
+}
+
+async function noticeCap(u) {
+  const period = u.blockedBy === 'daily' ? `day:${istDate()}` : u.blockedBy === 'weekly' ? `week:${istMonday()}` : `month:${istDate().slice(0, 7)}`;
+  await once(`cap-${period}`, () => tell(
+    `⛔ **Google Jobs ${u.blockedBy || ''} limit reached** (${usageLine(u)}).\n` +
+    'Searches pause until it resets — nothing can override that. Company-board discovery keeps running, ' +
+    'and the bot will give you Google boolean links to open yourself (no requests from the server).',
+  ));
+}
+
+async function noticeMonth80() {
+  const u = await searchUsage();
+  if (u.month >= Math.floor(u.monthlyCap * 0.8)) {
+    await once(`month-80:${istDate().slice(0, 7)}`, () => tell(
+      `⚠️ **Google Jobs at ${u.month}/${u.monthlyCap} searches this month** (past 80% of the cap). ` +
+      `The cap stops it at ${u.monthlyCap}; SerpAPI shows ${u.planLeft} left on the plan.`,
+    ));
+  }
 }
 
 /** "Bengaluru â€“ AI" — UTF-8 text decoded as Latin-1 somewhere upstream. */
@@ -97,18 +225,20 @@ function bestApply(job) {
   return stripTracking((named || linkedin || other || opts[0])?.link || job.source_link || job.share_link || '');
 }
 
+// Only spend() may call this.
 async function searchPage({ q, location }) {
   const url = new URL(`${SERP}/search.json`);
   Object.entries({ engine: 'google_jobs', q, location, gl: 'in', hl: 'en', api_key: config.googleJobs.apiKey })
     .forEach(([k, v]) => url.searchParams.set(k, v));
   const res = await fetch(url, { signal: AbortSignal.timeout(60_000) });
   const d = await res.json().catch(() => ({}));
+  const searchId = d.search_metadata?.id || null;
   if (!res.ok || d.error) {
     // "Google hasn't returned any results" is an empty page, not a failure.
-    if (/hasn't returned any results/i.test(d.error || '')) return [];
+    if (/hasn't returned any results/i.test(d.error || '')) return { results: [], searchId };
     throw new Error(`SerpAPI: ${d.error || res.status}`);
   }
-  return d.jobs_results || [];
+  return { results: d.jobs_results || [], searchId };
 }
 
 const catalogueId = async (name) =>
@@ -167,15 +297,20 @@ async function storeResults(results, { minRelevance = 40 } = {}) {
   return { relevant, added, duplicate, stale };
 }
 
+/** Today's standing searches: the configured list, rotated so all get run. */
+function todaysQueries(all, n) {
+  const day = Math.floor(Date.now() / DAY);
+  return Array.from({ length: Math.min(n, all.length) }, (_, i) => all[(day + i) % all.length]);
+}
+
 /**
- * Run searches and store what they find. `reserve` is how many searches must
- * remain on the plan afterwards; the morning run keeps some for the bot.
+ * Run searches through spend() and store what they find. The morning run
+ * takes at most `morningMax`, leaving the rest of the daily cap for the bot.
  */
-export async function runGoogleJobs({ trigger = 'manual', queries = config.googleJobs.queries || DEFAULT_QUERIES, reserve = config.googleJobs.reserve } = {}) {
+export async function runGoogleJobs({ trigger = 'manual', queries = null, notify = trigger === 'scheduled' } = {}) {
   if (!googleJobsReady()) throw new Error('Google Jobs is not configured — set SERPAPI_KEY');
-  const quota = await serpQuota();
-  const affordable = Math.max(0, quota.left - reserve);
-  const toRun = queries.slice(0, affordable);
+  const all = queries || config.googleJobs.queries || DEFAULT_QUERIES;
+  const planned = queries ? all : todaysQueries(all, config.googleJobs.morningMax);
 
   const run = await one(
     `INSERT INTO agent_runs (kind, trigger, status) VALUES ('google-jobs', $1, 'running') RETURNING id`,
@@ -183,23 +318,31 @@ export async function runGoogleJobs({ trigger = 'manual', queries = config.googl
   );
   const detail = [];
   const errors = [];
-  let seen = 0; let added = 0;
-  for (const qy of toRun) {
+  let seen = 0; let added = 0; let searches = 0; let billed = 0; let blocked = null;
+  for (const qy of planned) {
     try {
-      const results = await searchPage(qy);
-      const s = await storeResults(results);
+      const out = await spend(qy, trigger);
+      if (out.blocked) { blocked = out.blocked; break; }
+      searches += 1; if (out.billed !== false) billed += 1;
+      const s = await storeResults(out.results);
       seen += s.relevant; added += s.added;
-      detail.push({ query: qy.q, location: qy.location, results: results.length, ...s });
+      detail.push({ query: qy.q, location: qy.location, results: out.results.length, billed: out.billed, ...s });
     } catch (err) {
       errors.push({ query: qy.q, error: err.message });
     }
   }
-  const skipped = queries.length - toRun.length;
-  if (skipped) errors.push({ note: `${skipped} search(es) skipped to keep ${reserve} of ${quota.left} remaining for on-demand use` });
+  if (blocked) errors.push({ note: `stopped: ${blocked} limit reached` });
   await query(
     `UPDATE agent_runs SET status = 'done', companies = $2, jobs_seen = $3, jobs_new = $4,
        errors = $5, detail = $6, finished_at = now() WHERE id = $1`,
-    [run.id, toRun.length, seen, added, JSON.stringify(errors), JSON.stringify(detail)],
+    [run.id, searches, seen, added, JSON.stringify(errors), JSON.stringify(detail)],
   );
-  return { runId: run.id, searches: toRun.length, quotaBefore: quota.left, jobsSeen: seen, jobsNew: added, errors, detail };
+  const usage = await searchUsage();
+  if (notify) {
+    await tell(
+      `🔎 **Google Jobs**: ${searches} search${searches === 1 ? '' : 'es'} (${billed} billed) · ${added} new role${added === 1 ? '' : 's'}` +
+      `${blocked ? ` · stopped at the ${blocked} limit` : ''}\n${usageLine(usage)} · SerpAPI plan: ${usage.planLeft ?? '?'} left`,
+    );
+  }
+  return { runId: run.id, searches, billed, blocked, jobsSeen: seen, jobsNew: added, errors, detail, usage };
 }

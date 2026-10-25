@@ -263,9 +263,15 @@ function followUpsFrom(tracked, contacts, now) {
 /** Everything the message needs, as data. Pure read. */
 export async function buildDigest(now = new Date()) {
   const [{ jobs, total }, { tracked, contacts }] = await Promise.all([freshJobs(now), pipeline()]);
+  let searchUsage = null;
+  try {
+    const gj = await import('./google-jobs.js');
+    if (gj.googleJobsReady()) searchUsage = gj.usageLine(await gj.searchUsage());
+  } catch { searchUsage = null; }
   return {
     generatedAt: now.toISOString(),
     date: localDate(now),
+    searchUsage,
     interviews: interviewsFrom(tracked, now),
     jobs: { items: jobs, total },
     followUps: followUpsFrom(tracked, contacts, now),
@@ -351,7 +357,8 @@ export function renderDigest(d, now = new Date(d.generatedAt)) {
 
   // Standing web searches (past 24h) — reach LinkedIn, Naukri, Instahyre and
   // the rest in one tap without anything reading those sites automatically.
-  sections.push([`🔎 <b>Today on the web</b>: ${dailySearches().map((s) => link(s.url, s.label)).join(' · ')}`]);
+  sections.push([`🔎 <b>Today on the web</b>: ${dailySearches().map((s) => link(s.url, s.label)).join(' · ')}`]
+    .concat(d.searchUsage ? [`   Google Jobs searches: ${esc(d.searchUsage)}`] : []));
 
   sections.push([link(app, 'Open Career Copilot')]);
 

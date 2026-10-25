@@ -140,7 +140,7 @@ export function startScheduler(log) {
       if (done) return;
       log.info('[agent] Google Jobs starting');
       const res = await runGoogleJobs({ trigger: 'scheduled' });
-      log.info(`[agent] Google Jobs done — ${res.searches} searches, ${res.jobsNew} new, quota before ${res.quotaBefore}`);
+      log.info(`[agent] Google Jobs done — ${res.searches} searches (${res.billed} billed), ${res.jobsNew} new${res.blocked ? `, stopped at ${res.blocked} cap` : ''}`);
     } catch (err) {
       log.error(`[agent] Google Jobs failed: ${err.message}`);
     }

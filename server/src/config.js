@@ -135,15 +135,21 @@ export const config = {
     intervalHours: Math.max(6, int(process.env.INDIA_DISCOVERY_INTERVAL_HOURS, 12)),
   },
 
-  // Google Jobs via SerpAPI — one page per standing query each morning,
-  // before the digest. The free plan is 250 searches a month; `reserve`
-  // searches are always left for on-demand bot searches.
+  // Google Jobs via SerpAPI. Hard caps no caller can override — the bot
+  // included: per IST day, per IST week (Mon–Sun), and per month against
+  // SerpAPI's own counter (shared with other projects on the key). Defaults
+  // keep a month at or under 200 of the free plan's 250.
   googleJobs: {
     enabled: process.env.GOOGLE_JOBS_ENABLED !== 'false',
     apiKey: process.env.SERPAPI_KEY || '',
+    // Only overridden to point tests at a local stand-in.
+    apiBase: (process.env.SERPAPI_BASE || 'https://serpapi.com').replace(/\/$/, ''),
     hour: int(process.env.GOOGLE_JOBS_HOUR, 7),
     minute: int(process.env.GOOGLE_JOBS_MINUTE, 15),
-    reserve: int(process.env.GOOGLE_JOBS_RESERVE, 30),
+    dailyCap: Math.min(int(process.env.SERP_DAILY_CAP, 6), 8),
+    weeklyCap: Math.min(int(process.env.SERP_WEEKLY_CAP, 42), 50),
+    monthlyCap: Math.min(int(process.env.SERP_MONTHLY_CAP, 200), 200),
+    morningMax: int(process.env.GOOGLE_JOBS_MORNING_SEARCHES, 5),
     queries: (() => {
       try { return process.env.GOOGLE_JOBS_QUERIES ? JSON.parse(process.env.GOOGLE_JOBS_QUERIES) : null; } catch { return null; }
     })(),

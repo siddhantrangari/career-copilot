@@ -524,3 +524,30 @@ CREATE TABLE IF NOT EXISTS company_why (
 -- remains the discovery filter.
 ALTER TABLE jobs ADD COLUMN IF NOT EXISTS fit_score SMALLINT;
 CREATE INDEX IF NOT EXISTS jobs_fit_idx ON jobs (fit_score DESC NULLS LAST) WHERE closed_at IS NULL;
+
+-- Every SerpAPI search the app makes, kept for good. `billed` is measured,
+-- not assumed: the account's usage counter is read before and after each
+-- call (that read is free), and a cache hit leaves it unchanged. Daily and
+-- weekly caps count billed rows; the monthly cap reads SerpAPI's own
+-- counter, which also includes other projects sharing the key.
+CREATE TABLE IF NOT EXISTS serp_calls (
+  id            BIGSERIAL PRIMARY KEY,
+  at            TIMESTAMPTZ NOT NULL DEFAULT now(),
+  trigger       TEXT NOT NULL,              -- scheduled | bot | manual | test
+  query         TEXT NOT NULL,
+  location      TEXT NOT NULL DEFAULT '',
+  ok            BOOLEAN NOT NULL DEFAULT true,
+  billed        BOOLEAN,                    -- NULL = unknown, counted as billed
+  results       INTEGER NOT NULL DEFAULT 0,
+  month_usage   INTEGER,                    -- SerpAPI this_month_usage after the call
+  search_id     TEXT,
+  error         TEXT
+);
+CREATE INDEX IF NOT EXISTS serp_calls_at_idx ON serp_calls (at DESC);
+
+-- Once-per-period notices (80% alert, limit reached) so Telegram is told
+-- once, not on every blocked attempt.
+CREATE TABLE IF NOT EXISTS serp_notices (
+  key        TEXT PRIMARY KEY,               -- e.g. month-80:2026-10, cap-day:2026-10-26
+  sent_at    TIMESTAMPTZ NOT NULL DEFAULT now()
+);

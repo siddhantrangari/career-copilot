@@ -787,15 +787,39 @@ async function searchGoogleJobs({ query: q, location = 'Bangalore' } = {}) {
   const remote = /remote/i.test(`${q} ${location}`);
   const where = remote || /india/i.test(location) && !/bangalore|bengaluru/i.test(location) ? 'India' : 'Bengaluru, Karnataka, India';
   const term = remote && !/remote/i.test(q) ? `Remote ${q}` : q;
-  const run = await runGoogleJobs({ trigger: 'bot', queries: [{ q: term, location: where }], reserve: 5 });
-  if (!run.searches) throw new ToolError('Not run: the monthly Google Jobs quota is nearly used up.');
+  const run = await runGoogleJobs({ trigger: 'bot', queries: [{ q: term, location: where }] });
+  if (run.blocked || !run.searches) {
+    // Capped: no search was made. Links run in his own browser, so the
+    // server sends nothing to Google.
+    const { googleBooleanLinks } = await import('./search-links.js');
+    return {
+      limited: true,
+      reason: `${['daily', 'weekly', 'monthly'].includes(run.blocked) ? `Google Jobs ${run.blocked} limit reached` : `Google Jobs paused (${run.blocked || 'limit reached'})`} — no search was made (${(await import('./google-jobs.js')).usageLine(run.usage)}).`,
+      instead: 'Google boolean links for him to open:',
+      links: googleBooleanLinks(q, remote ? 'remote india' : 'Bangalore', 'week').slice(0, 6).map(({ name, url }) => ({ name, url })),
+    };
+  }
   const found = await searchJobs({ query: q.replace(/remote/ig, '').trim(), location: remote ? 'remote' : 'Bangalore', postedWithinDays: 30, limit: 8 });
+  const { usageLine } = await import('./google-jobs.js');
   return {
     searched: `${term} — ${where}`,
     newRolesStored: run.jobsNew,
-    quotaLeft: run.quotaBefore - run.searches,
+    usage: usageLine(run.usage),
     note: 'New roles get their fit score and why line within 30 minutes.',
     jobs: found.jobs,
+  };
+}
+
+async function getSearchUsage() {
+  const { searchUsage, usageLine } = await import('./google-jobs.js');
+  const u = await searchUsage();
+  const recent = await many(
+    `SELECT at, trigger, query, location, billed, results, ok FROM serp_calls ORDER BY at DESC LIMIT 10`,
+  );
+  return {
+    usage: usageLine(u), searchesLeftToday: u.allowance, serpapiPlanLeft: u.planLeft, blockedBy: u.blockedBy,
+    googleRequestsFromServer: 'none — searches go through SerpAPI; boolean links open in his browser',
+    recentCalls: recent,
   };
 }
 
@@ -847,7 +871,8 @@ const TOOLS = [
     problems: { type: 'array', items: { type: 'string' } }, topic: str(), round: { type: 'string', enum: ROUNDS }, force: bool,
   }, ['task', 'confirmedByUser']), startAiTask],
   ['web_search_links', 'Google boolean searches (past week by default) across LinkedIn, Naukri, Instahyre, foundit, Indeed, Wellfound, Cutshort, Hirist, ATS boards and careers pages, plus the portals\' own search pages. Links he opens. Offer when search_jobs is thin or he asks to search the web.', S({ query: str('role'), location: str(), period: { type: 'string', enum: ['day', 'week', 'month'] } }), webSearchLinks],
-  ['search_google_jobs', 'Live Google Jobs search (covers LinkedIn, Naukri, Indeed, Instahyre, company sites) for Bangalore or remote India; stores new roles. Uses 1 of ~250 monthly searches — only when he asks to search Google/the web live, or search_jobs found too little and he agrees.', S({ query: str('role, e.g. AI Engineer'), location: str('Bangalore or remote India') }, ['query']), searchGoogleJobs],
+  ['search_google_jobs', 'Live Google Jobs search (covers LinkedIn, Naukri, Indeed, Instahyre, company sites) for Bangalore or remote India; stores new roles. Uses 1 search; hard daily/weekly/monthly caps apply and cannot be overridden — when capped it returns boolean links instead. Only when he asks to search Google/the web live, or search_jobs found too little and he agrees.', S({ query: str('role, e.g. AI Engineer'), location: str('Bangalore or remote India') }, ['query']), searchGoogleJobs],
+  ['get_search_usage', 'Google Jobs (SerpAPI) usage against the daily/weekly/monthly caps, and the last calls.', S({}), getSearchUsage],
   ['send_digest_now', "Send today's digest now.", S({}), sendDigestNow],
 ];
 
