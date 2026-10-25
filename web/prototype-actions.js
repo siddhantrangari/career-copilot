@@ -968,9 +968,99 @@
     renderJobs();
   }
 
+  // ── Morning digest panel, above the live feed ───────────────────────
+  function buildDigestPanel() {
+    var host = document.getElementById('discovery') || document.getElementById('jobs');
+    var feed = document.getElementById('cc-feed');
+    if (!host || !feed || host.querySelector('#cc-digest')) return;
+
+    var panel = document.createElement('div');
+    panel.id = 'cc-digest';
+    panel.style.cssText =
+      'background:#141822;border:1px solid #232a38;border-radius:14px;padding:16px 20px;margin-bottom:16px';
+    panel.innerHTML =
+      '<div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">' +
+      '<div><strong style="font-size:15px">☀️ Morning digest</strong>' +
+      '<div class="cc-muted" id="cc-digest-sub">Loading…</div></div>' +
+      '<div style="display:flex;gap:7px;flex-wrap:wrap">' +
+      '<button class="btn" id="cc-digest-chat" type="button">Find my chat id</button>' +
+      '<button class="btn" id="cc-digest-preview" type="button">Preview</button>' +
+      '<button class="btn pri" id="cc-digest-send" type="button">Send now</button>' +
+      '</div></div><div id="cc-digest-body" style="margin-top:12px;display:none"></div>';
+    host.insertBefore(panel, feed);
+
+    var sub = document.getElementById('cc-digest-sub');
+    var body = document.getElementById('cc-digest-body');
+    var show = function (html) { body.style.display = ''; body.innerHTML = html; };
+
+    function refreshStatus() {
+      api('/digest/status').then(function (s) {
+        var ready = s.telegram.botToken && s.telegram.chatId;
+        var last = s.last
+          ? ' · last ' + (s.last.status === 'sent' ? 'sent ' : 'failed ') + ago(s.last.created_at)
+          : '';
+        sub.innerHTML = !s.enabled ? 'Disabled (DIGEST_ENABLED=false)'
+          : ready ? 'Telegram · daily at ' + esc(s.sendsAt) + esc(last)
+          : '<span style="color:#ffb020">Not connected</span> — set ' +
+            (s.telegram.botToken ? 'TELEGRAM_CHAT_ID' : 'TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID') +
+            ' in .env.production, then redeploy';
+        document.getElementById('cc-digest-send').disabled = !ready;
+      }).catch(function (e) { sub.textContent = 'Status unavailable: ' + e.message; });
+    }
+
+    document.getElementById('cc-digest-preview').addEventListener('click', function () {
+      show('<p class="cc-muted">Building preview…</p>');
+      api('/digest/preview').then(function (d) {
+        // The server escapes every value; Telegram HTML is a safe subset.
+        show(d.messages.map(function (m) {
+          return '<div style="white-space:pre-wrap;font-size:12.5px;line-height:1.55;background:#0f131b;' +
+            'border:1px solid #232a38;border-radius:10px;padding:12px 14px;margin-bottom:8px">' + m + '</div>';
+        }).join('') + '<p class="cc-muted" style="font-size:11px">Preview only — nothing was sent or marked.</p>');
+        body.querySelectorAll('a').forEach(function (a) { a.target = '_blank'; a.rel = 'noopener'; a.style.color = '#7cb4ff'; });
+      }).catch(function (e) { show('<div class="cc-bad">' + esc(e.message) + '</div>'); });
+    });
+
+    document.getElementById('cc-digest-send').addEventListener('click', function () {
+      var btn = this;
+      var go = function () {
+        btn.disabled = true;
+        api('/digest/send', { method: 'POST', body: {} }).then(function (r) {
+          show('<div style="color:#7ee0a8">Sent to Telegram — ' + r.counts.jobs + ' roles, ' +
+            r.counts.followUps + ' follow-ups, ' + r.counts.interviews + ' interviews.</div>');
+          refreshStatus();
+        }).catch(function (e) {
+          show('<div class="cc-bad">' + esc(e.message) + '</div>');
+        }).then(function () { btn.disabled = false; });
+      };
+      var msg = 'Send today’s digest to Telegram now? The roles in it are marked as sent, and the 8am digest is skipped for today.';
+      if (window.appConfirm) {
+        window.appConfirm({ title: 'Send digest now', message: msg, confirmText: 'Send' })
+          .then(function (ok) { if (ok) go(); });
+      } else if (window.confirm(msg)) go();
+    });
+
+    document.getElementById('cc-digest-chat').addEventListener('click', function () {
+      show('<p class="cc-muted">Checking the bot’s messages…</p>');
+      api('/digest/telegram/chats').then(function (d) {
+        if (!d.chats.length) {
+          show('<p class="cc-muted">No chats yet. Open your bot in Telegram, send it any message, then try again.</p>');
+          return;
+        }
+        show('<p class="cc-muted" style="margin-bottom:6px">Put this in .env.production as TELEGRAM_CHAT_ID, then redeploy:</p>' +
+          d.chats.map(function (c) {
+            return '<div><code style="font-size:13px">' + esc(c.id) + '</code> <span class="cc-muted">' +
+              esc(c.name) + ' (' + esc(c.type) + ')</span></div>';
+          }).join(''));
+      }).catch(function (e) { show('<div class="cc-bad">' + esc(e.message) + '</div>'); });
+    });
+
+    refreshStatus();
+  }
+
   buildFeed();
+  buildDigestPanel();
   // The Job Discovery section may only exist once its tab is opened.
-  document.addEventListener('click', function () { setTimeout(buildFeed, 120); });
+  document.addEventListener('click', function () { setTimeout(function () { buildFeed(); buildDigestPanel(); }, 120); });
 })();
 
 /* ────────────────────────────────────────────────────────────────────

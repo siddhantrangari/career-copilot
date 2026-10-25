@@ -417,6 +417,10 @@ Format as a numbered table.</div>
             <label>Applied Date (if applied)</label>
             <input type="text" id="tRoleAppliedAt" placeholder="e.g. 24 Oct 2026 or Today">
           </div>
+          <div class="fr">
+            <label>Interview Date &amp; Time (if scheduled)</label>
+            <input type="datetime-local" id="tRoleInterviewAt">
+          </div>
           <div class="fr" style="grid-column:1/-1">
             <label>Role-Specific Outreach / Messages Sent</label>
             <input type="text" id="tRoleMsgs" placeholder="e.g. 2 DMs sent to Hiring Manager, replied on LinkedIn">
@@ -4479,6 +4483,7 @@ function renderKanban(all,filter='all'){
                   </div>
                   <div class="krole-meta-row">
                     ${r.appliedAt ? `<span>📅 Applied: ${esc(r.appliedAt)}</span>` : (r.stage === 'applied' ? `<span>📅 Applied</span>` : '')}
+                    ${r.interviewAt && !isNaN(new Date(r.interviewAt)) ? `<span style="color:#f0abfc">🎤 ${esc(new Date(r.interviewAt).toLocaleString(undefined,{weekday:'short',day:'numeric',month:'short',hour:'numeric',minute:'2-digit'}))}</span>` : ''}
                     ${r.outreachSent ? `<span>✉️ ${esc(r.outreachSent)}</span>` : ''}
                     ${r.pay ? `<span>💰 ${esc(r.pay)}</span>` : ''}
                   </div>
@@ -4802,6 +4807,9 @@ function syncActiveRoleInputsToMemory() {
   role.pay = (document.getElementById('tPay')?.value || '').trim();
   role.jobLink = (document.getElementById('tJD')?.value || '').trim();
   role.appliedAt = (document.getElementById('tRoleAppliedAt')?.value || '').trim();
+  // Stored as an ISO instant so the morning digest reads it unambiguously.
+  const interviewVal = document.getElementById('tRoleInterviewAt')?.value || '';
+  role.interviewAt = interviewVal && !isNaN(new Date(interviewVal)) ? new Date(interviewVal).toISOString() : '';
   role.outreachSent = (document.getElementById('tRoleMsgs')?.value || '').trim();
   role.notes = (document.getElementById('tDesc')?.value || '').trim();
   role.jdText = (document.getElementById('tJdText')?.value || '').trim();
@@ -4847,6 +4855,12 @@ function populateActiveRoleFields() {
 
   const appliedAtEl = document.getElementById('tRoleAppliedAt');
   if (appliedAtEl) appliedAtEl.value = role.appliedAt || '';
+  const interviewAtEl = document.getElementById('tRoleInterviewAt');
+  if (interviewAtEl) {
+    // datetime-local wants local "YYYY-MM-DDTHH:mm", not the stored ISO instant.
+    const at = role.interviewAt ? new Date(role.interviewAt) : null;
+    interviewAtEl.value = at && !isNaN(at) ? new Date(at.getTime() - at.getTimezoneOffset() * 60000).toISOString().slice(0, 16) : '';
+  }
 
   const msgsEl = document.getElementById('tRoleMsgs');
   if (msgsEl) msgsEl.value = role.outreachSent || '';
@@ -5060,6 +5074,7 @@ function addNewRoleToCurrentTrack(title, url, jdText) {
     jdText: jdText || '',
     jdFile: null,
     appliedAt: '',
+    interviewAt: '',
     outreachSent: '',
     notes: '',
     isPrimary: (currentTrackRoles.length === 0)

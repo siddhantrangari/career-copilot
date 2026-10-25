@@ -395,3 +395,68 @@ BEGIN
     END LOOP;
   END LOOP;
 END $$;
+
+-- "Not for me" on a company — already present on the live database, declared
+-- here so a fresh install has it too (the digest filters on it).
+ALTER TABLE companies ADD COLUMN IF NOT EXISTS dismissed    BOOLEAN NOT NULL DEFAULT false;
+ALTER TABLE companies ADD COLUMN IF NOT EXISTS dismissed_at TIMESTAMPTZ;
+
+-- ── Morning digest ────────────────────────────────────────────────────
+-- Follow-ups need to know how long something has sat untouched, and
+-- updated_at cannot say: the state sync rewrites every tracked row on each
+-- save. These columns are maintained by triggers so every writer (sync,
+-- Track modal, favourites, WIN doc task) is covered without touching them.
+-- Rows that existed before this have NULL ("unknown"), and the digest falls
+-- back to created_at for those; new rows start at now().
+ALTER TABLE tracked_companies ADD COLUMN IF NOT EXISTS stage_changed_at TIMESTAMPTZ;
+ALTER TABLE tracked_companies ADD COLUMN IF NOT EXISTS activity_at      TIMESTAMPTZ;
+ALTER TABLE tracked_companies ALTER COLUMN stage_changed_at SET DEFAULT now();
+ALTER TABLE tracked_companies ALTER COLUMN activity_at      SET DEFAULT now();
+ALTER TABLE connections ADD COLUMN IF NOT EXISTS status_changed_at TIMESTAMPTZ;
+ALTER TABLE connections ALTER COLUMN status_changed_at SET DEFAULT now();
+
+CREATE OR REPLACE FUNCTION cc_tracked_touch() RETURNS trigger AS $$
+BEGIN
+  IF NEW.stage IS DISTINCT FROM OLD.stage THEN
+    NEW.stage_changed_at := now();
+  END IF;
+  -- Real activity only: a sync that rewrites identical values is not one.
+  IF (NEW.stage, NEW.win_status, NEW.msgs, NEW.jd, NEW.job_link, NEW.notes)
+     IS DISTINCT FROM (OLD.stage, OLD.win_status, OLD.msgs, OLD.jd, OLD.job_link, OLD.notes) THEN
+    NEW.activity_at := now();
+  END IF;
+  RETURN NEW;
+END $$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE TRIGGER tracked_companies_touch
+  BEFORE UPDATE ON tracked_companies
+  FOR EACH ROW EXECUTE FUNCTION cc_tracked_touch();
+
+CREATE OR REPLACE FUNCTION cc_connection_touch() RETURNS trigger AS $$
+BEGIN
+  IF NEW.status IS DISTINCT FROM OLD.status THEN
+    NEW.status_changed_at := now();
+  END IF;
+  RETURN NEW;
+END $$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE TRIGGER connections_touch
+  BEFORE UPDATE ON connections
+  FOR EACH ROW EXECUTE FUNCTION cc_connection_touch();
+
+-- One row per send attempt. job_ids is what stops a role being announced
+-- twice: the next digest skips anything already delivered.
+CREATE TABLE IF NOT EXISTS digest_runs (
+  id           UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  digest_date  DATE NOT NULL,                     -- local date in DIGEST_TZ
+  trigger      TEXT NOT NULL DEFAULT 'scheduled', -- scheduled | manual
+  channel      TEXT NOT NULL DEFAULT 'telegram',
+  status       TEXT NOT NULL,                     -- sent | error
+  job_ids      UUID[] NOT NULL DEFAULT '{}',
+  counts       JSONB NOT NULL DEFAULT '{}'::jsonb,
+  body         TEXT NOT NULL DEFAULT '',
+  error        TEXT,
+  created_at   TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS digest_runs_date_idx ON digest_runs (digest_date DESC, created_at DESC);

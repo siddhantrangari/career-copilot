@@ -22,7 +22,40 @@ async function dueForRun(intervalMs, kind = 'job-discovery') {
   return Date.now() - new Date(last.finished_at).getTime() >= intervalMs;
 }
 
+let digestTimer = null;
+
+/**
+ * The morning digest has its own five-minute check, independent of the
+ * discovery switch. digestDue() decides — past the local send time and not
+ * yet sent today — so a restart at 8:10 still delivers, and only once.
+ */
+function startDigest(log) {
+  if (!config.digest.enabled) {
+    log.info('[digest] disabled (DIGEST_ENABLED=false)');
+    return;
+  }
+  const check = async () => {
+    try {
+      const { digestDue, runDigest } = await import('./digest.js');
+      if (!(await digestDue())) return;
+      const { counts } = await runDigest({ trigger: 'scheduled' });
+      log.info(`[digest] sent — ${counts.jobs} roles, ${counts.followUps} follow-ups, ${counts.interviews} interviews`);
+    } catch (err) {
+      log.error(`[digest] failed: ${err.message}`);
+    }
+  };
+  setTimeout(check, 90_000);
+  digestTimer = setInterval(check, 5 * 60_000);
+  const { hour, minute, timeZone, telegram } = config.digest;
+  log.info(
+    `[digest] daily at ${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')} ${timeZone}` +
+    (telegram.botToken && telegram.chatId ? '' : ' — waiting for TELEGRAM_BOT_TOKEN / TELEGRAM_CHAT_ID'),
+  );
+}
+
 export function startScheduler(log) {
+  startDigest(log);
+
   if (!config.discovery.enabled) {
     log.info('[agent] job discovery is disabled (DISCOVERY_ENABLED=false)');
     return;
@@ -70,5 +103,7 @@ export function startScheduler(log) {
 
 export function stopScheduler() {
   if (timer) clearInterval(timer);
+  if (digestTimer) clearInterval(digestTimer);
   timer = null;
+  digestTimer = null;
 }

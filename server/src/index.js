@@ -21,6 +21,7 @@ import jobRoutes from './routes/jobs.js';
 import stateRoutes from './routes/state.js';
 import interviewRoutes from './routes/interview.js';
 import linkedInRoutes from './routes/linkedin.js';
+import digestRoutes from './routes/digest.js';
 
 const app = Fastify({
   logger: {
@@ -88,6 +89,7 @@ await app.register(jobRoutes, { prefix: '/api/jobs' });
 await app.register(stateRoutes, { prefix: '/api/state' });
 await app.register(interviewRoutes, { prefix: '/api/interview' });
 await app.register(linkedInRoutes, { prefix: '/api/linkedin' });
+await app.register(digestRoutes, { prefix: '/api/digest' });
 
 app.setErrorHandler((err, request, reply) => {
   const status = err.statusCode && err.statusCode >= 400 ? err.statusCode : 500;

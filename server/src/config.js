@@ -109,6 +109,25 @@ export const config = {
     gigIntervalHours: Math.max(6, int(process.env.GIG_DISCOVERY_INTERVAL_HOURS, 6)),
   },
 
+  // Morning digest — one Telegram message a day: fresh high-match roles,
+  // follow-ups due, interviews this week. Silent until both Telegram values
+  // are set, so a missing token never turns into a failing job.
+  digest: {
+    enabled: process.env.DIGEST_ENABLED !== 'false',
+    hour: int(process.env.DIGEST_HOUR, 8),
+    minute: int(process.env.DIGEST_MINUTE, 0),
+    timeZone: process.env.DIGEST_TZ || 'Asia/Kolkata',
+    minRelevance: int(process.env.DIGEST_MIN_RELEVANCE, 75),
+    maxJobs: int(process.env.DIGEST_MAX_JOBS, 10),
+    appUrl: (process.env.APP_URL || 'https://career.myagentfirm.com').replace(/\/$/, ''),
+    telegram: {
+      botToken: process.env.TELEGRAM_BOT_TOKEN || '',
+      chatId: process.env.TELEGRAM_CHAT_ID || '',
+      // Only overridden to point tests at a local stand-in.
+      apiBase: (process.env.TELEGRAM_API_BASE || 'https://api.telegram.org').replace(/\/$/, ''),
+    },
+  },
+
   auth: {
     jwtSecret: process.env.JWT_SECRET || 'career_copilot_os_dev_secret',
     email: (process.env.APP_USER_EMAIL || 'siddhantrangari@gmail.com').toLowerCase(),
