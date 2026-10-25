@@ -5,6 +5,7 @@ import { companyDetail, addToList, draftOutreach } from '../services/company-det
 import { buildWeeklyReview, sendWeeklyReview } from '../services/weekly-review.js';
 import { listFollowups, actOnFollowup, draftNudge } from '../services/followups.js';
 import { suggestAngles, draftPost } from '../services/linkedin-post.js';
+import { applyQueue, markApplied, skipRole } from '../services/apply-queue.js';
 
 export default async function targetRoutes(app) {
   app.addHook('onRequest', app.auth);
@@ -57,6 +58,15 @@ export default async function targetRoutes(app) {
   // LinkedIn post helper: angles from his real week, or a draft from his material.
   app.post('/post/angles', async () => suggestAngles());
   app.post('/post/draft', async (request) => draftPost({ material: request.body?.material, bucket: request.body?.bucket }));
+
+  // Apply queue: the next roles to apply to (Bangalore, remote open to India,
+  // abroad with visa sponsorship or relocation), and one-click applied / skip.
+  app.get('/apply-queue', async (request) => {
+    const q = request.query || {};
+    return applyQueue({ scope: q.scope, minFit: q.minFit, limit: q.limit, showUnverified: q.unverified === 'true' });
+  });
+  app.post('/apply-queue/applied', async (request) => markApplied(String(request.body?.jobId || ''), { tailored: request.body?.tailored === true }));
+  app.post('/apply-queue/skip', async (request) => skipRole(String(request.body?.jobId || ''), { undo: request.body?.undo === true }));
 
   /** The Sunday review: preview it, or send it to Telegram now. */
   app.get('/weekly-review', async () => buildWeeklyReview());

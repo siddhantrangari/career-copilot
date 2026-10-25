@@ -286,7 +286,7 @@ export async function listTargets({ tag = null, priorityOnly = false, limit = 20
   return many(
     `SELECT t.key, t.name, t.company_id, t.in_catalogue, t.tag, t.priority, t.rank, t.hiring_score, t.company_fit,
             t.why_now, t.open_fit75, t.new_30d, t.best_fit, t.research_at,
-            j.title AS best_role, j.url AS best_role_url, j.why_role AS why_role,
+            j.title AS best_role, j.url AS best_role_url, j.why_role AS why_role, j.id AS best_job_id_ref, j.app_status AS best_role_status,
             NULLIF((SELECT w.why FROM company_why w WHERE w.key = t.key), '') AS why_company,
             tc.stage AS pipeline_stage,
             (SELECT count(*) FROM connections n WHERE n.company_id = t.company_id)::int AS contacts

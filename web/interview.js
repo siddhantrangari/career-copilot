@@ -631,6 +631,20 @@
   }
   refreshPrepHistory();
 
+  // Opened from the Today board with ?prep=<id>: show that guide straight away.
+  if (new URLSearchParams(location.search).get('prep')) {
+    api('/interview/preps/' + encodeURIComponent(new URLSearchParams(location.search).get('prep'))).then(function (r) {
+      var row = r.prep;
+      renderPrepView({
+        ...row.guide,
+        sources: row.sources || [],
+        companyName: row.company_name,
+        roleTitle: row.role_title,
+        round: row.round,
+      }, row.id);
+    }).catch(function () { /* the setup page stays as it is */ });
+  }
+
   // ── Recording ──────────────────────────────────────────────────
   // MediaRecorder writes short chunks which are uploaded as they are produced,
   // so a crashed tab costs seconds rather than the whole session, and no large

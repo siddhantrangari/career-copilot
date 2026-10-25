@@ -101,7 +101,7 @@ export async function buildToday(now = new Date()) {
   const targets = (c, mult) => ({
     connections: { done: c.connections, target: g.daily.connections * mult, label: 'Connection requests' },
     dms: { done: c.dms, target: g.daily.dms * mult, label: 'DMs to HMs / peers' },
-    applications: { done: applicationsSince(tracked, logged, mult === 1 ? day : week), target: g.daily.applications * mult, label: 'Applications' },
+    applications: { done: applicationsSince(tracked, logged, mult === 1 ? day : week), target: g.daily.applications * mult, stretch: g.daily.applicationsStretch * mult, label: 'Applications' },
     posts: { done: c.posts, target: g.daily.posts * mult, label: 'LinkedIn posts' },
     referrals: { done: c.referrals, target: g.daily.referrals * mult, label: 'Referral asks' },
   });
@@ -123,9 +123,13 @@ export async function buildToday(now = new Date()) {
   const pipe = await pipeline();
   for (const i of interviewsFrom(pipe.tracked, now).upcoming) {
     if (i.at.getTime() - now.getTime() > 2 * DAY) continue;
+    const prep = await one(
+      `SELECT id, created_at FROM interview_preps WHERE company_id = $1 ORDER BY created_at DESC LIMIT 1`, [i.companyId],
+    );
     push({ key: key('interview', i.company, i.role), type: 'interview', icon: '🎤', company: i.company, companyId: i.companyId,
+      prepId: prep?.id || null, prepAt: prep?.created_at || null,
       role: i.role, title: `Interview ${i.at.toLocaleString('en-IN', { timeZone: tz(), weekday: 'short', hour: 'numeric', minute: '2-digit' })}`,
-      detail: 'Run interview prep, then a mock in the Interview Room', logKind: 'action_done' });
+      detail: prep ? 'Re-read your prep guide, then run a mock round' : 'Build the prep guide (how they interview for this role), then a mock round', logKind: 'action_done' });
   }
 
   // 2. Follow-ups due (DM day 4, applications quiet 7 days) — the two oldest.
@@ -140,12 +144,12 @@ export async function buildToday(now = new Date()) {
   const apply = await listTargets({ tag: 'apply', limit: 12 });
   let applyCount = 0; let referralCount = 0;
   for (const t of apply) {
-    const applied = ['applied', 'networking', 'call', 'win', 'interview', 'offer'].includes(t.pipeline_stage);
+    const applied = ['applied', 'networking', 'call', 'win', 'interview', 'offer'].includes(t.pipeline_stage) || t.best_role_status === 'applied';
     if (applied ? referralCount >= 2 : applyCount >= 3) continue;
     push({
       key: key(applied ? 'referral' : 'apply', t.name, t.best_role), type: applied ? 'referral' : 'apply',
       icon: applied ? '🤝' : '🚀', company: t.name, companyId: t.company_id, priority: t.priority,
-      role: t.best_role || '', fit: t.best_fit, url: t.best_role_url,
+      role: t.best_role || '', fit: t.best_fit, url: t.best_role_url, jobId: applied ? null : t.best_job_id_ref,
       title: applied ? 'Ask for a referral' : `Apply${t.best_fit ? ` · fit ${t.best_fit}` : ''}`,
       detail: t.why_now || '', whyCompany: t.why_company || null, whyRole: t.why_role || null,
       logKind: applied ? 'referral_ask' : 'application',

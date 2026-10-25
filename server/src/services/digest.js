@@ -166,7 +166,8 @@ async function freshJobs(now) {
 export async function pipeline() {
   const tracked = await many(
     `SELECT t.company_id, t.stage, t.notes, t.created_at, t.stage_changed_at, t.activity_at,
-            c.name AS company
+            c.name AS company,
+            COALESCE((SELECT ct.priority FROM company_targets ct WHERE ct.key = lower(trim(c.name))), false) AS priority
      FROM tracked_companies t JOIN companies c ON c.id = t.company_id
      WHERE t.stage NOT IN ('failed', 'offer') AND NOT COALESCE(c.dismissed, false)`,
   );
@@ -232,7 +233,9 @@ export function followUpsFrom(tracked, contacts, now, { snoozed = new Set(), lim
     const activity = t.activity_at ? new Date(t.activity_at) : null;
     const created = new Date(t.created_at);
     const roles = rolesOf(t.notes);
-    const appliedRoles = roles.filter((r) => r.stage === 'applied');
+    // Quick applications from the Apply queue (20–100 a day) would bury the
+    // nudges that matter; they get one only at a priority company.
+    const appliedRoles = roles.filter((r) => r.stage === 'applied' && (!r.quick || t.priority));
 
     if (appliedRoles.length) {
       for (const r of appliedRoles) {

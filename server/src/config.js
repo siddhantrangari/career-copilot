@@ -164,7 +164,7 @@ export const config = {
     daily: {
       connections: int(process.env.DAILY_CONNECTIONS, 50),
       dms: int(process.env.DAILY_DMS, 10),
-      applications: int(process.env.DAILY_APPLICATIONS, 5),
+      applications: int(process.env.DAILY_APPLICATIONS, 20), applicationsStretch: int(process.env.DAILY_APPLICATIONS_STRETCH, 100),
       posts: int(process.env.DAILY_POSTS, 1),
       referrals: int(process.env.DAILY_REFERRALS, 3),
     },

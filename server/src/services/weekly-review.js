@@ -51,7 +51,7 @@ export async function buildWeeklyReview(now = new Date()) {
     ['Referral asks', w.referrals], ['LinkedIn posts', w.posts],
   ];
   for (const [label, m] of rows) {
-    lines.push(`${m.done >= m.target ? '✅' : '▫️'} ${esc(label)}: <b>${m.done}/${m.target}</b> ${bar(m.done, m.target)}`);
+    lines.push(`${m.done >= m.target ? '✅' : '▫️'} ${esc(label)}: <b>${m.done}/${m.target}</b>${m.stretch ? ` (stretch ${m.stretch})` : ''} ${bar(m.done, m.target)}`);
   }
   lines.push(`${w.calls.done >= w.calls.target ? '✅' : '▫️'} Calls: <b>${w.calls.done}/${w.calls.target}–${w.calls.stretch}</b> ${bar(w.calls.done, w.calls.target)}`);
 

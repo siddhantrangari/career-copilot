@@ -149,7 +149,9 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);min-heig
 .vtog{display:flex;gap:4px;margin-left:auto}
 .vbtn{padding:4px 10px;border-radius:5px;border:1px solid var(--bd);background:transparent;color:var(--t2);font-size:11px;cursor:pointer;font-family:inherit;transition:all .15s}
 .vbtn.active{border-color:var(--ac);color:var(--ac);background:rgba(79,142,247,.1)}
-@media(max-width:600px){.cgrid{grid-template-columns:1fr}.kanban{grid-template-columns:repeat(7,minmax(150px,1fr))}}
+/* grid items default to their content's width; long role titles would stretch cards past the screen */
+.cgrid>*{min-width:0}
+@media(max-width:600px){.cgrid{grid-template-columns:1fr}.cc{overflow-wrap:anywhere}.kanban{grid-template-columns:repeat(7,minmax(150px,1fr))}}
 </style>
 </head>
 <body>

@@ -122,6 +122,19 @@ export function googleBooleanLinks(role = 'AI Engineer', location = 'Bangalore',
     '-site:simplyhired.co.in -site:shine.com -site:foundit.in -site:facebook.com -site:instagram.com';
   const careers = fitQueries(['inurl:careers'], role, loc, exclude)[0];
   links.push({ name: 'Google · company careers pages', query: careers, url: google(careers, period) });
+
+  // Abroad, only where the employer moves him, and remote open to India.
+  const ats = ['site:boards.greenhouse.io', 'site:job-boards.greenhouse.io', 'site:jobs.lever.co', 'site:jobs.ashbyhq.com'];
+  const abroad = [
+    ['Abroad · visa sponsorship', '("visa sponsorship" OR "sponsor visas" OR "visa support")'],
+    ['Abroad · relocation support', '("relocation support" OR "relocation assistance" OR "relocation package")'],
+    ['Gulf · Dubai, Abu Dhabi, Riyadh, Doha', '(Dubai OR "Abu Dhabi" OR Riyadh OR Doha)'],
+    ['Remote · worldwide / APAC', '("remote" ("worldwide" OR "anywhere" OR APAC OR "work from anywhere"))'],
+  ];
+  for (const [name, expr] of abroad) {
+    const query = fitQueries(ats, role, expr)[0];
+    links.push({ name: `Google · ${name}`, query, url: google(query, period) });
+  }
   return links;
 }
 

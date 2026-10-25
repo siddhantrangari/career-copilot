@@ -2552,7 +2552,9 @@
     '#cc-today .td-m .b button{flex:1;font-size:10.5px;padding:2px 0;background:#1a2030;border:1px solid #2a3244;color:#c9d4e3;border-radius:6px;cursor:pointer}' +
     '#cc-today .td-m .b button:hover{border-color:#38d9a9;color:#38d9a9}' +
     '#cc-today .td-acts{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:8px;margin-top:10px}' +
-    '#cc-today .td-a{background:#0f131b;border:1px solid #232a38;border-radius:10px;padding:8px 10px;display:flex;gap:9px;align-items:flex-start}' +
+    '#cc-today .td-a{background:#0f131b;border:1px solid #232a38;border-radius:10px;padding:8px 10px;display:flex;gap:9px;align-items:flex-start;min-width:0}' +
+    // Grid items default to their content's width; the one-line why text would stretch them.
+    '#cc-today .td-acts>*,#cc-today .td-m{min-width:0}' +
     '#cc-today .td-a.prio{border-color:rgba(251,191,36,.45)}' +
     '#cc-today .td-a .i{font-size:16px;line-height:1.2}' +
     '#cc-today .td-a .t{flex:1;min-width:0;font-size:12px;color:#c9d4e3}' +
@@ -2566,7 +2568,22 @@
     '#cc-today .td-tag{font-size:9px;font-weight:800;margin-left:5px}' +
     '#cc-today .td-foot{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-top:8px;font-size:11px;color:#7c8ba3}' +
     '#cc-today .td-foot a{color:#9fd3ff;cursor:pointer}' +
-    '@media (max-width:600px){#cc-today .td-acts{grid-template-columns:1fr}}';
+    '#cc-today .td-q{margin-top:8px;padding:8px 12px;border-radius:10px;border:1px solid rgba(56,217,169,.4);background:rgba(56,217,169,.07);cursor:pointer;font-size:12px;color:#c9d4e3;display:flex;gap:6px;flex-wrap:wrap;align-items:center}' +
+    '#cc-today .td-q span{color:#9aa6b8}' +
+    '#cc-today .td-q .go{margin-left:auto;color:#38d9a9;font-weight:700}' +
+    // Phone: two meters a row, one action a row, buttons in a row under the text.
+    '@media (max-width:600px){' +
+      '#cc-today{padding:10px 12px}' +
+      '#cc-today .td-meters{grid-template-columns:1fr 1fr;gap:6px}' +
+      '#cc-today .td-m{padding:7px 8px}' +
+      '#cc-today .td-acts{grid-template-columns:1fr}' +
+      '#cc-today .td-a{flex-wrap:wrap}' +
+      '#cc-today .td-a .t{flex-basis:calc(100% - 30px)}' +
+      '#cc-today .td-a .ab,#cc-today .td-a .ab.grid{display:flex;flex-direction:row;flex-wrap:wrap;width:100%;padding-left:25px}' +
+      '#cc-today .td-a .ab a,#cc-today .td-a .ab button{padding:6px 10px;font-size:11.5px}' +
+      '#cc-today .td-week{min-width:0;flex-basis:100%;order:3}' +
+      '#cc-today .td-foot{flex-direction:column}' +
+    '}';
   document.head.appendChild(css);
 
   var box = document.createElement('div');
@@ -2575,6 +2592,7 @@
 
   var open = store.get('cc_today_open') !== '0';
   var more = false;
+  var queue = null;
   var SHOWN = 6;
   var data = null;
 
@@ -2584,8 +2602,9 @@
   function meter(k, m) {
     var pct = m.target ? Math.min(100, Math.round(m.done / m.target * 100)) : 0;
     return '<div class="td-m' + (m.done >= m.target ? ' hit' : '') + '"><div class="l">' + esc(m.label) +
-      (k === 'posts' ? ' <a data-post="1" style="float:right;color:#9fd3ff;cursor:pointer;text-transform:none;letter-spacing:0" title="Draft today’s post in your LinkedIn rules">✍️ Draft</a>' : '') + '</div>' +
-      '<div class="n">' + m.done + ' <span>/ ' + m.target + (m.done >= m.target ? ' ✓' : '') + '</span></div>' +
+      (k === 'posts' ? ' <a data-post="1" style="float:right;color:#9fd3ff;cursor:pointer;text-transform:none;letter-spacing:0" title="Draft today’s post in your LinkedIn rules">✍️ Draft</a>' : '') +
+      (k === 'applications' ? ' <a data-queue="1" style="float:right;color:#9fd3ff;cursor:pointer;text-transform:none;letter-spacing:0" title="The next roles to apply to, best first">🚀 Queue</a>' : '') + '</div>' +
+      '<div class="n">' + m.done + ' <span>/ ' + m.target + (m.stretch ? ' · stretch ' + m.stretch : '') + (m.done >= m.target ? ' ✓' : '') + '</span></div>' +
       '<div class="td-bar"><i style="width:' + pct + '%"></i></div>' +
       '<div class="b">' + STEP[k].map(function (n) { return '<button type="button" data-log="' + k + '" data-n="' + n + '">+' + n + '</button>'; }).join('') + '</div></div>';
   }
@@ -2602,10 +2621,15 @@
       (a.whyNowLine ? '<div class="w" style="color:#d6b25e" title="' + esc(a.whyNowLine) + '">📈 ' + esc(a.whyNowLine) + '</div>' : '') +
       '</div><div class="ab' + (a.fkey ? ' grid' : '') + '">' +
       (a.url && a.type === 'apply' ? '<a target="_blank" rel="noopener" href="' + esc(a.url) + '">Apply ↗</a>' : '') +
+      (a.type === 'apply' && a.jobId ? '<button type="button" data-tailor="' + esc(a.jobId) + '" data-co="' + esc(a.company) + '" data-role="' + esc(a.role || '') + '" data-url="' + esc(a.url || '') + '" title="Tailor your resume to this role first">📄 Tailor</button>' : '') +
+      (a.type === 'interview' && a.prepId ? '<a href="/interview.html?prep=' + esc(a.prepId) + '" title="Your prep guide">📘 Prep guide</a>' : '') +
+      (a.type === 'interview' && a.companyId ? '<a href="/interview.html?company=' + encodeURIComponent(a.companyId) + (a.role ? '&role=' + encodeURIComponent(a.role) : '') + '" title="' + (a.prepId ? 'Run a mock round' : 'Build the prep guide, then run a mock round') + '">' + (a.prepId ? '🎙 Mock' : '🧠 Prep & mock') + '</a>' : '') +
       (a.url && a.type === 'follow_up' ? '<a target="_blank" rel="noopener" href="' + esc(a.url) + '">Open ↗</a>' : '') +
       (a.type === 'outreach' ? '<button type="button" data-detail-name="' + esc(a.company) + '" title="People to reach, news, and DM drafts">👥 People</button>' : '') +
       (a.companyId && typeof window.openTrack === 'function' ? '<button type="button" data-open="' + esc(a.companyId) + '">Track</button>' : '') +
-      (a.fkey
+      (a.type === 'apply' && a.jobId
+        ? '<button type="button" class="ok" data-applied="' + esc(a.jobId) + '" title="Mark applied — counts toward today">✓ Applied</button>'
+        : a.fkey
         ? '<button type="button" data-nudge="' + esc(a.fkey) + '" title="Draft the follow-up (one AI call)">✍️ Draft</button>' +
           '<button type="button" class="ok" data-fact="sent" data-fk="' + esc(a.fkey) + '" title="You followed up — the clock restarts">✓ Sent</button>' +
           '<button type="button" data-fact="snooze" data-fk="' + esc(a.fkey) + '" title="Waiting on them — hide for 7 days">💤 7d</button>' +
@@ -2625,6 +2649,11 @@
       '<span style="font-size:11px;color:#7c8ba3">' + (data ? data.actions.length + ' actions · ' : '') + (open ? '▾ hide' : '▸ show') + '</span></div>';
     if (open && data) {
       html += '<div class="td-meters">' + Object.keys(KIND).map(function (k) { return meter(k, data.today[k]); }).join('') + '</div>';
+      if (queue) {
+        html += '<div class="td-q" data-queue="1" title="Open the Apply queue">🚀 <b>' + (queue.counts.bangalore + queue.counts.remote + queue.counts.abroad) + ' roles ready to apply</b>' +
+          ' <span>· Bangalore ' + queue.counts.bangalore + ' · Remote ' + queue.counts.remote + ' · Abroad with visa/relocation ' + queue.counts.abroad + '</span>' +
+          '<span class="go">Open queue →</span></div>';
+      }
       html += data.actions.length
         ? '<div class="td-acts">' + (more ? data.actions : data.actions.slice(0, SHOWN)).map(action).join('') + '</div>' +
           (data.actions.length > SHOWN ? '<a data-more="1" style="display:inline-block;margin-top:6px;font-size:11px;color:#9fd3ff;cursor:pointer">' +
@@ -2637,6 +2666,7 @@
   }
 
   function load() {
+    api('/targets/apply-queue?limit=1').then(function (q) { queue = q; render(); }).catch(function () { /* the board works without it */ });
     return api('/targets/today').then(function (d) { data = d; render(); })
       .catch(function (e) { box.innerHTML = '<div class="cc-muted">📅 Today — could not load: ' + esc(e.message) + '</div>'; });
   }
@@ -2663,6 +2693,14 @@
     if ((b = el.closest('[data-open]'))) { window.openTrack(b.getAttribute('data-open')); return; }
     if (el.closest('[data-more]')) { more = !more; render(); return; }
     if (el.closest('[data-triage]')) { if (window.ccTriage) window.ccTriage(); return; }
+    if (el.closest('[data-queue]')) { if (window.ccApplyQueue) window.ccApplyQueue(); return; }
+    if ((b = el.closest('[data-tailor]'))) { if (window.ccTailor) window.ccTailor(b); return; }
+    if ((b = el.closest('[data-applied]'))) {
+      b.disabled = true;
+      api('/targets/apply-queue/applied', { method: 'POST', body: { jobId: b.getAttribute('data-applied') } })
+        .then(load).catch(function (err) { b.disabled = false; window.alert(err.message); });
+      return;
+    }
     if (el.closest('[data-post]')) { if (window.ccPostHelper) window.ccPostHelper(); return; }
     if ((b = el.closest('[data-nudge]'))) { if (window.ccTriage) window.ccTriage(b.getAttribute('data-nudge')); return; }
     if ((b = el.closest('[data-fact]'))) {
@@ -2713,7 +2751,7 @@
 
   var css = document.createElement('style');
   css.textContent =
-    '#cc-cd{position:fixed;inset:0;z-index:9000;background:rgba(5,8,14,.72);display:flex;align-items:flex-start;justify-content:center;padding:28px 16px;overflow:auto}' +
+    '#cc-cd{position:fixed;inset:0;z-index:10000;background:rgba(5,8,14,.72);display:flex;align-items:flex-start;justify-content:center;padding:28px 16px;overflow:auto}' +
     '#cc-cd .cd{background:#141822;border:1px solid #2a3244;border-radius:14px;width:100%;max-width:960px;padding:18px 22px;color:#c9d4e3;font-size:12.5px;box-shadow:0 20px 60px rgba(0,0,0,.5)}' +
     '#cc-cd h3{margin:0;font-size:19px;color:#e7ecf3}' +
     '#cc-cd h4{margin:16px 0 6px;font-size:12px;color:#9aa6b8;text-transform:uppercase;letter-spacing:.05em}' +
@@ -2949,7 +2987,7 @@
 
   var css = document.createElement('style');
   css.textContent =
-    '.cc-md{position:fixed;inset:0;z-index:9000;background:rgba(5,8,14,.72);display:flex;align-items:flex-start;justify-content:center;padding:28px 16px;overflow:auto}' +
+    '.cc-md{position:fixed;inset:0;z-index:10000;background:rgba(5,8,14,.72);display:flex;align-items:flex-start;justify-content:center;padding:28px 16px;overflow:auto}' +
     '.cc-md .cd{background:#141822;border:1px solid #2a3244;border-radius:14px;width:100%;max-width:880px;padding:18px 22px;color:#c9d4e3;font-size:12.5px}' +
     '.cc-md h3{margin:0;font-size:18px;color:#e7ecf3}' +
     '.cc-md .muted{color:#7c8ba3}' +
@@ -2962,7 +3000,17 @@
     '.cc-md textarea,.cc-md select{background:#0f131b;border:1px solid #2a3244;border-radius:8px;color:#e7ecf3;padding:8px 10px;font-size:12.5px;font-family:inherit}' +
     '.cc-md .hk{border:1px solid #232a38;border-radius:8px;padding:8px 10px;margin-top:6px;cursor:pointer}' +
     '.cc-md .hk.sel{border-color:rgba(56,217,169,.6);background:rgba(56,217,169,.06)}' +
-    '.cc-md .tabs{display:flex;gap:6px;margin:10px 0 4px;flex-wrap:wrap}';
+    '.cc-md .tabs{display:flex;gap:6px;margin:10px 0 4px;flex-wrap:wrap}' +
+    '@media (max-width:600px){' +
+      '.cc-md,#cc-cd{padding:0}' +
+      '.cc-md .cd,#cc-cd .cd{border-radius:0;min-height:100vh;padding:14px 14px 40px;border:0}' +
+      '.cc-md .fu,#cc-queue .q{flex-direction:column}' +
+      '.cc-md .fu .a,#cc-queue .q .a{justify-content:flex-start;max-width:none}' +
+      '.cc-md .b,#cc-cd .b,#cc-cd .lnk{padding:7px 11px;font-size:12px}' +
+      '#cc-cd .row{gap:6px}' +
+      '#cc-cd input{min-width:0 !important;flex:1 1 100%}' +
+      '#cc-queue .w{white-space:normal}' +
+    '}';
   document.head.appendChild(css);
 
   function modal(id) {
@@ -3144,5 +3192,150 @@
           .catch(function (err) { b.disabled = false; window.alert(err.message); });
       }
     });
+  };
+})();
+
+/* ────────────────────────────────────────────────────────────────────
+ * Apply queue: the next roles to apply to, at volume (20–100 a day).
+ *
+ * Bangalore, remote open to India, and abroad with visa sponsorship or
+ * relocation stated in the JD (Gulf counts), ranked by fit, then hiring
+ * signals, then freshness. Open ↗ → apply → ✓ Applied, in one row; Tailor
+ * for the roles worth a tailored resume; Skip hides it (reversible).
+ * ──────────────────────────────────────────────────────────────────── */
+(function () {
+  'use strict';
+
+  var CC = window.__CC__;
+  if (!CC) return;
+  var api = CC.api, esc = CC.esc;
+
+  var css = document.createElement('style');
+  css.textContent =
+    '#cc-queue .q{display:flex;gap:10px;align-items:flex-start;padding:9px 0;border-bottom:1px solid #1e2430}' +
+    '#cc-queue .q .t{flex:1;min-width:0}' +
+    '#cc-queue .q .a{display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end;flex:none;max-width:260px}' +
+    '#cc-queue .q.opened{background:rgba(56,217,169,.05)}' +
+    '#cc-queue .chip{font-size:10px;font-weight:700;padding:1px 7px;border-radius:9px;border:1px solid #2a3244;margin-left:4px}' +
+    '#cc-queue .w{font-size:11px;color:#9aa6b8;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}' +
+    '#cc-queue .ev{font-size:11px;color:#8fd6b6;margin-top:2px;font-style:italic}' +
+    '#cc-queue .ev.no{color:#ff8787}' +
+    '#cc-queue .bar{height:6px;background:#232a38;border-radius:4px;overflow:hidden;margin-top:6px}' +
+    '#cc-queue .bar i{display:block;height:100%;background:#38d9a9}';
+  document.head.appendChild(css);
+
+  var st = { scope: 'all', minFit: 70, limit: 40, unverified: false, data: null, opened: {} };
+  var PLACE = { bangalore: '#38d9a9', remote: '#9fd3ff', abroad: '#fbbf24' };
+  var refreshToday = function () { if (window.ccRefreshToday) window.ccRefreshToday(); };
+
+  function ago(iso) {
+    if (!iso) return '';
+    var d = Math.floor((Date.now() - new Date(iso).getTime()) / 86400000);
+    return d <= 0 ? 'today' : d === 1 ? 'yesterday' : d < 30 ? d + 'd ago' : Math.floor(d / 30) + 'mo ago';
+  }
+
+  function row(j) {
+    var ev = j.evidence ? '<div class="ev' + (j.visa === 'no' ? ' no' : '') + '" title="From the job description">“' + esc(j.evidence) + '”</div>' : '';
+    return '<div class="q' + (st.opened[j.id] ? ' opened' : '') + '" data-q="' + esc(j.id) + '"><div class="t">' +
+      '<div><b style="color:#e7ecf3;cursor:pointer;text-decoration:underline dotted" data-detail-name="' + esc(j.company) + '">' + esc(j.company) + '</b>' +
+      (j.priority ? '<span class="chip" style="color:#fbbf24;border-color:rgba(251,191,36,.5)">⭐ PRIORITY</span>' : '') +
+      '<span class="chip" style="color:' + (PLACE[j.place] || '#c9d4e3') + '">' + esc(j.placeLabel) + '</span>' +
+      (j.fit != null ? ' <b style="color:' + (j.fit >= 85 ? '#38d9a9' : '#c9d4e3') + ';font-size:11.5px">fit ' + j.fit + '</b>' : '') +
+      (j.hiring ? ' <span class="muted" style="font-size:11px">· hiring ' + j.hiring + '</span>' : '') + '</div>' +
+      '<div style="margin-top:2px"><a target="_blank" rel="noopener" data-open-role="' + esc(j.id) + '" style="color:#9fd3ff" href="' + esc(j.url) + '">' + esc(j.title) + '</a>' +
+      ' <span class="muted" style="font-size:11px">· ' + esc(j.location || '') + ' · ' + ago(j.posted) + '</span></div>' +
+      (j.whyRole ? '<div class="w" title="' + esc(j.whyRole) + '">🎯 ' + esc(j.whyRole) + '</div>' : '') +
+      (j.whyNow ? '<div class="w" style="color:#d6b25e" title="' + esc(j.whyNow) + '">📈 ' + esc(j.whyNow) + '</div>' : '') + ev +
+      '</div><div class="a">' +
+      '<a class="b" target="_blank" rel="noopener" data-open-role="' + esc(j.id) + '" href="' + esc(j.url) + '" style="text-decoration:none">Open ↗</a>' +
+      '<button class="b pri" data-ap="' + esc(j.id) + '" type="button" title="Mark applied — counts toward today">✓ Applied</button>' +
+      ((j.fit || 0) >= 85 || j.priority ? '<button class="b" data-tailor="' + esc(j.id) + '" data-co="' + esc(j.company) + '" data-role="' + esc(j.title) + '" data-url="' + esc(j.url) + '" type="button" title="Worth a tailored resume: fit 85+ or a priority company">📄 Tailor</button>' : '') +
+      '<button class="b" data-skip="' + esc(j.id) + '" type="button" title="Not for me — hidden (reversible)">Skip</button>' +
+      '</div></div>';
+  }
+
+  function render(m) {
+    var d = st.data;
+    var today = d ? d.appliedFromQueue.today : 0;
+    var t = d ? d.target : { daily: 20, stretch: 100 };
+    var pct = Math.min(100, Math.round(today / (t.stretch || 100) * 100));
+    m.innerHTML = '<div class="cd" style="max-width:980px"><div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px">' +
+      '<div><h3>🚀 Apply queue</h3><div class="muted">Applied from the queue today: <b style="color:#e7ecf3">' + today + '</b> · target ' + t.daily + ', stretch ' + t.stretch +
+      (d ? ' · this week ' + d.appliedFromQueue.week : '') + '</div>' +
+      '<div class="bar" style="width:260px"><i style="width:' + pct + '%"></i></div></div><button class="b" data-x="1" type="button">✕</button></div>' +
+      '<div class="tabs">' + [['all', 'All'], ['bangalore', 'Bangalore'], ['remote', 'Remote'], ['abroad', 'Abroad · visa / relocation']].map(function (s) {
+        var n = !d ? '' : s[0] === 'all' ? d.counts.bangalore + d.counts.remote + d.counts.abroad : d.counts[s[0]];
+        return '<button class="b' + (st.scope === s[0] ? ' pri' : '') + '" data-scope="' + s[0] + '" type="button">' + s[1] + (n !== '' ? ' (' + n + ')' : '') + '</button>';
+      }).join('') +
+      '<select data-minfit="1" style="margin-left:6px">' + [60, 70, 80, 85].map(function (f) { return '<option value="' + f + '"' + (st.minFit === f ? ' selected' : '') + '>fit ' + f + '+</option>'; }).join('') + '</select>' +
+      '<label class="muted" style="display:flex;align-items:center;gap:4px;margin-left:6px"><input type="checkbox" data-unv="1"' + (st.unverified ? ' checked' : '') + '> abroad, sponsorship not stated' + (d ? ' (' + d.counts.unverifiedAbroad + ')' : '') + '</label>' +
+      '</div>' +
+      '<div class="muted" style="font-size:11px;margin:4px 0 6px">Open ↗, apply, then ✓ Applied. Tailor appears for fit 85+ and priority companies; the rest go with your master resume. Other Indian cities and region-locked remote are left out.</div>' +
+      (!d ? '<div class="muted">Loading…</div>' : d.items.length ? d.items.map(row).join('') +
+        (d.total > d.items.length ? '<button class="b" data-more="1" type="button" style="margin-top:10px">Show more (' + (d.total - d.items.length) + ' left)</button>' : '')
+        : '<p class="muted">Nothing left at this fit level — lower the fit filter, or use Web search for abroad / visa roles.</p>') + '</div>';
+  }
+
+  function load(m) {
+    var q = 'scope=' + st.scope + '&minFit=' + st.minFit + '&limit=' + st.limit + (st.unverified ? '&unverified=true' : '');
+    return api('/targets/apply-queue?' + q).then(function (d) { st.data = d; render(m); })
+      .catch(function (e) { m.innerHTML = '<div class="cd"><div class="cc-bad">' + esc(e.message) + '</div></div>'; });
+  }
+
+  /** Tailor: make sure the company is in his list, then open the Studio with the role and its link. */
+  window.ccTailor = function (b) {
+    b.disabled = true;
+    api('/targets/company/add', { method: 'POST', body: { name: b.getAttribute('data-co') } }).then(function (r) {
+      if (typeof window.openCompanyStudio === 'function') {
+        window.openCompanyStudio(null, r.companyId, b.getAttribute('data-role'), 'resume', null, b.getAttribute('data-url') || '');
+      } else {
+        window.location.href = '/outreach.html?tab=resume&companyId=' + encodeURIComponent(r.companyId) + '&role=' + encodeURIComponent(b.getAttribute('data-role') || '');
+      }
+    }).catch(function (err) { b.disabled = false; window.alert(err.message); });
+  };
+
+  window.ccApplyQueue = function () {
+    var m = document.getElementById('cc-queue');
+    if (!m) {
+      m = document.createElement('div');
+      m.id = 'cc-queue'; m.className = 'cc-md';
+      document.body.appendChild(m);
+      m.addEventListener('click', function (e) {
+        if (e.target === m) { m.remove(); return; }
+        var el = e.target.closest ? e.target : null;
+        if (!el) return;
+        var b;
+        if (el.closest('[data-x]')) { m.remove(); return; }
+        if ((b = el.closest('[data-open-role]'))) { st.opened[b.getAttribute('data-open-role')] = true; var r0 = b.closest('.q'); if (r0) r0.classList.add('opened'); return; }
+        if ((b = el.closest('[data-scope]'))) { st.scope = b.getAttribute('data-scope'); st.limit = 40; load(m); return; }
+        if (el.closest('[data-more]')) { st.limit += 40; load(m); return; }
+        if (el.closest('[data-detail-name]')) return;
+        if ((b = el.closest('[data-tailor]'))) { window.ccTailor(b); return; }
+        if ((b = el.closest('[data-ap]')) || (b = el.closest('[data-skip]'))) {
+          var applied = b.hasAttribute('data-ap');
+          var id = b.getAttribute(applied ? 'data-ap' : 'data-skip');
+          var rowEl = b.closest('.q');
+          b.disabled = true;
+          api(applied ? '/targets/apply-queue/applied' : '/targets/apply-queue/skip', { method: 'POST', body: { jobId: id } }).then(function (r) {
+            st.data.items = st.data.items.filter(function (x) { return x.id !== id; });
+            st.data.total -= 1;
+            if (applied) st.data.appliedFromQueue.today += 1, st.data.appliedFromQueue.week += 1;
+            rowEl.innerHTML = '<div class="muted" style="padding:2px 0">' + (applied ? '✓ Applied — ' + esc(r.company) + ' added to your pipeline' : 'Skipped · <a data-unskip="' + esc(id) + '" style="color:#9fd3ff;cursor:pointer">undo</a>') + '</div>';
+            if (applied) { setTimeout(function () { render(m); }, 700); refreshToday(); }
+          }).catch(function (err) { b.disabled = false; window.alert(err.message); });
+          return;
+        }
+        if ((b = el.closest('[data-unskip]'))) {
+          api('/targets/apply-queue/skip', { method: 'POST', body: { jobId: b.getAttribute('data-unskip'), undo: true } }).then(function () { load(m); });
+        }
+      });
+      m.addEventListener('change', function (e) {
+        if (e.target.matches('[data-minfit]')) { st.minFit = Number(e.target.value); st.limit = 40; load(m); }
+        if (e.target.matches('[data-unv]')) { st.unverified = e.target.checked; st.limit = 40; load(m); }
+      });
+      var onKey = function (e) { if (e.key === 'Escape' && document.getElementById('cc-queue')) { m.remove(); document.removeEventListener('keydown', onKey); } };
+      document.addEventListener('keydown', onKey);
+    }
+    st.data = null; render(m); load(m);
   };
 })();

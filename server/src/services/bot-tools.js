@@ -963,6 +963,37 @@ async function linkedinPostTool({ material, bucket, confirmedByUser } = {}) {
   }
 }
 
+async function getApplyQueue({ scope = 'all', minFit = 70, limit = 10 } = {}) {
+  const { applyQueue } = await import('./apply-queue.js');
+  const q = await applyQueue({ scope, minFit, limit: Math.min(Number(limit) || 10, 25) });
+  return {
+    appliedToday: q.appliedFromQueue.today, target: q.target, ready: q.counts,
+    roles: q.items.map((j) => ({ jobId: j.id, company: j.company, title: j.title, fit: j.fit, where: j.placeLabel, url: j.url,
+      priority: j.priority || undefined, visaEvidence: j.evidence || undefined, whyRole: j.whyRole || undefined })),
+    howTo: 'He applies via the url; then mark_applied with the jobId. skip_role for "not for me".',
+  };
+}
+
+async function markAppliedTool({ jobId } = {}) {
+  if (!jobId) throw new ToolError('jobId is required — get it from get_apply_queue or search_jobs');
+  const { markApplied } = await import('./apply-queue.js');
+  try {
+    const r = await markApplied(String(jobId));
+    await audit('mark_applied', { jobId }, r.companyId, null, r);
+    return { company: r.company, changed: `marked "${r.role}" applied · company stage ${r.stage}` };
+  } catch (err) { throw new ToolError(err.message); }
+}
+
+async function skipRoleTool({ jobId } = {}) {
+  if (!jobId) throw new ToolError('jobId is required');
+  const { skipRole } = await import('./apply-queue.js');
+  try {
+    const r = await skipRole(String(jobId));
+    await audit('skip_role', { jobId }, null, null, r);
+    return { changed: 'hidden from the queue (not for me) — reversible in the app' };
+  } catch (err) { throw new ToolError(err.message); }
+}
+
 async function getOutreachPlan() {
   const { outreachPlan, progressLine } = await import('./targets.js');
   const plan = await outreachPlan({ limit: 8 });
@@ -1059,6 +1090,9 @@ const TOOLS = [
   ['get_navigator', 'His evidence-based target niche, strengths and title aliases.', S({}), getNavigator],
   ['run_navigator', 'Regenerate the target niche and title aliases from his profile.', S({ confirmedByUser: { type: 'boolean' } }, ['confirmedByUser']), runNavigatorTool],
   ['send_digest_now', "Send today's digest now.", S({}), sendDigestNow],
+  ['get_apply_queue', 'The next roles to apply to, best first (target 20–100 a day): Bangalore, remote open to India, abroad with visa sponsorship / relocation in the JD (Gulf counts). With jobIds for mark_applied.', S({ scope: { type: 'string', enum: ['all', 'bangalore', 'remote', 'abroad'] }, minFit: int, limit: int }), getApplyQueue],
+  ['mark_applied', 'Mark a discovered role applied (adds it to his pipeline; counts toward today). Only when he says he applied.', S({ jobId: str() }, ['jobId']), markAppliedTool],
+  ['skip_role', 'Hide a role from the queue as not for me (reversible).', S({ jobId: str() }, ['jobId']), skipRoleTool],
   ['get_today', "Today's board: Daily System targets (connections, DMs, applications, posts, referral asks) with today's and this week's counts, and today's actions with why lines. For \"what's on today / what should I do today\".", S({}), getToday],
   ['get_company_detail', 'Everything stored about one company — catalogue or found by discovery: tag, priority, hiring signals, why this company, open roles with fit and why, contacts, next action, plus Google news and people searches he can open. No search is run.', S({ company: companyArg }, ['company']), getCompanyDetail],
   ['add_to_companies', 'Add a company found by discovery to his Companies list; interested=true also puts it in the pipeline as Interested.', S({ company: companyArg, interested: bool }, ['company']), addToCompaniesTool],
