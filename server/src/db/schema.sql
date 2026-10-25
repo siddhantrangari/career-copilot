@@ -22,7 +22,7 @@ CREATE TABLE IF NOT EXISTS companies (
 CREATE INDEX IF NOT EXISTS companies_region_idx ON companies (region);
 
 CREATE TABLE IF NOT EXISTS tracked_companies (
-  company_id    TEXT PRIMARY KEY REFERENCES companies (id) ON DELETE CASCADE,
+  company_id    TEXT PRIMARY KEY REFERENCES companies (id) ON DELETE RESTRICT,
   user_id       TEXT NOT NULL DEFAULT 'siddhant',
   stage         TEXT NOT NULL DEFAULT 'new',      -- new|interested|applied|networking|call|win|interview|offer|failed
   win_status    TEXT NOT NULL DEFAULT 'none',     -- none|drafted|sent
@@ -38,7 +38,7 @@ CREATE INDEX IF NOT EXISTS tracked_stage_idx ON tracked_companies (stage);
 
 CREATE TABLE IF NOT EXISTS connections (
   id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  company_id    TEXT NOT NULL REFERENCES companies (id) ON DELETE CASCADE,
+  company_id    TEXT NOT NULL REFERENCES companies (id) ON DELETE RESTRICT,
   position      INTEGER NOT NULL DEFAULT 0,       -- preserves prototype array ordering
   name          TEXT NOT NULL DEFAULT '',
   role          TEXT NOT NULL DEFAULT '',
@@ -54,7 +54,7 @@ CREATE INDEX IF NOT EXISTS connections_company_idx ON connections (company_id, p
 
 CREATE TABLE IF NOT EXISTS messages (
   id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  company_id    TEXT NOT NULL REFERENCES companies (id) ON DELETE CASCADE,
+  company_id    TEXT NOT NULL REFERENCES companies (id) ON DELETE RESTRICT,
   connection_id UUID REFERENCES connections (id) ON DELETE SET NULL,
   kind          TEXT NOT NULL,                    -- connectionNote|firstDM|peerDM|followUp|winDocNote|coldEmail|linkedinPost
   body          TEXT NOT NULL DEFAULT '',
@@ -67,7 +67,7 @@ CREATE INDEX IF NOT EXISTS messages_company_idx ON messages (company_id, created
 
 CREATE TABLE IF NOT EXISTS win_docs (
   id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  company_id    TEXT NOT NULL REFERENCES companies (id) ON DELETE CASCADE,
+  company_id    TEXT NOT NULL REFERENCES companies (id) ON DELETE RESTRICT,
   contact_name  TEXT NOT NULL DEFAULT '',
   problems      JSONB NOT NULL DEFAULT '[]'::jsonb,
   markdown      TEXT NOT NULL DEFAULT '',
@@ -162,7 +162,7 @@ CREATE TABLE IF NOT EXISTS ui_state (
 -- Cached so a WIN doc can reuse the same grounded sources the brief used.
 CREATE TABLE IF NOT EXISTS research_evidence (
   id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  company_id  TEXT NOT NULL REFERENCES companies (id) ON DELETE CASCADE,
+  company_id  TEXT NOT NULL REFERENCES companies (id) ON DELETE RESTRICT,
   findings    JSONB NOT NULL DEFAULT '[]'::jsonb,   -- [{ key, query, content, citations, sources }]
   sources     JSONB NOT NULL DEFAULT '[]'::jsonb,   -- de-duplicated [{ title, url, date }]
   model       TEXT NOT NULL DEFAULT '',
@@ -366,3 +366,32 @@ ALTER TABLE jobs ADD COLUMN IF NOT EXISTS app_status    TEXT;          -- NULL |
 ALTER TABLE jobs ADD COLUMN IF NOT EXISTS app_status_at TIMESTAMPTZ;
 ALTER TABLE jobs ADD COLUMN IF NOT EXISTS proposal      JSONB;
 CREATE INDEX IF NOT EXISTS jobs_engagement_idx ON jobs (engagement, posted_at DESC NULLS LAST);
+
+-- User data must never disappear as a side effect of a catalogue change.
+-- These keys were ON DELETE CASCADE, so removing one company row silently
+-- took its pipeline stage, contacts, outreach, WIN docs and evidence with it.
+-- RESTRICT makes the database refuse instead; the delete route checks first
+-- and explains why. The CREATE TABLEs above already say RESTRICT for fresh
+-- installs — this block converts databases created before that, and is a
+-- no-op once a key is no longer CASCADE.
+DO $$
+DECLARE
+  t TEXT;
+  fk RECORD;
+BEGIN
+  FOREACH t IN ARRAY ARRAY['tracked_companies', 'connections', 'messages', 'win_docs', 'research_evidence'] LOOP
+    FOR fk IN
+      SELECT conname FROM pg_constraint
+      WHERE contype = 'f'
+        AND conrelid = t::regclass
+        AND confrelid = 'companies'::regclass
+        AND confdeltype = 'c'
+    LOOP
+      EXECUTE format('ALTER TABLE %I DROP CONSTRAINT %I', t, fk.conname);
+      EXECUTE format(
+        'ALTER TABLE %I ADD CONSTRAINT %I FOREIGN KEY (company_id) REFERENCES companies (id) ON DELETE RESTRICT',
+        t, fk.conname
+      );
+    END LOOP;
+  END LOOP;
+END $$;

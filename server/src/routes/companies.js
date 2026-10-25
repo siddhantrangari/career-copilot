@@ -222,17 +222,44 @@ export default async function companyRoutes(app) {
     return { company: row };
   });
 
-  /** Delete any company permanently */
+  /**
+   * Delete a company — only when nothing of the user's hangs off it.
+   *
+   * This used to wipe the pipeline stage, contacts, outreach and WIN docs
+   * first and then the company, so one click lost real work. Now it refuses
+   * and says what is attached; dismissing hides the company without loss.
+   * Research evidence is a regenerable search cache, so it is still cleared.
+   */
   app.delete('/:id', async (request, reply) => {
     const id = request.params.id;
-    await query('DELETE FROM tracked_companies WHERE company_id = $1', [id]);
-    await query('DELETE FROM connections WHERE company_id = $1', [id]);
-    await query('DELETE FROM messages WHERE company_id = $1', [id]);
-    await query('DELETE FROM win_docs WHERE company_id = $1', [id]);
+    const company = await one('SELECT id, name FROM companies WHERE id = $1', [id]);
+    if (!company) return reply.code(404).send({ error: 'Company not found' });
+
+    const linked = await one(
+      `SELECT
+         (SELECT count(*) FROM tracked_companies WHERE company_id = $1)::int AS tracked,
+         (SELECT count(*) FROM connections       WHERE company_id = $1)::int AS connections,
+         (SELECT count(*) FROM messages          WHERE company_id = $1)::int AS messages,
+         (SELECT count(*) FROM win_docs          WHERE company_id = $1)::int AS win_docs`,
+      [id],
+    );
+    const attached = [
+      linked.tracked && 'pipeline tracking',
+      linked.connections && `${linked.connections} contact(s)`,
+      linked.messages && `${linked.messages} outreach message(s)`,
+      linked.win_docs && `${linked.win_docs} WIN doc(s)`,
+    ].filter(Boolean);
+    if (attached.length) {
+      return reply.code(409).send({
+        error: `${company.name} still has ${attached.join(', ')}. ` +
+          'Remove those first, or use "Not for me" to hide the company without losing anything.',
+        linked,
+      });
+    }
+
     await query('DELETE FROM research_evidence WHERE company_id = $1', [id]);
     await query('UPDATE jobs SET company_id = NULL WHERE company_id = $1', [id]);
     const row = await one('DELETE FROM companies WHERE id = $1 RETURNING id, name', [id]);
-    if (!row) return reply.code(404).send({ error: 'Company not found' });
     return { deleted: row.id, name: row.name };
   });
 }

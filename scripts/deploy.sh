@@ -45,6 +45,7 @@ rsync -az --delete \
   --exclude .git \
   --exclude '.env' \
   --exclude '.DS_Store' \
+  --exclude backups \
   ./ "$SSH_HOST:$APP_DIR/"
 log "✅ Files synced"
 
