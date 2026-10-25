@@ -2014,6 +2014,183 @@ function saveResumePdfToServer(blob, markdownText, filename){
   } catch (e) { /* the download already happened */ }
 }
 
+/**
+ * Real-text PDF from the Studio's print sheet.
+ *
+ * html2pdf took a picture of the sheet, so the PDF held one image per page:
+ * nothing an applicant-tracking system could read, select or search. This
+ * draws the same sheet as text instead. The sheet is laid out by the browser
+ * in Helvetica (the font the PDF uses, so the measurements match), then every
+ * line is written at its exact position with its size, weight, colour and
+ * letter-spacing, plus the divider rules, list bullets and clickable links.
+ * Lines never split across pages; headings and role titles move to the next
+ * page rather than sit alone at the bottom.
+ */
+function pdfSafeText(t){
+  // Helvetica in a PDF covers Western European text (WinAnsi); map the rest.
+  return String(t)
+    .replace(/[→➜➡]/g, '->').replace(/←/g, '<-').replace(/↔/g, '<->')
+    .replace(/₹/g, 'INR ').replace(/≈/g, '~').replace(/≥/g, '>=').replace(/≤/g, '<=')
+    .replace(/×/g, 'x').replace(/[✓✔✅]/g, '').replace(/ | | /g, ' ')
+    .replace(/[‐‑‒]/g, '-')
+    .replace(/[^\x09\x0A\x0D\x20-\x7E -ÿ–—‘’‚“”„†‡•…‰‹›€™ŒœŠšŸŽžƒˆ˜]/g, '');
+}
+
+function renderSheetAsTextPdf(sheet, opt){
+  const { jsPDF } = window.jspdf;
+  const pdf = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait', compress: true });
+  const [mt, ml, mb, mr] = opt.margin;
+  const pageW = 210, pageH = 297;
+  const contentW = pageW - ml - mr, contentH = pageH - mt - mb;
+
+  // Lay the sheet out in the PDF's font so every measured position is exact.
+  // Kerning and ligatures off too: the PDF has neither, so widths must match.
+  const pdfFace = (el) => { el.style.fontFamily = 'Helvetica, Arial, sans-serif'; el.style.fontKerning = 'none'; el.style.fontVariantLigatures = 'none'; el.style.fontFeatureSettings = '"kern" 0, "liga" 0'; };
+  pdfFace(sheet);
+  sheet.querySelectorAll('*').forEach(pdfFace);
+  const base = sheet.getBoundingClientRect();
+  const k = contentW / base.width;              // mm per CSS px
+  const toPt = (px) => px * k * 72 / 25.4;      // CSS px → PDF points at this scale
+  const rgb = (c) => { const m = String(c).match(/[\d.]+/g) || [0, 0, 0]; return [+m[0], +m[1], +m[2]]; };
+
+  // 1. Text, line by line, from the browser's own layout.
+  const lines = [];
+  const walker = document.createTreeWalker(sheet, NodeFilter.SHOW_TEXT);
+  const range = document.createRange();
+  for (let node = walker.nextNode(); node; node = walker.nextNode()) {
+    const raw = node.textContent;
+    if (!raw.trim()) continue;
+    const el = node.parentElement;
+    const cs = getComputedStyle(el);
+    if (cs.display === 'none' || cs.visibility === 'hidden') continue;
+    const fontPx = parseFloat(cs.fontSize);
+    const weight = parseInt(cs.fontWeight, 10) || 400;
+    const style = (weight >= 600 ? 'bold' : 'normal') + (cs.fontStyle === 'italic' ? 'italic' : '');
+    const font = style === 'normalitalic' ? 'italic' : style;
+    const color = rgb(cs.color);
+    const ls = parseFloat(cs.letterSpacing) || 0;
+    const upper = cs.textTransform === 'uppercase';
+    let seg = null;
+    // Split after hyphens too: the browser may break "hands-on" across lines.
+    const re = /[^\s\-\u2010\u2011]+[\-\u2010\u2011]?|[\-\u2010\u2011]+/g;
+    let m;
+    while ((m = re.exec(raw))) {
+      range.setStart(node, m.index);
+      range.setEnd(node, m.index + m[0].length);
+      const r = range.getClientRects()[0];
+      if (!r) continue;
+      const word = { text: m[0], left: r.left, right: r.right };
+      if (seg && Math.abs(r.top - seg.top) < fontPx * 0.5) { seg.end = m.index + m[0].length; seg.right = r.right; seg.words.push(word); continue; }
+      if (seg) lines.push(seg);
+      seg = { node, start: m.index, end: m.index + m[0].length, left: r.left, right: r.right, top: r.top, bottom: r.bottom, fontPx, font, color, ls, upper, el, words: [word] };
+    }
+    if (seg) lines.push(seg);
+  }
+  lines.forEach(l => {
+    let t = l.node.textContent.slice(l.start, l.end).replace(/\s+/g, ' ');
+    if (l.upper) t = t.toUpperCase();
+    l.text = pdfSafeText(t);
+    l.y0 = (l.top - base.top) * k;               // line top, mm from the sheet top
+    l.y1 = (l.bottom - base.top) * k;
+  });
+
+  // 2. Pages: break between lines; keep headings with what follows.
+  const tops = [...new Set(lines.map(l => Math.round(l.y0 * 10) / 10))].sort((a, b) => a - b);
+  const breaks = [];                              // [yOrig, extra shift]
+  let shift = 0;
+  const isKeepWithNext = (y) => lines.some(l => Math.abs(l.y0 - y) < 0.1 && l.el.closest('h2, .res-sec-head, .res-role-row, .res-name'));
+  for (const y of tops) {
+    const lineH = Math.max(...lines.filter(l => Math.abs(l.y0 - y) < 0.1).map(l => l.y1 - l.y0));
+    const pos = y + shift;
+    const page = Math.floor(pos / contentH);
+    const pageEnd = (page + 1) * contentH;
+    const needsRoom = isKeepWithNext(y) ? lineH + 14 : lineH;
+    if (pos + needsRoom > pageEnd && pos > page * contentH + 1) {
+      const add = pageEnd - pos;
+      breaks.push([y, add]);
+      shift += add;
+    }
+  }
+  const shiftAt = (y) => breaks.reduce((s, [yb, add]) => (y >= yb - 0.05 ? s + add : s), 0);
+  const place = (y) => {                         // sheet mm → [page, y on page]
+    const pos = y + shiftAt(y);
+    const page = Math.floor(pos / contentH);
+    return [page, mt + pos - page * contentH];
+  };
+  const pages = new Set();
+  const onPage = (p) => { while (pdf.getNumberOfPages() < p + 1) pdf.addPage(); pdf.setPage(p + 1); pages.add(p); };
+
+  // 3. Rules (section dividers, the contact bar line).
+  sheet.querySelectorAll('*').forEach(el => {
+    const cs = getComputedStyle(el);
+    const r = el.getBoundingClientRect();
+    if (!r.width) return;
+    [['Bottom', r.bottom], ['Top', r.top]].forEach(([side, edge]) => {
+      const w = parseFloat(cs['border' + side + 'Width']);
+      if (!w || cs['border' + side + 'Style'] === 'none') return;
+      const anchor = (r.top - base.top) * k;
+      const [p] = place(anchor);
+      const yOnPage = mt + ((edge - base.top) * k + shiftAt(anchor)) - p * contentH - (side === 'Bottom' ? w * k / 2 : -w * k / 2);
+      onPage(p);
+      pdf.setDrawColor(...rgb(cs['border' + side + 'Color']));
+      pdf.setLineWidth(w * k);
+      pdf.line(ml + (r.left - base.left) * k, yOnPage, ml + (r.right - base.left) * k, yOnPage);
+    });
+  });
+
+  // 4. Text — each list item's bullet just before its first line, so the
+  // text reads in order ("• Built …") when a screening system extracts it.
+  const bulletFor = new Map();
+  sheet.querySelectorAll('li').forEach(li => {
+    const first = lines.find(l => li.contains(l.node));
+    if (first) bulletFor.set(first, li);
+  });
+  for (const l of lines) {
+    if (!l.text) continue;
+    const [p, y] = place(l.y0);
+    onPage(p);
+    const li = bulletFor.get(l);
+    if (li) {
+      const lcs = getComputedStyle(li);
+      pdf.setFont('helvetica', 'normal');
+      pdf.setFontSize(toPt(parseFloat(lcs.fontSize)));
+      pdf.setTextColor(...rgb(lcs.color));
+      pdf.text('\u2022', ml + (li.getBoundingClientRect().left - base.left) * k - parseFloat(lcs.fontSize) * k * 0.95, y + (l.y1 - l.y0) - l.fontPx * k * 0.215);
+    }
+    pdf.setFont('helvetica', l.font);
+    pdf.setFontSize(toPt(l.fontPx));
+    pdf.setTextColor(...l.color);
+    const baseline = y + (l.y1 - l.y0) - l.fontPx * k * 0.215;   // Helvetica descent
+    // Each word at the position the browser measured: jsPDF's widths differ
+    // from the browser's by about 0.5%, which over a long line ran plain text
+    // into the bold figure after it. Readers and screening systems read the
+    // gaps between words as spaces, so the text still extracts in order.
+    const opts = l.ls ? { charSpace: l.ls * k } : undefined;
+    for (const w of l.words) {
+      let t = w.text;
+      if (l.upper) t = t.toUpperCase();
+      t = pdfSafeText(t);
+      if (t) pdf.text(t, ml + (w.left - base.left) * k, baseline, opts);
+    }
+  }
+
+  // 6. Clickable links.
+  sheet.querySelectorAll('a[href]').forEach(a => {
+    const href = a.getAttribute('href');
+    if (!/^(https?:|mailto:)/i.test(href)) return;
+    for (const r of a.getClientRects()) {
+      const y0 = (r.top - base.top) * k;
+      const [p, y] = place(y0);
+      onPage(p);
+      pdf.link(ml + (r.left - base.left) * k, y, r.width * k, r.height * k, { url: href });
+    }
+  });
+
+  pdf.setPage(1);
+  pdf.setProperties({ title: (opt.filename || 'Resume').replace(/\.pdf$/i, '').replace(/_/g, ' '), creator: 'Career Copilot Resume Studio' });
+  return pdf;
+}
+
 function generateResumePdfFromMarkdown(markdownText, filename, btn, densityOverride){
   const density = densityOverride || currentPdfDensity || 'standard';
   const sheet = document.createElement('div');
@@ -2056,10 +2233,12 @@ function generateResumePdfFromMarkdown(markdownText, filename, btn, densityOverr
     if (sheet.parentNode) sheet.parentNode.removeChild(sheet);
   };
 
-  if (typeof html2pdf !== 'undefined') {
-    // Same PDF as before, kept as bytes too: it is saved to the server so the
-    // Telegram bot and the autofill can send this exact file.
-    return html2pdf().set(opt).from(sheet).toPdf().get('pdf').then((pdf) => {
+  if (window.jspdf && window.jspdf.jsPDF) {
+    // A real-text PDF (selectable, searchable, readable by applicant-tracking
+    // systems), kept as bytes too: it is saved to the server so the Telegram
+    // bot and the autofill send this exact file.
+    return Promise.resolve().then(() => {
+      const pdf = renderSheetAsTextPdf(sheet, opt);
       const blob = pdf.output('blob');
       pdf.save(opt.filename);
       saveResumePdfToServer(blob, markdownText, opt.filename);
@@ -2101,8 +2280,9 @@ function generateCoverLetterPdfFromMarkdown(markdownText, filename, btn){
 
   const cleanup = () => { if (sheet.parentNode) sheet.parentNode.removeChild(sheet); };
 
-  if (typeof html2pdf !== 'undefined') {
-    return html2pdf().set(opt).from(sheet).save().then(() => {
+  if (window.jspdf && window.jspdf.jsPDF) {
+    return Promise.resolve().then(() => {
+      renderSheetAsTextPdf(sheet, opt).save(opt.filename);
       cleanup();
       if (btn) {
         btn.innerHTML = '✓ Downloaded!';

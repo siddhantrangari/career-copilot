@@ -66,6 +66,7 @@ const RELABEL = [
 const headInject = (v) => `
 <link rel="stylesheet" href="/bridge.css?v=${v.bridgeCss}">
 <script src="/html2pdf.bundle.min.js"></script>
+<script src="/jspdf.umd.min.js"></script>
 <script>window.CC_ASSET_VERSION=${JSON.stringify(v.actions)};</script>
 <script src="/bridge.js?v=${v.bridgeJs}"></script>`;
 
@@ -86,6 +87,8 @@ async function build() {
   await fs.mkdir(OUT, { recursive: true });
 
   await fs.copyFile(path.join(ROOT, 'web/html2pdf.bundle.min.js'), path.join(OUT, 'html2pdf.bundle.min.js'));
+  // jsPDF 2.5.2 (npm, vendored): the Studio draws resume PDFs as real text with it.
+  await fs.copyFile(path.join(ROOT, 'web/jspdf.umd.min.js'), path.join(OUT, 'jspdf.umd.min.js'));
   await fs.copyFile(path.join(ROOT, 'web/bridge.js'), path.join(OUT, 'bridge.js'));
   await fs.copyFile(path.join(ROOT, 'web/bridge.css'), path.join(OUT, 'bridge.css'));
   await fs.copyFile(path.join(ROOT, 'web/prototype-actions.js'), path.join(OUT, 'prototype-actions.js'));
