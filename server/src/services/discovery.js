@@ -208,11 +208,24 @@ const EXCLUDE = new RegExp([
 
 const DSA_SIGNALS = /leetcode|data structures and algorithms|algorithmic (interview|assessment)|hackerrank|codesignal|competitive programming/i;
 
-const LOCATION_OK = /remote|hybrid|onsite|on-site|emea|europe|london|berlin|amsterdam|munich|paris|dublin|madrid|lisbon|zurich|stockholm|dubai|abu dhabi|uae|riyadh|saudi|doha|qatar|singapore|tokyo|sydney|toronto|vancouver|san francisco|sf|bay area|new york|nyc|seattle|austin|boston|chicago|india|bangalore|bengaluru|bengalore|mumbai|delhi|gurgaon|gurugram|noida|chennai|hyderabad|pune|anywhere|global|worldwide|us|united states|uk|united kingdom/i;
+const LOCATION_OK = /remote|hybrid|onsite|on-site|emea|europe|london|berlin|amsterdam|munich|paris|dublin|madrid|lisbon|zurich|stockholm|dubai|abu dhabi|uae|riyadh|saudi|doha|qatar|singapore|tokyo|sydney|toronto|vancouver|san francisco|sf|bay area|new york|nyc|seattle|austin|boston|chicago|india|bangalore|bengaluru|bengalore|anywhere|global|worldwide|us|united states|uk|united kingdom/i;
+
+/**
+ * In India he targets Bangalore only, or remote. A role placed in any other
+ * Indian city is excluded unless the same listing also offers Bangalore or
+ * remote ("Bangalore, Hyderabad" and "Pune (Remote)" stay). A bare "India"
+ * with no city is kept: it usually means country-wide or remote.
+ */
+const INDIA_OTHER_CITY = /\b(mumbai|bombay|thane|navi mumbai|delhi|new delhi|ncr|gurgaon|gurugram|noida|ghaziabad|faridabad|hyderabad|secunderabad|pune|chennai|kolkata|calcutta|ahmedabad|gandhinagar|kochi|cochin|trivandrum|thiruvananthapuram|jaipur|chandigarh|mohali|indore|coimbatore|mysore|mysuru|visakhapatnam|vizag|bhubaneswar|nagpur|lucknow|vadodara|surat|goa|kerala)\b/i;
+const BANGALORE_OR_REMOTE = /bangalore|bengaluru|bengalore|remote|work from home|\bwfh\b|anywhere/i;
+
+export const outsideIndiaTarget = (location = '') =>
+  INDIA_OTHER_CITY.test(location) && !BANGALORE_OR_REMOTE.test(location);
 
 export function scoreJob(job) {
   const title = job.title || '';
   if (EXCLUDE.test(title)) return { relevance: 0, roles: [] };
+  if (outsideIndiaTarget(job.location || '')) return { relevance: 0, roles: [], excluded: 'india-city' };
 
   let score = 0;
   const roles = [];

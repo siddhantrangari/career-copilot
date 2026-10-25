@@ -248,7 +248,8 @@ const PLACES = [
   { words: ['mumbai', 'bombay'], re: 'mumbai|bombay' },
   { words: ['delhi', 'ncr', 'gurgaon', 'gurugram', 'noida'], re: 'delhi|ncr|gurgaon|gurugram|noida' },
   { words: ['chennai'], re: 'chennai' },
-  { words: ['india', 'indian'], re: 'india|bangalore|bengaluru|hyderabad|pune|mumbai|delhi|gurgaon|gurugram|noida|chennai' },
+  // In India he targets Bangalore or remote only (other cities score 0 in discovery).
+  { words: ['india', 'indian'], re: 'india|bangalore|bengaluru|bengalore' },
   { words: ['remote'], re: 'remote|anywhere|worldwide' },
   { words: ['europe', 'eu', 'emea'], re: 'europe|emea|\\meu\\M|london|berlin|amsterdam|paris|dublin|madrid|lisbon|munich|zurich|stockholm|warsaw' },
   { words: ['uae', 'dubai', 'gulf'], re: 'dubai|abu dhabi|uae|united arab emirates|riyadh|saudi|doha|qatar' },
