@@ -37,16 +37,34 @@ step "1/7 — Building web assets from /artifacts"
 node scripts/build-web.js
 log "✅ server/public rebuilt"
 
+# ── Safety: back up, then refuse any deletion ───────────────────────────
+# The database and the current app folder are backed up and the dump is
+# checked to be readable before anything changes. The sync uses --delete,
+# so a dry run that would delete anything stops the deploy (set
+# ALLOW_DELETIONS=1 only after reading the list).
+step "Backing up the database and the app folder"
+TS=$(date -u +%Y%m%dT%H%M%SZ)
+BK=/var/backups/career-copilot
+ssh "$SSH_HOST" "set -e; mkdir -p $BK
+  docker exec career-copilot-postgres pg_dump -U postgres -d career_copilot_os -Fc > $BK/career_copilot_os_pre_deploy_$TS.dump
+  docker exec -i career-copilot-postgres pg_restore -l < $BK/career_copilot_os_pre_deploy_$TS.dump > /dev/null
+  test -s $BK/career_copilot_os_pre_deploy_$TS.dump
+  if [ -d $APP_DIR ]; then tar -czf $BK/app_dir_pre_deploy_$TS.tgz --exclude=node_modules -C $(dirname $APP_DIR) $(basename $APP_DIR); tar -tzf $BK/app_dir_pre_deploy_$TS.tgz > /dev/null; fi" \
+  || die "Backup failed — nothing was deployed"
+log "✅ Backed up and verified: $BK/career_copilot_os_pre_deploy_$TS.dump (+ app_dir_pre_deploy_$TS.tgz)"
+
+RSYNC_OPTS=(-az --delete --exclude node_modules --exclude .git --exclude '.env' --exclude '.DS_Store' --exclude backups)
+DELETIONS=$(rsync "${RSYNC_OPTS[@]}" -n --itemize-changes ./ "$SSH_HOST:$APP_DIR/" | grep '^\*deleting' || true)
+if [[ -n "$DELETIONS" && "${ALLOW_DELETIONS:-0}" != "1" ]]; then
+  echo "$DELETIONS"
+  die "The sync would delete the files above on the server. Nothing was deployed."
+fi
+log "✅ Dry run: no deletions"
+
 # ── 2. Sync the tree ──────────────────────────────────────────────────────
 step "2/7 — Syncing to $SSH_HOST:$APP_DIR"
 ssh "$SSH_HOST" "mkdir -p $APP_DIR"
-rsync -az --delete \
-  --exclude node_modules \
-  --exclude .git \
-  --exclude '.env' \
-  --exclude '.DS_Store' \
-  --exclude backups \
-  ./ "$SSH_HOST:$APP_DIR/"
+rsync "${RSYNC_OPTS[@]}" ./ "$SSH_HOST:$APP_DIR/"
 log "✅ Files synced"
 
 # ── 3. Production env ─────────────────────────────────────────────────────

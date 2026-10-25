@@ -81,7 +81,7 @@ function fitQueries(sites, role, loc, tail = '') {
   return out;
 }
 
-const PERIOD = { day: 'qdr:d', week: 'qdr:w', month: 'qdr:m' };
+const PERIOD = { day: 'qdr:d', week: 'qdr:w', month: 'qdr:m', year: 'qdr:y' };
 const google = (query, period) => `https://www.google.com/search?q=${q(query)}&tbs=${PERIOD[period] || PERIOD.week}`;
 
 // Job-page paths, not search pages, so results are individual postings.
@@ -113,9 +113,14 @@ export function googleBooleanLinks(role = 'AI Engineer', location = 'Bangalore',
     const queries = fitQueries(sites, role, loc);
     queries.forEach((query, i) => links.push({ name: `Google · ${name}${queries.length > 1 ? ` (${i + 1})` : ''}`, query, url: google(query, period) }));
   }
-  // Company career pages outside every board above.
-  const exclude = '-site:linkedin.com -site:naukri.com -site:indeed.com -site:glassdoor.com -site:foundit.in';
-  const careers = fitQueries(['inurl:careers', 'inurl:jobs'], role, loc, exclude)[0];
+  // Company career pages outside every board above. inurl:jobs is left out
+  // on purpose: every aggregator's listing lives under /jobs, and it filled
+  // the results with SimplyHired, Glassdoor and the like. -inurl:search drops
+  // aggregators' search pages; the rest excludes the boards and social
+  // reposts that still match /careers.
+  const exclude = '-inurl:search -site:linkedin.com -site:naukri.com -site:indeed.com -site:glassdoor.co.in -site:glassdoor.com ' +
+    '-site:simplyhired.co.in -site:shine.com -site:foundit.in -site:facebook.com -site:instagram.com';
+  const careers = fitQueries(['inurl:careers'], role, loc, exclude)[0];
   links.push({ name: 'Google · company careers pages', query: careers, url: google(careers, period) });
   return links;
 }
@@ -146,5 +151,52 @@ export function dailySearches() {
     { label: 'AI Engineer', url: google(plain('AI Engineer'), 'day') },
     { label: 'Full Stack', url: google(plain('Full Stack'), 'day') },
     { label: 'Forward Deployed', url: google(plain('Forward Deployed'), 'day') },
+  ];
+}
+
+// ── One company: news and people, as searches he opens ──────────────────
+// Free Google searches built here and opened in his browser; the server
+// never fetches them and no search API is spent.
+
+/** "Anysphere (Cursor)" → ("Anysphere" OR "Cursor"); quotes stripped. */
+function companyExpr(name) {
+  const clean = String(name || '').replace(/["“”]/g, '').trim();
+  const m = clean.match(/^(.+?)\s*\(([^)]+)\)\s*$/);
+  const names = m ? [m[1].trim(), m[2].trim()] : [clean];
+  return orGroup(names.map((n) => `"${n}"`));
+}
+const googleNews = (query, period) => `https://www.google.com/search?q=${q(query)}&tbm=nws&tbs=${PERIOD[period] || PERIOD.month}`;
+const googleYear = (query) => `https://www.google.com/search?q=${q(query)}&tbs=qdr:y`;
+const googleAny = (query) => `https://www.google.com/search?q=${q(query)}`;
+
+/** What happened recently: news, money, layoffs, India expansion, interviews. */
+export function companyNewsLinks(name) {
+  const c = companyExpr(name);
+  return [
+    { name: 'News · past month', hint: 'Anything recent', url: googleNews(c, 'month') },
+    { name: 'Funding & acquisitions', hint: 'Past year', url: googleNews(`${c} (funding OR raises OR acquisition OR acquires OR IPO OR valuation)`, 'year') },
+    { name: 'Layoffs or hiring freeze', hint: 'Past year — a red flag if recent', url: googleNews(`${c} (layoffs OR "hiring freeze" OR restructuring OR "job cuts")`, 'year') },
+    { name: 'India / Bangalore expansion', hint: 'Past year', url: googleYear(`${c} (Bangalore OR Bengaluru OR India) (office OR expansion OR "engineering center" OR hiring)`) },
+    { name: 'Product & AI launches', hint: 'Past month', url: googleNews(`${c} (launches OR announces OR unveils OR "AI")`, 'month') },
+    { name: 'Leadership changes', hint: 'Past year', url: googleNews(`${c} (appoints OR "new CEO" OR CTO OR "VP of Engineering" OR hires)`, 'year') },
+    { name: 'Engineering blog', hint: 'What they are building', url: googleAny(`${c} ("engineering blog" OR "tech blog" OR inurl:engineering)`) },
+    { name: 'Interview experiences', hint: 'Glassdoor, AmbitionBox, LeetCode Discuss', url: googleAny(`(site:glassdoor.co.in OR site:glassdoor.com OR site:ambitionbox.com OR site:leetcode.com/discuss) ${c} interview`) },
+    { name: 'Salaries in Bangalore', hint: 'levels.fyi, AmbitionBox', url: googleAny(`(site:levels.fyi OR site:ambitionbox.com) ${c} (Bangalore OR Bengaluru OR India) salary`) },
+    { name: 'Crunchbase profile', hint: 'Funding history', url: googleAny(`site:crunchbase.com/organization ${c}`) },
+  ];
+}
+
+/** People to reach (Google X-ray of LinkedIn profiles), Bangalore first. */
+export function companyPeopleLinks(name) {
+  const c = companyExpr(name);
+  const blr = '(Bangalore OR Bengaluru OR India)';
+  const li = 'site:linkedin.com/in';
+  return [
+    { name: 'Hiring managers', type: 'hm', hint: 'Engineering managers, heads and directors', url: googleAny(`${li} ${c} ("engineering manager" OR "head of engineering" OR "director of engineering" OR "VP engineering") ${blr}`) },
+    { name: 'AI / ML leads', type: 'hm', hint: 'Who owns the AI work', url: googleAny(`${li} ${c} ("head of AI" OR "AI lead" OR "ML lead" OR "applied AI" OR "machine learning manager")`) },
+    { name: 'Peer engineers', type: 'peer', hint: 'Senior / staff engineers in your stack', url: googleAny(`${li} ${c} ("senior software engineer" OR "staff engineer" OR "full stack" OR "AI engineer") ${blr}`) },
+    { name: 'Forward deployed / solutions', type: 'peer', hint: 'FDE and solutions engineers', url: googleAny(`${li} ${c} ("forward deployed" OR "solutions engineer" OR "solutions architect")`) },
+    { name: 'Recruiters', type: 'hr', hint: 'Technical recruiters and talent partners', url: googleAny(`${li} ${c} ("technical recruiter" OR "talent acquisition" OR "talent partner") ${blr}`) },
+    { name: 'LinkedIn people search', type: 'other', hint: 'LinkedIn’s own search, Bangalore', url: `https://www.linkedin.com/search/results/people/?keywords=${q(String(name || '').replace(/\s*\(.*\)\s*$/, ''))}%20Bangalore` },
   ];
 }

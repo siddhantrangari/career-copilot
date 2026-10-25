@@ -44,8 +44,19 @@ function startDigest(log) {
       log.error(`[digest] failed: ${err.message}`);
     }
   };
-  setTimeout(check, 90_000);
-  digestTimer = setInterval(check, 5 * 60_000);
+  // Sunday 19:00 local: the weekly review, once.
+  const weekly = async () => {
+    try {
+      const { weeklyReviewDue, sendWeeklyReview } = await import('./weekly-review.js');
+      if (!(await weeklyReviewDue())) return;
+      await sendWeeklyReview({ trigger: 'scheduled' });
+      log.info('[weekly-review] sent');
+    } catch (err) {
+      log.error(`[weekly-review] failed: ${err.message}`);
+    }
+  };
+  setTimeout(() => { check(); weekly(); }, 90_000);
+  digestTimer = setInterval(() => { check(); weekly(); }, 5 * 60_000);
   const { hour, minute, timeZone, telegram } = config.digest;
   log.info(
     `[digest] daily at ${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')} ${timeZone}` +

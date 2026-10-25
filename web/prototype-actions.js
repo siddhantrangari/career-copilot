@@ -1189,18 +1189,23 @@
         return '<div class="tg-row" style="display:flex;gap:12px;padding:8px 0;border-bottom:1px solid #1e2430;align-items:flex-start;cursor:pointer" title="Click to show the why lines in full">' +
           '<span style="flex:none;width:30px;font-size:12px;font-weight:800;color:#7c8ba3">#' + t.rank + '</span>' +
           '<div style="flex:1;min-width:0">' +
-          '<div><b style="color:#e7ecf3">' + esc(t.name) + '</b> ' + badge(t) +
+          '<div><b style="color:#e7ecf3;cursor:pointer;text-decoration:underline dotted" data-detail-key="' + esc(t.key) + '" title="Everything about this company">' + esc(t.name) + '</b> ' + badge(t) +
           '<span class="cc-muted" style="font-size:11px"> · hiring ' + t.hiring_score + ' · fit ' + t.company_fit +
-          (t.in_catalogue ? '' : ' · not in your list') + (t.pipeline_stage ? ' · ' + esc(t.pipeline_stage) : '') + '</span></div>' +
+          (t.in_catalogue ? '' : ' · <span style="color:#fbbf24" title="Found by job discovery; not in your Companies tab">not in your Companies list</span>') + (t.pipeline_stage ? ' · ' + esc(t.pipeline_stage) : '') + '</span></div>' +
           (t.why_company ? '<div class="tg-w" style="font-size:11.5px;color:#9aa6b8;margin-top:2px">💡 Why this company: ' + esc(t.why_company) + '</div>' : '') +
           (t.why_now ? '<div style="font-size:11.5px;color:#fbbf24;margin-top:2px">📈 ' + esc(t.why_now) + '</div>' : '') +
           (t.best_role ? '<div style="font-size:11.5px;margin-top:2px"><a target="_blank" rel="noopener" style="color:#9fd3ff" href="' + esc(t.best_role_url || '#') + '">' + esc(t.best_role) + '</a>' + (t.best_fit ? ' <span class="cc-muted">fit ' + t.best_fit + '</span>' : '') + '</div>' : '') +
           (t.best_role && t.why_role ? '<div class="tg-w" style="font-size:11.5px;color:#9aa6b8;margin-top:2px">🎯 Why this role: ' + esc(t.why_role) + '</div>' : '') +
           '<div style="font-size:11.5px;color:#c9d4e3;margin-top:3px">→ ' + esc(t.nextAction || '') + '</div>' +
           '</div>' +
-          (t.company_id && typeof window.openTrack === 'function'
-            ? '<button class="btn" type="button" data-open="' + esc(t.company_id) + '" style="font-size:11px;padding:4px 9px;flex:none">Open</button>' : '') +
-          '</div>';
+          '<div style="display:flex;flex-direction:column;gap:4px;flex:none">' +
+          '<button class="btn" type="button" data-detail-key="' + esc(t.key) + '" style="font-size:11px;padding:4px 9px">ℹ️ Details</button>' +
+          (!t.in_catalogue
+            ? '<button class="btn" type="button" data-add-key="' + esc(t.key) + '" data-stage="new" style="font-size:11px;padding:4px 9px;color:#38d9a9" title="Add to your Companies tab">＋ Companies</button>' +
+              '<button class="btn" type="button" data-add-key="' + esc(t.key) + '" data-stage="interested" style="font-size:11px;padding:4px 9px;color:#fb923c" title="Add to Companies and your pipeline as Interested">⭐ Interested</button>'
+            : (t.company_id && typeof window.openTrack === 'function'
+              ? '<button class="btn" type="button" data-open="' + esc(t.company_id) + '" style="font-size:11px;padding:4px 9px">📊 Track</button>' : '')) +
+          '</div></div>';
       }).join('') : '<p class="cc-muted">No companies in this view yet.</p>';
       if (matching.length > 5) {
         body.innerHTML += '<button class="btn" type="button" data-more="1" style="font-size:11px;padding:4px 10px;margin-top:8px">' +
@@ -1221,6 +1226,20 @@
       var o = e.target.closest ? e.target.closest('[data-open]') : null;
       if (o) window.openTrack(o.getAttribute('data-open'));
       if (e.target.closest && e.target.closest('[data-more]')) { showAll = !showAll; render(); return; }
+      var add = e.target.closest ? e.target.closest('[data-add-key]') : null;
+      if (add) {
+        add.disabled = true;
+        api('/targets/company/add', { method: 'POST', body: { key: add.getAttribute('data-add-key'), stage: add.getAttribute('data-stage') } })
+          .then(function (r) {
+            var row = data.targets.find(function (x) { return x.key === add.getAttribute('data-add-key'); });
+            if (row) { row.in_catalogue = true; row.company_id = r.companyId; row.pipeline_stage = r.stage; }
+            render();
+            if (typeof window.ccRefreshToday === 'function') window.ccRefreshToday();
+          })
+          .catch(function (err) { add.disabled = false; window.alert(err.message); });
+        return;
+      }
+      if (e.target.closest && e.target.closest('[data-detail-key]')) return;
       var row = e.target.closest && !e.target.closest('a,button') ? e.target.closest('.tg-row') : null;
       if (row) row.classList.toggle('full');
     });
@@ -2573,7 +2592,7 @@
     var tag = a.priority ? '<span class="td-tag" style="color:#fbbf24">⭐ PRIORITY</span>' : '';
     var role = a.role ? (a.url ? '<a target="_blank" rel="noopener" style="color:#9fd3ff" href="' + esc(a.url) + '">' + esc(a.role) + '</a>' : esc(a.role)) : '';
     return '<div class="td-a' + (a.priority ? ' prio' : '') + '"><div class="i">' + a.icon + '</div><div class="t">' +
-      '<div><b>' + esc(a.company) + '</b>' + tag + ' · ' + esc(a.title) + '</div>' +
+      '<div><b data-detail-name="' + esc(a.company) + '" style="cursor:pointer;text-decoration:underline dotted" title="Everything about this company">' + esc(a.company) + '</b>' + tag + ' · ' + esc(a.title) + '</div>' +
       (role ? '<div style="margin-top:2px">' + role + '</div>' : '') +
       (a.detail ? '<div style="margin-top:2px">→ ' + esc(a.detail) + '</div>' : '') +
       (a.whyCompany ? '<div class="w" title="' + esc(a.whyCompany) + '">💡 Why this company: ' + esc(a.whyCompany) + '</div>' : '') +
@@ -2582,6 +2601,7 @@
       '</div><div class="ab">' +
       (a.url && a.type === 'apply' ? '<a target="_blank" rel="noopener" href="' + esc(a.url) + '">Apply ↗</a>' : '') +
       (a.url && a.type === 'follow_up' ? '<a target="_blank" rel="noopener" href="' + esc(a.url) + '">Open ↗</a>' : '') +
+      (a.type === 'outreach' ? '<button type="button" data-detail-name="' + esc(a.company) + '" title="People to reach, news, and DM drafts">👥 People</button>' : '') +
       (a.companyId && typeof window.openTrack === 'function' ? '<button type="button" data-open="' + esc(a.companyId) + '">Track</button>' : '') +
       '<button type="button" class="ok" data-done="' + i + '" title="Mark done — logs it and hides it for today">Done ✓</button>' +
       '</div></div>';
@@ -2635,6 +2655,7 @@
     }
     if ((b = el.closest('[data-open]'))) { window.openTrack(b.getAttribute('data-open')); return; }
     if (el.closest('[data-more]')) { more = !more; render(); return; }
+    if (el.closest('[data-detail-name]')) return;
     // Clicking an action's text shows its why lines in full.
     if ((b = el.closest('.td-a .t')) && !el.closest('a')) { b.parentNode.classList.toggle('full'); return; }
     if (el.closest('[data-all]')) {
@@ -2651,9 +2672,247 @@
     if (el.closest('[data-toggle]')) { open = !open; store.set('cc_today_open', open ? '1' : '0'); render(); }
   });
 
+  window.ccRefreshToday = load;
   render();
   load();
   // Keep it current: when he comes back to the tab, and every 10 minutes.
   document.addEventListener('visibilitychange', function () { if (!document.hidden) load(); });
   setInterval(function () { if (!document.hidden) load(); }, 600000);
+})();
+
+/* ────────────────────────────────────────────────────────────────────
+ * Company detail: everything known about one company, in one modal.
+ *
+ * Opens from stored data only (no search API). What is new on the web —
+ * news, funding, layoffs, India expansion, interviews, people to reach —
+ * comes as free Google searches he opens. From here he can add the company
+ * to his list, log a contact, and draft outreach (one AI call, on demand).
+ * ──────────────────────────────────────────────────────────────────── */
+(function () {
+  'use strict';
+
+  var CC = window.__CC__;
+  if (!CC) return;
+  var api = CC.api, esc = CC.esc;
+
+  var css = document.createElement('style');
+  css.textContent =
+    '#cc-cd{position:fixed;inset:0;z-index:9000;background:rgba(5,8,14,.72);display:flex;align-items:flex-start;justify-content:center;padding:28px 16px;overflow:auto}' +
+    '#cc-cd .cd{background:#141822;border:1px solid #2a3244;border-radius:14px;width:100%;max-width:960px;padding:18px 22px;color:#c9d4e3;font-size:12.5px;box-shadow:0 20px 60px rgba(0,0,0,.5)}' +
+    '#cc-cd h3{margin:0;font-size:19px;color:#e7ecf3}' +
+    '#cc-cd h4{margin:16px 0 6px;font-size:12px;color:#9aa6b8;text-transform:uppercase;letter-spacing:.05em}' +
+    '#cc-cd .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}' +
+    '#cc-cd .muted{color:#7c8ba3}' +
+    '#cc-cd .chip{font-size:10px;font-weight:800;padding:2px 7px;border-radius:10px;border:1px solid}' +
+    '#cc-cd .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}' +
+    '#cc-cd .box{background:#0f131b;border:1px solid #232a38;border-radius:10px;padding:10px 12px}' +
+    '#cc-cd .lnk{display:inline-block;margin:0 6px 6px 0;font-size:11px;padding:4px 9px;border-radius:7px;border:1px solid #2a3244;background:#1a2030;color:#c9d4e3;text-decoration:none}' +
+    '#cc-cd .lnk:hover{border-color:#9fd3ff;color:#9fd3ff}' +
+    '#cc-cd .lnk small{color:#7c8ba3;margin-left:4px}' +
+    '#cc-cd .b{font-size:11.5px;padding:5px 11px;border-radius:7px;border:1px solid #2a3244;background:#1a2030;color:#c9d4e3;cursor:pointer}' +
+    '#cc-cd .b.pri{border-color:rgba(56,217,169,.55);color:#38d9a9}' +
+    '#cc-cd .b.amb{border-color:rgba(251,146,60,.5);color:#fb923c}' +
+    '#cc-cd .role{padding:6px 0;border-bottom:1px solid #1e2430}' +
+    '#cc-cd input,#cc-cd select{background:#0f131b;border:1px solid #2a3244;border-radius:7px;color:#e7ecf3;padding:5px 8px;font-size:12px;font-family:inherit}' +
+    '#cc-cd .msg{white-space:pre-wrap;background:#0f131b;border:1px solid #232a38;border-radius:8px;padding:9px 11px;margin-top:6px;line-height:1.5}' +
+    '@media (max-width:720px){#cc-cd .grid2{grid-template-columns:1fr}}';
+  document.head.appendChild(css);
+
+  var ref = null;
+  var data = null;
+
+  function ago(iso) {
+    if (!iso) return '';
+    var d = Math.floor((Date.now() - new Date(iso).getTime()) / 86400000);
+    return d <= 0 ? 'today' : d === 1 ? 'yesterday' : d < 30 ? d + 'd ago' : Math.floor(d / 30) + 'mo ago';
+  }
+  var STAGE = { new: 'New', interested: 'Interested', applied: 'Applied', networking: 'Networking', call: 'Call', win: 'WIN doc', interview: 'Interview', offer: 'Offer', failed: 'Closed' };
+  var REGION = { eu: 'Europe', gulf: 'Gulf', global: 'Global remote', global_onsite: 'Global on-site', in_remote: 'India remote', blr_onsite: 'Bangalore on-site', blr_hybrid: 'Bangalore hybrid', india: 'India' };
+  var CONN = { req: 'Request sent', dm: 'DM sent', reply: 'Replied', fu1: 'Follow-up 1', fu2: 'Follow-up 2', fu3: 'Follow-up 3', win: 'WIN doc', call: 'Call', ref: 'Referral', ab: 'No reply' };
+
+  function close() { var m = document.getElementById('cc-cd'); if (m) m.remove(); document.removeEventListener('keydown', onKey); }
+  function onKey(e) { if (e.key === 'Escape') close(); }
+
+  function shell(inner) {
+    var m = document.getElementById('cc-cd');
+    if (!m) {
+      m = document.createElement('div');
+      m.id = 'cc-cd';
+      m.addEventListener('click', function (e) { if (e.target === m) close(); });
+      m.addEventListener('click', onClick);
+      document.body.appendChild(m);
+      document.addEventListener('keydown', onKey);
+    }
+    m.innerHTML = '<div class="cd">' + inner + '</div>';
+  }
+
+  function list(items, fn, empty) { return items && items.length ? items.map(fn).join('') : '<div class="muted">' + esc(empty) + '</div>'; }
+
+  function render() {
+    var d = data, t = d.target || {}, co = d.company || {}, r = t.research || {}, cr = co.research || {};
+    var tag = t.tag && t.tag !== 'watch'
+      ? (t.priority ? '<span class="chip" style="color:#fbbf24;border-color:rgba(251,191,36,.5)">⭐ PRIORITY</span>' : '') +
+        '<span class="chip" style="color:' + (t.tag === 'apply' ? '#34d399;border-color:rgba(52,211,153,.5)' : '#c4b5fd;border-color:rgba(196,181,253,.5)') + '">' + (t.tag === 'apply' ? 'APPLY' : 'OUTREACH') + (t.rank ? ' #' + t.rank : '') + '</span>'
+      : '';
+    var stage = d.pipeline ? d.pipeline.stage : null;
+    var listBtns = !d.inList
+      ? '<button class="b pri" data-add="new" type="button" title="Add to your Companies tab">＋ Add to Companies</button>' +
+        '<button class="b amb" data-add="interested" type="button" title="Add to Companies and to your pipeline as Interested">⭐ Add as Interested</button>'
+      : (!stage || stage === 'new' ? '<button class="b amb" data-add="interested" type="button" title="Move into your pipeline as Interested">⭐ Mark Interested</button>' : '') +
+        (typeof window.openTrack === 'function' ? '<button class="b" data-track="1" type="button">📊 Track</button>' : '');
+
+    var html =
+      '<div class="row" style="justify-content:space-between;align-items:flex-start">' +
+        '<div><div class="row"><h3>' + esc(d.name) + '</h3>' + tag + '</div>' +
+        '<div class="muted" style="margin-top:4px">' +
+          (t.hiring != null ? 'hiring ' + t.hiring + ' · company fit ' + t.fit + ' · ' : '') +
+          (d.inList ? 'in your Companies list' + (stage ? ' · pipeline: ' + esc(STAGE[stage] || stage) : '') : '<span style="color:#fbbf24">found by job discovery — not in your Companies list yet</span>') +
+          (co.region ? ' · ' + esc(REGION[co.region] || co.region) : '') + (co.pay ? ' · ' + esc(co.pay) : '') + (co.dsa ? ' · expects DSA rounds' : '') +
+        '</div></div>' +
+        '<div class="row">' + listBtns + '<button class="b" data-close="1" type="button">✕</button></div>' +
+      '</div>';
+
+    if (d.nextAction) html += '<div class="box" style="margin-top:12px;border-color:rgba(56,217,169,.35)"><b style="color:#38d9a9">→ Next:</b> ' + esc(d.nextAction) + '</div>';
+
+    html += '<div class="grid2" style="margin-top:4px"><div>';
+    html += '<h4>Why this company</h4><div>' + (d.whyCompany ? '💡 ' + esc(d.whyCompany) : '<span class="muted">No why line yet — it is written within a few hours of discovery.</span>') + '</div>';
+    if (co.description && co.description !== d.whyCompany) html += '<div class="muted" style="margin-top:6px">' + esc(co.description) + '</div>';
+    html += '<h4>Hiring signals</h4>';
+    html += '<div>' + (t.whyNow ? '📈 ' + esc(t.whyNow) : '<span class="muted">No signals yet.</span>') + '</div>';
+    html += '<div class="muted" style="margin-top:4px">' + (t.new30d != null ? t.new30d + ' relevant roles in the last 30 days (' + t.prev30d + ' the 30 before) · ' + t.openFit75 + ' open with fit 75+' : '') + '</div>';
+    if (r.layoffs) html += '<div style="color:#ff8787;margin-top:6px">⚠️ Layoffs or a hiring freeze in the last 6 months</div>';
+    if (r.signals && r.signals.length) {
+      html += '<div style="margin-top:6px">' + r.signals.map(function (s) {
+        return '<div style="margin:3px 0">• ' + esc(s.text) + ' <span class="muted">' + esc(s.date || '') + '</span>' +
+          (s.source && /^https?:/.test(s.source) ? ' <a target="_blank" rel="noopener" style="color:#9fd3ff" href="' + esc(s.source) + '">source</a>' : '') + '</div>';
+      }).join('') + '</div><div class="muted" style="font-size:11px">Researched ' + ago(t.researchAt) + '</div>';
+    } else {
+      html += '<div class="muted" style="font-size:11px;margin-top:4px">Not researched yet — the Monday run researches the top candidates. Use the news searches below for anything newer.</div>';
+    }
+    if (cr.challenges || cr.recentNews || cr.hookSentence) {
+      html += '<h4>From your research</h4>';
+      if (cr.hookSentence) html += '<div>🪝 ' + esc(cr.hookSentence) + '</div>';
+      if (cr.challenges && cr.challenges.length) html += '<div style="margin-top:4px">' + cr.challenges.slice(0, 5).map(function (c) { return '<div>• ' + esc(typeof c === 'string' ? c : (c.title || c.challenge || c.text || JSON.stringify(c))) + '</div>'; }).join('') + '</div>';
+      if (cr.recentNews && cr.recentNews.length) html += '<div style="margin-top:4px">' + cr.recentNews.slice(0, 5).map(function (n) { return '<div>📰 ' + esc(typeof n === 'string' ? n : (n.headline || n.title || n.text || '')) + (n.date ? ' <span class="muted">' + esc(n.date) + '</span>' : '') + '</div>'; }).join('') + '</div>';
+      if (cr.lastResearched) html += '<div class="muted" style="font-size:11px">Researched ' + ago(cr.lastResearched) + '</div>';
+    }
+    html += '</div><div>';
+    html += '<h4>Open roles (' + d.roles.length + ')</h4>' + list(d.roles, function (j) {
+      return '<div class="role"><a target="_blank" rel="noopener" style="color:#9fd3ff" href="' + esc(j.url) + '">' + esc(j.title) + '</a>' +
+        (j.fit_score != null ? ' <b style="color:' + (j.fit_score >= 80 ? '#38d9a9' : '#c9d4e3') + '">fit ' + j.fit_score + '</b>' : '') +
+        (j.app_status ? ' <span class="chip" style="color:#fb923c;border-color:rgba(251,146,60,.5)">' + esc(j.app_status) + '</span>' : '') +
+        '<div class="muted">' + esc(j.location || '') + ' · ' + esc(j.source || '') + ' · ' + ago(j.posted_at || j.discovered_at) + '</div>' +
+        (j.why_role ? '<div style="font-size:11.5px;margin-top:2px">🎯 ' + esc(j.why_role) + '</div>' : '') + '</div>';
+    }, 'No open roles found — an Outreach target: reach people before a role is posted.');
+    html += '</div></div>';
+
+    // Pipeline and contacts
+    html += '<h4>Your pipeline</h4><div class="grid2"><div class="box">';
+    html += d.pipeline
+      ? '<div>Stage: <b>' + esc(STAGE[d.pipeline.stage] || d.pipeline.stage) + '</b> <span class="muted">since ' + ago(d.pipeline.since) + '</span></div>' +
+        list(d.pipeline.roles, function (x) { return '<div>• ' + esc(x.title || 'Role') + ' <span class="muted">' + esc(x.stage || '') + (x.appliedAt ? ' · applied ' + esc(String(x.appliedAt).slice(0, 10)) : '') + (x.interviewAt ? ' · interview ' + esc(String(x.interviewAt).slice(0, 16).replace('T', ' ')) : '') + '</span></div>'; }, 'No roles tracked yet.')
+      : '<span class="muted">Not in your pipeline.</span>';
+    html += '<div style="margin-top:8px"><b>Recent activity</b></div>' + list(d.activity, function (a) {
+      return '<div class="muted">• ' + esc(a.kind.replace(/_/g, ' ')) + (a.count > 1 ? ' ×' + a.count : '') + ' · ' + ago(a.at) + '</div>';
+    }, 'Nothing logged yet.');
+    html += '</div><div class="box"><b>Contacts (' + d.contacts.length + ')</b>' + list(d.contacts, function (c) {
+      return '<div style="margin-top:3px">• ' + (c.linkedin_url ? '<a target="_blank" rel="noopener" style="color:#9fd3ff" href="' + esc(c.linkedin_url) + '">' + esc(c.name) + '</a>' : esc(c.name)) +
+        ' <span class="muted">' + esc(c.role || c.type) + ' · ' + esc(CONN[c.status] || c.status) + '</span></div>';
+    }, 'No one logged yet — find people below.') + '</div></div>';
+
+    // What's happening — free Google searches
+    html += '<h4>📰 What’s happening — free Google searches (open in your browser)</h4><div>' +
+      d.links.news.map(function (l) { return '<a class="lnk" target="_blank" rel="noopener" href="' + esc(l.url) + '" title="' + esc(l.hint) + '">' + esc(l.name) + ' ↗</a>'; }).join('') + '</div>' +
+      '<div class="muted" style="font-size:11px">These are Google searches you open — nothing is fetched by the server and no search API is used.</div>';
+
+    // People + outreach
+    html += '<h4>👥 Find people to reach</h4><div>' +
+      d.links.people.map(function (l) { return '<a class="lnk" target="_blank" rel="noopener" href="' + esc(l.url) + '" title="' + esc(l.hint) + '">' + esc(l.name) + ' ↗</a>'; }).join('') + '</div>';
+    html += '<div class="box" style="margin-top:6px"><div class="row">' +
+      '<input id="cc-cd-name" placeholder="Name" style="min-width:140px">' +
+      '<input id="cc-cd-role" placeholder="Role (e.g. Engineering Manager)" style="min-width:200px">' +
+      '<select id="cc-cd-type"><option value="hm">Hiring manager</option><option value="peer" selected>Peer engineer</option><option value="indian">Indian engineer</option><option value="hr">Recruiter</option><option value="other">Other</option></select>' +
+      '<input id="cc-cd-li" placeholder="LinkedIn URL" style="min-width:200px;flex:1">' +
+      '</div><div class="row" style="margin-top:8px">' +
+      '<button class="b pri" data-contact="1" type="button" title="Saves the person as a contact (request sent) — counts toward today’s connections">＋ Save contact (request sent)</button>' +
+      '<button class="b" data-draft="1" type="button" title="One AI call, grounded in your profile and this company’s stored research — no search API">✍️ Draft connection note + DMs</button>' +
+      '<span class="muted" id="cc-cd-status"></span></div><div id="cc-cd-drafts"></div></div>';
+    shell(html);
+  }
+
+  function load() {
+    shell('<div class="muted">Loading ' + esc(ref.name || '') + '…</div>');
+    var q = Object.keys(ref).filter(function (k) { return ref[k]; }).map(function (k) { return k + '=' + encodeURIComponent(ref[k]); }).join('&');
+    return api('/targets/company?' + q).then(function (d) { data = d; ref = { key: d.key }; render(); })
+      .catch(function (e) { shell('<div class="cc-bad">' + esc(e.message) + '</div><button class="b" data-close="1" type="button">Close</button>'); });
+  }
+
+  function status(t, bad) { var s = document.getElementById('cc-cd-status'); if (s) { s.textContent = t; s.style.color = bad ? '#ff8787' : ''; } }
+  function val(id) { var e = document.getElementById(id); return e ? e.value.trim() : ''; }
+  function afterChange() {
+    if (typeof window.ccRefreshToday === 'function') window.ccRefreshToday();
+    if (CC.refreshState) CC.refreshState();
+  }
+
+  function ensureInList(stage) {
+    if (data.companyId && data.inList && stage !== 'interested') return Promise.resolve(data.companyId);
+    return api('/targets/company/add', { method: 'POST', body: { key: data.key, stage: stage || 'new' } }).then(function (r) { return r.companyId; });
+  }
+
+  function onClick(e) {
+    var el = e.target.closest ? e.target : null;
+    if (!el) return;
+    var b;
+    if (el.closest('[data-close]')) { close(); return; }
+    if ((b = el.closest('[data-track]'))) { var id = data.companyId; close(); window.openTrack(id); return; }
+    if ((b = el.closest('[data-add]'))) {
+      b.disabled = true;
+      ensureInList(b.getAttribute('data-add')).then(function () { afterChange(); return load(); })
+        .catch(function (err) { b.disabled = false; window.alert(err.message); });
+      return;
+    }
+    if ((b = el.closest('[data-contact]'))) {
+      var name = val('cc-cd-name');
+      if (!name) { status('Enter a name first', true); return; }
+      b.disabled = true; status('Saving…');
+      ensureInList('new').then(function (id) {
+        return api('/tracked/' + encodeURIComponent(id) + '/connections', { method: 'POST', body: { name: name, role: val('cc-cd-role'), type: val('cc-cd-type'), li: val('cc-cd-li'), status: 'req' } });
+      }).then(function () { afterChange(); return load(); })
+        .catch(function (err) { b.disabled = false; status(err.message, true); });
+      return;
+    }
+    if ((b = el.closest('[data-draft]'))) {
+      b.disabled = true; status('Drafting (one AI call, ~15s)…');
+      api('/targets/company/draft', { method: 'POST', body: { key: data.key, contact: { name: val('cc-cd-name'), role: val('cc-cd-role'), type: val('cc-cd-type') } } })
+        .then(function (r) {
+          var m = r.messages || {};
+          var block = function (label, text, extra) {
+            return text ? '<div style="margin-top:10px"><b>' + label + '</b>' + (extra || '') + ' <button class="b" data-copy="1" type="button" style="padding:2px 8px;font-size:10.5px">Copy</button><div class="msg">' + esc(text) + '</div></div>' : '';
+          };
+          document.getElementById('cc-cd-drafts').innerHTML =
+            block('Connection note', m.connectionNote, ' <span class="muted">' + (m.connectionNoteChars || 0) + '/300' + (m.connectionNoteOverLimit ? ' — too long, trim it' : '') + '</span>') +
+            block('First DM (after they accept)', m.firstDM) + block('Peer DM', m.peerDM) + block('Day-4 follow-up', m.followUp) +
+            (m.rationale ? '<div class="muted" style="margin-top:8px">Angle: ' + esc(m.rationale) + '</div>' : '') +
+            (r.grounded && !r.grounded.research ? '<div style="color:#fbbf24;margin-top:6px">No research on file for this company yet — check the specifics before sending.</div>' : '');
+          status(''); b.disabled = false;
+        })
+        .catch(function (err) { b.disabled = false; status(err.message, true); });
+      return;
+    }
+    if ((b = el.closest('[data-copy]'))) {
+      var text = b.parentNode.querySelector('.msg').textContent;
+      navigator.clipboard.writeText(text).then(function () { b.textContent = '✓ Copied'; setTimeout(function () { b.textContent = 'Copy'; }, 1600); });
+    }
+  }
+
+  /** Open the detail modal: { key } (target), { id } (catalogue) or { name }. */
+  window.ccCompanyDetail = function (r) { ref = r || {}; data = null; load(); };
+
+  // Any element with data-detail-key / data-detail-name opens it.
+  document.addEventListener('click', function (e) {
+    var el = e.target.closest ? e.target.closest('[data-detail-key],[data-detail-name],[data-detail-id]') : null;
+    if (!el || (e.target.closest && e.target.closest('a'))) return;
+    e.preventDefault();
+    window.ccCompanyDetail({ key: el.getAttribute('data-detail-key'), id: el.getAttribute('data-detail-id'), name: el.getAttribute('data-detail-name') });
+  });
 })();
