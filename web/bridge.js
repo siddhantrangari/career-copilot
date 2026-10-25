@@ -206,6 +206,7 @@
             roles: Array.isArray(c.roles) ? c.roles : [],
             pay: c.pay || '',
             desc: c.desc || c.description || '',
+            why: c.why || '',
             apply: c.apply || c.apply_url || '',
             dismissed: !!c.dismissed,
           };

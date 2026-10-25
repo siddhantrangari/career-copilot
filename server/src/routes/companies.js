@@ -5,7 +5,8 @@ import { fetchJdForRole } from '../services/discovery.js';
 
 const ROW = `
   c.id, c.name, c.region, c.roles, c.pay, c.description AS desc, c.apply_url AS apply,
-  c.dsa, c.custom, c.favourite, c.freelance, COALESCE(c.dismissed, false) AS dismissed, c.dismissed_at, c.research, c.created_at, c.updated_at
+  c.dsa, c.custom, c.favourite, c.freelance, COALESCE(c.dismissed, false) AS dismissed, c.dismissed_at, c.research, c.created_at, c.updated_at,
+  (SELECT w.why FROM company_why w WHERE w.key = lower(trim(c.name))) AS why
 `;
 
 export default async function companyRoutes(app) {

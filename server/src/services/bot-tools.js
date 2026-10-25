@@ -194,7 +194,7 @@ async function getCompany({ company }) {
     many(`SELECT id, contact_name, created_at FROM win_docs WHERE company_id = $1 ORDER BY created_at DESC LIMIT 3`, [c.id]),
     many(`SELECT id, role_title, round, created_at FROM interview_preps WHERE company_id = $1 ORDER BY created_at DESC LIMIT 3`, [c.id]),
     many(`SELECT id, round, status, report->>'readiness' AS readiness, started_at FROM interview_sessions WHERE company_id = $1 ORDER BY started_at DESC LIMIT 3`, [c.id]),
-    many(`SELECT id, title, location, relevance, url, COALESCE(posted_at, discovered_at) AS posted FROM jobs
+    many(`SELECT id, title, location, relevance, url, why_role, COALESCE(posted_at, discovered_at) AS posted FROM jobs
           WHERE company_id = $1 AND closed_at IS NULL AND NOT dismissed ORDER BY relevance DESC, posted_at DESC NULLS LAST LIMIT 6`, [c.id]),
   ]);
   const r = c.research || null;
@@ -202,6 +202,7 @@ async function getCompany({ company }) {
     id: c.id, name: c.name, region: c.region, pay: c.pay, website: c.website || undefined,
     description: clip(c.description, 400), applyUrl: c.apply_url || undefined,
     dismissed: c.dismissed || false,
+    whyThisCompany: (await one('SELECT why FROM company_why WHERE key = lower(trim($1))', [c.name]))?.why,
     tracking: t ? {
       stage: t.stage, winStatus: t.win_status, outreachLog: clip(t.msgs, 600) || undefined,
       notes: clip(text, 600) || undefined, jobLink: t.job_link || undefined,
@@ -348,7 +349,8 @@ async function searchJobs({
     params.push(Math.min(Number(limit) || 5, 25));
     return many(
       `SELECT j.id, j.title, COALESCE(NULLIF(c.name,''), j.company_name) AS company, j.location, j.relevance AS match,
-              j.url, j.favourite, j.no_dsa, COALESCE(j.posted_at, j.discovered_at) AS posted, t.stage AS tracked_stage
+              j.url, j.favourite, j.no_dsa, COALESCE(j.posted_at, j.discovered_at) AS posted, t.stage AS tracked_stage,
+              j.why_role AS why_role, (SELECT w.why FROM company_why w WHERE w.key = lower(trim(COALESCE(NULLIF(c.name,''), j.company_name)))) AS why_company
        ${from} ${where}
        ORDER BY j.favourite DESC, COALESCE(j.posted_at, j.discovered_at) DESC, j.relevance DESC
        LIMIT $${params.length}`,

@@ -137,7 +137,7 @@ async function freshJobs(now) {
   const since = new Date(now.getTime() - 72 * HOUR);
 
   const jobs = await many(
-    `SELECT j.id, j.title, j.url, j.location, j.relevance, j.favourite, j.no_dsa,
+    `SELECT j.id, j.title, j.url, j.location, j.relevance, j.favourite, j.no_dsa, j.why_role,
             COALESCE(j.posted_at, j.discovered_at) AS posted_at,
             COALESCE(NULLIF(c.name, ''), j.company_name) AS company, t.stage AS tracked_stage
      ${from} WHERE ${where}
@@ -302,6 +302,7 @@ export function renderDigest(d, now = new Date(d.generatedAt)) {
         `${j.location ? ` · ${esc(clip(j.location, 40))}` : ''} · match ${j.relevance} · ${esc(ago(new Date(j.posted_at), now))}` +
         `${tags ? ` · ${esc(tags)}` : ''}`,
       );
+      if (j.why_role) lines.push(`   💡 <i>${esc(j.why_role)}</i>`);
     }
     if (total > jobs.length) lines.push(`  ${link(`${app}/?tab=discovery`, `See all ${total} in the live feed`)}`);
     sections.push(lines);

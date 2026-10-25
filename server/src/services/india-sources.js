@@ -1,6 +1,7 @@
 import { many, one, query } from '../db/pool.js';
 import { config } from '../config.js';
 import { scoreJob } from './discovery.js';
+import { cleanJdText } from './autofill.js';
 
 /**
  * India job discovery — Bangalore and India-remote roles the catalogue's
@@ -101,6 +102,7 @@ async function fetchWorkday(board, maxPerSpelling = 300) {
         // "2 Locations" hides the list; the search was for Bangalore, so say so.
         const loc = /^\d+ locations?$/i.test(p.locationsText || '') ? `Bangalore (+${p.locationsText})` : (p.locationsText || city);
         byPath.set(p.externalPath, {
+          path: p.externalPath,
           externalId: p.bulletFields?.[0] || p.externalPath,
           title: p.title,
           url: `https://${board.host}/${board.site}${p.externalPath}`,
@@ -113,6 +115,33 @@ async function fetchWorkday(board, maxPerSpelling = 300) {
     }
   }
   return [...byPath.values()];
+}
+
+/**
+ * The list API carries no description; the posting endpoint does, plus the
+ * exact posting date. Fetched only for relevant roles not yet described.
+ */
+async function describeWorkday(board, job) {
+  const res = await fetch(`https://${board.host}/wday/cxs/${board.tenant}/${board.site}${job.path}`, {
+    headers: { Accept: 'application/json', 'User-Agent': UA }, signal: AbortSignal.timeout(25_000),
+  });
+  if (!res.ok) return null;
+  const info = (await res.json()).jobPostingInfo || {};
+  return {
+    description: cleanJdText(info.jobDescription || ''),
+    postedAt: info.startDate ? new Date(`${info.startDate}T06:30:00Z`) : null,
+  };
+}
+
+async function describeSmartRecruiters(sr, job) {
+  const res = await fetch(`https://api.smartrecruiters.com/v1/companies/${sr.id}/postings/${job.externalId}`, {
+    headers: { Accept: 'application/json', 'User-Agent': UA }, signal: AbortSignal.timeout(25_000),
+  });
+  if (!res.ok) return null;
+  const s = (await res.json()).jobAd?.sections || {};
+  const text = ['jobDescription', 'qualifications', 'companyDescription']
+    .map((k) => s[k]?.text || '').filter(Boolean).join('\n\n');
+  return { description: cleanJdText(text) };
 }
 
 // ── SmartRecruiters ───────────────────────────────────────────────────
@@ -211,7 +240,7 @@ async function catalogueId(name) {
   return row?.id || null;
 }
 
-async function store(source, companyName, jobs, minRelevance) {
+async function store(source, companyName, jobs, minRelevance, describe = null) {
   const companyId = await catalogueId(companyName);
   const ids = new Map();
   let relevant = 0;
@@ -222,6 +251,17 @@ async function store(source, companyName, jobs, minRelevance) {
     if (relevance < minRelevance) continue;
     relevant += 1;
     if (!ids.has(name)) ids.set(name, companyId ?? (await catalogueId(name)));
+    if (describe && !job.description) {
+      const have = await one(`SELECT length(description) > 0 AS described FROM jobs WHERE url = $1`, [job.url]);
+      if (!have?.described) {
+        try {
+          const d = await describe(job);
+          if (d?.description) job.description = d.description;
+          if (d?.postedAt && !Number.isNaN(d.postedAt.getTime())) job.postedAt = d.postedAt;
+        } catch { /* a missing description is not worth failing the board */ }
+        await sleep(250);
+      }
+    }
     const meta = job.publisher ? { publisher: job.publisher } : {};
     const row = await one(
       `INSERT INTO jobs (company_id, company_name, title, url, location, source, description, no_dsa,
@@ -229,6 +269,8 @@ async function store(source, companyName, jobs, minRelevance) {
        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$6,$12,$13, now())
        ON CONFLICT (url) DO UPDATE SET
          title = EXCLUDED.title, location = EXCLUDED.location,
+         description = CASE WHEN EXCLUDED.description <> '' THEN EXCLUDED.description ELSE jobs.description END,
+         no_dsa = COALESCE(EXCLUDED.no_dsa, jobs.no_dsa),
          posted_at = COALESCE(EXCLUDED.posted_at, jobs.posted_at),
          relevance = EXCLUDED.relevance, matched_roles = EXCLUDED.matched_roles,
          seen_at = now(), closed_at = NULL
@@ -268,8 +310,8 @@ export async function runIndiaDiscovery({ trigger = 'manual', minRelevance = 40 
   let closed = 0;
 
   const boards = [
-    ...WORKDAY_BOARDS.map((b) => ({ source: 'workday', company: b.company, key: b.host, fetch: () => fetchWorkday(b) })),
-    ...SMARTRECRUITERS_COMPANIES.map((s) => ({ source: 'smartrecruiters', company: s.company, key: s.id, fetch: () => fetchSmartRecruiters(s) })),
+    ...WORKDAY_BOARDS.map((b) => ({ source: 'workday', company: b.company, key: b.host, fetch: () => fetchWorkday(b), describe: (j) => describeWorkday(b, j) })),
+    ...SMARTRECRUITERS_COMPANIES.map((s) => ({ source: 'smartrecruiters', company: s.company, key: s.id, fetch: () => fetchSmartRecruiters(s), describe: (j) => describeSmartRecruiters(s, j) })),
   ];
   const { adzuna, jsearch } = indiaSourcesStatus();
   if (adzuna) boards.push({ source: 'adzuna', company: null, aggregator: true, fetch: fetchAdzuna });
@@ -279,7 +321,7 @@ export async function runIndiaDiscovery({ trigger = 'manual', minRelevance = 40 
     for (const b of boards) {
       try {
         const jobs = await b.fetch();
-        const { relevant, added: n } = await store(b.source, b.company, jobs, minRelevance);
+        const { relevant, added: n } = await store(b.source, b.company, jobs, minRelevance, b.describe);
         seen += relevant;
         added += n;
         // A company board was read in full, so a role it no longer lists has

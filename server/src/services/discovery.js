@@ -430,7 +430,8 @@ export async function listJobs({
             discovered_at, relevance, matched_roles, no_dsa, closed_at, favourite, dismissed,
             engagement, rate_min, rate_max, rate_unit, currency, skills, meta,
             app_status, app_status_at, (proposal IS NOT NULL) AS has_proposal,
-            left(description, 420) AS snippet
+            left(description, 420) AS snippet, why_role,
+            (SELECT w.why FROM company_why w WHERE w.key = lower(trim(company_name))) AS why_company
      FROM jobs
      WHERE ${where.join(' AND ')}
      ORDER BY ${order}
@@ -465,7 +466,7 @@ export async function latestPostings() {
               (
                 SELECT json_agg(j_sub)
                 FROM (
-                  SELECT id, title, url, location, relevance, posted_at
+                  SELECT id, title, url, location, relevance, posted_at, why_role
                   FROM jobs j2
                   WHERE j2.company_id = j.company_id
                     AND j2.closed_at IS NULL

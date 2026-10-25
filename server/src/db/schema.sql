@@ -501,3 +501,19 @@ CREATE TABLE IF NOT EXISTS bot_state (
 -- Prompt-cache hits per AI call, so the saving from a stable prompt prefix
 -- is measured rather than assumed.
 ALTER TABLE ai_runs ADD COLUMN IF NOT EXISTS cached_tokens INTEGER NOT NULL DEFAULT 0;
+
+-- ── "Why this company / why this role" one-liners ─────────────────────
+-- Written once per role and per company from data the app holds (JD,
+-- company description and research, his profile) and stored, so the feed,
+-- cards, digest and bot can show them without another AI call.
+ALTER TABLE jobs ADD COLUMN IF NOT EXISTS why_role    TEXT;
+ALTER TABLE jobs ADD COLUMN IF NOT EXISTS why_role_at TIMESTAMPTZ;
+
+-- Keyed by lower(name) rather than companies.id so it also covers employers
+-- found by discovery that are not in the catalogue (NVIDIA via Workday, …).
+CREATE TABLE IF NOT EXISTS company_why (
+  key          TEXT PRIMARY KEY,         -- lower(trim(company name))
+  name         TEXT NOT NULL,
+  why          TEXT NOT NULL,
+  generated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);

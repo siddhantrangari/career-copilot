@@ -889,7 +889,10 @@
               (j.location ? ' · ' + esc(j.location) : '') +
               ' · match ' + j.relevance +
               (j.no_dsa === false ? ' · <span style="color:#ffb020">DSA signals</span>' : '') +
-              '</div></div></div>';
+              '</div>' +
+              (j.why_role ? '<div style="font-size:11px;color:#9fd3ff;margin-top:2px" title="Why this role">💡 ' + esc(j.why_role) + '</div>' : '') +
+              (j.why_company ? '<div style="font-size:10.5px;color:#7c8ba3;margin-top:1px" title="Why this company">🏢 ' + esc(j.why_company) + '</div>' : '') +
+              '</div></div>';
           }).join('');
         })
         .catch(function (e) {

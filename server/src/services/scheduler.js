@@ -105,11 +105,31 @@ export function startScheduler(log) {
     }
   };
 
+  // Fill in "why this company / role" lines for anything new. Cheap model,
+  // small batches; only rows without a line are touched.
+  let whyBusy = false;
+  const whyTick = async () => {
+    if (whyBusy) return;
+    whyBusy = true;
+    try {
+      const { generateWhyLines, whyBacklog } = await import('./why.js');
+      const backlog = await whyBacklog();
+      if (!backlog.roles && !backlog.companies) return;
+      const res = await generateWhyLines({ maxJobs: 150, maxCompanies: 50 });
+      log.info(`[agent] why-lines — ${res.roles} roles, ${res.companies} companies, ${res.skipped} skipped`);
+    } catch (err) {
+      log.error(`[agent] why-lines failed: ${err.message}`);
+    } finally {
+      whyBusy = false;
+    }
+  };
+
   // A short delay on boot keeps startup fast and avoids a thundering restart.
   setTimeout(tick, 60_000);
+  setTimeout(whyTick, 240_000);
   setTimeout(gigTick, 120_000);
   setTimeout(indiaTick, 180_000);
-  timer = setInterval(() => { tick(); gigTick(); indiaTick(); }, 30 * 60_000); // dueForRun gates each
+  timer = setInterval(() => { tick(); gigTick(); indiaTick(); whyTick(); }, 30 * 60_000); // dueForRun gates each
   log.info(
     `[agent] job discovery every ${config.discovery.intervalHours}h, ` +
     `gig discovery every ${config.discovery.gigIntervalHours}h`,
