@@ -128,6 +128,15 @@ export const config = {
     },
   },
 
+  // Telegram assistant — chat with the whole app from the same bot that
+  // sends the digest. Answers only TELEGRAM_CHAT_ID.
+  bot: {
+    enabled: process.env.BOT_ENABLED !== 'false',
+    model: process.env.BOT_MODEL || 'openai/gpt-5.6-luna',
+    maxToolRounds: int(process.env.BOT_MAX_TOOL_ROUNDS, 8),
+    historyMessages: int(process.env.BOT_HISTORY_MESSAGES, 30),
+  },
+
   auth: {
     jwtSecret: process.env.JWT_SECRET || 'career_copilot_os_dev_secret',
     email: (process.env.APP_USER_EMAIL || 'siddhantrangari@gmail.com').toLowerCase(),

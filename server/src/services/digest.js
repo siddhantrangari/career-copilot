@@ -1,5 +1,6 @@
 import { many, one } from '../db/pool.js';
 import { config } from '../config.js';
+import { tg } from './telegram.js';
 
 /**
  * Morning digest.
@@ -356,27 +357,18 @@ export function renderDigest(d, now = new Date(d.generatedAt)) {
 
 // ── Telegram ──────────────────────────────────────────────────────────
 
-async function telegram(method, body) {
-  const { botToken, apiBase } = config.digest.telegram;
-  if (!botToken) throw new DigestError('TELEGRAM_BOT_TOKEN is not set');
-  const res = await fetch(`${apiBase}/bot${botToken}/${method}`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body || {}),
-    signal: AbortSignal.timeout(20_000),
-  });
-  const data = await res.json().catch(() => ({}));
-  if (!res.ok || !data.ok) {
-    throw new DigestError(`Telegram ${method} failed: ${data.description || res.status}`, 502);
-  }
-  return data.result;
-}
+const telegram = (method, body) => tg(method, body);
 
 /**
  * Chats that have messaged the bot — how you find TELEGRAM_CHAT_ID: send the
- * bot any message, then call this.
+ * bot any message, then call this. Once a chat id is set the bot long-polls
+ * getUpdates itself, and a second getUpdates caller would make Telegram
+ * return 409 to both — so the configured chat is reported instead.
  */
 export async function telegramChats() {
+  if (config.digest.telegram.chatId) {
+    return [{ id: Number(config.digest.telegram.chatId) || config.digest.telegram.chatId, type: 'private', name: 'configured (TELEGRAM_CHAT_ID)' }];
+  }
   const updates = await telegram('getUpdates', { limit: 50 });
   const chats = new Map();
   for (const u of updates || []) {

@@ -1,4 +1,4 @@
-import { many, one, withTransaction } from '../db/pool.js';
+import { many, one, pool, withTransaction } from '../db/pool.js';
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -55,8 +55,30 @@ const toTrackedBlob = (rows, connections) => {
   return blob;
 };
 
+/**
+ * Content fingerprint of everything the prototype keeps in localStorage.
+ * The page holds that data in memory and saves all of it back, so a tab left
+ * open while the Telegram assistant edits the pipeline would overwrite those
+ * edits. The bridge compares this on returning to the tab and reloads when
+ * something changed elsewhere.
+ */
+async function stateVersion() {
+  const { rows } = await pool.query(`
+    SELECT md5(
+      COALESCE((SELECT string_agg(concat_ws('|', company_id, stage, win_status, msgs, jd, job_link, notes), '¦' ORDER BY company_id)
+                FROM tracked_companies), '') || '#' ||
+      COALESCE((SELECT string_agg(concat_ws('|', id, company_id, name, role, type, linkedin_url, status, notes), '¦' ORDER BY id)
+                FROM connections), '') || '#' ||
+      COALESCE((SELECT string_agg(concat_ws('|', id, name, region, apply_url), '¦' ORDER BY id)
+                FROM companies WHERE custom), '')
+    ) AS v`);
+  return rows[0].v;
+}
+
 export default async function stateRoutes(app) {
   app.addHook('onRequest', app.auth);
+
+  app.get('/version', async () => ({ version: await stateVersion() }));
 
   // GET /api/state — the whole prototype state in one round trip
   app.get('/', async () => {
@@ -69,6 +91,7 @@ export default async function stateRoutes(app) {
     const ui = await many('SELECT key, value FROM ui_state');
 
     return {
+      version: await stateVersion(),
       tracked: toTrackedBlob(tracked, connections),
       custom,
       ui: Object.fromEntries(ui.map((r) => [r.key, r.value])),
@@ -201,7 +224,7 @@ export default async function stateRoutes(app) {
     });
 
     const { connectionIds, ...saved } = counts;
-    return { saved, connectionIds };
+    return { saved, connectionIds, version: await stateVersion() };
   });
 
   // Arbitrary UI keys (daily checklist state and friends).

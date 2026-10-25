@@ -460,3 +460,40 @@ CREATE TABLE IF NOT EXISTS digest_runs (
 );
 
 CREATE INDEX IF NOT EXISTS digest_runs_date_idx ON digest_runs (digest_date DESC, created_at DESC);
+
+-- ── Telegram assistant ────────────────────────────────────────────────
+-- Conversation memory in the chat-completions shape, so recent turns can be
+-- replayed to the model as-is. "Start fresh" (/new) appends a 'reset' marker
+-- instead of deleting history; context loads from the latest marker on.
+CREATE TABLE IF NOT EXISTS bot_messages (
+  id            BIGSERIAL PRIMARY KEY,
+  chat_id       BIGINT NOT NULL,
+  role          TEXT NOT NULL,              -- user | assistant | tool | reset
+  content       TEXT,
+  tool_calls    JSONB,
+  tool_call_id  TEXT,
+  created_at    TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS bot_messages_chat_idx ON bot_messages (chat_id, id DESC);
+
+-- Every change the assistant makes, with what it was before — the audit
+-- trail behind "do it, then tell me what changed".
+CREATE TABLE IF NOT EXISTS bot_actions (
+  id          BIGSERIAL PRIMARY KEY,
+  tool        TEXT NOT NULL,
+  args        JSONB NOT NULL DEFAULT '{}'::jsonb,
+  company_id  TEXT,
+  before      JSONB,
+  after       JSONB,
+  ok          BOOLEAN NOT NULL DEFAULT true,
+  error       TEXT,
+  created_at  TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS bot_actions_created_idx ON bot_actions (created_at DESC);
+
+-- Small key/value store for the bot (Telegram update offset).
+CREATE TABLE IF NOT EXISTS bot_state (
+  key         TEXT PRIMARY KEY,
+  value       JSONB NOT NULL,
+  updated_at  TIMESTAMPTZ NOT NULL DEFAULT now()
+);

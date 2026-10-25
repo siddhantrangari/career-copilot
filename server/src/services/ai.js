@@ -113,7 +113,7 @@ export function parseJson(raw, fallback = null) {
   return fallback;
 }
 
-async function logRun({
+export async function logRun({
   kind, companyId, model, ok, error, durationMs, input, output,
   tokensIn = 0, tokensOut = 0, cachedIn = 0, sessionId,
 }) {
@@ -318,4 +318,55 @@ export async function chatText({ kind, companyId, system, user, maxTokens, input
     });
     throw err;
   }
+}
+
+/**
+ * One tool-calling turn, for the Telegram assistant.
+ *
+ * Kept apart from callProvider on purpose: a tool-call reply has no text
+ * content, which callProvider (rightly, for JSON tasks) treats as a failure.
+ * Returns the assistant message as the provider sent it — content and/or
+ * tool_calls — so the caller can append it to the transcript verbatim.
+ *
+ * `model` is a Mesh-style id ("openai/gpt-5.6-luna"); the direct OpenAI
+ * provider takes the bare id, so the vendor prefix is dropped for it.
+ */
+export async function chatWithTools({ messages, tools, model, maxTokens = 1200, timeoutMs = 90_000, kind = 'telegram-bot' }) {
+  const providers = activeProviders();
+  if (!providers.length) throw new AiError('No AI provider is configured', 503);
+
+  const failures = [];
+  for (const provider of providers) {
+    const useModel = provider.name === 'openai' ? (model || provider.model).replace(/^[a-z-]+\//, '') : (model || provider.model);
+    const payload = {
+      ...provider.buildPayload({ model: useModel, messages, maxTokens, json: false }),
+      tools,
+      tool_choice: 'auto',
+    };
+    const started = Date.now();
+    try {
+      const res = await fetch(`${provider.baseUrl}/chat/completions`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${provider.apiKey}` },
+        body: JSON.stringify(payload),
+        signal: AbortSignal.timeout(timeoutMs),
+      });
+      if (!res.ok) throw new AiError(`${provider.name} returned ${res.status}: ${(await res.text()).slice(0, 300)}`);
+      const data = await res.json();
+      const choice = data.choices?.[0];
+      if (!choice?.message) throw new AiError(`${provider.name} returned no message`);
+      const usage = data.usage || {};
+      await logRun({
+        kind, model: useModel, ok: true, durationMs: Date.now() - started,
+        tokensIn: usage.prompt_tokens || 0, tokensOut: usage.completion_tokens || 0,
+        cachedIn: usage.prompt_tokens_details?.cached_tokens || 0,
+      });
+      return { message: choice.message, finishReason: choice.finish_reason, model: useModel };
+    } catch (err) {
+      const msg = err.name === 'TimeoutError' ? `${provider.name} timed out` : err.message;
+      failures.push(`${provider.name}: ${msg}`);
+      await logRun({ kind, model: useModel, ok: false, error: msg, durationMs: Date.now() - started });
+    }
+  }
+  throw new AiError(`All AI providers failed → ${failures.join(' | ')}`);
 }

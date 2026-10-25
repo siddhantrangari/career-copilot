@@ -10,6 +10,7 @@ import { migrate } from './db/migrate.js';
 import { providerStatus } from './services/providers.js';
 import { failStaleJobs } from './services/jobs.js';
 import { startScheduler } from './services/scheduler.js';
+import { startBot } from './services/bot.js';
 
 import authRoutes from './routes/auth.js';
 import companyRoutes from './routes/companies.js';
@@ -109,6 +110,7 @@ try {
 }
 
 startScheduler(app.log);
+startBot(app.log);
 
 await app.listen({ port: config.port, host: config.host });
 app.log.info(`Career Copilot API on :${config.port} — providers: ${config.ai.order.join(' > ')}`);

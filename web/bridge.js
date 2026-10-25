@@ -142,6 +142,37 @@
   }
 
   // ── Server → localStorage hydration ─────────────────────────────────
+
+  /**
+   * Server state wins, but a few fields live only in the browser (JD file,
+   * free-text JD, role title, roles not yet saved), and companies tracked
+   * locally but not yet pushed are kept.
+   */
+  function mergeTracked(serverTracked, localTracked) {
+    var merged = serverTracked || {};
+    for (var k in localTracked) {
+      if (!merged[k]) {
+        merged[k] = localTracked[k];
+      } else {
+        if (localTracked[k].roles && Array.isArray(localTracked[k].roles) && localTracked[k].roles.length) {
+          if (!merged[k].roles || !merged[k].roles.length) {
+            merged[k].roles = localTracked[k].roles;
+          }
+        }
+        if (localTracked[k].roleTitle && !merged[k].roleTitle) {
+          merged[k].roleTitle = localTracked[k].roleTitle;
+        }
+        if (localTracked[k].jdText && !merged[k].jdText) {
+          merged[k].jdText = localTracked[k].jdText;
+        }
+        if (localTracked[k].jdFile && !merged[k].jdFile) {
+          merged[k].jdFile = localTracked[k].jdFile;
+        }
+      }
+    }
+    return merged;
+  }
+
   function hydrate() {
     // Two fetches in parallel: /state hydrates the two localStorage keys the
     // prototype reads on boot; /companies overrides its hard-coded COS[] so
@@ -155,27 +186,8 @@
 
       var localTracked = {};
       try { localTracked = JSON.parse(localStorage.getItem('sr_tracked') || '{}'); } catch(e){}
-      var mergedTracked = state.tracked || {};
-      for (var k in localTracked) {
-        if (!mergedTracked[k]) {
-          mergedTracked[k] = localTracked[k];
-        } else {
-          if (localTracked[k].roles && Array.isArray(localTracked[k].roles) && localTracked[k].roles.length) {
-            if (!mergedTracked[k].roles || !mergedTracked[k].roles.length) {
-              mergedTracked[k].roles = localTracked[k].roles;
-            }
-          }
-          if (localTracked[k].roleTitle && !mergedTracked[k].roleTitle) {
-            mergedTracked[k].roleTitle = localTracked[k].roleTitle;
-          }
-          if (localTracked[k].jdText && !mergedTracked[k].jdText) {
-            mergedTracked[k].jdText = localTracked[k].jdText;
-          }
-          if (localTracked[k].jdFile && !mergedTracked[k].jdFile) {
-            mergedTracked[k].jdFile = localTracked[k].jdFile;
-          }
-        }
-      }
+      var mergedTracked = mergeTracked(state.tracked || {}, localTracked);
+      knownVersion = state.version || null;
 
       localStorage.setItem('sr_tracked', JSON.stringify(mergedTracked));
       localStorage.setItem('sr_custom', JSON.stringify(state.custom || []));
@@ -240,6 +252,7 @@
     api('/state', { method: 'PUT', body: { tracked: tracked, custom: custom } })
       .then(function (res) {
         stampConnectionIds(tracked, (res && res.connectionIds) || {});
+        if (res && res.version) knownVersion = res.version;
         setStatus('ok', 'Synced');
       })
       .catch(function (e) {
@@ -288,8 +301,72 @@
 
   function scheduleSync() {
     clearTimeout(syncTimer);
-    syncTimer = setTimeout(pushState, 700);
+    dirty = true;
+    syncTimer = setTimeout(function () { dirty = false; pushState(); }, 700);
   }
+
+  // ── Staying in step with edits made elsewhere ───────────────────────
+  // The Telegram assistant (or another device) can change the pipeline while
+  // this tab is open. The prototype keeps its data in memory and saves all of
+  // it back, so a stale tab would quietly undo those edits. When the tab
+  // regains attention — and every 45s while visible — compare the server's
+  // content version and, if it moved, refresh the page's own objects in
+  // place and re-render. No reload, so half-typed text is never lost.
+  var knownVersion = null;
+  var dirty = false;
+  var refreshing = false;
+
+  /** A top-level `let` in the prototype script (tracked, custom, …), or null. */
+  function pageBinding(name) {
+    try { return (0, eval)('typeof ' + name + ' !== "undefined" ? ' + name + ' : null'); } catch (e) { return null; }
+  }
+
+  function replaceObject(target, source) {
+    if (!target || typeof target !== 'object') return;
+    Object.keys(target).forEach(function (k) { delete target[k]; });
+    Object.keys(source).forEach(function (k) { target[k] = source[k]; });
+  }
+
+  function replaceArray(target, source) {
+    if (!Array.isArray(target)) return;
+    target.splice.apply(target, [0, target.length].concat(source));
+  }
+
+  function refreshFromServer() {
+    if (refreshing || syncing || dirty || !knownVersion || document.visibilityState !== 'visible') return;
+    refreshing = true;
+    api('/state/version')
+      .then(function (v) {
+        if (!v || v.version === knownVersion) return;
+        return api('/state').then(function (state) {
+          // A local edit started meanwhile: let it save; the next check retries.
+          if (syncing || dirty) return;
+          var local = {};
+          try { local = JSON.parse(localStorage.getItem('sr_tracked') || '{}'); } catch (e) {}
+          var merged = mergeTracked(state.tracked || {}, local);
+          var custom = state.custom || [];
+          if (rawSetItem) {
+            rawSetItem('sr_tracked', JSON.stringify(merged));
+            rawSetItem('sr_custom', JSON.stringify(custom));
+          }
+          var live = pageBinding('tracked') || window.tracked;
+          replaceObject(live, JSON.parse(JSON.stringify(merged)));
+          if (window.tracked && window.tracked !== live) replaceObject(window.tracked, JSON.parse(JSON.stringify(merged)));
+          replaceArray(pageBinding('custom'), custom);
+          replaceArray(pageBinding('customCompanies'), custom);
+          knownVersion = state.version;
+          try { if (typeof window.renderCards === 'function') window.renderCards(); } catch (e) {}
+          try { if (typeof window.renderPipeline === 'function') window.renderPipeline(); } catch (e) {}
+          setStatus('ok', 'Updated from elsewhere');
+        });
+      })
+      .catch(function () {})
+      .then(function () { refreshing = false; });
+  }
+
+  document.addEventListener('visibilitychange', refreshFromServer);
+  window.addEventListener('focus', refreshFromServer);
+  setInterval(refreshFromServer, 45000);
 
   var rawSetItem = null;
 
