@@ -238,7 +238,8 @@
     try { custom = JSON.parse(localStorage.getItem('sr_custom') || '[]'); } catch (e) {}
 
     api('/state', { method: 'PUT', body: { tracked: tracked, custom: custom } })
-      .then(function () {
+      .then(function (res) {
+        stampConnectionIds(tracked, (res && res.connectionIds) || {});
         setStatus('ok', 'Synced');
       })
       .catch(function (e) {
@@ -250,13 +251,51 @@
       });
   }
 
+  /**
+   * The server upserts contacts and never deletes them, matching on the row
+   * id first. A contact added since the last load has no id yet, so copy the
+   * ids the PUT handed back onto it — in the prototype's live `tracked`
+   * object (or its next save would drop them) and in localStorage. Only an
+   * entry that still has no id and the same name + URL as the one sent is
+   * stamped, so edits made while the request was in flight are left alone.
+   */
+  function stampConnectionIds(sent, idsByCompany) {
+    var stored = {};
+    try { stored = JSON.parse(localStorage.getItem('sr_tracked') || '{}'); } catch (e) {}
+    var targets = [stored];
+    if (window.tracked && typeof window.tracked === 'object') targets.push(window.tracked);
+
+    var changed = false;
+    Object.keys(idsByCompany).forEach(function (companyId) {
+      var ids = idsByCompany[companyId] || [];
+      var sentConns = (sent[companyId] && sent[companyId].connections) || [];
+      targets.forEach(function (target) {
+        var conns = target[companyId] && target[companyId].connections;
+        if (!Array.isArray(conns)) return;
+        ids.forEach(function (rowId, i) {
+          var was = sentConns[i];
+          var cn = conns[i];
+          if (!rowId || !was || !cn || cn.id) return;
+          if ((cn.name || '') !== (was.name || '') || (cn.li || '') !== (was.li || '')) return;
+          cn.id = rowId;
+          if (target === stored) changed = true;
+        });
+      });
+    });
+    // Unpatched write: stamping ids must not schedule another sync.
+    if (changed && rawSetItem) rawSetItem('sr_tracked', JSON.stringify(stored));
+  }
+
   function scheduleSync() {
     clearTimeout(syncTimer);
     syncTimer = setTimeout(pushState, 700);
   }
 
+  var rawSetItem = null;
+
   function patchStorage() {
     var original = localStorage.setItem.bind(localStorage);
+    rawSetItem = original;
     localStorage.setItem = function (key, value) {
       original(key, value);
       if (SYNC_KEYS.indexOf(key) !== -1) scheduleSync();

@@ -1,5 +1,7 @@
 import { many, one, withTransaction } from '../db/pool.js';
 
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 /**
  * Compatibility layer for the single-file prototypes in /artifacts.
  *
@@ -99,10 +101,11 @@ export default async function stateRoutes(app) {
         );
       }
 
-      const ids = Object.keys(tracked);
+      const trackedIds = Object.keys(tracked);
       let connCount = 0;
+      const connectionIds = {};
 
-      for (const companyId of ids) {
+      for (const companyId of trackedIds) {
         const t = tracked[companyId] || {};
 
         // Skip ids that never made it into the companies table.
@@ -128,30 +131,77 @@ export default async function stateRoutes(app) {
           ],
         );
 
-        // Connections are a full replace — the prototype owns the array.
-        await client.query('DELETE FROM connections WHERE company_id = $1', [companyId]);
+        // Connections are upserted, never deleted. This used to delete the
+        // company's whole list and re-insert the array, so a device holding a
+        // stale copy erased contacts added elsewhere. A contact missing from
+        // the array is now left alone; removal is a deliberate single-record
+        // call (DELETE /api/tracked/:id/connections/:connId).
+        //
+        // Matching order: the row id the client got from GET /api/state, then
+        // the LinkedIn URL, then the name when there is no URL. `used` stops
+        // two entries in one payload collapsing into the same row.
         const conns = Array.isArray(t.connections) ? t.connections : [];
+        const used = [];
+        const ids = [];
         for (const [i, cn] of conns.entries()) {
-          if (!cn?.name && !cn?.li) continue;
-          await client.query(
-            `INSERT INTO connections (company_id, position, name, role, type, linkedin_url, status, notes)
-             VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
-            [
-              companyId, i, cn.name || '', cn.role || '', cn.type || 'peer',
-              cn.li || cn.linkedinUrl || '', cn.status || 'req', cn.notes || '',
-            ],
-          );
+          if (!cn?.name && !cn?.li) { ids.push(null); continue; }
+          const li = (cn.li || cn.linkedinUrl || '').trim();
+          const name = (cn.name || '').trim();
+
+          let rowId = null;
+          if (UUID.test(cn.id || '')) {
+            const hit = await client.query(
+              'SELECT id FROM connections WHERE id = $1 AND company_id = $2',
+              [cn.id, companyId],
+            );
+            rowId = hit.rows[0]?.id || null;
+          }
+          if (!rowId) {
+            const hit = await client.query(
+              `SELECT id FROM connections
+               WHERE company_id = $1 AND NOT (id = ANY($4::uuid[]))
+                 AND CASE WHEN $2 <> '' THEN linkedin_url = $2
+                          ELSE linkedin_url = '' AND lower(name) = lower($3) END
+               ORDER BY created_at LIMIT 1`,
+              [companyId, li, name, used],
+            );
+            rowId = hit.rows[0]?.id || null;
+          }
+
+          const values = [
+            companyId, i, name, cn.role || '', cn.type || 'peer',
+            li, cn.status || 'req', cn.notes || '',
+          ];
+          const res = rowId
+            ? await client.query(
+              `UPDATE connections SET position = $2, name = $3, role = $4, type = $5,
+                 linkedin_url = $6, status = $7, notes = $8, updated_at = now()
+               WHERE id = $9 AND company_id = $1 RETURNING id`,
+              [...values, rowId],
+            )
+            : await client.query(
+              `INSERT INTO connections (company_id, position, name, role, type, linkedin_url, status, notes)
+               VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id`,
+              values,
+            );
+          used.push(res.rows[0].id);
+          ids.push(res.rows[0].id);
           connCount += 1;
         }
+        // Handed back so the client can stamp new contacts with their row id.
+        connectionIds[companyId] = ids;
       }
 
       // Do not blindly purge untracked companies during state sync to protect
       // against multi-device sync overwrites. Explicit removals use DELETE /api/tracked/:id.
 
-      return { tracked: ids.length, connections: connCount, custom: custom.length };
+      return {
+        tracked: trackedIds.length, connections: connCount, custom: custom.length, connectionIds,
+      };
     });
 
-    return { saved: counts };
+    const { connectionIds, ...saved } = counts;
+    return { saved, connectionIds };
   });
 
   // Arbitrary UI keys (daily checklist state and friends).

@@ -5169,7 +5169,8 @@ function saveConn(){
   if(!tracked[id])tracked[id]={stage:'networking',connections:[],msgs:'',win:'none',notes:'',jd:''};
   if(!tracked[id].connections)tracked[id].connections=[];
   const cn={name:document.getElementById('cName').value,role:document.getElementById('cRole').value,type:document.getElementById('cType').value,li:document.getElementById('cLI').value,status:document.getElementById('cStatus').value,notes:document.getElementById('cNotes').value};
-  if(editConnIdx!==null)tracked[id].connections[editConnIdx]=cn;
+  // Keep the server row id on edit, so the sync updates this contact instead of adding a copy.
+  if(editConnIdx!==null){const prev=tracked[id].connections[editConnIdx];if(prev&&prev.id)cn.id=prev.id;tracked[id].connections[editConnIdx]=cn;}
   else tracked[id].connections.push(cn);
   saveTr();renderConnList(tracked[id].connections);closeM('connModal');
 }
