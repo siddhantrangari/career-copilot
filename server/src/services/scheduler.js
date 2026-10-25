@@ -91,10 +91,25 @@ export function startScheduler(log) {
     }
   };
 
+  const indiaIntervalMs = config.india.intervalHours * 3600_000;
+  const indiaTick = async () => {
+    if (!config.india.enabled) return;
+    try {
+      if (!(await dueForRun(indiaIntervalMs, 'india-discovery'))) return;
+      const { runIndiaDiscovery } = await import('./india-sources.js');
+      log.info('[agent] India discovery starting');
+      const res = await runIndiaDiscovery({ trigger: 'scheduled' });
+      log.info(`[agent] India discovery done — ${res.jobsNew} new, ${res.jobsSeen} relevant, ${res.errors.length} errors`);
+    } catch (err) {
+      log.error(`[agent] India discovery failed: ${err.message}`);
+    }
+  };
+
   // A short delay on boot keeps startup fast and avoids a thundering restart.
   setTimeout(tick, 60_000);
   setTimeout(gigTick, 120_000);
-  timer = setInterval(() => { tick(); gigTick(); }, 30 * 60_000); // dueForRun gates each
+  setTimeout(indiaTick, 180_000);
+  timer = setInterval(() => { tick(); gigTick(); indiaTick(); }, 30 * 60_000); // dueForRun gates each
   log.info(
     `[agent] job discovery every ${config.discovery.intervalHours}h, ` +
     `gig discovery every ${config.discovery.gigIntervalHours}h`,

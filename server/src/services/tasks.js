@@ -676,6 +676,11 @@ async function gigDiscovery(payload, ctx) {
   return runGigDiscovery({ trigger: 'manual', ...(payload || {}), onStep: ctx?.onStep });
 }
 
+async function indiaDiscovery(payload) {
+  const { runIndiaDiscovery } = await import('./india-sources.js');
+  return runIndiaDiscovery({ trigger: 'manual', ...(payload || {}) });
+}
+
 async function jobDiscovery(payload) {
   const { runDiscovery } = await import('./discovery.js');
   return runDiscovery({ trigger: 'manual', ...(payload || {}) });
@@ -684,6 +689,7 @@ async function jobDiscovery(payload) {
 /** Everything the job runner is allowed to execute. */
 export const TASKS = {
   'job-discovery': jobDiscovery,
+  'india-discovery': indiaDiscovery,
   'gig-discovery': gigDiscovery,
   'recording-upload': recordingUpload,
   'linkedin-resolve': linkedinResolve,

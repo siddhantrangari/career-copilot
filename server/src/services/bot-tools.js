@@ -717,6 +717,7 @@ const TASK_KINDS = {
   interview_prep: 'interview-prep',
   linkedin_post: 'linkedin-post',
   job_scan: 'job-discovery',
+  india_job_scan: 'india-discovery',
 };
 
 async function startAiTask(args) {
@@ -729,7 +730,7 @@ async function startAiTask(args) {
   if (round && !ROUNDS.includes(round)) throw new ToolError(`round must be one of ${ROUNDS.join(', ')}`);
 
   let c = null; let r = null; let t = null;
-  if (!['linkedin_post', 'job_scan'].includes(task)) {
+  if (!['linkedin_post', 'job_scan', 'india_job_scan'].includes(task)) {
     c = await findCompany(company);
     t = await tracking(c.id);
     r = findRole(splitNotes(t?.notes).roles, role);
@@ -752,6 +753,7 @@ async function startAiTask(args) {
     interview_prep: { companyId: c?.id, roleTitle, round: round || 'any', jobDescription: jobDescription || r?.jdText || '' },
     linkedin_post: { topic },
     job_scan: {},
+    india_job_scan: {},
   };
   if (task === 'linkedin_post' && !topic) throw new ToolError('topic is required for a LinkedIn post');
 
@@ -761,6 +763,14 @@ async function startAiTask(args) {
     taskId: job.id, task, company: c?.name, role: roleTitle || undefined,
     status: 'started — the result will be messaged automatically when it finishes',
     typicalDuration: { research: '~2 min', win_doc: '~2–3 min', interview_prep: '~1–2 min', job_scan: '~1–3 min' }[task] || '~30–90 s',
+  };
+}
+
+async function portalLinks({ query: q = 'AI Engineer', location = 'Bangalore' } = {}) {
+  const { portalSearchLinks } = await import('./india-sources.js');
+  return {
+    note: 'Instahyre, Naukri, LinkedIn and foundit forbid automated reading, so these are search links for him to open.',
+    links: portalSearchLinks(q, location),
   };
 }
 
@@ -811,6 +821,7 @@ const TOOLS = [
     company: companyArg, role: str(), jobDescription: str(), instructions: str(), contactName: str(),
     problems: { type: 'array', items: { type: 'string' } }, topic: str(), round: { type: 'string', enum: ROUNDS }, force: bool,
   }, ['task', 'confirmedByUser']), startAiTask],
+  ['portal_links', 'Search links for Instahyre, Naukri, LinkedIn, foundit, Indeed India, Wellfound (not read automatically — he opens them). Offer when search_jobs is thin.', S({ query: str('role'), location: str() }), portalLinks],
   ['send_digest_now', "Send today's digest now.", S({}), sendDigestNow],
 ];
 

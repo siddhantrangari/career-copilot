@@ -128,6 +128,15 @@ export const config = {
     },
   },
 
+  // India discovery: Workday + SmartRecruiters public APIs need no key; the
+  // aggregators stay off until their key is set.
+  india: {
+    enabled: process.env.INDIA_DISCOVERY_ENABLED !== 'false',
+    intervalHours: Math.max(6, int(process.env.INDIA_DISCOVERY_INTERVAL_HOURS, 12)),
+    adzuna: { appId: process.env.ADZUNA_APP_ID || '', appKey: process.env.ADZUNA_APP_KEY || '' },
+    jsearch: { apiKey: process.env.JSEARCH_API_KEY || '', host: process.env.JSEARCH_HOST || 'jsearch.p.rapidapi.com' },
+  },
+
   // Telegram assistant — chat with the whole app from the same bot that
   // sends the digest. Answers only TELEGRAM_CHAT_ID.
   bot: {

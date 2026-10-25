@@ -188,7 +188,7 @@ const ROLE_PATTERNS = [
   // Manager are commercial roles that merely sound similar, and are excluded
   // below rather than scored here.
   { role: 'se', weight: 35, re: /solutions? engineer|customer engineer/i },
-  { role: 'fs', weight: 30, re: /full[- ]?stack|backend engineer|software engineer|platform engineer/i },
+  { role: 'fs', weight: 30, re: /full[- ]?stack|back[- ]?end (engineer|developer)|software (engineer|developer|development engineer)|\bsde\b|platform engineer|member of (the )?technical staff|\b[sl]?mts\b/i },
   { role: 'senior', weight: 15, re: /\b(senior|staff|principal|lead|sr\.?)\b/i },
 ];
 
@@ -208,7 +208,7 @@ const EXCLUDE = new RegExp([
 
 const DSA_SIGNALS = /leetcode|data structures and algorithms|algorithmic (interview|assessment)|hackerrank|codesignal|competitive programming/i;
 
-const LOCATION_OK = /remote|hybrid|onsite|on-site|emea|europe|london|berlin|amsterdam|munich|paris|dublin|madrid|lisbon|zurich|stockholm|dubai|abu dhabi|uae|riyadh|saudi|doha|qatar|singapore|tokyo|sydney|toronto|vancouver|san francisco|sf|bay area|new york|nyc|seattle|austin|boston|chicago|india|bangalore|mumbai|delhi|hyderabad|pune|anywhere|global|worldwide|us|united states|uk|united kingdom/i;
+const LOCATION_OK = /remote|hybrid|onsite|on-site|emea|europe|london|berlin|amsterdam|munich|paris|dublin|madrid|lisbon|zurich|stockholm|dubai|abu dhabi|uae|riyadh|saudi|doha|qatar|singapore|tokyo|sydney|toronto|vancouver|san francisco|sf|bay area|new york|nyc|seattle|austin|boston|chicago|india|bangalore|bengaluru|bengalore|mumbai|delhi|gurgaon|gurugram|noida|chennai|hyderabad|pune|anywhere|global|worldwide|us|united states|uk|united kingdom/i;
 
 export function scoreJob(job) {
   const title = job.title || '';
