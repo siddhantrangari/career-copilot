@@ -40,7 +40,6 @@ async function countsSince(since) {
          + (SELECT count(*) FROM connections WHERE created_at >= $1) AS connections,
        (SELECT COALESCE(sum(count), 0) FROM outreach_activity WHERE kind IN ('dm', 'follow_up') AND at >= $1)
          + (SELECT count(*) FROM connections WHERE status IN ('dm', 'fu1', 'fu2', 'fu3') AND COALESCE(status_changed_at, created_at) >= $1) AS dms,
-       (SELECT COALESCE(sum(count), 0) FROM outreach_activity WHERE kind = 'application' AND at >= $1) AS applications_logged,
        (SELECT COALESCE(sum(count), 0) FROM outreach_activity WHERE kind = 'post' AND at >= $1) AS posts,
        (SELECT COALESCE(sum(count), 0) FROM outreach_activity WHERE kind = 'referral_ask' AND at >= $1)
          + (SELECT count(*) FROM connections WHERE status = 'ref' AND COALESCE(status_changed_at, created_at) >= $1) AS referrals,
@@ -51,40 +50,58 @@ async function countsSince(since) {
   return Object.fromEntries(Object.entries(r).map(([k, v]) => [k, Number(v)]));
 }
 
+const key = (...parts) => parts.map((p) => String(p || '').toLowerCase().trim()).join(':');
+
 /**
- * Applications: roles whose applied date falls in the window, or a company
- * moved to "applied" in it when it has no roles — plus any logged directly.
+ * Applications in the window, each counted once. One application can be
+ * recorded twice — Done on an Apply action, and the role marked applied in
+ * Track — so both are reduced to a company:role key and merged. A company
+ * moved to "applied" with no roles counts once unless a role there is
+ * already counted. +1 presses carry no key and are added as they are.
  */
-function applicationsSince(tracked, since) {
-  let n = 0;
+export function applicationsSince(tracked, logged, since) {
+  const roles = new Set();       // company:role
+  const companies = new Set();   // companies with a counted role
+  const companyOnly = new Set(); // applied with no role named
+  const addRole = (company, role) => { roles.add(key(company, role)); companies.add(key(company)); };
+  let unkeyed = 0;
+
+  for (const a of logged) {
+    if (new Date(a.at) < since) continue;
+    const m = /^action:apply:(.*)$/.exec(a.note || '');
+    if (!m) { unkeyed += a.count; continue; }
+    const [company, ...role] = m[1].split(':');
+    addRole(company, role.join(':'));
+  }
   for (const t of tracked) {
-    const roles = rolesOf(t.notes);
-    if (roles.length) {
-      for (const r of roles) {
+    const rs = rolesOf(t.notes);
+    if (rs.length) {
+      for (const r of rs) {
         if (r.stage !== 'applied' && !r.appliedAt) continue;
         const d = parseLooseDate(r.appliedAt);
-        if (d && d >= since) n += 1;
+        if (d && d >= since) addRole(t.company, r.title);
       }
     } else if (t.stage === 'applied' && t.stage_changed_at && new Date(t.stage_changed_at) >= since) {
-      n += 1;
+      companyOnly.add(key(t.company));
     }
   }
-  return n;
+  const extra = [...companyOnly].filter((c) => !companies.has(c)).length;
+  return roles.size + extra + unkeyed;
 }
-
-const key = (...parts) => parts.map((p) => String(p || '').toLowerCase().trim()).join(':');
 
 export async function buildToday(now = new Date()) {
   const { day, week } = await boundaries();
   const g = config.targets;
-  const [tracked, cToday, cWeek] = await Promise.all([
-    many(`SELECT company_id, stage, notes, stage_changed_at FROM tracked_companies`),
+  const [tracked, logged, cToday, cWeek] = await Promise.all([
+    many(`SELECT t.company_id, t.stage, t.notes, t.stage_changed_at, c.name AS company
+          FROM tracked_companies t JOIN companies c ON c.id = t.company_id`),
+    many(`SELECT at, count, note FROM outreach_activity WHERE kind = 'application' AND at >= $1`, [week]),
     countsSince(day), countsSince(week),
   ]);
   const targets = (c, mult) => ({
     connections: { done: c.connections, target: g.daily.connections * mult, label: 'Connection requests' },
     dms: { done: c.dms, target: g.daily.dms * mult, label: 'DMs to HMs / peers' },
-    applications: { done: c.applications_logged + applicationsSince(tracked, mult === 1 ? day : week), target: g.daily.applications * mult, label: 'Applications' },
+    applications: { done: applicationsSince(tracked, logged, mult === 1 ? day : week), target: g.daily.applications * mult, label: 'Applications' },
     posts: { done: c.posts, target: g.daily.posts * mult, label: 'LinkedIn posts' },
     referrals: { done: c.referrals, target: g.daily.referrals * mult, label: 'Referral asks' },
   });
@@ -93,6 +110,11 @@ export async function buildToday(now = new Date()) {
   const doneKeys = new Set((await many(
     `SELECT note FROM outreach_activity WHERE at >= $1 AND note LIKE 'action:%'`, [day],
   )).map((r) => r.note.slice(7)));
+
+  // An application marked done stays done, not just for today.
+  for (const r of await many(`SELECT note FROM outreach_activity WHERE kind = 'application' AND note LIKE 'action:apply:%'`)) {
+    doneKeys.add(r.note.slice(7));
+  }
 
   const actions = [];
   const push = (a) => { if (!doneKeys.has(a.key)) actions.push(a); };
