@@ -268,10 +268,17 @@ export async function buildDigest(now = new Date()) {
     const gj = await import('./google-jobs.js');
     if (gj.googleJobsReady()) searchUsage = gj.usageLine(await gj.searchUsage());
   } catch { searchUsage = null; }
+  let plan = null;
+  try {
+    const { outreachPlan, progressLine } = await import('./targets.js');
+    const p = await outreachPlan({ limit: 5 });
+    plan = { progress: progressLine(p.progress), targets: p.targets, suggested: p.suggested };
+  } catch { plan = null; }
   return {
     generatedAt: now.toISOString(),
     date: localDate(now),
     searchUsage,
+    plan,
     interviews: interviewsFrom(tracked, now),
     jobs: { items: jobs, total },
     followUps: followUpsFrom(tracked, contacts, now),
@@ -304,6 +311,20 @@ export function renderDigest(d, now = new Date(d.generatedAt)) {
       lines.push(`• ${esc(u.company)} — at Interview stage, no date set`);
     }
     lines.push(`  ${link(`${app}/interview.html`, 'Run a mock')} · prep guides live in the Interview Room`);
+    sections.push(lines);
+  }
+
+  // Company-first: where to spend the week, before the list of new postings.
+  if (d.plan && d.plan.targets?.length) {
+    const lines = [`🎯 <b>This week</b> — ${esc(d.plan.progress)}`];
+    for (const t of d.plan.targets) {
+      const badge = `${t.priority ? '⭐ ' : ''}${t.tag === 'apply' ? 'APPLY' : 'OUTREACH'}`;
+      lines.push(`• <b>${esc(t.name)}</b> · ${badge}${t.why_now ? ` — ${esc(t.why_now)}` : ''}`);
+      if (t.nextAction) lines.push(`   → ${esc(t.nextAction)}`);
+    }
+    if (d.plan.suggested?.length) {
+      lines.push(`   ➕ Worth adding to your list: ${d.plan.suggested.map((s) => esc(s.name)).join(', ')}`);
+    }
     sections.push(lines);
   }
 

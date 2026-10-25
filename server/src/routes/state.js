@@ -85,10 +85,12 @@ export default async function stateRoutes(app) {
     const tracked = await many('SELECT * FROM tracked_companies');
     const connections = await many('SELECT * FROM connections ORDER BY company_id, position, created_at');
     const custom = await many(
-      // Qualified on purpose: company_why has its own name column, and an
-      // unqualified `name` inside the subquery binds to it, matching every row.
+      // Qualified on purpose: company_why and company_targets both have their
+      // own name column, and an unqualified `name` inside a subquery binds to
+      // it, matching every row.
       `SELECT c.id, c.name, c.region, c.roles, c.pay, c.description AS desc, c.apply_url AS apply, c.dsa, c.custom,
-              (SELECT w.why FROM company_why w WHERE w.key = lower(trim(c.name))) AS why
+              (SELECT w.why FROM company_why w WHERE w.key = lower(trim(c.name))) AS why,
+              (SELECT json_build_object('tag', ct.tag, 'priority', ct.priority, 'rank', ct.rank, 'whyNow', ct.why_now, 'hiring', ct.hiring_score, 'fit', ct.company_fit) FROM company_targets ct WHERE ct.key = lower(trim(c.name))) AS target
        FROM companies c WHERE c.custom = true ORDER BY c.created_at`,
     );
     const ui = await many('SELECT key, value FROM ui_state');

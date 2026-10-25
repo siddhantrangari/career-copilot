@@ -155,6 +155,15 @@ export const config = {
     })(),
   },
 
+  // Targeting and outreach (NxtJob method). Free signals refresh daily; a
+  // grounded web search per company refreshes researched signals weekly for
+  // at most researchPerWeek companies.
+  targets: {
+    researchPerWeek: Math.min(int(process.env.TARGETS_RESEARCH_PER_WEEK, 20), 40),
+    weeklyConnections: int(process.env.OUTREACH_WEEKLY_CONNECTIONS, 100),
+    weeklyCalls: int(process.env.OUTREACH_WEEKLY_CALLS, 3),
+  },
+
   // Telegram assistant — chat with the whole app from the same bot that
   // sends the digest. Answers only TELEGRAM_CHAT_ID.
   bot: {

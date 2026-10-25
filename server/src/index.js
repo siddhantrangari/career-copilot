@@ -23,6 +23,7 @@ import stateRoutes from './routes/state.js';
 import interviewRoutes from './routes/interview.js';
 import linkedInRoutes from './routes/linkedin.js';
 import digestRoutes from './routes/digest.js';
+import targetRoutes from './routes/targets.js';
 
 const app = Fastify({
   logger: {
@@ -91,6 +92,7 @@ await app.register(stateRoutes, { prefix: '/api/state' });
 await app.register(interviewRoutes, { prefix: '/api/interview' });
 await app.register(linkedInRoutes, { prefix: '/api/linkedin' });
 await app.register(digestRoutes, { prefix: '/api/digest' });
+await app.register(targetRoutes, { prefix: '/api/targets' });
 
 app.setErrorHandler((err, request, reply) => {
   const status = err.statusCode && err.statusCode >= 400 ? err.statusCode : 500;
@@ -110,6 +112,8 @@ try {
 }
 
 startScheduler(app.log);
+// Navigator title aliases feed the boolean searches.
+import('./services/targets.js').then((m) => m.loadNavigator()).catch(() => {});
 startBot(app.log);
 
 await app.listen({ port: config.port, host: config.host });

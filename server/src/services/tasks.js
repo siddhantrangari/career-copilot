@@ -676,6 +676,16 @@ async function gigDiscovery(payload, ctx) {
   return runGigDiscovery({ trigger: 'manual', ...(payload || {}), onStep: ctx?.onStep });
 }
 
+async function targetsRefresh(payload, ctx) {
+  const { refreshTargets } = await import('./targets.js');
+  return refreshTargets({ trigger: 'manual', research: true, ...(payload || {}), onStep: ctx?.onStep });
+}
+
+async function navigator() {
+  const { generateNavigator } = await import('./targets.js');
+  return { navigator: await generateNavigator() };
+}
+
 async function googleJobs(payload) {
   const { runGoogleJobs } = await import('./google-jobs.js');
   return runGoogleJobs({ trigger: 'manual', ...(payload || {}) });
@@ -702,6 +712,8 @@ export const TASKS = {
   'india-discovery': indiaDiscovery,
   'why-lines': whyLines,
   'google-jobs': googleJobs,
+  'targets-refresh': targetsRefresh,
+  'navigator': navigator,
   'gig-discovery': gigDiscovery,
   'recording-upload': recordingUpload,
   'linkedin-resolve': linkedinResolve,

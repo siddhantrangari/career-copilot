@@ -551,3 +551,54 @@ CREATE TABLE IF NOT EXISTS serp_notices (
   key        TEXT PRIMARY KEY,               -- e.g. month-80:2026-10, cap-day:2026-10-26
   sent_at    TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+
+-- ── Targeting: Navigator, target companies, outreach ──────────────────
+-- The NxtJob method is company-first: pick the niche from evidence, rank
+-- companies by hiring signals, apply where a good-fit role is open, and
+-- reach insiders where it is not. These tables hold that layer on top of
+-- job discovery.
+
+-- Evidence-based niche and title aliases (one row).
+CREATE TABLE IF NOT EXISTS target_profile (
+  id            TEXT PRIMARY KEY DEFAULT 'siddhant',
+  data          JSONB NOT NULL,
+  generated_at  TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+-- One row per employer (catalogue or found by discovery), keyed by name.
+-- Free signals are recomputed daily from jobs; researched signals weekly.
+CREATE TABLE IF NOT EXISTS company_targets (
+  key              TEXT PRIMARY KEY,            -- lower(trim(name))
+  company_id       TEXT,                        -- catalogue id when it is one
+  name             TEXT NOT NULL,
+  open_fit75       INTEGER NOT NULL DEFAULT 0,  -- open roles with fit >= 75
+  new_30d          INTEGER NOT NULL DEFAULT 0,  -- relevant roles first seen in 30 days
+  prev_30d         INTEGER NOT NULL DEFAULT 0,  -- the 30 days before that
+  best_fit         INTEGER,
+  best_job_id      UUID,
+  research         JSONB,                       -- { signals[], layoffs, hiringScore, companyFit, whyNow, sources[] }
+  research_at      TIMESTAMPTZ,
+  hiring_score     INTEGER NOT NULL DEFAULT 0,  -- 0-100
+  company_fit      INTEGER NOT NULL DEFAULT 0,  -- 0-100
+  tag              TEXT NOT NULL DEFAULT 'watch', -- apply | outreach | watch
+  priority         BOOLEAN NOT NULL DEFAULT false,
+  why_now          TEXT,
+  rank             INTEGER,
+  in_catalogue     BOOLEAN NOT NULL DEFAULT false,
+  updated_at       TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS company_targets_rank_idx ON company_targets (rank NULLS LAST);
+
+-- Outreach actions he reports (connection requests, DMs, calls, referral
+-- asks). Contacts logged in `connections` count too; this covers batches
+-- like "sent 5 requests at Adyen" without naming each person.
+CREATE TABLE IF NOT EXISTS outreach_activity (
+  id            BIGSERIAL PRIMARY KEY,
+  at            TIMESTAMPTZ NOT NULL DEFAULT now(),
+  company_id    TEXT,
+  company_name  TEXT NOT NULL DEFAULT '',
+  kind          TEXT NOT NULL,   -- connection_request | dm | follow_up | call | referral_ask | win_doc_sent | application
+  count         INTEGER NOT NULL DEFAULT 1,
+  note          TEXT
+);
+CREATE INDEX IF NOT EXISTS outreach_activity_at_idx ON outreach_activity (at DESC);

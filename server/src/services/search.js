@@ -81,6 +81,8 @@ export async function groundedSearch(query, { maxTokens = 1600, timeoutMs = 120_
       })),
       model: provider.model,
       searchedAt: new Date().toISOString(),
+      // Token usage (and cost, when Mesh reports it) so callers can log spend.
+      usage: data.usage || {},
     };
   } catch (err) {
     if (err.name === 'AbortError') throw new AiError('Search request timed out', 504);

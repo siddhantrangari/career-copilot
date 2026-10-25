@@ -885,6 +885,8 @@
               '<div style="flex:1;min-width:0">' +
               '<a href="' + esc(j.url) + '" target="_blank" rel="noopener" ' +
               'style="color:#e7ecf3;text-decoration:none;font-weight:600">' + esc(j.title) + '</a>' +
+              (j.target_priority ? ' <span style="font-size:9.5px;font-weight:800;color:#fbbf24">⭐ PRIORITY</span>' : '') +
+              (j.target_tag === 'apply' ? ' <span style="font-size:9.5px;font-weight:800;color:#34d399">APPLY</span>' : j.target_tag === 'outreach' ? ' <span style="font-size:9.5px;font-weight:800;color:#c4b5fd">OUTREACH</span>' : '') +
               '<div class="cc-muted" style="font-size:11px">' + esc(j.company_name) +
               (j.location ? ' · ' + esc(j.location) : '') +
               (j.fit_score != null ? ' · <b style="color:' + (j.fit_score >= 75 ? '#7ee0a8' : j.fit_score >= 55 ? '#ffd166' : '#ff8787') + '">fit ' + j.fit_score + '</b>' : ' · match ' + j.relevance) +
@@ -1109,11 +1111,88 @@
     build();
   }
 
+  // ── Targets panel: company-first plan (NxtJob method) ───────────────
+  // apply = a fit-75+ role is open; outreach = no matching role posted, so
+  // reach insiders; ⭐ priority = hiring hard and one of his best fits.
+  function buildTargetsPanel() {
+    var host = document.getElementById('discovery') || document.getElementById('jobs');
+    var feed = document.getElementById('cc-feed');
+    if (!host || !feed || host.querySelector('#cc-targets')) return;
+    var first = document.getElementById('cc-digest') || feed;
+
+    var panel = document.createElement('div');
+    panel.id = 'cc-targets';
+    panel.style.cssText = 'background:#141822;border:1px solid #232a38;border-radius:14px;padding:16px 20px;margin-bottom:16px';
+    panel.innerHTML =
+      '<div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">' +
+      '<div><strong style="font-size:15px">🎯 Target companies</strong>' +
+      '<div class="cc-muted" id="cc-tg-sub">Loading…</div></div>' +
+      '<div style="display:flex;gap:6px;flex-wrap:wrap" id="cc-tg-filters">' +
+      ['all', 'priority', 'apply', 'outreach'].map(function (f) {
+        return '<button class="btn' + (f === 'all' ? ' pri' : '') + '" type="button" data-f="' + f + '" style="font-size:11px;padding:4px 10px">' +
+          { all: 'All', priority: '⭐ Priority', apply: 'Apply', outreach: 'Outreach' }[f] + '</button>';
+      }).join('') +
+      '</div></div><div id="cc-tg-body" style="margin-top:12px"></div>';
+    host.insertBefore(panel, first);
+
+    var sub = document.getElementById('cc-tg-sub');
+    var body = document.getElementById('cc-tg-body');
+    var data = null;
+    var filter = 'all';
+    var badge = function (t) {
+      return (t.priority ? '<span style="font-size:9.5px;font-weight:800;color:#fbbf24;margin-right:6px">⭐ PRIORITY</span>' : '') +
+        '<span style="font-size:9.5px;font-weight:800;color:' + (t.tag === 'apply' ? '#34d399' : '#c4b5fd') + '">' + (t.tag === 'apply' ? 'APPLY' : 'OUTREACH') + '</span>';
+    };
+    function render() {
+      if (!data) return;
+      var rows = data.targets.filter(function (t) { return filter === 'all' || (filter === 'priority' ? t.priority : t.tag === filter); });
+      body.innerHTML = rows.length ? rows.map(function (t) {
+        return '<div style="display:flex;gap:12px;padding:9px 0;border-bottom:1px solid #1e2430;align-items:flex-start">' +
+          '<span style="flex:none;width:30px;font-size:12px;font-weight:800;color:#7c8ba3">#' + t.rank + '</span>' +
+          '<div style="flex:1;min-width:0">' +
+          '<div><b style="color:#e7ecf3">' + esc(t.name) + '</b> ' + badge(t) +
+          '<span class="cc-muted" style="font-size:11px"> · hiring ' + t.hiring_score + ' · fit ' + t.company_fit +
+          (t.in_catalogue ? '' : ' · not in your list') + (t.pipeline_stage ? ' · ' + esc(t.pipeline_stage) : '') + '</span></div>' +
+          (t.why_now ? '<div style="font-size:11.5px;color:#fbbf24;margin-top:2px">📈 ' + esc(t.why_now) + '</div>' : '') +
+          (t.best_role ? '<div style="font-size:11.5px;margin-top:2px"><a target="_blank" rel="noopener" style="color:#9fd3ff" href="' + esc(t.best_role_url || '#') + '">' + esc(t.best_role) + '</a>' + (t.best_fit ? ' <span class="cc-muted">fit ' + t.best_fit + '</span>' : '') + '</div>' : '') +
+          '<div style="font-size:11.5px;color:#c9d4e3;margin-top:3px">→ ' + esc(t.nextAction || '') + '</div>' +
+          '</div>' +
+          (t.company_id && typeof window.openTrack === 'function'
+            ? '<button class="btn" type="button" data-open="' + esc(t.company_id) + '" style="font-size:11px;padding:4px 9px;flex:none">Open</button>' : '') +
+          '</div>';
+      }).join('') : '<p class="cc-muted">No companies in this view yet.</p>';
+      if (data.suggested && data.suggested.length) {
+        body.innerHTML += '<div class="cc-muted" style="font-size:11.5px;margin-top:10px">➕ Worth adding to your list (found by discovery, strong fit): ' +
+          data.suggested.map(function (s) { return '<b style="color:#e7ecf3">' + esc(s.name) + '</b> (fit ' + s.best_fit + ')'; }).join(', ') + '</div>';
+      }
+    }
+    panel.addEventListener('click', function (e) {
+      var f = e.target.closest ? e.target.closest('[data-f]') : null;
+      if (f) {
+        filter = f.getAttribute('data-f');
+        panel.querySelectorAll('[data-f]').forEach(function (b) { b.classList.toggle('pri', b === f); });
+        render();
+      }
+      var o = e.target.closest ? e.target.closest('[data-open]') : null;
+      if (o) window.openTrack(o.getAttribute('data-open'));
+    });
+    api('/targets/plan?limit=30').then(function (d) {
+      data = d;
+      var p = d.progress;
+      var prio = d.targets.filter(function (t) { return t.priority; }).length;
+      sub.innerHTML = 'This week: <b>' + p.connections + '/' + p.connectionsTarget + '</b> connection requests · ' +
+        p.messages + ' messages · <b>' + p.calls + '/' + p.callsTarget + '</b> calls · ' + p.referrals + ' referrals · ' +
+        prio + ' priority targets';
+      render();
+    }).catch(function (e) { sub.textContent = 'Could not load: ' + e.message; });
+  }
+
   buildFeed();
   buildDigestPanel();
   buildWebSearchPanel();
+  buildTargetsPanel();
   // The Job Discovery section may only exist once its tab is opened.
-  document.addEventListener('click', function () { setTimeout(function () { buildFeed(); buildDigestPanel(); buildWebSearchPanel(); }, 120); });
+  document.addEventListener('click', function () { setTimeout(function () { buildFeed(); buildDigestPanel(); buildWebSearchPanel(); buildTargetsPanel(); }, 120); });
 })();
 
 /* ────────────────────────────────────────────────────────────────────

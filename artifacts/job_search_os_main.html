@@ -40,6 +40,11 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);min-heig
 .ndsa{font-size:10px;padding:2px 6px;border-radius:4px;background:rgba(56,217,169,.1);color:var(--g);font-weight:600}
 .cdesc{font-size:12px;color:var(--t2);margin:5px 0;line-height:1.5}
 .cwhy{font-size:11.5px;color:#9fd3ff;margin:4px 0;line-height:1.45}
+.ttag{display:inline-block;font-size:9.5px;font-weight:800;letter-spacing:.4px;padding:2px 6px;border-radius:4px;margin-left:5px;vertical-align:middle}
+.ttag.apply{background:rgba(16,185,129,.16);color:#34d399;border:1px solid rgba(16,185,129,.35)}
+.ttag.outreach{background:rgba(139,92,246,.16);color:#c4b5fd;border:1px solid rgba(139,92,246,.35)}
+.ttag.prio{background:rgba(251,191,36,.16);color:#fbbf24;border:1px solid rgba(251,191,36,.4)}
+.cnow{font-size:11px;color:#fbbf24;margin:3px 0;line-height:1.4}
 .jwhy{font-size:10.5px;color:#9fd3ff;white-space:normal;margin-top:2px;line-height:1.4}
 .pay{font-family:'JetBrains Mono';font-size:11px;font-weight:600;color:var(--g);background:rgba(56,217,169,.1);padding:2px 7px;border-radius:4px}
 /* KANBAN */
@@ -3606,12 +3611,13 @@ function renderCards(filter) {
 
     return `<div class="cc ${c.region}" data-company="${c.id}" style="${isDismissed ? "opacity:0.42;border-style:dashed;" : ""}">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px">
-        <div class="cn">${c.name}${badge}${isDismissed ? " <span style=\"font-size:9px;color:var(--r);font-weight:normal\">[Not Interested]</span>" : ""}</div>
+        <div class="cn">${c.name}${badge}${isDismissed ? " <span style=\"font-size:9px;color:var(--r);font-weight:normal\">[Not Interested]</span>" : ""}${c.target && c.target.tag !== 'watch' ? `${c.target.priority ? '<span class="ttag prio" title="Hiring hard and one of your best fits">⭐ PRIORITY</span>' : ''}<span class="ttag ${c.target.tag}" title="${c.target.tag === 'apply' ? 'A fit-75+ role is open — apply and ask for a referral' : 'No matching role posted — reach insiders before one is'}">${c.target.tag === 'apply' ? 'APPLY' : 'OUTREACH'}${c.target.rank ? ' #' + c.target.rank : ''}</span>` : ''}</div>
         <span class="rb ${c.region}">${formatRegionBadge(c.region)}</span>
       </div>
       <div style="margin-bottom:5px">${(c.roles || []).map(r => `<span class="rtag t-${r}">${RL[r] || r}</span>`).join("")}${c.dsa ? '<span style="font-size:10px;padding:2px 6px;border-radius:4px;background:rgba(255,107,107,.12);color:#ff8787;font-weight:600">⚠️ DSA Required</span>' : '<span class="ndsa">✓ No DSA</span>'}</div>
       <div class="cdesc">${c.desc}</div>
       ${c.why ? `<div class="cwhy" title="Why this company">💡 ${esc(c.why)}</div>` : ""}
+      ${c.target && c.target.whyNow && c.target.tag !== "watch" ? `<div class="cnow" title="Why target now (hiring signals)">📈 ${esc(c.target.whyNow)}</div>` : ""}
       <div style="margin:5px 0;display:flex;align-items:center;gap:8px">
         <span class="pay">${c.pay}</span>
         ${connCount > 0 ? `<span style="font-size:10px;color:var(--t3)">🤝 ${connCount} connection${connCount > 1 ? "s" : ""}</span>` : ""}

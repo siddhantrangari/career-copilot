@@ -207,6 +207,7 @@
             pay: c.pay || '',
             desc: c.desc || c.description || '',
             why: c.why || '',
+            target: c.target || null,
             apply: c.apply || c.apply_url || '',
             dismissed: !!c.dismissed,
           };

@@ -823,6 +823,60 @@ async function getSearchUsage() {
   };
 }
 
+// ── Targets and outreach (NxtJob method) ──────────────────────────────
+
+async function listTargetsTool({ tag, priorityOnly = false, limit = 10 } = {}) {
+  const { listTargets } = await import('./targets.js');
+  const rows = await listTargets({ tag: ['apply', 'outreach'].includes(tag) ? tag : null, priorityOnly, limit: Math.min(Number(limit) || 10, 25) });
+  return {
+    legend: 'apply = a fit-75+ role is open now; outreach = no matching role posted, reach insiders (hidden market); priority = hiring hard and among his best fits',
+    targets: rows.map((t) => ({
+      rank: t.rank, company: t.name, tag: t.tag, priority: t.priority, hiring: t.hiring_score, fit: t.company_fit,
+      whyNow: t.why_now, bestRole: t.best_role, bestRoleUrl: t.best_role_url, pipeline: t.pipeline_stage,
+      contacts: t.contacts, inYourList: t.in_catalogue,
+    })),
+  };
+}
+
+async function getOutreachPlan() {
+  const { outreachPlan, progressLine } = await import('./targets.js');
+  const plan = await outreachPlan({ limit: 8 });
+  return {
+    thisWeek: progressLine(plan.progress),
+    targets: plan.targets.map((t) => ({ rank: t.rank, company: t.name, tag: t.tag, priority: t.priority, whyNow: t.why_now, next: t.nextAction })),
+    suggestedToAdd: plan.suggested,
+  };
+}
+
+async function logActivityTool(args) {
+  const { logActivity, ACTIVITY_KINDS, outreachProgress, progressLine } = await import('./targets.js');
+  const { company, kind, count = 1, note } = args;
+  if (!ACTIVITY_KINDS.includes(kind)) throw new ToolError(`kind must be one of ${ACTIVITY_KINDS.join(', ')}`);
+  let c = null;
+  if (company) { try { c = await findCompany(company); } catch { c = null; } }
+  await logActivity({ companyId: c?.id || null, companyName: c?.name || company || '', kind, count, note });
+  await audit('log_activity', args, c?.id, null, { kind, count });
+  return { changed: `logged ${count} × ${kind.replace('_', ' ')}${c || company ? ` at ${c?.name || company}` : ''}`, thisWeek: progressLine(await outreachProgress()) };
+}
+
+async function refreshTargetsTool({ confirmedByUser } = {}) {
+  if (confirmedByUser !== true) throw new ToolError('Not started: refreshing researched hiring signals runs paid web searches. Offer it and start only when he says yes.');
+  const job = await createJob('targets-refresh', {});
+  await audit('refresh_targets', {}, null, null, { taskId: job.id });
+  return { taskId: job.id, status: 'started — the ranking updates in a few minutes; the result will be messaged automatically' };
+}
+
+async function runNavigatorTool({ confirmedByUser } = {}) {
+  if (confirmedByUser !== true) throw new ToolError('Not started: offer it and start only when he says yes.');
+  const job = await createJob('navigator', {});
+  return { taskId: job.id, status: 'started — his target niche and title aliases will be messaged when ready' };
+}
+
+async function getNavigator() {
+  const { loadNavigator } = await import('./targets.js');
+  return (await loadNavigator()) || { note: 'Not generated yet — offer run_navigator.' };
+}
+
 async function sendDigestNow() {
   const { counts } = await runDigest({ trigger: 'manual' });
   return { sent: true, counts };
@@ -873,6 +927,12 @@ const TOOLS = [
   ['web_search_links', 'Google boolean searches (past week by default) across LinkedIn, Naukri, Instahyre, foundit, Indeed, Wellfound, Cutshort, Hirist, ATS boards and careers pages, plus the portals\' own search pages. Links he opens. Offer when search_jobs is thin or he asks to search the web.', S({ query: str('role'), location: str(), period: { type: 'string', enum: ['day', 'week', 'month'] } }), webSearchLinks],
   ['search_google_jobs', 'Live Google Jobs search (covers LinkedIn, Naukri, Indeed, Instahyre, company sites) for Bangalore or remote India; stores new roles. Uses 1 search; hard daily/weekly/monthly caps apply and cannot be overridden — when capped it returns boolean links instead. Only when he asks to search Google/the web live, or search_jobs found too little and he agrees.', S({ query: str('role, e.g. AI Engineer'), location: str('Bangalore or remote India') }, ['query']), searchGoogleJobs],
   ['get_search_usage', 'Google Jobs (SerpAPI) usage against the daily/weekly/monthly caps, and the last calls.', S({}), getSearchUsage],
+  ['list_targets', 'Ranked target companies with tag (apply / outreach), priority star, hiring and fit scores, why-now line, best role, contacts.', S({ tag: { type: 'string', enum: ['apply', 'outreach'] }, priorityOnly: bool, limit: int }), listTargetsTool],
+  ['get_outreach_plan', "This week's outreach progress against targets and the next action at each top target company.", S({}), getOutreachPlan],
+  ['log_activity', 'Log outreach he did, e.g. 5 connection requests at Adyen, a call, a referral ask, an application.', S({ company: companyArg, kind: { type: 'string', enum: ['connection_request', 'dm', 'follow_up', 'call', 'referral_ask', 'win_doc_sent', 'application'] }, count: int, note: str() }, ['kind']), logActivityTool],
+  ['refresh_targets', 'Re-research hiring signals (funding, India expansion, headcount, leadership, layoffs) and re-rank targets. Paid web searches: only when he asks or agrees.', S({ confirmedByUser: { type: 'boolean', description: 'true only if his latest message asks for it or says yes' } }, ['confirmedByUser']), refreshTargetsTool],
+  ['get_navigator', 'His evidence-based target niche, strengths and title aliases.', S({}), getNavigator],
+  ['run_navigator', 'Regenerate the target niche and title aliases from his profile.', S({ confirmedByUser: { type: 'boolean' } }, ['confirmedByUser']), runNavigatorTool],
   ['send_digest_now', "Send today's digest now.", S({}), sendDigestNow],
 ];
 

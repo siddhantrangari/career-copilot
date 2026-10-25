@@ -222,6 +222,23 @@ const BANGALORE_OR_REMOTE = /bangalore|bengaluru|bengalore|remote|work from home
 export const outsideIndiaTarget = (location = '') =>
   INDIA_OTHER_CITY.test(location) && !BANGALORE_OR_REMOTE.test(location);
 
+// A trailing "- Zagreb, Croatia" / "(Remote)" / "| Bangalore" names a place,
+// not a different job: Speechify posted one role 173 times that way.
+const PLACE_HINT = /\b(remote|hybrid|onsite|on-site|usa|us|uk|united states|united kingdom|india|germany|france|spain|italy|canada|mexico|brazil|argentina|colombia|chile|netherlands|belgium|denmark|sweden|norway|finland|croatia|serbia|romania|bulgaria|greece|poland|portugal|ireland|switzerland|austria|czech(ia| republic)?|hungary|turkey|israel|egypt|nigeria|kenya|south africa|singapore|japan|korea|china|taiwan|philippines|vietnam|indonesia|malaysia|thailand|australia|new zealand|uae|dubai|saudi arabia|qatar|emea|apac|latam|europe|americas|bangalore|bengaluru|hyderabad|pune|mumbai|delhi|london|berlin|munich|paris|madrid|barcelona|lisbon|dublin|zurich|stockholm|warsaw|new york|nyc|san francisco|sf|bay area|seattle|austin|boston|chicago|toronto|vancouver|amsterdam|tel aviv|tokyo|sydney)\b|,\s*[A-Z]{2}\b/i;
+
+/** The title with any trailing location suffix removed, for de-duplication. */
+export function titleKey(title = '') {
+  let t = String(title).trim().replace(/\s+/g, ' ');
+  for (let i = 0; i < 2; i++) {
+    const m = t.match(/^(.*\S)\s*(?:[-–—|]\s+([^-–—|]+)|\(([^()]+)\))$/);
+    if (!m) break;
+    const tail = m[2] || m[3] || '';
+    if (!PLACE_HINT.test(tail) || m[1].length < 6) break;
+    t = m[1].trim();
+  }
+  return t.toLowerCase();
+}
+
 export function scoreJob(job) {
   const title = job.title || '';
   if (EXCLUDE.test(title)) return { relevance: 0, roles: [] };
@@ -307,7 +324,7 @@ export async function runDiscovery({ trigger = 'manual', companyIds = null, minR
           .filter((j) => j.url && j.title)
           .sort((a, b) => new Date(b.postedAt || 0) - new Date(a.postedAt || 0))
           .reduce((map, j) => {
-            const key = j.title.trim().toLowerCase().replace(/\s+/g, ' ');
+            const key = titleKey(j.title);
             if (!map.has(key)) map.set(key, j);
             return map;
           }, new Map())
@@ -435,7 +452,9 @@ export async function listJobs({
             engagement, rate_min, rate_max, rate_unit, currency, skills, meta,
             app_status, app_status_at, (proposal IS NOT NULL) AS has_proposal,
             left(description, 420) AS snippet, why_role, fit_score,
-            (SELECT w.why FROM company_why w WHERE w.key = lower(trim(company_name))) AS why_company
+            (SELECT w.why FROM company_why w WHERE w.key = lower(trim(company_name))) AS why_company,
+            (SELECT ct.tag FROM company_targets ct WHERE ct.key = lower(trim(company_name))) AS target_tag,
+            (SELECT ct.priority FROM company_targets ct WHERE ct.key = lower(trim(company_name))) AS target_priority
      FROM jobs
      WHERE ${where.join(' AND ')}
      ORDER BY ${order}

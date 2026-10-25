@@ -146,13 +146,35 @@ export function startScheduler(log) {
     }
   };
 
+  // Targets: free signals and tags daily after 06:45 local; Mondays also
+  // refresh researched hiring signals (paid, capped by researchPerWeek).
+  const targetsTick = async () => {
+    try {
+      const { localDate, localMinutes } = await import('./digest.js');
+      if (localMinutes() < 6 * 60 + 45) return;
+      const done = await one(
+        `SELECT 1 FROM agent_runs WHERE kind = 'targets' AND trigger = 'scheduled' AND status = 'done'
+           AND (started_at AT TIME ZONE $1)::date = $2::date`,
+        [config.digest.timeZone, localDate()],
+      );
+      if (done) return;
+      const monday = new Intl.DateTimeFormat('en-GB', { timeZone: config.digest.timeZone, weekday: 'short' }).format(new Date()) === 'Mon';
+      const { refreshTargets } = await import('./targets.js');
+      const res = await refreshTargets({ trigger: 'scheduled', research: monday });
+      log.info(`[agent] targets — ${res.apply} apply, ${res.outreach} outreach, ${res.priority} priority, ${res.researched} researched`);
+    } catch (err) {
+      log.error(`[agent] targets failed: ${err.message}`);
+    }
+  };
+
   // A short delay on boot keeps startup fast and avoids a thundering restart.
   setTimeout(tick, 60_000);
+  setTimeout(targetsTick, 200_000);
   setTimeout(googleTick, 150_000);
   setTimeout(whyTick, 240_000);
   setTimeout(gigTick, 120_000);
   setTimeout(indiaTick, 180_000);
-  timer = setInterval(() => { tick(); gigTick(); indiaTick(); whyTick(); googleTick(); }, 30 * 60_000); // dueForRun gates each
+  timer = setInterval(() => { tick(); gigTick(); indiaTick(); whyTick(); googleTick(); targetsTick(); }, 30 * 60_000); // dueForRun gates each
   log.info(
     `[agent] job discovery every ${config.discovery.intervalHours}h, ` +
     `gig discovery every ${config.discovery.gigIntervalHours}h`,
