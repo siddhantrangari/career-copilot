@@ -355,7 +355,38 @@ async function finishTask(chatId, job) {
     }
   }
   const summary = JSON.stringify(compactResult(job.result)).slice(0, 7000);
-  await converse(chatId, `[Background task update — not typed by Siddhant] The ${job.kind} task${company ? ` for ${company}` : ''} finished${docType || job.kind === 'cover-letter' ? ' and the document has been attached above' : ''}. Result: ${summary}\nSummarise what matters for him in a few lines (for a LinkedIn post or outreach messages, give the full text he can copy).`);
+  try {
+    await converse(chatId, `[Background task update — not typed by Siddhant] The ${job.kind} task${company ? ` for ${company}` : ''} finished${docType || job.kind === 'cover-letter' ? ' and the document has been attached above' : ''}. Result: ${summary}\nSummarise what matters for him in a few lines (for a LinkedIn post or outreach messages, give the full text he can copy).`);
+  } catch (err) {
+    // The summary needs the model; the facts don't. Never leave a finished task unreported.
+    log.error(`[bot] task summary failed: ${err.message}`);
+    const text = [plainResult(job, company), aiDownNote(err)].filter(Boolean).join('\n\n');
+    await remember(chatId, { role: 'assistant', content: text }).catch(() => {});
+    await sendMarkdown(chatId, text).catch(() => {});
+  }
+}
+
+/** A finished task's key facts, written without the model. */
+function plainResult(job, company) {
+  const r = job.result || {};
+  const v = r.resume?.verification || r.verification || {};
+  const check = v.safeToSend === false ? `⚠️ ${v.blockingCount || 0} claim(s) to review` : v.safeToSend ? '🛡️ fact-check passed' : '';
+  if (job.kind === 'improve-resume') {
+    return `✅ **Improved resume ready** — ${r.companyName || company} ${r.jobTitle ? `· ${r.jobTitle}` : ''}\nATS **${r.scoreBefore} → ${r.scoreAfter}**${check ? ` · ${check}` : ''}${r.remembered?.confirmed?.length ? `\nRemembered: ${r.remembered.confirmed.join(', ')}` : ''}`;
+  }
+  if (job.kind === 'tailor-resume') {
+    return `✅ **Tailored resume ready** — ${company}\nATS match **${Math.round(r.resume?.matchScore || 0)}**${check ? ` · ${check}` : ''}`;
+  }
+  return `✅ The ${job.kind} task${company ? ` for ${company}` : ''} finished.`;
+}
+
+/** Out of AI credit or rate-limited: say so plainly, since every AI feature stops until it's fixed. */
+function aiDownNote(err) {
+  const m = String(err?.message || '');
+  if (/spend.?limit|spend cap|insufficient_quota|credit_balance|no credits|402|429/i.test(m)) {
+    return '⚠️ **AI credits are used up** (gateway spend cap reached and the OpenAI fallback has no credits). Replies, tailoring and other AI tasks will fail until the credits are topped up.';
+  }
+  return `⚠️ I couldn't write the summary: ${m.slice(0, 160)}`;
 }
 
 // ── Telegram plumbing ─────────────────────────────────────────────────
@@ -422,7 +453,7 @@ async function handleUpdate(update) {
     await converse(chatId, text);
   } catch (err) {
     log.error(`[bot] turn failed: ${err.message}`);
-    await sendMarkdown(chatId, `Sorry — that failed: ${err.message.slice(0, 300)}`).catch(() => {});
+    await sendMarkdown(chatId, /spend.?limit|insufficient_quota|credit_balance|402|429/i.test(err.message) ? aiDownNote(err) : `Sorry — that failed: ${err.message.slice(0, 300)}`).catch(() => {});
   }
 }
 
