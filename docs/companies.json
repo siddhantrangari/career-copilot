@@ -3166,5 +3166,530 @@
     "desc": "Dublin e-commerce financing scaleup. Engineers in Dublin and remote Europe. Checked 26 Oct 2026.",
     "apply": "https://jobs.ashbyhq.com/wayflyer",
     "dsa": false
+  },
+  {
+    "id": "preply",
+    "name": "Preply",
+    "region": "eu",
+    "roles": [
+      "ai",
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "On a shared list of visa-sponsoring employers (hiring in Spain, United Kingdom). 30 matching engineering roles open, e.g. Senior Back-End Engineer. Checked 26 Oct 2026.",
+    "apply": "https://jobs.ashbyhq.com/preply",
+    "dsa": false
+  },
+  {
+    "id": "scalable_capital",
+    "name": "Scalable Capital",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "On a shared list of visa-sponsoring employers (hiring in Germany). 27 matching engineering roles open, e.g. (Senior) Platform Engineer - Real-Time Infrastructure - Banking (m/f/x). Checked 26 Oct 2026.",
+    "apply": "https://jobs.smartrecruiters.com/ScalableGmbH",
+    "dsa": false
+  },
+  {
+    "id": "agoda",
+    "name": "Agoda",
+    "region": "global",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "On a shared list of visa-sponsoring employers (hiring in Thailand). 21 matching engineering roles open, e.g. Backend Engineer Manager (Bangkok based, Relocation provided). Bangkok roles state relocation provided. Checked 26 Oct 2026.",
+    "apply": "https://job-boards.greenhouse.io/agoda",
+    "dsa": false
+  },
+  {
+    "id": "betsson",
+    "name": "Betsson",
+    "region": "eu",
+    "roles": [
+      "ai",
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "On a shared list of visa-sponsoring employers (hiring in Malta). 18 matching engineering roles open, e.g. AI Engineer. Checked 26 Oct 2026.",
+    "apply": "https://job-boards.greenhouse.io/betsson",
+    "dsa": false
+  },
+  {
+    "id": "smartly",
+    "name": "Smartly",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "On a shared list of visa-sponsoring employers (hiring in Finland). 18 matching engineering roles open, e.g. Early Interest - Senior Fullstack Engineer, Helsinki. Checked 26 Oct 2026.",
+    "apply": "https://job-boards.greenhouse.io/smartlyio",
+    "dsa": false
+  },
+  {
+    "id": "spotify",
+    "name": "Spotify",
+    "region": "eu",
+    "roles": [
+      "ai",
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "On a shared list of visa-sponsoring employers (hiring in Sweden). 17 matching engineering roles open, e.g. Backend Engineer - Data Platform. Checked 26 Oct 2026.",
+    "apply": "https://jobs.lever.co/spotify",
+    "dsa": false
+  },
+  {
+    "id": "scopely",
+    "name": "Scopely",
+    "region": "eu",
+    "roles": [
+      "ai",
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "On a shared list of visa-sponsoring employers (hiring in Spain). 15 matching engineering roles open, e.g. Principal Software Engineer (Unity) - WWE Champions. Checked 26 Oct 2026.",
+    "apply": "https://job-boards.greenhouse.io/scopely",
+    "dsa": false
+  },
+  {
+    "id": "tide",
+    "name": "Tide",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "On a shared list of visa-sponsoring employers (hiring in Bulgaria). 13 matching engineering roles open, e.g. Senior Staff Software Engineer, Agentic Platform. Checked 26 Oct 2026.",
+    "apply": "https://job-boards.greenhouse.io/tide",
+    "dsa": false
+  },
+  {
+    "id": "ebury",
+    "name": "Ebury",
+    "region": "eu",
+    "roles": [
+      "ai",
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "On a shared list of visa-sponsoring employers (hiring in Spain). 11 matching engineering roles open, e.g. Engineer - AI Platform. Checked 26 Oct 2026.",
+    "apply": "https://job-boards.greenhouse.io/ebury",
+    "dsa": false
+  },
+  {
+    "id": "hellofresh",
+    "name": "HelloFresh",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "On a shared list of visa-sponsoring employers (hiring in Germany). 10 matching engineering roles open, e.g. Backend Engineer, Consumer. Checked 26 Oct 2026.",
+    "apply": "https://job-boards.greenhouse.io/hellofresh",
+    "dsa": false
+  },
+  {
+    "id": "teads",
+    "name": "Teads",
+    "region": "eu",
+    "roles": [
+      "ai",
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "On a shared list of visa-sponsoring employers (hiring in France, Slovenia). 8 matching engineering roles open, e.g. Join Senior Software Engineer Talent Network. Checked 26 Oct 2026.",
+    "apply": "https://job-boards.greenhouse.io/teads1",
+    "dsa": false
+  },
+  {
+    "id": "atolls",
+    "name": "Atolls",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "On a shared list of visa-sponsoring employers (hiring in Germany). 7 matching engineering roles open, e.g. Senior Backend Software Engineer (TypeScript, NestJS/Node.js) (m/f/x). Checked 26 Oct 2026.",
+    "apply": "https://job-boards.greenhouse.io/atolls",
+    "dsa": false
+  },
+  {
+    "id": "surfshark",
+    "name": "Surfshark",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "On a shared list of visa-sponsoring employers (hiring in Lithuania). 6 matching engineering roles open, e.g. Senior Backend Engineer (Go) (Incogni). Checked 26 Oct 2026.",
+    "apply": "https://jobs.ashbyhq.com/surfshark",
+    "dsa": false
+  },
+  {
+    "id": "trustly",
+    "name": "Trustly",
+    "region": "eu",
+    "roles": [
+      "ai",
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "On a shared list of visa-sponsoring employers (hiring in Sweden). 6 matching engineering roles open, e.g. Staff Software Engineer, Payment Gateway. Checked 26 Oct 2026.",
+    "apply": "https://jobs.ashbyhq.com/trustly",
+    "dsa": false
+  },
+  {
+    "id": "teya",
+    "name": "Teya",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "On a shared list of visa-sponsoring employers (hiring in Czech Republic, United Kingdom). 5 matching engineering roles open, e.g. Principal Backend Engineer. Checked 26 Oct 2026.",
+    "apply": "https://jobs.ashbyhq.com/teya",
+    "dsa": false
+  },
+  {
+    "id": "voodoo",
+    "name": "Voodoo",
+    "region": "eu",
+    "roles": [
+      "ai",
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "On a shared list of visa-sponsoring employers (hiring in France). 5 matching engineering roles open, e.g. Staff Backend Engineer - Golang. Checked 26 Oct 2026.",
+    "apply": "https://jobs.ashbyhq.com/voodoo",
+    "dsa": false
+  },
+  {
+    "id": "almedia",
+    "name": "Almedia",
+    "region": "eu",
+    "roles": [
+      "ai",
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "On a shared list of visa-sponsoring employers (hiring in Germany). 4 matching engineering roles open, e.g. AI Full Stack Engineer. Checked 26 Oct 2026.",
+    "apply": "https://jobs.ashbyhq.com/almedia",
+    "dsa": false
+  },
+  {
+    "id": "manychat",
+    "name": "ManyChat",
+    "region": "eu",
+    "roles": [
+      "ai"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "On a shared list of visa-sponsoring employers (hiring in Netherlands, Spain). 4 matching engineering roles open, e.g. Staff Site Reliability Engineer — AI Platform. Checked 26 Oct 2026.",
+    "apply": "https://jobs.ashbyhq.com/manychat",
+    "dsa": false
+  },
+  {
+    "id": "rover",
+    "name": "Rover",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "On a shared list of visa-sponsoring employers (hiring in Spain). 4 matching engineering roles open, e.g. Entry Level Software Engineer, Recommendations. Checked 26 Oct 2026.",
+    "apply": "https://jobs.lever.co/rover",
+    "dsa": false
+  },
+  {
+    "id": "sixt",
+    "name": "SIXT",
+    "region": "eu",
+    "roles": [
+      "ai",
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "On a shared list of visa-sponsoring employers (hiring in Germany, Portugal). 4 matching engineering roles open, e.g. Site Reliability Engineer II (Platform Engineer). Checked 26 Oct 2026.",
+    "apply": "https://jobs.smartrecruiters.com/SIXT",
+    "dsa": false
+  },
+  {
+    "id": "veriff",
+    "name": "Veriff",
+    "region": "eu",
+    "roles": [
+      "fs",
+      "se"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "On a shared list of visa-sponsoring employers (hiring in Estonia, Spain). 4 matching engineering roles open, e.g. Senior Software Engineer. Checked 26 Oct 2026.",
+    "apply": "https://job-boards.greenhouse.io/veriff",
+    "dsa": false
+  },
+  {
+    "id": "back_market",
+    "name": "Back Market",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "On a shared list of visa-sponsoring employers (hiring in France). 3 matching engineering roles open, e.g. Senior Software Engineer - Circularity Order Lifecycle. Checked 26 Oct 2026.",
+    "apply": "https://jobs.ashbyhq.com/backmarket",
+    "dsa": false
+  },
+  {
+    "id": "blablacar",
+    "name": "BlaBlaCar",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "On a shared list of visa-sponsoring employers (hiring in France). 3 matching engineering roles open, e.g. Confirmed Backend Engineer - Care. Checked 26 Oct 2026.",
+    "apply": "https://jobs.lever.co/blablacar",
+    "dsa": false
+  },
+  {
+    "id": "proton",
+    "name": "Proton",
+    "region": "eu",
+    "roles": [
+      "ai",
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "On a shared list of visa-sponsoring employers (hiring in Spain). 3 matching engineering roles open, e.g. Fullstack Software Engineer (Autonomous systems). Checked 26 Oct 2026.",
+    "apply": "https://job-boards.greenhouse.io/proton",
+    "dsa": false
+  },
+  {
+    "id": "shopfully",
+    "name": "Shopfully",
+    "region": "eu",
+    "roles": [
+      "ai",
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "On a shared list of visa-sponsoring employers (hiring in Italy). 3 matching engineering roles open, e.g. AI Engineer. Checked 26 Oct 2026.",
+    "apply": "https://job-boards.greenhouse.io/shopfully",
+    "dsa": false
+  },
+  {
+    "id": "think_cell",
+    "name": "think-cell",
+    "region": "eu",
+    "roles": [
+      "ai",
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "On a shared list of visa-sponsoring employers (hiring in Germany). 3 matching engineering roles open, e.g. Senior Full Stack Developer - AI Team. Checked 26 Oct 2026.",
+    "apply": "https://job-boards.greenhouse.io/think-cell",
+    "dsa": false
+  },
+  {
+    "id": "cd_projekt_red",
+    "name": "CD PROJEKT RED",
+    "region": "eu",
+    "roles": [
+      "ai",
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "On a shared list of visa-sponsoring employers (hiring in Poland). 2 matching engineering roles open, e.g. Senior AI Engineer. Checked 26 Oct 2026.",
+    "apply": "https://jobs.smartrecruiters.com/CDPROJEKTRED",
+    "dsa": false
+  },
+  {
+    "id": "nexos",
+    "name": "Nexos",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "On a shared list of visa-sponsoring employers (hiring in Lithuania). 2 matching engineering roles open, e.g. Backend Engineer | Mid-Senior | Go. Checked 26 Oct 2026.",
+    "apply": "https://jobs.lever.co/Nexos",
+    "dsa": false
+  },
+  {
+    "id": "supercell",
+    "name": "Supercell",
+    "region": "eu",
+    "roles": [
+      "ai",
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "On a shared list of visa-sponsoring employers (hiring in Finland). 2 matching engineering roles open, e.g. Senior Software Engineer, Supercell ID (Client SDK). Checked 26 Oct 2026.",
+    "apply": "https://jobs.ashbyhq.com/supercell",
+    "dsa": false
+  },
+  {
+    "id": "wheely",
+    "name": "Wheely",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "Chauffeur platform. Backend Engineer in Cyprus — 'Relocation support, including visa sponsorship and allowance'. Checked 26 Oct 2026.",
+    "apply": "https://job-boards.greenhouse.io/wheely",
+    "dsa": false
+  },
+  {
+    "id": "picnic",
+    "name": "Picnic",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "≈€60–90k (est.)",
+    "desc": "Amsterdam online grocer. Java Software Engineers; covers relocation and sponsors the visa, plus a month of housing. Careers site is not a board the app can read — check it directly. Checked 26 Oct 2026.",
+    "apply": "https://jobs.picnic.app/en/jobs?department=Engineering",
+    "dsa": false
+  },
+  {
+    "id": "jumbo",
+    "name": "Jumbo",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "Dutch supermarket chain (Veghel). Senior Java/EBX Developer; has a relocation process for internationals. Checked 26 Oct 2026.",
+    "apply": "https://nl.jobs.jumbo.com/en/",
+    "dsa": false
+  },
+  {
+    "id": "waes",
+    "name": "WAES",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "Dutch tech consultancy that recruits internationally and handles selection & relocation. Java Software Engineer. Checked 26 Oct 2026.",
+    "apply": "https://wearewaes.com/careers",
+    "dsa": false
+  },
+  {
+    "id": "electricity_maps",
+    "name": "Electricity Maps",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Competitive salary + stock options",
+    "desc": "Copenhagen climate-data scaleup. Senior/Staff Full-stack Engineer; sponsorship not stated on the posting. Checked 26 Oct 2026.",
+    "apply": "https://careers.electricitymaps.com/jobs",
+    "dsa": false
+  },
+  {
+    "id": "spirii",
+    "name": "Spirii",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "Copenhagen EV-charging software. Senior Backend Software Engineer; sponsorship not stated on the posting. Checked 26 Oct 2026.",
+    "apply": "https://wd3.myworkdaysite.com/recruiting/edenpeople/spirii-Careers",
+    "dsa": false
+  },
+  {
+    "id": "siriusxm_dublin",
+    "name": "SiriusXM (Dublin)",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "SiriusXM / Pandora engineering hub in Dublin. Senior Software Engineer, hybrid; sponsorship not stated. Checked 26 Oct 2026.",
+    "apply": "https://careers.siriusxm.com/careers/jobs?location=Dublin",
+    "dsa": false
+  },
+  {
+    "id": "airbus",
+    "name": "Airbus",
+    "region": "eu",
+    "roles": [
+      "ai",
+      "fde"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "Toulouse. AI, Data & Digital Transformation Lead in Corporate Audit (AI agents, reports to the Group CEO office). Likely needs French; check the posting. Checked 26 Oct 2026.",
+    "apply": "https://www.airbus.com/en/careers",
+    "dsa": false
+  },
+  {
+    "id": "canva",
+    "name": "Canva",
+    "region": "global",
+    "roles": [
+      "fs",
+      "ai"
+    ],
+    "pay": "≈A$180–260k (est.)",
+    "desc": "Sydney design platform — on the visa-sponsor list for Australia, and Sydney is a preferred city. Careers site is not a board the app can read. Checked 26 Oct 2026.",
+    "apply": "https://www.lifeatcanva.com/en/jobs/",
+    "dsa": false
+  },
+  {
+    "id": "booking_com",
+    "name": "Booking.com",
+    "region": "eu",
+    "roles": [
+      "fs",
+      "ai"
+    ],
+    "pay": "≈€80–120k (est.)",
+    "desc": "Amsterdam; long-standing highly-skilled-migrant sponsor with relocation. Checked 26 Oct 2026.",
+    "apply": "https://jobs.booking.com/booking/jobs",
+    "dsa": false
+  },
+  {
+    "id": "zalando",
+    "name": "Zalando",
+    "region": "eu",
+    "roles": [
+      "fs",
+      "ai"
+    ],
+    "pay": "≈€75–110k (est.)",
+    "desc": "Berlin e-commerce; regularly sponsors Blue Cards for engineers. Checked 26 Oct 2026.",
+    "apply": "https://jobs.zalando.com/en/jobs",
+    "dsa": false
+  },
+  {
+    "id": "revolut",
+    "name": "Revolut",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "Fintech hiring engineers in Lithuania, Poland, Spain and London; on the visa-sponsor list. Known for heavy coding tests. Checked 26 Oct 2026.",
+    "apply": "https://www.revolut.com/careers/",
+    "dsa": true
+  },
+  {
+    "id": "mistral_ai",
+    "name": "Mistral AI",
+    "region": "eu",
+    "roles": [
+      "ai",
+      "fde"
+    ],
+    "pay": "≈€100–180k (est.)",
+    "desc": "Paris; most open AI roles in Europe (84 in Oct 2026) incl. applied AI / deployment engineers; on the visa-sponsor list. Checked 26 Oct 2026.",
+    "apply": "https://jobs.lever.co/mistral",
+    "dsa": false
   }
 ]

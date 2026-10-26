@@ -172,6 +172,9 @@ export function abroadBoardLinks(role = 'AI Engineer') {
     { name: '✈️ English Jobs Germany', url: `https://englishjobs.de/in/germany?q=${q(role)}` },
     { name: '✈️ Landing.jobs (EU)', url: `https://landing.jobs/jobs?q=${q(role)}` },
     { name: '✈️ XING', url: `https://www.xing.com/jobs/search?keywords=${q(role)}` },
+    // Denmark's official board for foreign candidates, and the Nordic startup board.
+    { name: '✈️ Work in Denmark (gov board)', url: 'https://workindenmark.jobnet.dk/find-job' },
+    { name: '✈️ The Hub (Nordic startups)', url: 'https://thehub.io/jobs' },
   ];
 }
 
