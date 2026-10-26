@@ -3515,3 +3515,41 @@
     load(m, jobId, false);
   };
 })();
+
+/**
+ * Pipeline cards: tailored resumes from the server.
+ *
+ * The cards find a role's resume in a per-browser cache that only the
+ * Resume Studio filled, so a resume tailored by the Telegram bot or on
+ * another device never showed on its card. The pipeline page now loads the
+ * saved versions itself (newest first, so a card shows the latest), keeps
+ * the role links the Studio stored locally, and redraws the cards.
+ */
+(function () {
+  'use strict';
+  var CC = window.__CC__;
+  if (!CC || !document.getElementById('kanbanBoard')) return;
+  var KEY = 'cc_saved_resumes_cache';
+  var last = '';
+
+  function sync() {
+    return CC.api('/resumes').then(function (d) {
+      var local = [];
+      try { local = JSON.parse(localStorage.getItem(KEY) || '[]'); } catch (e) { /* empty */ }
+      var roleOf = {};
+      local.forEach(function (r) { if (r && r.id && r.role_id) roleOf[r.id] = r.role_id; });
+      var rows = (d.resumes || []).map(function (r) {
+        return { id: r.id, company_id: r.company_id, company_name: r.company_name, job_title: r.job_title,
+          role_id: roleOf[r.id] || null, tailored_text: r.tailored_text, match_score: r.match_score, created_at: r.created_at };
+      });
+      var next = JSON.stringify(rows);
+      if (next === last) return;
+      last = next;
+      try { localStorage.setItem(KEY, next); } catch (e) { return; }
+      if (typeof window.renderPipeline === 'function') window.renderPipeline();
+    }).catch(function () { /* the cards keep the cached list */ });
+  }
+
+  sync();
+  document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'visible') sync(); });
+})();
