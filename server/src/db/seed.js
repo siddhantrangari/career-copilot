@@ -17,8 +17,8 @@ export async function seed() {
   const companies = await readJson(path.join(config.rootDir, 'docs/companies.json'));
   for (const c of companies) {
     await pool.query(
-      `INSERT INTO companies (id, name, region, roles, pay, description, apply_url, dsa, custom, freelance)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, false, $9)
+      `INSERT INTO companies (id, name, region, roles, pay, description, apply_url, dsa, custom, freelance, verified)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, false, $9, $10)
        ON CONFLICT (id) DO UPDATE SET
          name = EXCLUDED.name,
          region = EXCLUDED.region,
@@ -28,10 +28,11 @@ export async function seed() {
          apply_url = EXCLUDED.apply_url,
          dsa = EXCLUDED.dsa,
          freelance = EXCLUDED.freelance,
+         verified = EXCLUDED.verified,
          updated_at = now()`,
       [
         c.id, c.name, c.region, c.roles || [], c.pay || '', c.desc || '',
-        c.apply || '', !!c.dsa, !!c.freelance,
+        c.apply || '', !!c.dsa, !!c.freelance, !!c.verified,
       ],
     );
   }

@@ -166,6 +166,8 @@ export async function resolveBoard(company) {
     const jobs = await fetchBoard(direct.provider, direct.slug);
     if (jobs) return { ...direct, jobs };
   }
+  // A verified career page is the only source: a guessed board could be another company's.
+  if (company.verified) return null;
 
   for (const slug of slugCandidates(company.name)) {
     for (const provider of GUESSABLE) {

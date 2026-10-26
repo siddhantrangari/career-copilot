@@ -326,6 +326,10 @@ ALTER TABLE companies ADD COLUMN IF NOT EXISTS brand   JSONB;
 -- marketplace is not the same thing as an employer with a careers page.
 ALTER TABLE companies ADD COLUMN IF NOT EXISTS freelance BOOLEAN NOT NULL DEFAULT false;
 
+-- Career page taken from a verified list: discovery reads only the board that
+-- URL names and never guesses one from the company name.
+ALTER TABLE companies ADD COLUMN IF NOT EXISTS verified BOOLEAN NOT NULL DEFAULT false;
+
 -- Interview prep guides — the recap/study counterpart to the mock interview.
 -- Reads the JD, tailored resume, WIN doc and grounded research, then runs a
 -- fresh search on candidate reports (Glassdoor, Reddit, Blind, engineering

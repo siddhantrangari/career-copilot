@@ -3177,8 +3177,9 @@
     ],
     "pay": "Market rate — check posting",
     "desc": "On a shared list of visa-sponsoring employers (hiring in Spain, United Kingdom). 30 matching engineering roles open, e.g. Senior Back-End Engineer. Checked 26 Oct 2026.",
-    "apply": "https://jobs.ashbyhq.com/preply",
-    "dsa": false
+    "apply": "https://preply.com/en/careers",
+    "dsa": false,
+    "verified": true
   },
   {
     "id": "scalable_capital",
@@ -3190,7 +3191,8 @@
     "pay": "Market rate — check posting",
     "desc": "On a shared list of visa-sponsoring employers (hiring in Germany). 27 matching engineering roles open, e.g. (Senior) Platform Engineer - Real-Time Infrastructure - Banking (m/f/x). Checked 26 Oct 2026.",
     "apply": "https://jobs.smartrecruiters.com/ScalableGmbH",
-    "dsa": false
+    "dsa": false,
+    "verified": true
   },
   {
     "id": "agoda",
@@ -3202,7 +3204,8 @@
     "pay": "Market rate — check posting",
     "desc": "On a shared list of visa-sponsoring employers (hiring in Thailand). 21 matching engineering roles open, e.g. Backend Engineer Manager (Bangkok based, Relocation provided). Bangkok roles state relocation provided. Checked 26 Oct 2026.",
     "apply": "https://job-boards.greenhouse.io/agoda",
-    "dsa": false
+    "dsa": false,
+    "verified": true
   },
   {
     "id": "betsson",
@@ -3215,7 +3218,8 @@
     "pay": "Market rate — check posting",
     "desc": "On a shared list of visa-sponsoring employers (hiring in Malta). 18 matching engineering roles open, e.g. AI Engineer. Checked 26 Oct 2026.",
     "apply": "https://job-boards.greenhouse.io/betsson",
-    "dsa": false
+    "dsa": false,
+    "verified": true
   },
   {
     "id": "smartly",
@@ -3227,7 +3231,8 @@
     "pay": "Market rate — check posting",
     "desc": "On a shared list of visa-sponsoring employers (hiring in Finland). 18 matching engineering roles open, e.g. Early Interest - Senior Fullstack Engineer, Helsinki. Checked 26 Oct 2026.",
     "apply": "https://job-boards.greenhouse.io/smartlyio",
-    "dsa": false
+    "dsa": false,
+    "verified": true
   },
   {
     "id": "spotify",
@@ -3240,7 +3245,8 @@
     "pay": "Market rate — check posting",
     "desc": "On a shared list of visa-sponsoring employers (hiring in Sweden). 17 matching engineering roles open, e.g. Backend Engineer - Data Platform. Checked 26 Oct 2026.",
     "apply": "https://jobs.lever.co/spotify",
-    "dsa": false
+    "dsa": false,
+    "verified": true
   },
   {
     "id": "scopely",
@@ -3253,7 +3259,8 @@
     "pay": "Market rate — check posting",
     "desc": "On a shared list of visa-sponsoring employers (hiring in Spain). 15 matching engineering roles open, e.g. Principal Software Engineer (Unity) - WWE Champions. Checked 26 Oct 2026.",
     "apply": "https://job-boards.greenhouse.io/scopely",
-    "dsa": false
+    "dsa": false,
+    "verified": true
   },
   {
     "id": "tide",
@@ -3265,7 +3272,8 @@
     "pay": "Market rate — check posting",
     "desc": "On a shared list of visa-sponsoring employers (hiring in Bulgaria). 13 matching engineering roles open, e.g. Senior Staff Software Engineer, Agentic Platform. Checked 26 Oct 2026.",
     "apply": "https://job-boards.greenhouse.io/tide",
-    "dsa": false
+    "dsa": false,
+    "verified": true
   },
   {
     "id": "ebury",
@@ -3277,8 +3285,9 @@
     ],
     "pay": "Market rate — check posting",
     "desc": "On a shared list of visa-sponsoring employers (hiring in Spain). 11 matching engineering roles open, e.g. Engineer - AI Platform. Checked 26 Oct 2026.",
-    "apply": "https://job-boards.greenhouse.io/ebury",
-    "dsa": false
+    "apply": "https://ebury.com/company/careers",
+    "dsa": false,
+    "verified": true
   },
   {
     "id": "hellofresh",
@@ -3289,8 +3298,9 @@
     ],
     "pay": "Market rate — check posting",
     "desc": "On a shared list of visa-sponsoring employers (hiring in Germany). 10 matching engineering roles open, e.g. Backend Engineer, Consumer. Checked 26 Oct 2026.",
-    "apply": "https://job-boards.greenhouse.io/hellofresh",
-    "dsa": false
+    "apply": "https://careers.hellofresh.com",
+    "dsa": false,
+    "verified": true
   },
   {
     "id": "teads",
@@ -3302,8 +3312,9 @@
     ],
     "pay": "Market rate — check posting",
     "desc": "On a shared list of visa-sponsoring employers (hiring in France, Slovenia). 8 matching engineering roles open, e.g. Join Senior Software Engineer Talent Network. Checked 26 Oct 2026.",
-    "apply": "https://job-boards.greenhouse.io/teads1",
-    "dsa": false
+    "apply": "https://job-boards.eu.greenhouse.io/teads1",
+    "dsa": false,
+    "verified": true
   },
   {
     "id": "atolls",
@@ -3314,8 +3325,9 @@
     ],
     "pay": "Market rate — check posting",
     "desc": "On a shared list of visa-sponsoring employers (hiring in Germany). 7 matching engineering roles open, e.g. Senior Backend Software Engineer (TypeScript, NestJS/Node.js) (m/f/x). Checked 26 Oct 2026.",
-    "apply": "https://job-boards.greenhouse.io/atolls",
-    "dsa": false
+    "apply": "https://atolls.com/careers",
+    "dsa": false,
+    "verified": true
   },
   {
     "id": "surfshark",
@@ -3326,8 +3338,9 @@
     ],
     "pay": "Market rate — check posting",
     "desc": "On a shared list of visa-sponsoring employers (hiring in Lithuania). 6 matching engineering roles open, e.g. Senior Backend Engineer (Go) (Incogni). Checked 26 Oct 2026.",
-    "apply": "https://jobs.ashbyhq.com/surfshark",
-    "dsa": false
+    "apply": "https://jobs.lever.co/surfshark",
+    "dsa": false,
+    "verified": true
   },
   {
     "id": "trustly",
@@ -3339,8 +3352,9 @@
     ],
     "pay": "Market rate — check posting",
     "desc": "On a shared list of visa-sponsoring employers (hiring in Sweden). 6 matching engineering roles open, e.g. Staff Software Engineer, Payment Gateway. Checked 26 Oct 2026.",
-    "apply": "https://jobs.ashbyhq.com/trustly",
-    "dsa": false
+    "apply": "https://jobs.lever.co/trustly",
+    "dsa": false,
+    "verified": true
   },
   {
     "id": "teya",
@@ -3352,7 +3366,8 @@
     "pay": "Market rate — check posting",
     "desc": "On a shared list of visa-sponsoring employers (hiring in Czech Republic, United Kingdom). 5 matching engineering roles open, e.g. Principal Backend Engineer. Checked 26 Oct 2026.",
     "apply": "https://jobs.ashbyhq.com/teya",
-    "dsa": false
+    "dsa": false,
+    "verified": true
   },
   {
     "id": "voodoo",
@@ -3364,8 +3379,9 @@
     ],
     "pay": "Market rate — check posting",
     "desc": "On a shared list of visa-sponsoring employers (hiring in France). 5 matching engineering roles open, e.g. Staff Backend Engineer - Golang. Checked 26 Oct 2026.",
-    "apply": "https://jobs.ashbyhq.com/voodoo",
-    "dsa": false
+    "apply": "https://voodoo.io/careers",
+    "dsa": false,
+    "verified": true
   },
   {
     "id": "almedia",
@@ -3378,7 +3394,8 @@
     "pay": "Market rate — check posting",
     "desc": "On a shared list of visa-sponsoring employers (hiring in Germany). 4 matching engineering roles open, e.g. AI Full Stack Engineer. Checked 26 Oct 2026.",
     "apply": "https://jobs.ashbyhq.com/almedia",
-    "dsa": false
+    "dsa": false,
+    "verified": true
   },
   {
     "id": "manychat",
@@ -3389,8 +3406,9 @@
     ],
     "pay": "Market rate — check posting",
     "desc": "On a shared list of visa-sponsoring employers (hiring in Netherlands, Spain). 4 matching engineering roles open, e.g. Staff Site Reliability Engineer — AI Platform. Checked 26 Oct 2026.",
-    "apply": "https://jobs.ashbyhq.com/manychat",
-    "dsa": false
+    "apply": "https://job-boards.greenhouse.io/manychat",
+    "dsa": false,
+    "verified": true
   },
   {
     "id": "rover",
@@ -3402,7 +3420,8 @@
     "pay": "Market rate — check posting",
     "desc": "On a shared list of visa-sponsoring employers (hiring in Spain). 4 matching engineering roles open, e.g. Entry Level Software Engineer, Recommendations. Checked 26 Oct 2026.",
     "apply": "https://jobs.lever.co/rover",
-    "dsa": false
+    "dsa": false,
+    "verified": true
   },
   {
     "id": "sixt",
@@ -3415,7 +3434,8 @@
     "pay": "Market rate — check posting",
     "desc": "On a shared list of visa-sponsoring employers (hiring in Germany, Portugal). 4 matching engineering roles open, e.g. Site Reliability Engineer II (Platform Engineer). Checked 26 Oct 2026.",
     "apply": "https://jobs.smartrecruiters.com/SIXT",
-    "dsa": false
+    "dsa": false,
+    "verified": true
   },
   {
     "id": "veriff",
@@ -3427,8 +3447,9 @@
     ],
     "pay": "Market rate — check posting",
     "desc": "On a shared list of visa-sponsoring employers (hiring in Estonia, Spain). 4 matching engineering roles open, e.g. Senior Software Engineer. Checked 26 Oct 2026.",
-    "apply": "https://job-boards.greenhouse.io/veriff",
-    "dsa": false
+    "apply": "https://www.veriff.com/careers",
+    "dsa": false,
+    "verified": true
   },
   {
     "id": "back_market",
@@ -3440,7 +3461,8 @@
     "pay": "Market rate — check posting",
     "desc": "On a shared list of visa-sponsoring employers (hiring in France). 3 matching engineering roles open, e.g. Senior Software Engineer - Circularity Order Lifecycle. Checked 26 Oct 2026.",
     "apply": "https://jobs.ashbyhq.com/backmarket",
-    "dsa": false
+    "dsa": false,
+    "verified": true
   },
   {
     "id": "blablacar",
@@ -3452,7 +3474,8 @@
     "pay": "Market rate — check posting",
     "desc": "On a shared list of visa-sponsoring employers (hiring in France). 3 matching engineering roles open, e.g. Confirmed Backend Engineer - Care. Checked 26 Oct 2026.",
     "apply": "https://jobs.lever.co/blablacar",
-    "dsa": false
+    "dsa": false,
+    "verified": true
   },
   {
     "id": "proton",
@@ -3464,8 +3487,9 @@
     ],
     "pay": "Market rate — check posting",
     "desc": "On a shared list of visa-sponsoring employers (hiring in Spain). 3 matching engineering roles open, e.g. Fullstack Software Engineer (Autonomous systems). Checked 26 Oct 2026.",
-    "apply": "https://job-boards.greenhouse.io/proton",
-    "dsa": false
+    "apply": "https://job-boards.eu.greenhouse.io/proton",
+    "dsa": false,
+    "verified": true
   },
   {
     "id": "shopfully",
@@ -3477,8 +3501,9 @@
     ],
     "pay": "Market rate — check posting",
     "desc": "On a shared list of visa-sponsoring employers (hiring in Italy). 3 matching engineering roles open, e.g. AI Engineer. Checked 26 Oct 2026.",
-    "apply": "https://job-boards.greenhouse.io/shopfully",
-    "dsa": false
+    "apply": "https://shopfully.jobs.personio.com/",
+    "dsa": false,
+    "verified": true
   },
   {
     "id": "think_cell",
@@ -3490,8 +3515,9 @@
     ],
     "pay": "Market rate — check posting",
     "desc": "On a shared list of visa-sponsoring employers (hiring in Germany). 3 matching engineering roles open, e.g. Senior Full Stack Developer - AI Team. Checked 26 Oct 2026.",
-    "apply": "https://job-boards.greenhouse.io/think-cell",
-    "dsa": false
+    "apply": "https://job-boards.eu.greenhouse.io/think-cell",
+    "dsa": false,
+    "verified": true
   },
   {
     "id": "cd_projekt_red",
@@ -3504,7 +3530,8 @@
     "pay": "Market rate — check posting",
     "desc": "On a shared list of visa-sponsoring employers (hiring in Poland). 2 matching engineering roles open, e.g. Senior AI Engineer. Checked 26 Oct 2026.",
     "apply": "https://jobs.smartrecruiters.com/CDPROJEKTRED",
-    "dsa": false
+    "dsa": false,
+    "verified": true
   },
   {
     "id": "nexos",
@@ -3516,7 +3543,8 @@
     "pay": "Market rate — check posting",
     "desc": "On a shared list of visa-sponsoring employers (hiring in Lithuania). 2 matching engineering roles open, e.g. Backend Engineer | Mid-Senior | Go. Checked 26 Oct 2026.",
     "apply": "https://jobs.lever.co/Nexos",
-    "dsa": false
+    "dsa": false,
+    "verified": true
   },
   {
     "id": "supercell",
@@ -3528,8 +3556,9 @@
     ],
     "pay": "Market rate — check posting",
     "desc": "On a shared list of visa-sponsoring employers (hiring in Finland). 2 matching engineering roles open, e.g. Senior Software Engineer, Supercell ID (Client SDK). Checked 26 Oct 2026.",
-    "apply": "https://jobs.ashbyhq.com/supercell",
-    "dsa": false
+    "apply": "https://supercell.com/en/careers",
+    "dsa": false,
+    "verified": true
   },
   {
     "id": "wheely",
@@ -3552,8 +3581,9 @@
     ],
     "pay": "≈€60–90k (est.)",
     "desc": "Amsterdam online grocer. Java Software Engineers; covers relocation and sponsors the visa, plus a month of housing. Careers site is not a board the app can read — check it directly. Checked 26 Oct 2026.",
-    "apply": "https://jobs.picnic.app/en/jobs?department=Engineering",
-    "dsa": false
+    "apply": "https://jobs.picnic.app/en/vacancies",
+    "dsa": false,
+    "verified": true
   },
   {
     "id": "jumbo",
@@ -3564,8 +3594,9 @@
     ],
     "pay": "Market rate — check posting",
     "desc": "Dutch supermarket chain (Veghel). Senior Java/EBX Developer; has a relocation process for internationals. Checked 26 Oct 2026.",
-    "apply": "https://nl.jobs.jumbo.com/en/",
-    "dsa": false
+    "apply": "https://nl.jobs.jumbo.com",
+    "dsa": false,
+    "verified": true
   },
   {
     "id": "waes",
@@ -3638,8 +3669,9 @@
     ],
     "pay": "≈A$180–260k (est.)",
     "desc": "Sydney design platform — on the visa-sponsor list for Australia, and Sydney is a preferred city. Careers site is not a board the app can read. Checked 26 Oct 2026.",
-    "apply": "https://www.lifeatcanva.com/en/jobs/",
-    "dsa": false
+    "apply": "https://www.lifeatcanva.com/en/jobs",
+    "dsa": false,
+    "verified": true
   },
   {
     "id": "booking_com",
@@ -3652,7 +3684,8 @@
     "pay": "≈€80–120k (est.)",
     "desc": "Amsterdam; long-standing highly-skilled-migrant sponsor with relocation. Checked 26 Oct 2026.",
     "apply": "https://jobs.booking.com/booking/jobs",
-    "dsa": false
+    "dsa": false,
+    "verified": true
   },
   {
     "id": "zalando",
@@ -3665,7 +3698,8 @@
     "pay": "≈€75–110k (est.)",
     "desc": "Berlin e-commerce; regularly sponsors Blue Cards for engineers. Checked 26 Oct 2026.",
     "apply": "https://jobs.zalando.com/en/jobs",
-    "dsa": false
+    "dsa": false,
+    "verified": true
   },
   {
     "id": "revolut",
@@ -3676,8 +3710,9 @@
     ],
     "pay": "Market rate — check posting",
     "desc": "Fintech hiring engineers in Lithuania, Poland, Spain and London; on the visa-sponsor list. Known for heavy coding tests. Checked 26 Oct 2026.",
-    "apply": "https://www.revolut.com/careers/",
-    "dsa": true
+    "apply": "https://www.revolut.com/careers",
+    "dsa": true,
+    "verified": true
   },
   {
     "id": "mistral_ai",
@@ -3690,6 +3725,1762 @@
     "pay": "≈€100–180k (est.)",
     "desc": "Paris; most open AI roles in Europe (84 in Oct 2026) incl. applied AI / deployment engineers; on the visa-sponsor list. Checked 26 Oct 2026.",
     "apply": "https://jobs.lever.co/mistral",
-    "dsa": false
+    "dsa": false,
+    "verified": true
+  },
+  {
+    "id": "about_you",
+    "name": "About You",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "Verified visa sponsor (shared list). Hires in Germany. Checked 26 Oct 2026.",
+    "apply": "https://corporate.aboutyou.de/en/jobs",
+    "dsa": false,
+    "verified": true
+  },
+  {
+    "id": "abra",
+    "name": "Abra",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "Verified visa sponsor (shared list). Hires in Ireland. Checked 26 Oct 2026.",
+    "apply": "https://www.comeet.com/jobs/abra_rnd/15.007",
+    "dsa": false,
+    "verified": true
+  },
+  {
+    "id": "adevinta",
+    "name": "Adevinta",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "Verified visa sponsor (shared list). Hires in Netherlands. Checked 26 Oct 2026.",
+    "apply": "https://marketplaces.wd3.myworkdayjobs.com/External_Careers",
+    "dsa": false,
+    "verified": true
+  },
+  {
+    "id": "aira",
+    "name": "Aira",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "Verified visa sponsor (shared list). Hires in Sweden. Checked 26 Oct 2026.",
+    "apply": "https://career.airahome.com/jobs",
+    "dsa": false,
+    "verified": true
+  },
+  {
+    "id": "alva_labs",
+    "name": "Alva Labs",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "Verified visa sponsor (shared list). Hires in Sweden. Checked 26 Oct 2026.",
+    "apply": "https://career.alvalabs.io/jobs",
+    "dsa": false,
+    "verified": true
+  },
+  {
+    "id": "amazon",
+    "name": "Amazon",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "Verified visa sponsor (shared list). Hires in Spain. Checked 26 Oct 2026.",
+    "apply": "https://www.amazon.jobs",
+    "dsa": false,
+    "verified": true
+  },
+  {
+    "id": "appodeal",
+    "name": "Appodeal",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "Verified visa sponsor (shared list). Hires in Spain. Checked 26 Oct 2026.",
+    "apply": "https://job-boards.greenhouse.io/appodeal",
+    "dsa": false,
+    "verified": true
+  },
+  {
+    "id": "aps_bank",
+    "name": "APS Bank",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "Verified visa sponsor (shared list). Hires in Malta. Checked 26 Oct 2026.",
+    "apply": "https://apsbank.hire.trakstar.com/jobs",
+    "dsa": false,
+    "verified": true
+  },
+  {
+    "id": "archer_igaming_recruiter",
+    "name": "Archer (iGaming recruiter)",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "Verified visa sponsor (shared list). Hires in Malta. Checked 26 Oct 2026.",
+    "apply": "https://www.archer.mt",
+    "dsa": false,
+    "verified": true
+  },
+  {
+    "id": "auto1_group",
+    "name": "AUTO1 Group",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "Verified visa sponsor (shared list). Hires in Italy. Checked 26 Oct 2026.",
+    "apply": "https://www.auto1-group.com/en/jobs",
+    "dsa": false,
+    "verified": true
+  },
+  {
+    "id": "axis_communications",
+    "name": "Axis Communications",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "Verified visa sponsor (shared list). Hires in Sweden. Checked 26 Oct 2026.",
+    "apply": "https://axis.wd3.myworkdayjobs.com/en-US/External_Career_Site",
+    "dsa": false,
+    "verified": true
+  },
+  {
+    "id": "baxter",
+    "name": "Baxter",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "Verified visa sponsor (shared list). Hires in Spain. Checked 26 Oct 2026.",
+    "apply": "https://baxter.wd1.myworkdayjobs.com/baxter",
+    "dsa": false,
+    "verified": true
+  },
+  {
+    "id": "bitpanda",
+    "name": "Bitpanda",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "Verified visa sponsor (shared list). Hires in Austria. Checked 26 Oct 2026.",
+    "apply": "https://job-boards.eu.greenhouse.io/bitpanda",
+    "dsa": false,
+    "verified": true
+  },
+  {
+    "id": "bondora",
+    "name": "Bondora",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "Verified visa sponsor (shared list). Hires in Estonia. 1 matching engineering roles open today. Checked 26 Oct 2026.",
+    "apply": "https://job-boards.eu.greenhouse.io/bondora",
+    "dsa": false,
+    "verified": true
+  },
+  {
+    "id": "boom_ai",
+    "name": "Boom AI",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "Verified visa sponsor (shared list). Hires in Germany. Checked 26 Oct 2026.",
+    "apply": "https://jobs.ashbyhq.com/boam",
+    "dsa": false,
+    "verified": true
+  },
+  {
+    "id": "born",
+    "name": "Born",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "Verified visa sponsor (shared list). Hires in Germany. Checked 26 Oct 2026.",
+    "apply": "https://join.com/companies/slay",
+    "dsa": false,
+    "verified": true
+  },
+  {
+    "id": "boston_scientific",
+    "name": "Boston Scientific",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "Verified visa sponsor (shared list). Hires in Netherlands. Checked 26 Oct 2026.",
+    "apply": "https://bostonscientific.eightfold.ai/careers",
+    "dsa": false,
+    "verified": true
+  },
+  {
+    "id": "brainrocket",
+    "name": "BrainRocket",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "Verified visa sponsor (shared list). Hires in Malta, Spain. Checked 26 Oct 2026.",
+    "apply": "https://job-boards.eu.greenhouse.io/brainrocketltd",
+    "dsa": false,
+    "verified": true
+  },
+  {
+    "id": "cabify",
+    "name": "Cabify",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "Verified visa sponsor (shared list). Hires in Spain. 1 matching engineering roles open today. Checked 26 Oct 2026.",
+    "apply": "https://inhaus.teamtailor.com/",
+    "dsa": false,
+    "verified": true
+  },
+  {
+    "id": "caixa_m_gica",
+    "name": "Caixa Mágica",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "Verified visa sponsor (shared list). Hires in Portugal. Checked 26 Oct 2026.",
+    "apply": "https://caixamagica.pt/opportunities",
+    "dsa": false,
+    "verified": true
+  },
+  {
+    "id": "capital_com",
+    "name": "Capital.com",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "Verified visa sponsor (shared list). Hires in Poland. Checked 26 Oct 2026.",
+    "apply": "https://careers.capital.com",
+    "dsa": false,
+    "verified": true
+  },
+  {
+    "id": "cargoo",
+    "name": "Cargoo",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "Verified visa sponsor (shared list). Hires in Estonia. 1 matching engineering roles open today. Checked 26 Oct 2026.",
+    "apply": "https://job-boards.eu.greenhouse.io/cargoo",
+    "dsa": false,
+    "verified": true
+  },
+  {
+    "id": "casumo",
+    "name": "Casumo",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "Verified visa sponsor (shared list). Hires in Croatia. Checked 26 Oct 2026.",
+    "apply": "https://www.casumocareers.com/jobs",
+    "dsa": false,
+    "verified": true
+  },
+  {
+    "id": "checkatrade",
+    "name": "Checkatrade",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "Verified visa sponsor (shared list). Hires in Spain. 1 matching engineering roles open today. Checked 26 Oct 2026.",
+    "apply": "https://jobs.ashbyhq.com/checkatrade",
+    "dsa": false,
+    "verified": true
+  },
+  {
+    "id": "checkout_com",
+    "name": "Checkout.com",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "Verified visa sponsor (shared list). Hires in Estonia. Checked 26 Oct 2026.",
+    "apply": "https://checkout.wd3.myworkdayjobs.com/en-US/CheckoutCareers",
+    "dsa": false,
+    "verified": true
+  },
+  {
+    "id": "clariness",
+    "name": "Clariness",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "Verified visa sponsor (shared list). Hires in Germany. Checked 26 Oct 2026.",
+    "apply": "https://career.clariness.com/careers",
+    "dsa": false,
+    "verified": true
+  },
+  {
+    "id": "clearpeaks",
+    "name": "ClearPeaks",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "Verified visa sponsor (shared list). Hires in Spain. Checked 26 Oct 2026.",
+    "apply": "https://www.clearpeaks.com/careers",
+    "dsa": false,
+    "verified": true
+  },
+  {
+    "id": "cleo",
+    "name": "Cleo",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "Verified visa sponsor (shared list). Hires in United Kingdom. 1 matching engineering roles open today. Checked 26 Oct 2026.",
+    "apply": "https://revolutpeople.com/cleo/public/careers",
+    "dsa": false,
+    "verified": true
+  },
+  {
+    "id": "comeon_group",
+    "name": "ComeOn Group",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "Verified visa sponsor (shared list). Hires in Malta. Checked 26 Oct 2026.",
+    "apply": "https://apply.workable.com/comeon-group",
+    "dsa": false,
+    "verified": true
+  },
+  {
+    "id": "coolbet",
+    "name": "Coolbet",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "Verified visa sponsor (shared list). Hires in Estonia. Checked 26 Oct 2026.",
+    "apply": "https://careers.coolbet.ee/jobs",
+    "dsa": false,
+    "verified": true
+  },
+  {
+    "id": "corpay",
+    "name": "Corpay",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "Verified visa sponsor (shared list). Hires in Sweden. Checked 26 Oct 2026.",
+    "apply": "https://corpay.wd103.myworkdayjobs.com/Ext_001",
+    "dsa": false,
+    "verified": true
+  },
+  {
+    "id": "debeka",
+    "name": "Debeka",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "Verified visa sponsor (shared list). Hires in Germany. Checked 26 Oct 2026.",
+    "apply": "https://debeka.wd3.myworkdayjobs.com/Karriere",
+    "dsa": false,
+    "verified": true
+  },
+  {
+    "id": "deloitte",
+    "name": "Deloitte",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "Verified visa sponsor (shared list). Hires in Spain. Checked 26 Oct 2026.",
+    "apply": "https://empleo.es.deloitte.com",
+    "dsa": false,
+    "verified": true
+  },
+  {
+    "id": "dhl",
+    "name": "DHL",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "Verified visa sponsor (shared list). Hires in Poland. Checked 26 Oct 2026.",
+    "apply": "https://careers.dhl.com",
+    "dsa": false,
+    "verified": true
+  },
+  {
+    "id": "dream_data",
+    "name": "Dream Data",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "Verified visa sponsor (shared list). Hires in Denmark. Checked 26 Oct 2026.",
+    "apply": "https://apply.workable.com/dreamdata",
+    "dsa": false,
+    "verified": true
+  },
+  {
+    "id": "dynatrace",
+    "name": "Dynatrace",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "Verified visa sponsor (shared list). Hires in Austria. Checked 26 Oct 2026.",
+    "apply": "https://www.dynatrace.com/careers",
+    "dsa": false,
+    "verified": true
+  },
+  {
+    "id": "easybrain",
+    "name": "Easybrain",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "Verified visa sponsor (shared list). Hires in Cyprus. 1 matching engineering roles open today. Checked 26 Oct 2026.",
+    "apply": "https://jobs.lever.co/easybrain",
+    "dsa": false,
+    "verified": true
+  },
+  {
+    "id": "edreams_odigeo",
+    "name": "eDreams ODIGEO",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "Verified visa sponsor (shared list). Hires in Spain. Checked 26 Oct 2026.",
+    "apply": "https://www.edreamsodigeocareers.com",
+    "dsa": false,
+    "verified": true
+  },
+  {
+    "id": "enmacc",
+    "name": "Enmacc",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "Verified visa sponsor (shared list). Hires in Germany. Checked 26 Oct 2026.",
+    "apply": "https://job-boards.eu.greenhouse.io/enmacc",
+    "dsa": false,
+    "verified": true
+  },
+  {
+    "id": "enpal",
+    "name": "Enpal",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "Verified visa sponsor (shared list). Hires in Germany. Checked 26 Oct 2026.",
+    "apply": "https://www.jobs.enpal.com/jobs",
+    "dsa": false,
+    "verified": true
+  },
+  {
+    "id": "epam",
+    "name": "EPAM",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "Verified visa sponsor (shared list). Hires in Lithuania, Spain. Checked 26 Oct 2026.",
+    "apply": "https://www.epam.com/careers",
+    "dsa": false,
+    "verified": true
+  },
+  {
+    "id": "euroports",
+    "name": "Euroports",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "Verified visa sponsor (shared list). Hires in Finland. Checked 26 Oct 2026.",
+    "apply": "https://euroports.fi/meille-toihin/",
+    "dsa": false,
+    "verified": true
+  },
+  {
+    "id": "exadel",
+    "name": "Exadel",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "Verified visa sponsor (shared list). Hires in Bulgaria, Lithuania. 14 matching engineering roles open today. Checked 26 Oct 2026.",
+    "apply": "https://job-boards.greenhouse.io/exadelinc",
+    "dsa": false,
+    "verified": true
+  },
+  {
+    "id": "exmox",
+    "name": "Exmox",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "Verified visa sponsor (shared list). Hires in Germany. Checked 26 Oct 2026.",
+    "apply": "https://join.com/companies/exmox",
+    "dsa": false,
+    "verified": true
+  },
+  {
+    "id": "exness",
+    "name": "Exness",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "Verified visa sponsor (shared list). Hires in Cyprus. Checked 26 Oct 2026.",
+    "apply": "https://exness-careers.com/jobs",
+    "dsa": false,
+    "verified": true
+  },
+  {
+    "id": "experian",
+    "name": "Experian",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "Verified visa sponsor (shared list). Hires in Bulgaria. 8 matching engineering roles open today. Checked 26 Oct 2026.",
+    "apply": "https://jobs.smartrecruiters.com/Experian",
+    "dsa": false,
+    "verified": true
+  },
+  {
+    "id": "finn",
+    "name": "FINN",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "Verified visa sponsor (shared list). Hires in Germany. Checked 26 Oct 2026.",
+    "apply": "https://jobs.lever.co/finn",
+    "dsa": false,
+    "verified": true
+  },
+  {
+    "id": "flaconi",
+    "name": "Flaconi",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "Verified visa sponsor (shared list). Hires in Germany. Checked 26 Oct 2026.",
+    "apply": "https://jobs.eu.lever.co/flaconi",
+    "dsa": false,
+    "verified": true
+  },
+  {
+    "id": "flash",
+    "name": "Flash",
+    "region": "global",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "Verified visa sponsor (shared list). Hires in Remote. Checked 26 Oct 2026.",
+    "apply": "https://jobs.lever.co/flashapp",
+    "dsa": false,
+    "verified": true
+  },
+  {
+    "id": "flink",
+    "name": "Flink",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "Verified visa sponsor (shared list). Hires in Germany. 1 matching engineering roles open today. Checked 26 Oct 2026.",
+    "apply": "https://jobs.smartrecruiters.com/Flink3",
+    "dsa": false,
+    "verified": true
+  },
+  {
+    "id": "fortray",
+    "name": "Fortray",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "Verified visa sponsor (shared list). Hires in Ireland. Checked 26 Oct 2026.",
+    "apply": "https://fortrayglobalservices.teamtailor.com/",
+    "dsa": false,
+    "verified": true
+  },
+  {
+    "id": "freenow",
+    "name": "FREENOW",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "Verified visa sponsor (shared list). Hires in Germany. Checked 26 Oct 2026.",
+    "apply": "https://job-boards.greenhouse.io/freenow",
+    "dsa": false,
+    "verified": true
+  },
+  {
+    "id": "fxpro",
+    "name": "FxPro",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "Verified visa sponsor (shared list). Hires in Cyprus. 1 matching engineering roles open today. Checked 26 Oct 2026.",
+    "apply": "https://fxpro.bamboohr.com/",
+    "dsa": false,
+    "verified": true
+  },
+  {
+    "id": "gameloft",
+    "name": "Gameloft",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "Verified visa sponsor (shared list). Hires in Bulgaria. Checked 26 Oct 2026.",
+    "apply": "https://jobs.smartrecruiters.com/Gameloft",
+    "dsa": false,
+    "verified": true
+  },
+  {
+    "id": "genius_sports",
+    "name": "Genius Sports",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "Verified visa sponsor (shared list). Hires in Estonia. 2 matching engineering roles open today. Checked 26 Oct 2026.",
+    "apply": "https://www.geniussports.com/careers",
+    "dsa": false,
+    "verified": true
+  },
+  {
+    "id": "glocomms",
+    "name": "Glocomms",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "Verified visa sponsor (shared list). Hires in United Kingdom. Checked 26 Oct 2026.",
+    "apply": "https://www.glocomms.com",
+    "dsa": false,
+    "verified": true
+  },
+  {
+    "id": "glovo",
+    "name": "Glovo",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "Verified visa sponsor (shared list). Hires in Bulgaria, Croatia, Italy, Poland, Spain. Checked 26 Oct 2026.",
+    "apply": "https://jobs.glovoapp.com",
+    "dsa": false,
+    "verified": true
+  },
+  {
+    "id": "grupo_pi_ero",
+    "name": "Grupo Piñero",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "Verified visa sponsor (shared list). Hires in Spain. Checked 26 Oct 2026.",
+    "apply": "https://empleo.grupo-pinero.com/jobs",
+    "dsa": false,
+    "verified": true
+  },
+  {
+    "id": "h_m",
+    "name": "H&M",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "Verified visa sponsor (shared list). Hires in Sweden. Checked 26 Oct 2026.",
+    "apply": "https://career.hm.com",
+    "dsa": false,
+    "verified": true
+  },
+  {
+    "id": "hostinger",
+    "name": "Hostinger",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "Verified visa sponsor (shared list). Hires in Estonia. 1 matching engineering roles open today. Checked 26 Oct 2026.",
+    "apply": "https://jobs.lever.co/hostinger",
+    "dsa": false,
+    "verified": true
+  },
+  {
+    "id": "inbank",
+    "name": "Inbank",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "Verified visa sponsor (shared list). Hires in Estonia. Checked 26 Oct 2026.",
+    "apply": "https://job-boards.eu.greenhouse.io/inbank",
+    "dsa": false,
+    "verified": true
+  },
+  {
+    "id": "indie_campers",
+    "name": "Indie Campers",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "Verified visa sponsor (shared list). Hires in Portugal. Checked 26 Oct 2026.",
+    "apply": "https://indiecampers.com/careers",
+    "dsa": false,
+    "verified": true
+  },
+  {
+    "id": "inetum",
+    "name": "Inetum",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "Verified visa sponsor (shared list). Hires in Portugal. 6 matching engineering roles open today. Checked 26 Oct 2026.",
+    "apply": "https://jobs.smartrecruiters.com/Inetum2",
+    "dsa": false,
+    "verified": true
+  },
+  {
+    "id": "iver",
+    "name": "Iver",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "Verified visa sponsor (shared list). Hires in Poland. Checked 26 Oct 2026.",
+    "apply": "https://iverpolska.teamtailor.com/",
+    "dsa": false,
+    "verified": true
+  },
+  {
+    "id": "jobgether",
+    "name": "Jobgether",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "Verified visa sponsor (shared list). Hires in Germany, Remote. 443 matching engineering roles open today. Checked 26 Oct 2026.",
+    "apply": "https://jobs.lever.co/jobgether",
+    "dsa": false,
+    "verified": true
+  },
+  {
+    "id": "johnson_johnson",
+    "name": "Johnson & Johnson",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "Verified visa sponsor (shared list). Hires in Spain. Checked 26 Oct 2026.",
+    "apply": "https://jj.wd5.myworkdayjobs.com/JJ",
+    "dsa": false,
+    "verified": true
+  },
+  {
+    "id": "journi",
+    "name": "Journi",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "Verified visa sponsor (shared list). Hires in Austria. Checked 26 Oct 2026.",
+    "apply": "https://careers.kula.ai/journi",
+    "dsa": false,
+    "verified": true
+  },
+  {
+    "id": "just_eat_takeaway",
+    "name": "Just Eat Takeaway",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "Verified visa sponsor (shared list). Hires in Germany. Checked 26 Oct 2026.",
+    "apply": "https://careers.justeattakeaway.com",
+    "dsa": false,
+    "verified": true
+  },
+  {
+    "id": "justplay",
+    "name": "JustPlay",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "Verified visa sponsor (shared list). Hires in Germany. Checked 26 Oct 2026.",
+    "apply": "https://jobs.ashbyhq.com/justplay-gmbh",
+    "dsa": false,
+    "verified": true
+  },
+  {
+    "id": "kultakiertue",
+    "name": "Kultakiertue",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "Verified visa sponsor (shared list). Hires in Finland. Checked 26 Oct 2026.",
+    "apply": "https://careers.kultakiertue.fi/jobs",
+    "dsa": false,
+    "verified": true
+  },
+  {
+    "id": "l_mobile",
+    "name": "L Mobile",
+    "region": "global",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "Verified visa sponsor (shared list). Hires in Tunisia. Checked 26 Oct 2026.",
+    "apply": "https://l-mobile.jobs.personio.de/",
+    "dsa": false,
+    "verified": true
+  },
+  {
+    "id": "la_fosse",
+    "name": "La Fosse",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "Verified visa sponsor (shared list). Hires in Luxembourg. Checked 26 Oct 2026.",
+    "apply": "https://www.lafosse.com",
+    "dsa": false,
+    "verified": true
+  },
+  {
+    "id": "leaseweb",
+    "name": "Leaseweb",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "Verified visa sponsor (shared list). Hires in Netherlands. Checked 26 Oct 2026.",
+    "apply": "https://job-boards.greenhouse.io/leaseweb",
+    "dsa": false,
+    "verified": true
+  },
+  {
+    "id": "leovegas",
+    "name": "LeoVegas",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "Verified visa sponsor (shared list). Hires in Sweden. Checked 26 Oct 2026.",
+    "apply": "https://jobs.jobvite.com/leovegas",
+    "dsa": false,
+    "verified": true
+  },
+  {
+    "id": "lhv",
+    "name": "LHV",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "Verified visa sponsor (shared list). Hires in Estonia. Checked 26 Oct 2026.",
+    "apply": "https://lhv.teamdash.com/p/",
+    "dsa": false,
+    "verified": true
+  },
+  {
+    "id": "lightspeed",
+    "name": "Lightspeed",
+    "region": "global",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "Verified visa sponsor (shared list). Hires in Belgium, Canada. Checked 26 Oct 2026.",
+    "apply": "https://www.lightspeedhq.com/careers",
+    "dsa": false,
+    "verified": true
+  },
+  {
+    "id": "lovable_v",
+    "name": "Lovable",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "Verified visa sponsor (shared list). Hires in Sweden. Checked 26 Oct 2026.",
+    "apply": "https://lovable.dev/careers",
+    "dsa": false,
+    "verified": true
+  },
+  {
+    "id": "marley_spoon",
+    "name": "Marley Spoon",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "Verified visa sponsor (shared list). Hires in Portugal. Checked 26 Oct 2026.",
+    "apply": "https://apply.marleyspoon.com/jobs",
+    "dsa": false,
+    "verified": true
+  },
+  {
+    "id": "marshall",
+    "name": "Marshall",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "Verified visa sponsor (shared list). Hires in United Kingdom. Checked 26 Oct 2026.",
+    "apply": "https://marshall.wd103.myworkdayjobs.com/en-US/Marshall_Group",
+    "dsa": false,
+    "verified": true
+  },
+  {
+    "id": "mediamarkt",
+    "name": "MediaMarkt",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "Verified visa sponsor (shared list). Hires in Spain. Checked 26 Oct 2026.",
+    "apply": "https://careers.mediamarktsaturn.com",
+    "dsa": false,
+    "verified": true
+  },
+  {
+    "id": "mentimeter",
+    "name": "Mentimeter",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "Verified visa sponsor (shared list). Hires in Sweden. Checked 26 Oct 2026.",
+    "apply": "https://job-boards.eu.greenhouse.io/mentimeter",
+    "dsa": false,
+    "verified": true
+  },
+  {
+    "id": "moia",
+    "name": "MOIA",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "Verified visa sponsor (shared list). Hires in Germany. Checked 26 Oct 2026.",
+    "apply": "https://job-boards.eu.greenhouse.io/moia",
+    "dsa": false,
+    "verified": true
+  },
+  {
+    "id": "msd",
+    "name": "MSD",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "Verified visa sponsor (shared list). Hires in Poland. Checked 26 Oct 2026.",
+    "apply": "https://jobs.msd.com",
+    "dsa": false,
+    "verified": true
+  },
+  {
+    "id": "mtech_group",
+    "name": "Mtech Group",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "Verified visa sponsor (shared list). Hires in Spain. Checked 26 Oct 2026.",
+    "apply": "https://empleo.mtechgroup.com/jobs",
+    "dsa": false,
+    "verified": true
+  },
+  {
+    "id": "multiverse_computing",
+    "name": "Multiverse Computing",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "Verified visa sponsor (shared list). Hires in Spain. 1 matching engineering roles open today. Checked 26 Oct 2026.",
+    "apply": "https://multiversecomputing.teamtailor.com/",
+    "dsa": false,
+    "verified": true
+  },
+  {
+    "id": "nestle",
+    "name": "Nestle",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "Verified visa sponsor (shared list). Hires in Greece. Checked 26 Oct 2026.",
+    "apply": "https://www.nestle.com/jobs",
+    "dsa": false,
+    "verified": true
+  },
+  {
+    "id": "next_gen_technology",
+    "name": "Next Gen Technology",
+    "region": "global",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "Verified visa sponsor (shared list). Hires in Georgia. Checked 26 Oct 2026.",
+    "apply": "https://nxtgentechnologyllc-1738565931-next-gen-technology.teamtailor.com/",
+    "dsa": false,
+    "verified": true
+  },
+  {
+    "id": "nexthink",
+    "name": "Nexthink",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "Verified visa sponsor (shared list). Hires in Spain. Checked 26 Oct 2026.",
+    "apply": "https://www.smartrecruiters.com/Nexthink",
+    "dsa": false,
+    "verified": true
+  },
+  {
+    "id": "nimber",
+    "name": "Nimber",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "Verified visa sponsor (shared list). Hires in Portugal. Checked 26 Oct 2026.",
+    "apply": "https://www.careers-page.com/nimber",
+    "dsa": false,
+    "verified": true
+  },
+  {
+    "id": "nordea",
+    "name": "Nordea",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "Verified visa sponsor (shared list). Hires in Finland. Checked 26 Oct 2026.",
+    "apply": "https://careers.nordea.com",
+    "dsa": false,
+    "verified": true
+  },
+  {
+    "id": "nutrition_kitchen",
+    "name": "Nutrition Kitchen",
+    "region": "global",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "Verified visa sponsor (shared list). Hires in Hong Kong. Checked 26 Oct 2026.",
+    "apply": "https://nutritionkitchenhk.applytojob.com/",
+    "dsa": false,
+    "verified": true
+  },
+  {
+    "id": "officernd",
+    "name": "OfficeRnD",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "Verified visa sponsor (shared list). Hires in Bulgaria. Checked 26 Oct 2026.",
+    "apply": "https://officernd.bamboohr.com/",
+    "dsa": false,
+    "verified": true
+  },
+  {
+    "id": "onoff",
+    "name": "Onoff",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "Verified visa sponsor (shared list). Hires in Estonia. Checked 26 Oct 2026.",
+    "apply": "https://www.welcometothejungle.com/fr/companies/onoff-telecom/jobs",
+    "dsa": false,
+    "verified": true
+  },
+  {
+    "id": "optiver",
+    "name": "Optiver",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "Verified visa sponsor (shared list). Hires in Netherlands. Checked 26 Oct 2026.",
+    "apply": "https://optiver.com/working-at-optiver/career-opportunities",
+    "dsa": false,
+    "verified": true
+  },
+  {
+    "id": "oxylabs",
+    "name": "Oxylabs",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "Verified visa sponsor (shared list). Hires in Lithuania. Checked 26 Oct 2026.",
+    "apply": "https://jobs.lever.co/oxylabs",
+    "dsa": false,
+    "verified": true
+  },
+  {
+    "id": "paysafe",
+    "name": "Paysafe",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "Verified visa sponsor (shared list). Hires in Bulgaria. Checked 26 Oct 2026.",
+    "apply": "https://jobs.paysafe.com",
+    "dsa": false,
+    "verified": true
+  },
+  {
+    "id": "pgway",
+    "name": "Pgway",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "Verified visa sponsor (shared list). Hires in Portugal. Checked 26 Oct 2026.",
+    "apply": "https://job-boards.eu.greenhouse.io/pgway",
+    "dsa": false,
+    "verified": true
+  },
+  {
+    "id": "podimo",
+    "name": "Podimo",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "Verified visa sponsor (shared list). Hires in Netherlands. Checked 26 Oct 2026.",
+    "apply": "https://careers.podimo.com/jobs",
+    "dsa": false,
+    "verified": true
+  },
+  {
+    "id": "qualcomm",
+    "name": "Qualcomm",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "Verified visa sponsor (shared list). Hires in Ireland. Checked 26 Oct 2026.",
+    "apply": "https://careers.qualcomm.com/careers",
+    "dsa": false,
+    "verified": true
+  },
+  {
+    "id": "rakuten_tv",
+    "name": "Rakuten TV",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "Verified visa sponsor (shared list). Hires in Spain. Checked 26 Oct 2026.",
+    "apply": "https://rakuten.wd1.myworkdayjobs.com/RakutenTV",
+    "dsa": false,
+    "verified": true
+  },
+  {
+    "id": "recharge",
+    "name": "Recharge",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "Verified visa sponsor (shared list). Hires in Germany. Checked 26 Oct 2026.",
+    "apply": "https://company.recharge.com/vacancies",
+    "dsa": false,
+    "verified": true
+  },
+  {
+    "id": "rhenus_group",
+    "name": "Rhenus Group",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "Verified visa sponsor (shared list). Hires in Germany. Checked 26 Oct 2026.",
+    "apply": "https://rhe.wd3.myworkdayjobs.com/R1111",
+    "dsa": false,
+    "verified": true
+  },
+  {
+    "id": "rituals",
+    "name": "Rituals",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "Verified visa sponsor (shared list). Hires in Netherlands. Checked 26 Oct 2026.",
+    "apply": "https://jobs.smartrecruiters.com/Rituals1",
+    "dsa": false,
+    "verified": true
+  },
+  {
+    "id": "seb",
+    "name": "SEB",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "Verified visa sponsor (shared list). Hires in Estonia. Checked 26 Oct 2026.",
+    "apply": "https://sebgroup.com/career",
+    "dsa": false,
+    "verified": true
+  },
+  {
+    "id": "shiftmove",
+    "name": "Shiftmove",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "Verified visa sponsor (shared list). Hires in France, Germany. Checked 26 Oct 2026.",
+    "apply": "https://apply.workable.com/shiftmove",
+    "dsa": false,
+    "verified": true
+  },
+  {
+    "id": "siemens",
+    "name": "Siemens",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "Verified visa sponsor (shared list). Hires in Czech Republic. Checked 26 Oct 2026.",
+    "apply": "https://jobs.siemens.com",
+    "dsa": false,
+    "verified": true
+  },
+  {
+    "id": "sintra",
+    "name": "Sintra",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "Verified visa sponsor (shared list). Hires in Lithuania. Checked 26 Oct 2026.",
+    "apply": "https://sintra.ai",
+    "dsa": false,
+    "verified": true
+  },
+  {
+    "id": "sisu_group",
+    "name": "Sisu Group",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "Verified visa sponsor (shared list). Hires in Estonia. Checked 26 Oct 2026.",
+    "apply": "https://sisugroup.teamtailor.com/",
+    "dsa": false,
+    "verified": true
+  },
+  {
+    "id": "smoobu",
+    "name": "Smoobu",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "Verified visa sponsor (shared list). Hires in Germany. Checked 26 Oct 2026.",
+    "apply": "https://smoobu.jobs.personio.com/",
+    "dsa": false,
+    "verified": true
+  },
+  {
+    "id": "spaulding_ridge",
+    "name": "Spaulding Ridge",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "Verified visa sponsor (shared list). Hires in Spain. 1 matching engineering roles open today. Checked 26 Oct 2026.",
+    "apply": "https://job-boards.greenhouse.io/spauldingridge",
+    "dsa": false,
+    "verified": true
+  },
+  {
+    "id": "star_stable",
+    "name": "Star Stable",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "Verified visa sponsor (shared list). Hires in Sweden. Checked 26 Oct 2026.",
+    "apply": "https://jobs.starstableentertainment.com/jobs",
+    "dsa": false,
+    "verified": true
+  },
+  {
+    "id": "stuart",
+    "name": "Stuart",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "Verified visa sponsor (shared list). Hires in Spain. Checked 26 Oct 2026.",
+    "apply": "https://jobs.lever.co/stuart",
+    "dsa": false,
+    "verified": true
+  },
+  {
+    "id": "superbet",
+    "name": "Superbet",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "Verified visa sponsor (shared list). Hires in Spain. Checked 26 Oct 2026.",
+    "apply": "https://job-boards.eu.greenhouse.io/superbet",
+    "dsa": false,
+    "verified": true
+  },
+  {
+    "id": "swedbank",
+    "name": "Swedbank",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "Verified visa sponsor (shared list). Hires in Estonia. Checked 26 Oct 2026.",
+    "apply": "https://jobs.swedbank.com/jobs",
+    "dsa": false,
+    "verified": true
+  },
+  {
+    "id": "tactile",
+    "name": "Tactile",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "Verified visa sponsor (shared list). Hires in Denmark. Checked 26 Oct 2026.",
+    "apply": "https://job-boards.eu.greenhouse.io/tactilegames",
+    "dsa": false,
+    "verified": true
+  },
+  {
+    "id": "talan",
+    "name": "Talan",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "Verified visa sponsor (shared list). Hires in France. 7 matching engineering roles open today. Checked 26 Oct 2026.",
+    "apply": "https://jobs.smartrecruiters.com/Talan",
+    "dsa": false,
+    "verified": true
+  },
+  {
+    "id": "tango",
+    "name": "Tango",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "Verified visa sponsor (shared list). Hires in Poland. Checked 26 Oct 2026.",
+    "apply": "https://www.comeet.com/jobs/tango/B7.007",
+    "dsa": false,
+    "verified": true
+  },
+  {
+    "id": "telia_company",
+    "name": "Telia Company",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "Verified visa sponsor (shared list). Hires in Lithuania. Checked 26 Oct 2026.",
+    "apply": "https://teliacompany.wd3.myworkdayjobs.com/Telia_careers",
+    "dsa": false,
+    "verified": true
+  },
+  {
+    "id": "tipico",
+    "name": "Tipico",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "Verified visa sponsor (shared list). Hires in Malta. Checked 26 Oct 2026.",
+    "apply": "https://www.tipico-careers.com/en/jobs",
+    "dsa": false,
+    "verified": true
+  },
+  {
+    "id": "tractive",
+    "name": "Tractive",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "Verified visa sponsor (shared list). Hires in Austria. Checked 26 Oct 2026.",
+    "apply": "https://tractive.com",
+    "dsa": false,
+    "verified": true
+  },
+  {
+    "id": "transfergo",
+    "name": "TransferGo",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "Verified visa sponsor (shared list). Hires in Lithuania. Checked 26 Oct 2026.",
+    "apply": "https://www.transfergo.com/careers",
+    "dsa": false,
+    "verified": true
+  },
+  {
+    "id": "trivago",
+    "name": "Trivago",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "Verified visa sponsor (shared list). Hires in Germany. Checked 26 Oct 2026.",
+    "apply": "https://careers.trivago.com",
+    "dsa": false,
+    "verified": true
+  },
+  {
+    "id": "ust",
+    "name": "UST",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "Verified visa sponsor (shared list). Hires in Spain. Checked 26 Oct 2026.",
+    "apply": "https://www.ust.com",
+    "dsa": false,
+    "verified": true
+  },
+  {
+    "id": "vattenfall",
+    "name": "Vattenfall",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "Verified visa sponsor (shared list). Hires in Netherlands, Sweden. 2 matching engineering roles open today. Checked 26 Oct 2026.",
+    "apply": "https://jobs.smartrecruiters.com/Vattenfall",
+    "dsa": false,
+    "verified": true
+  },
+  {
+    "id": "vay",
+    "name": "Vay",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "Verified visa sponsor (shared list). Hires in Germany. 1 matching engineering roles open today. Checked 26 Oct 2026.",
+    "apply": "https://job-boards.eu.greenhouse.io/vay",
+    "dsa": false,
+    "verified": true
+  },
+  {
+    "id": "veikkaus",
+    "name": "Veikkaus",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "Verified visa sponsor (shared list). Hires in Finland. Checked 26 Oct 2026.",
+    "apply": "https://fa-exdl-saasfaprod1.fa.ocs.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_2/jobs",
+    "dsa": false,
+    "verified": true
+  },
+  {
+    "id": "visa",
+    "name": "Visa",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "Verified visa sponsor (shared list). Hires in Poland. Checked 26 Oct 2026.",
+    "apply": "https://visa.wd5.myworkdayjobs.com/en-US/Visa",
+    "dsa": false,
+    "verified": true
+  },
+  {
+    "id": "volvo_group",
+    "name": "Volvo Group",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "Verified visa sponsor (shared list). Hires in Sweden. Checked 26 Oct 2026.",
+    "apply": "https://jobs.volvogroup.com",
+    "dsa": false,
+    "verified": true
+  },
+  {
+    "id": "wallapop",
+    "name": "Wallapop",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "Verified visa sponsor (shared list). Hires in Spain. Checked 26 Oct 2026.",
+    "apply": "https://job-boards.eu.greenhouse.io/wallapop",
+    "dsa": false,
+    "verified": true
+  },
+  {
+    "id": "wargaming",
+    "name": "Wargaming",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "Verified visa sponsor (shared list). Hires in Cyprus, Lithuania. Checked 26 Oct 2026.",
+    "apply": "https://wargaming.com/en/careers",
+    "dsa": false,
+    "verified": true
+  },
+  {
+    "id": "western_union",
+    "name": "Western Union",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "Verified visa sponsor (shared list). Hires in Lithuania. Checked 26 Oct 2026.",
+    "apply": "https://westernunion.wd5.myworkdayjobs.com/WesternUnionJobs",
+    "dsa": false,
+    "verified": true
+  },
+  {
+    "id": "wood_mackenzie",
+    "name": "Wood Mackenzie",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "Verified visa sponsor (shared list). Hires in United Kingdom. Checked 26 Oct 2026.",
+    "apply": "https://woodmac.wd3.myworkdayjobs.com/woodmaccareers",
+    "dsa": false,
+    "verified": true
+  },
+  {
+    "id": "yousician",
+    "name": "Yousician",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "Verified visa sponsor (shared list). Hires in Finland, Germany. Checked 26 Oct 2026.",
+    "apply": "https://yousician.com/careers",
+    "dsa": false,
+    "verified": true
+  },
+  {
+    "id": "zeals",
+    "name": "Zeals",
+    "region": "global",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "Verified visa sponsor (shared list). Hires in Japan. Checked 26 Oct 2026.",
+    "apply": "https://job-boards.greenhouse.io/zeals",
+    "dsa": false,
+    "verified": true
+  },
+  {
+    "id": "zynga",
+    "name": "Zynga",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "Market rate — check posting",
+    "desc": "Verified visa sponsor (shared list). Hires in Spain. 4 matching engineering roles open today. Checked 26 Oct 2026.",
+    "apply": "https://job-boards.greenhouse.io/zyngacareers",
+    "dsa": false,
+    "verified": true
   }
 ]
