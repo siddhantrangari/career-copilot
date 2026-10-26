@@ -2946,5 +2946,225 @@
     "desc": "Berlin savings-platform fintech. Engineering roles mention visa/relocation support. Checked 26 Oct 2026.",
     "apply": "https://job-boards.greenhouse.io/raisin",
     "dsa": false
+  },
+  {
+    "id": "nebius",
+    "name": "Nebius",
+    "region": "eu",
+    "roles": [
+      "fde",
+      "ai",
+      "se"
+    ],
+    "pay": "≈€90–150k (est.)",
+    "desc": "Amsterdam AI cloud (Nasdaq-listed, hyper-growth). 75 engineering roles in Europe, incl. Forward Deployed Engineer (Remote – Europe) and Applied AI Solutions Engineers. Checked 26 Oct 2026.",
+    "apply": "https://job-boards.greenhouse.io/nebius",
+    "dsa": false
+  },
+  {
+    "id": "perk",
+    "name": "Perk (TravelPerk)",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "≈€80–130k (est.)",
+    "desc": "Barcelona/London/Berlin business-travel scaleup. 20 EU engineering roles; every one mentions visa/relocation support. Checked 26 Oct 2026.",
+    "apply": "https://jobs.ashbyhq.com/perk",
+    "dsa": false
+  },
+  {
+    "id": "intercom",
+    "name": "Intercom",
+    "region": "eu",
+    "roles": [
+      "fde",
+      "ai",
+      "fs"
+    ],
+    "pay": "≈€90–150k (est.)",
+    "desc": "Dublin, AI customer-service agent Fin. 21 EU engineering roles incl. Forward Deployed and Senior Product Engineers. Checked 26 Oct 2026.",
+    "apply": "https://job-boards.greenhouse.io/intercom",
+    "dsa": false
+  },
+  {
+    "id": "attio",
+    "name": "Attio",
+    "region": "eu",
+    "roles": [
+      "fs",
+      "ai"
+    ],
+    "pay": "£95–125k / €95–125k + equity",
+    "desc": "London AI-native CRM. 15 EU engineering roles (London, Poland/Portugal remote). Checked 26 Oct 2026.",
+    "apply": "https://jobs.ashbyhq.com/attio",
+    "dsa": false
+  },
+  {
+    "id": "doctrine",
+    "name": "Doctrine",
+    "region": "eu",
+    "roles": [
+      "fs",
+      "ai"
+    ],
+    "pay": "≈€65–95k (est.)",
+    "desc": "Paris legal-AI. 12 Experienced/Senior Fullstack Engineer roles. Checked 26 Oct 2026.",
+    "apply": "https://jobs.lever.co/doctrine",
+    "dsa": false
+  },
+  {
+    "id": "taktile",
+    "name": "Taktile",
+    "region": "eu",
+    "roles": [
+      "fs",
+      "ai"
+    ],
+    "pay": "≈€80–120k (est.)",
+    "desc": "Berlin AI decisioning platform for fintech. Senior Backend / Full-Stack / AI Enablement Engineers in Berlin. Checked 26 Oct 2026.",
+    "apply": "https://jobs.ashbyhq.com/taktile",
+    "dsa": false
+  },
+  {
+    "id": "robco",
+    "name": "RobCo",
+    "region": "eu",
+    "roles": [
+      "fs",
+      "ai",
+      "se"
+    ],
+    "pay": "≈€80–120k (est.)",
+    "desc": "Munich robotics; became a unicorn with its Series C on 5 Oct 2026. Senior Full Stack (Agentic Workflows, remote Europe) and Solutions Engineers. Checked 26 Oct 2026.",
+    "apply": "https://jobs.ashbyhq.com/robco",
+    "dsa": false
+  },
+  {
+    "id": "lexroom",
+    "name": "Lexroom",
+    "region": "eu",
+    "roles": [
+      "ai",
+      "fs"
+    ],
+    "pay": "€80–120k (senior bands)",
+    "desc": "Milan legal-AI; $50M Series B 2026. Senior Full Stack / AI Engineers in Milan and Barcelona. Checked 26 Oct 2026.",
+    "apply": "https://jobs.ashbyhq.com/lexroom",
+    "dsa": false
+  },
+  {
+    "id": "granola",
+    "name": "Granola",
+    "region": "eu",
+    "roles": [
+      "fs",
+      "ai"
+    ],
+    "pay": "≈£90–140k (est.)",
+    "desc": "London AI meeting-notes app, fast-growing. 9 engineering roles; nearly all mention visa sponsorship. Checked 26 Oct 2026.",
+    "apply": "https://jobs.ashbyhq.com/granola",
+    "dsa": false
+  },
+  {
+    "id": "peec_ai",
+    "name": "Peec AI",
+    "region": "eu",
+    "roles": [
+      "fs",
+      "ai"
+    ],
+    "pay": "€100–150k + equity",
+    "desc": "Berlin AI-search visibility startup growing fast. Senior Fullstack / Product Engineers in Berlin. Checked 26 Oct 2026.",
+    "apply": "https://jobs.ashbyhq.com/peec",
+    "dsa": false
+  },
+  {
+    "id": "pipedrive",
+    "name": "Pipedrive",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "≈€60–95k (est.)",
+    "desc": "Tallinn/Lisbon CRM scaleup. 8 engineering roles across Portugal/Germany/UK/Ireland, all mention relocation/visa. Checked 26 Oct 2026.",
+    "apply": "https://jobs.lever.co/pipedrive",
+    "dsa": false
+  },
+  {
+    "id": "quantexa",
+    "name": "Quantexa",
+    "region": "eu",
+    "roles": [
+      "fs",
+      "ai"
+    ],
+    "pay": "≈£80–120k (est.)",
+    "desc": "London decision-intelligence unicorn. Senior Software Engineers in London and Munich. Checked 26 Oct 2026.",
+    "apply": "https://jobs.ashbyhq.com/quantexa",
+    "dsa": false
+  },
+  {
+    "id": "endra",
+    "name": "Endra",
+    "region": "eu",
+    "roles": [
+      "ai",
+      "fs"
+    ],
+    "pay": "≈€80–130k (est.)",
+    "desc": "Stockholm/Malmö AI startup; $50M Series A (a16z) June 2026, 550%+ headcount growth. Checked 26 Oct 2026.",
+    "apply": "https://jobs.ashbyhq.com/endra",
+    "dsa": false
+  },
+  {
+    "id": "prelude",
+    "name": "Prelude",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "≈€70–100k (est.)",
+    "desc": "Paris verification/anti-fraud API; $20M Series A 2026. Senior Backend (Go) and founding engineers. Checked 26 Oct 2026.",
+    "apply": "https://jobs.ashbyhq.com/prelude",
+    "dsa": false
+  },
+  {
+    "id": "conduct",
+    "name": "Conduct",
+    "region": "eu",
+    "roles": [
+      "fde",
+      "ai"
+    ],
+    "pay": "≈£90–140k (est.)",
+    "desc": "London AI agents for ERP/legacy-code modernisation; $60M Series A (Index, ICONIQ). Customer-facing engineering. Checked 26 Oct 2026.",
+    "apply": "https://jobs.ashbyhq.com/conduct",
+    "dsa": false
+  },
+  {
+    "id": "viktor",
+    "name": "Viktor",
+    "region": "eu",
+    "roles": [
+      "ai",
+      "fs"
+    ],
+    "pay": "≈€70–110k (est.)",
+    "desc": "Warsaw/Munich/Dublin AI-coworker agents; €64.7M Series A 2026. Checked 26 Oct 2026.",
+    "apply": "https://jobs.ashbyhq.com/viktor",
+    "dsa": false
+  },
+  {
+    "id": "wayflyer",
+    "name": "Wayflyer",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "≈€80–120k (est.)",
+    "desc": "Dublin e-commerce financing scaleup. Engineers in Dublin and remote Europe. Checked 26 Oct 2026.",
+    "apply": "https://jobs.ashbyhq.com/wayflyer",
+    "dsa": false
   }
 ]
