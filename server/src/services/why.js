@@ -17,6 +17,37 @@ const MODEL = process.env.WHY_MODEL || 'openai/gpt-5.6-luna';
 const BATCH = 10;
 const MAX_LEN = 220;
 
+/**
+ * Requirements he does not have, checked on the whole JD (the model only sees
+ * its start, where requirements rarely are). A role that needs them is capped
+ * below the Apply queue's fit 70 and its line names the gap. Postgres regexes:
+ * they run as one UPDATE over every open role, so re-running changes nothing.
+ */
+export const HARD_GAPS = [
+  // Only when asked of him (a requirement word just before it) — not a stack list or "founded by the team behind PyTorch".
+  { gap: 'PyTorch/TensorFlow (ML model work)', cap: 55,
+    re: '((experience|proficien|expert|familiar|knowledge|must|hands-on|skills|background).{0,80}(pytorch|tensorflow|\\mjax\\M|\\mkeras\\M|scikit-learn|sklearn)|train(ing)? (ml|machine learning|deep learning) models)' },
+  // .NET backends; a JD that also takes Java is left alone.
+  { gap: 'C#/.NET backend', cap: 50, re: '(\\mc#|asp\\.net|\\.net (core|framework)|\\mdotnet\\M)', unless: '\\mjava\\M' },
+];
+
+/** Cap fit and note the gap on open roles whose JD requires what he lacks. */
+export async function applyHardGaps() {
+  let capped = 0;
+  for (const g of HARD_GAPS) {
+    const r = await query(
+      `UPDATE jobs SET fit_score = LEAST(fit_score, $1),
+              why_role = CASE WHEN why_role IS NULL OR why_role = '' THEN 'Gap: ' || $2
+                              ELSE why_role || '; gap: ' || $2 END
+       WHERE closed_at IS NULL AND fit_score > $1 AND description ~* $3
+         AND ($4::text IS NULL OR description !~* $4)`,
+      [g.cap, g.gap, g.re, g.unless || null],
+    );
+    capped += r.rowCount || 0;
+  }
+  return capped;
+}
+
 export const companyKey = (name) => String(name || '').trim().toLowerCase();
 
 const clean = (s, n) => String(s || '').replace(/\s+/g, ' ').trim().slice(0, n);
@@ -35,6 +66,7 @@ async function compactCandidate() {
 Headline: ${profile.headline}
 Target roles: ${(profile.target_roles || []).join(', ')}
 Targets: Bangalore/Bengaluru or remote in India; EU remote; Gulf; global remote. Avoids DSA/LeetCode-style interviews.
+Has NOT worked with: PyTorch, TensorFlow, JAX or training ML models (he builds LLM applications — agents, RAG, MCP — not models); C#/.NET.
 Summary: ${clean(profile.summary, 500)}
 Skills:
 ${skills}
@@ -55,7 +87,7 @@ Also give "fit", an integer 0-100 for how well this role suits him, from the sam
 - 85-100: one of his target role types, most required skills proven in his work, location acceptable.
 - 70-84: target role type, many skills proven, one or two real gaps.
 - 50-69: adjacent role, or several gaps in required skills.
-- 30-49: major gap in core stack or domain (e.g. a language or platform he has never used).
+- 30-49: major gap in core stack or domain (e.g. a language or platform he has never used). A JD that requires PyTorch/TensorFlow/ML model training, or a C#/.NET backend, is at most 55.
 - 0-29: not his field (mobile-native, hardware/firmware, sales, pure research).
 Location: Bangalore/Bengaluru, India-remote, EU-remote, Gulf and global remote are acceptable; other on-site cities lower fit by 10-20. Title only (no JD): at most 60.
 ${RULES.replace('{"id":"<id>","why":"<line>"}', '{"id":"<id>","why":"<line>","fit":<0-100>}')}`
@@ -197,7 +229,8 @@ export async function generateWhyLines({ maxJobs = 120, maxCompanies = 40, onSte
       onStep({ phase: 'why', status: 'error', message: err.message });
     }
   }
-  return { roles, companies: comps, skipped };
+  const capped = await applyHardGaps();
+  return { roles, companies: comps, skipped, capped };
 }
 
 /** How much is still missing — for the scheduler and status checks. */
