@@ -574,14 +574,17 @@ async function addRole(args) {
   const { company, title, jobLink, stage = 'interested', pay } = args;
   if (!title) throw new ToolError('title is required');
   if (!STAGES.includes(stage)) throw new ToolError(`stage must be one of ${STAGES.join(', ')}`);
-  const c = await findCompany(company);
+  const c = await findCompanyOrTarget(company);
   const t = await ensureTracked(c.id, stage);
   const { roles, text } = splitNotes(t.notes);
   if (findRole(roles, title)?.title?.toLowerCase() === title.toLowerCase()) {
     throw new ToolError(`${c.name} already has a role called "${title}"`);
   }
+  // Save the JD with the role, so tailoring and prep work from it later.
+  const jd = await jdForLink(jobLink, { companyName: c.name, title });
   const role = {
-    id: `role-${Date.now()}`, title, stage, pay: pay || '', jobLink: jobLink || '', jdText: '',
+    id: `role-${Date.now()}`, title, stage, pay: pay || '', jobLink: jobLink || '', jdText: (jd?.jdText || '').slice(0, 20_000),
+    ...(jd?.jobId ? { jobId: jd.jobId } : {}),
     appliedAt: stage === 'applied' ? today() : '', interviewAt: '', outreachSent: '', notes: '',
     isPrimary: roles.length === 0,
   };
@@ -589,7 +592,8 @@ async function addRole(args) {
   await query('UPDATE tracked_companies SET notes = $2, stage = CASE WHEN $3 THEN $4 ELSE stage END, updated_at = now() WHERE company_id = $1',
     [c.id, joinNotes(text, roles), role.isPrimary, stage]);
   await audit('add_role', args, c.id, null, roleView(role));
-  return { company: c.name, changed: `added role "${title}" at stage ${stage}${role.isPrimary ? ' (primary)' : ''}` };
+  return { company: c.name, changed: `added role "${title}" at stage ${stage}${role.isPrimary ? ' (primary)' : ''}`,
+    jobDescription: jd ? `saved (${jd.jdText.length} chars, from the ${jd.source === 'discovered' ? 'discovered posting' : 'job page'})` : (jobLink ? 'not readable from the link — ask him to paste the JD' : 'none — ask for the job link or JD') };
 }
 
 async function updateRole(args) {
@@ -714,6 +718,17 @@ async function addCompany(args) {
   if (!name) throw new ToolError('name is required');
   const existing = await one('SELECT id, name FROM companies WHERE lower(name) = lower($1)', [name]);
   if (existing) throw new ToolError(`${existing.name} already exists (${existing.id}) — use track_company.`);
+  const known = await one(
+    `SELECT 1 FROM jobs WHERE lower(trim(company_name)) = lower(trim($1))
+     UNION ALL SELECT 1 FROM company_targets WHERE key = lower(trim($1)) LIMIT 1`, [name]);
+  if (known) {
+    const { addToList } = await import('./company-detail.js');
+    const r = await addToList({ name }, { stage: 'interested' });
+    if (r) {
+      await audit('add_to_companies', { company: name, interested: true }, r.companyId, null, { created: r.created });
+      return { changed: `added ${r.name} (${r.companyId}) from discovered jobs — with its open roles, JDs and hiring signals — tracking at "interested"`, companyId: r.companyId };
+    }
+  }
   const id = `c_${Date.now()}`;
   await query(
     `INSERT INTO companies (id, name, region, roles, description, apply_url, website, custom)
@@ -741,8 +756,46 @@ const TASK_KINDS = {
   india_job_scan: 'india-discovery',
 };
 
+/**
+ * The discovered posting behind a role, so its stored JD can be used: by job
+ * id, by the role's link, else the company's posting whose title matches.
+ */
+async function discoveredJob({ jobId, jobLink, companyName, title }) {
+  if (jobId && /^[0-9a-f-]{36}$/i.test(jobId)) {
+    const j = await one(`SELECT id, title, url, description FROM jobs WHERE id = $1`, [jobId]);
+    if (j) return j;
+  }
+  if (jobLink) {
+    const j = await one(`SELECT id, title, url, description FROM jobs WHERE url = $1 OR url = rtrim($1, '/')`, [String(jobLink).split('#')[0]]);
+    if (j) return j;
+  }
+  if (companyName && title) {
+    return one(
+      `SELECT id, title, url, description FROM jobs
+       WHERE lower(trim(company_name)) = lower(trim($1)) AND closed_at IS NULL
+         AND (lower(title) = lower($2) OR title ILIKE '%' || $2 || '%')
+       ORDER BY COALESCE(fit_score, 0) DESC, COALESCE(posted_at, discovered_at) DESC LIMIT 1`,
+      [companyName, title],
+    );
+  }
+  return null;
+}
+
+/** JD text for a role link: the discovered posting if we have it, else fetched from the page. */
+async function jdForLink(jobLink, { companyName, title } = {}) {
+  const j = await discoveredJob({ jobLink, companyName, title });
+  if (j?.description && j.description.length > 200) return { jdText: j.description.replace(/<[^>]+>/g, ' ').replace(/\s+\n/g, '\n').trim(), jobId: j.id, source: 'discovered' };
+  if (!jobLink) return null;
+  try {
+    const { extractJdFromUrl } = await import('./fetch-jd.js');
+    const x = await extractJdFromUrl(jobLink);
+    if (x?.ok && x.jdText) return { jdText: x.jdText, jobId: j?.id || null, source: x.source || 'page' };
+  } catch { /* the link is still saved; tailoring fetches it again */ }
+  return null;
+}
+
 async function startAiTask(args) {
-  const { task, company, role, jobDescription, instructions, contactName, problems, topic, round, force, confirmedByUser } = args;
+  const { task, company, role, jobDescription, jobId, instructions, contactName, problems, topic, round, force, confirmedByUser } = args;
   if (confirmedByUser !== true) {
     throw new ToolError('Not started: AI tasks cost money. Offer it and start only when he asks or says yes.');
   }
@@ -752,13 +805,18 @@ async function startAiTask(args) {
 
   let c = null; let r = null; let t = null;
   if (!['linkedin_post', 'job_scan', 'india_job_scan'].includes(task)) {
-    c = await findCompany(company);
+    c = await findCompanyOrTarget(company);
     t = await tracking(c.id);
     r = findRole(splitNotes(t?.notes).roles, role);
   }
   const roleTitle = r?.title || role || '';
-  // A tracked role already holds the JD (or its URL); use it unless one was given.
-  const jd = jobDescription || r?.jdText || r?.jobLink || t?.jd || t?.job_link || '';
+  // A tracked role already holds the JD (or its URL); else the discovered posting's JD.
+  let jd = jobDescription || r?.jdText || '';
+  if (!jd && ['tailor_resume', 'cover_letter', 'interview_prep'].includes(task)) {
+    const j = await discoveredJob({ jobId: jobId || r?.jobId, jobLink: r?.jobLink, companyName: c?.name, title: roleTitle });
+    if (j?.description && j.description.length > 200) jd = j.description;
+  }
+  jd = jd || r?.jobLink || t?.jd || t?.job_link || '';
   if (['tailor_resume', 'cover_letter'].includes(task) && !jd) {
     throw new ToolError(`No job description for ${c.name}${roleTitle ? ` / ${roleTitle}` : ''}. Ask for the job URL or the JD text.`);
   }
@@ -771,7 +829,7 @@ async function startAiTask(args) {
     cold_email: { companyId: c?.id, roleName: roleTitle, recipient: contactName },
     call_prep: { companyId: c?.id, contactName },
     win_doc: { companyId: c?.id, roleTitle, contactName, problems: Array.isArray(problems) ? problems : [] },
-    interview_prep: { companyId: c?.id, roleTitle, round: round || 'any', jobDescription: jobDescription || r?.jdText || '' },
+    interview_prep: { companyId: c?.id, roleTitle, round: round || 'any', jobDescription: /^https?:\/\//.test(jd) ? '' : jd },
     linkedin_post: { topic },
     job_scan: {},
     india_job_scan: {},
@@ -1111,18 +1169,18 @@ const TOOLS = [
   ['get_ai_task', 'Status of a background task.', S({ taskId: str() }, ['taskId']), getTask],
   ['track_company', 'Start tracking a company.', S({ company: companyArg, stage: stageArg }, ['company']), trackCompany],
   ['set_stage', 'Move a company or one role to a stage (sets applied date when moving to applied).', S({ company: companyArg, stage: stageArg, role: str('role title') }, ['company', 'stage']), setStage],
-  ['add_role', 'Add a role to a company.', S({ company: companyArg, title: str(), jobLink: str(), stage: stageArg, pay: str() }, ['company', 'title']), addRole],
+  ['add_role', 'Add a role to a company; with jobLink the JD is saved too (from the discovered posting or the page).', S({ company: companyArg, title: str(), jobLink: str(), stage: stageArg, pay: str() }, ['company', 'title']), addRole],
   ['update_role', 'Edit a role: applied date, interview time, pay, link, outreach, notes.', S({ company: companyArg, role: str('title'), appliedAt: str('e.g. 25 Oct 2026'), interviewAtIst: str('YYYY-MM-DD HH:mm IST'), clearInterview: bool, pay: str(), jobLink: str(), outreachSent: str(), notes: str() }, ['company']), updateRole],
   ['add_note', 'Append a dated note to a company.', S({ company: companyArg, text: str() }, ['company', 'text']), addNote],
   ['log_outreach', 'Append a dated entry to the outreach log.', S({ company: companyArg, text: str() }, ['company', 'text']), logOutreach],
   ['add_contact', 'Add a contact. type: hm=hiring manager. status: req=request, dm, reply, fu1-3, win, call, ref=referred, ab=abandoned.', S({ company: companyArg, name: str(), role: str('their title'), type: { type: 'string', enum: CONN_TYPES }, linkedinUrl: str(), status: { type: 'string', enum: CONN_STATUSES }, notes: str() }, ['company', 'name']), addContact],
   ['update_contact', "Update a contact's status, title, URL or notes.", S({ company: companyArg, contact: str('name'), status: { type: 'string', enum: CONN_STATUSES }, role: str(), linkedinUrl: str(), notes: str() }, ['company', 'contact']), updateContact],
   ['set_job_flag', 'Favourite a job (tracks its company) or mark it not for me.', S({ jobId: str(), favourite: bool, notForMe: bool }, ['jobId']), setJobFlag],
-  ['add_company', 'Add a new company and track it.', S({ name: str(), website: str(), region: REGION, applyUrl: str(), description: str() }, ['name']), addCompany],
+  ['add_company', 'Add a company and track it. A company that discovery already found (e.g. from get_apply_queue) comes in with its open roles, JDs and signals.', S({ name: str(), website: str(), region: REGION, applyUrl: str(), description: str() }, ['name']), addCompany],
   ['start_ai_task', 'Background AI task; result is messaged when done. Costs money: only when his message asks for it or agrees to your offer. Resume/cover letter use the saved JD unless jobDescription (text or URL) is given.', S({
     task: { type: 'string', enum: Object.keys(TASK_KINDS) },
     confirmedByUser: { type: 'boolean', description: 'true only if his latest message asks for this task or says yes to it' },
-    company: companyArg, role: str(), jobDescription: str(), instructions: str(), contactName: str(),
+    company: companyArg, role: str(), jobDescription: str(), jobId: str('discovered job id, e.g. from get_apply_queue — its stored JD is used'), instructions: str(), contactName: str(),
     problems: { type: 'array', items: { type: 'string' } }, topic: str(), round: { type: 'string', enum: ROUNDS }, force: bool,
   }, ['task', 'confirmedByUser']), startAiTask],
   ['web_search_links', 'Google boolean searches (past week by default) across LinkedIn, Naukri, Instahyre, foundit, Indeed, Wellfound, Cutshort, Hirist, ATS boards and careers pages, plus the portals\' own search pages. Links he opens. Offer when search_jobs is thin or he asks to search the web.', S({ query: str('role'), location: str(), period: { type: 'string', enum: ['day', 'week', 'month'] } }), webSearchLinks],

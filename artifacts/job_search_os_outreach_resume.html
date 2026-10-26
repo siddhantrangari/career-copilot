@@ -191,7 +191,7 @@ input[type=text],input[type=url]{width:100%}
 .res-doc-sheet.theme-dark .res-skills-cat strong{color:#f8fafc !important}
 
 /* Dedicated Pristine A4 PDF Print Sheet (used for html2pdf export) - True Readable Industry Standards */
-.res-pdf-print-sheet{display:block;width:186mm;max-width:186mm;background:#ffffff !important;color:#0f172a !important;box-sizing:border-box;padding:0;margin:0;font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:10.5pt;line-height:1.42;box-shadow:none !important;border-radius:0 !important;border:none !important;overflow:visible}
+.res-pdf-print-sheet{-webkit-text-size-adjust:100%;text-size-adjust:100%;display:block;width:186mm;max-width:186mm;background:#ffffff !important;color:#0f172a !important;box-sizing:border-box;padding:0;margin:0;font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:10.5pt;line-height:1.42;box-shadow:none !important;border-radius:0 !important;border:none !important;overflow:visible}
 .res-pdf-print-sheet h1.res-name{font-size:22pt;font-weight:800;color:#0f172a;text-transform:uppercase;letter-spacing:.5px;margin:0 0 2pt 0;line-height:1.15}
 .res-pdf-print-sheet .res-title-line{font-size:11pt;font-weight:700;color:#1d4ed8;margin:0 0 3.5pt 0;line-height:1.25}
 .res-pdf-print-sheet .res-contact-bar{font-size:9.5pt;color:#475569;display:flex;flex-wrap:wrap;gap:8pt;border-bottom:1.5pt solid #0f172a;padding-bottom:4pt;margin-bottom:8pt;font-weight:500;line-height:1.2}
@@ -265,6 +265,10 @@ input[type=text],input[type=url]{width:100%}
   .res-doc-sheet{box-shadow:none !important;border:none !important;padding:8mm 10mm !important;max-width:100% !important;width:100% !important;margin:0 !important;transform:none !important;min-height:auto !important}
   .res-role-row, .res-stack-line, .res-role-sub, li{page-break-inside:avoid}
   h2.res-sec-head{page-break-after:avoid}
+  /* Only the resume prints — no keyword panels, reports or toolbars. */
+  body *{visibility:hidden !important}
+  #resumeDocument, #resumeDocument *{visibility:visible !important}
+  #resumeDocument{position:absolute !important;left:0;top:0;-webkit-text-size-adjust:100%;text-size-adjust:100%}
   @page{size:A4 portrait;margin:8mm}
 }
 </style>
@@ -1998,14 +2002,19 @@ function onDensityChange(){
  * download never waits on it or fails because of it.
  */
 function saveResumePdfToServer(blob, markdownText, filename){
+  const giveUp = new Promise((resolve) => setTimeout(resolve, 6000));
+  return Promise.race([uploadResumePdf(blob, markdownText, filename), giveUp]);
+}
+
+function uploadResumePdf(blob, markdownText, filename){
   try {
     const md = String(markdownText || DEFAULT_MASTER_RESUME);
     const kind = md === DEFAULT_MASTER_RESUME ? 'master'
       : (typeof savedResumesList !== 'undefined' && savedResumesList.some(r => r.tailored_text === md)) ? 'tailored' : 'draft';
     let token = null;
     try { token = localStorage.getItem('cc_token'); } catch (e) {}
-    if (!token || !window.crypto || !crypto.subtle) return;
-    crypto.subtle.digest('SHA-256', new TextEncoder().encode(md)).then((buf) => {
+    if (!token || !window.crypto || !crypto.subtle) return Promise.resolve();
+    return crypto.subtle.digest('SHA-256', new TextEncoder().encode(md)).then((buf) => {
       const hash = Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
       return fetch('/api/resume-pdfs', {
         method: 'POST',
@@ -2015,7 +2024,7 @@ function saveResumePdfToServer(blob, markdownText, filename){
     }).then((res) => res && res.json()).then((r) => {
       if (r && r.delivered && window.appAlert) window.appAlert({ title: 'Sent to Telegram', message: 'The bot was waiting for this PDF — it is in your chat now.' });
     }).catch(() => {});
-  } catch (e) { /* the download already happened */ }
+  } catch (e) { return Promise.resolve(); /* the download goes ahead regardless */ }
 }
 
 /**
@@ -2244,9 +2253,10 @@ function generateResumePdfFromMarkdown(markdownText, filename, btn, densityOverr
     return Promise.resolve().then(() => {
       const pdf = renderSheetAsTextPdf(sheet, opt);
       const blob = pdf.output('blob');
-      pdf.save(opt.filename);
-      saveResumePdfToServer(blob, markdownText, opt.filename);
       cleanup();
+      // Upload first: on iPhone the download replaces the page, which would cancel it.
+      return saveResumePdfToServer(blob, markdownText, opt.filename).then(() => pdf.save(opt.filename));
+    }).then(() => {
       if (btn) {
         btn.innerHTML = '✓ Downloaded!';
         setTimeout(() => btn.innerHTML = oldHtml, 2000);

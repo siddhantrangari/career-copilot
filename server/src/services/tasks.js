@@ -11,6 +11,7 @@ import {
   tailorResumePrompt,
   refineResumePrompt,
   verifyResumePrompt,
+  condenseResumePrompt,
   coverLetterPrompt,
   refineCoverLetterPrompt,
   coldEmailPrompt,
@@ -307,6 +308,31 @@ export async function ensureJdText(rawJd, rawTitle, onStep = () => {}) {
   return { jd, title, autoFetched };
 }
 
+// ── Resume length: two A4 pages ─────────────────────────────────────────
+const RESUME_MAX_WORDS = 790;
+const wordCount = (t) => String(t || '').trim().split(/\s+/).filter(Boolean).length;
+// Role-header lines (title | company | dates | location): a shortened version must keep them all.
+const roleLines = (t) => String(t || '').split('\n').filter((l) => (l.match(/\|/g) || []).length >= 2).length;
+
+/**
+ * Over budget → one tightening pass. The shorter text is kept only if it
+ * is actually shorter, not gutted, and still has every role header.
+ */
+export async function fitResumeLength(text, { companyId, kind = 'condense-resume' } = {}) {
+  const words = wordCount(text);
+  if (words <= RESUME_MAX_WORDS) return { text, words, condensed: false };
+  try {
+    const p = condenseResumePrompt({ resumeText: text, words });
+    const out = await chatJson({ kind, companyId, system: p.system, user: p.user, maxTokens: 8_000, input: { words } });
+    const next = String(out.tailoredResumeText || '');
+    const n = wordCount(next);
+    if (n < words && n >= 500 && roleLines(next) >= roleLines(text)) return { text: next, words: n, condensed: true, from: words };
+  } catch (err) {
+    console.warn('[fitResumeLength] condense failed:', err.message);
+  }
+  return { text, words, condensed: false };
+}
+
 // ── Tailored resume (+ fact-check pass) ───────────────────────────────
 export async function tailorResume(payload = {}, ctx = {}) {
   const onStep = ctx?.onStep || (() => {});
@@ -337,6 +363,12 @@ export async function tailorResume(payload = {}, ctx = {}) {
     maxTokens: 16_000,
     input: { companyName: name, jobTitle },
   });
+
+  if (result.tailoredResumeText) {
+    const fit = await fitResumeLength(result.tailoredResumeText, { companyId: company?.id });
+    result.tailoredResumeText = fit.text;
+    result.length = { words: fit.words, condensedFrom: fit.from || null };
+  }
 
   // A hallucinated bullet only surfaces in the interview — audit before saving.
   if (result.tailoredResumeText && verify !== false) {
@@ -433,6 +465,12 @@ export async function refineResume(payload = {}) {
     maxTokens: 16_000,
     input: { companyName: name, jobTitle, feedback: userFeedback },
   });
+
+  if (result.tailoredResumeText) {
+    const fit = await fitResumeLength(result.tailoredResumeText, { companyId: company?.id });
+    result.tailoredResumeText = fit.text;
+    result.length = { words: fit.words, condensedFrom: fit.from || null };
+  }
 
   // Verification pass
   if (result.tailoredResumeText && verify !== false) {

@@ -287,6 +287,30 @@ Return JSON exactly in this shape:
 }`,
 });
 
+/**
+ * Second pass when a tailored resume runs over its word budget: the model
+ * reliably overshoots the 780-word cap, and every 100 words over is about a
+ * third of a page in the PDF.
+ */
+export const condenseResumePrompt = ({ resumeText, words, target = 740 }) => ({
+  system: `You edit resumes for length. You only cut and tighten; you never add claims, employers, dates, titles or metrics, and never change a fact. Return valid JSON only.`,
+  user: `This resume is ${words} words. Cut it to ${target - 40}–${target} words so it fits on two A4 pages.
+
+How to cut, in this order:
+1. Shorten bullets to 15–22 words; drop filler ("responsible for", "successfully", "various").
+2. Older or less relevant roles (GE Healthcare, Cropdata, Ajanta, NareshIT, ChalOnline, TradingOS, AnnaRakshak): one bullet each.
+3. Flagship roles (Philips, MyAgentFirm, Growlogic): at most 3 bullets each — keep the ones with the strongest metrics.
+4. Summary: 3 sentences. Technical skills: 3–4 lines.
+5. Drop any "Selected achievements", "Open to" or repeated section.
+
+Keep exactly: every employer and role header line (title | company | dates | location), every section header, education, the name and contact lines, the markdown format ('## ' sections, '- ' bullets, '**bold**' metrics, 'Key Stack:' lines), and every real metric you keep.
+
+RESUME
+${resumeText}
+
+Return JSON exactly: { "tailoredResumeText": "the shortened resume in markdown" }`,
+});
+
 export const refineResumePrompt = ({
   companyName,
   jobTitle,
