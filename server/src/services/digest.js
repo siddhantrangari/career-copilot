@@ -2,6 +2,7 @@ import { many, one } from '../db/pool.js';
 import { config } from '../config.js';
 import { tg } from './telegram.js';
 import { dailySearches } from './search-links.js';
+import { jobActionsMessage } from './job-actions.js';
 
 /**
  * Morning digest.
@@ -488,6 +489,9 @@ export async function runDigest({ trigger = 'manual', now = new Date() } = {}) {
           disable_web_page_preview: true,
         });
       }
+      // Buttons for the new roles: tailor resume, cover letter, guided apply, people.
+      const buttons = jobActionsMessage(digest.jobs.items.map((j) => ({ id: j.id, company: j.company, title: j.title })), { heading: 'Act on the new roles' });
+      if (buttons) await telegram('sendMessage', { chat_id: config.digest.telegram.chatId, ...buttons }).catch(() => {});
     } catch (err) {
       await one(
         `INSERT INTO digest_runs (digest_date, trigger, status, counts, body, error)

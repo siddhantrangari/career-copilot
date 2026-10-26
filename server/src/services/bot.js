@@ -4,6 +4,8 @@ import { chatWithTools } from './ai.js';
 import { tg, tgDocument, sendMarkdown, telegramReady } from './telegram.js';
 import { toolSchemas, runTool, documentFiles } from './bot-tools.js';
 import { getJob } from './jobs.js';
+import { jobActionsMessage, parseJobAction, jobForAction } from './job-actions.js';
+import { companyPeopleLinks } from './search-links.js';
 
 /**
  * Telegram assistant — the whole app, from a chat.
@@ -203,6 +205,7 @@ async function converse(chatId, userContent) {
     // Links the reply may use: ones from tool results this turn, ones already
     // in the conversation (his own pastes, earlier checked replies), the app.
     const allowedLinks = new Set([config.digest.appUrl, ...past.flatMap((m) => linksIn(m.content)), ...linksIn(current?.content)]);
+    const listed = []; // roles from job-list tools this turn, for the buttons
     for (let round = 0; round < config.bot.maxToolRounds; round++) {
       const { message } = await chatWithTools({ messages, tools: toolSchemas, model: config.bot.model });
       const calls = message.tool_calls || [];
@@ -210,6 +213,7 @@ async function converse(chatId, userContent) {
         const text = guardLinks((message.content || '').trim() || 'Done.', allowedLinks);
         await remember(chatId, { role: 'assistant', content: text });
         await sendMarkdown(chatId, text);
+        await sendJobButtons(chatId, listed, text);
         return;
       }
 
@@ -218,6 +222,7 @@ async function converse(chatId, userContent) {
 
       for (const call of calls) {
         let result = await runTool(call.function?.name, call.function?.arguments);
+        listed.push(...rolesIn(call.function?.name, result));
         result = await deliverFile(chatId, result);
         if (result?.taskId) watchTask(chatId, result.taskId);
         let content = JSON.stringify(compactForModel(result));
@@ -233,6 +238,50 @@ async function converse(chatId, userContent) {
   } finally {
     stopTyping();
   }
+}
+
+// ── Buttons under job lists ───────────────────────────────────────────
+
+/** Roles a job-list tool returned, as { id, company, title }. */
+function rolesIn(tool, result) {
+  if (tool === 'get_apply_queue') return (result?.roles || []).map((r) => ({ id: r.jobId, company: r.company, title: r.title }));
+  if (tool === 'search_jobs') return (result?.jobs || []).map((j) => ({ id: j.id, company: j.company, title: j.title }));
+  return [];
+}
+
+/** Buttons for the roles the reply mentions (all listed, if it names none). */
+async function sendJobButtons(chatId, listed, replyText) {
+  if (!listed.length) return;
+  const said = String(replyText || '').toLowerCase();
+  const named = listed.filter((j) => said.includes(String(j.company || '').toLowerCase()) || said.includes(String(j.title || '').toLowerCase()));
+  const body = jobActionsMessage(named.length ? named : listed);
+  if (body) await tg('sendMessage', { chat_id: chatId, ...body }).catch((err) => log.error(`[bot] buttons failed: ${err.message}`));
+}
+
+/**
+ * A button press under a job list. The press is his go-ahead: resume and
+ * cover letter start right away; guided apply and people need no AI call.
+ */
+async function handleJobAction(chatId, { action, jobId }) {
+  const job = await jobForAction(jobId);
+  if (!job) { await sendMarkdown(chatId, 'That role is no longer in Career Copilot.'); return; }
+  const what = `**${job.company}** — ${job.title}`;
+  if (action === 'r' || action === 'l') {
+    const task = action === 'r' ? 'tailor_resume' : 'cover_letter';
+    const res = await runTool('start_ai_task', { task, confirmedByUser: true, company: job.company, role: job.title, jobId: job.id });
+    if (res.error) { await sendMarkdown(chatId, `Could not start the ${action === 'r' ? 'tailored resume' : 'cover letter'} for ${what}: ${res.error}`); return; }
+    watchTask(chatId, res.taskId);
+    await remember(chatId, { role: 'assistant', content: `Started ${task} for ${job.company} — ${job.title} (button).` });
+    await sendMarkdown(chatId, `${action === 'r' ? '📄 Tailoring your resume' : '✉️ Writing the cover letter'} for ${what} — it will arrive here in ~1 min.`);
+    return;
+  }
+  if (action === 'g') {
+    await converse(chatId, `[Button pressed by Siddhant] Guided apply for ${job.company} — ${job.title} (jobId ${job.id}). Run get_apply_pack and ask only its needsYou questions.`);
+    return;
+  }
+  const links = companyPeopleLinks(job.company).filter((l) => ['hm', 'peer', 'hr'].includes(l.type) || /LinkedIn/.test(l.name));
+  await sendMarkdown(chatId, [`👥 People to connect with at ${what}`, ...links.map((l) => `• [${l.name}](${l.url}) — ${l.hint}`),
+    'Send connection requests, then tell me who you reached ("sent 5 at …") and I\'ll log them.'].join('\n'));
 }
 
 // ── Background task delivery ──────────────────────────────────────────
@@ -327,6 +376,21 @@ Ask in plain words — for example:
 Deleting is only possible in the web app.`;
 
 async function handleUpdate(update) {
+  const cb = update.callback_query;
+  if (cb) {
+    const chatId = cb.message?.chat?.id;
+    await tg('answerCallbackQuery', { callback_query_id: cb.id }).catch(() => {});
+    if (String(chatId) !== myChat()) { log.warn(`[bot] ignored button from chat ${chatId}`); return; }
+    const a = parseJobAction(cb.data);
+    if (!a) return;
+    try {
+      await handleJobAction(chatId, a);
+    } catch (err) {
+      log.error(`[bot] button failed: ${err.message}`);
+      await sendMarkdown(chatId, `Sorry — that failed: ${err.message.slice(0, 300)}`).catch(() => {});
+    }
+    return;
+  }
   const msg = update.message;
   if (!msg?.chat) return;
   const chatId = msg.chat.id;
@@ -362,7 +426,7 @@ async function pollLoop() {
   let offset = await getOffset();
   while (running) {
     try {
-      const updates = await tg('getUpdates', { offset, timeout: 50, allowed_updates: ['message'] }, { timeoutMs: 65_000 });
+      const updates = await tg('getUpdates', { offset, timeout: 50, allowed_updates: ['message', 'callback_query'] }, { timeoutMs: 65_000 });
       for (const u of updates || []) {
         offset = u.update_id + 1;
         await setOffset(offset);
