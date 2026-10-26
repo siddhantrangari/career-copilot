@@ -40,6 +40,8 @@ export const CATEGORIES = [
   ['work_auth', /(legally )?(authori[sz]ed|eligible|right) to work|work (permit|authori[sz]ation)/i],
   ['relocate', /relocat/i],
   ['located_in', /are you (currently )?(located|based|living|residing) in/i],
+  ['contractor', /(current|currently (a|an)?) ?contractor|work(ing)? as a contractor/i],
+  ['address', /\baddress\b(?!.*e-?mail)|street|postal code|zip ?code|pin ?code/i],
   ['country', /country of residence|which country|current country|country do you (live|reside)/i],
   ['location', /current location|where are you (based|located)|city|location/i],
   ['notice_period', /notice period|how soon|earliest start|start date|available to start|availability/i],
@@ -59,7 +61,7 @@ export const categoryOf = (label) => (CATEGORIES.find(([, re]) => re.test(String
 
 // Categories whose answer is the same for every application: kept in the bank.
 const REUSABLE = new Set(['phone', 'github', 'website', 'notice_period', 'salary', 'current_salary', 'experience_years', 'current_company',
-  'current_title', 'how_heard', 'location', 'country', 'preferred_name', 'restrictions', 'accessibility', 'linkedin',
+  'current_title', 'how_heard', 'location', 'country', 'address', 'contractor', 'preferred_name', 'restrictions', 'accessibility', 'linkedin',
   'work_auth:india', 'work_auth:abroad', 'sponsorship:india', 'sponsorship:abroad', 'relocate:abroad', 'relocate:india']);
 
 // What only he can decide, even with a default.
@@ -180,6 +182,8 @@ export async function buildPack(jobId, { rebuild = false } = {}) {
     } else if (cat === 'github') set(fromBank('github') || (/github\.com/i.test(me.website || '') ? me.website : ''), 'bank');
     else if (cat === 'relocate') set(fromBank(`relocate:${region}`) || 'Yes', fromBank(`relocate:${region}`) ? 'bank' : 'default');
     else if (cat === 'previous_employee') set(fromBank(`previous:${job.company}`) || 'No', 'default', 'Have you worked there before?');
+    else if (cat === 'address') set(fromBank('address') || '', 'bank');
+    else if (cat === 'contractor') set(fromBank('contractor') || 'No', fromBank('contractor') ? 'bank' : 'default');
     else if (cat === 'restrictions') set(fromBank('restrictions') || 'No', fromBank('restrictions') ? 'bank' : 'default');
     else if (cat === 'how_heard') set(fromBank('how_heard') || (q.options?.length ? (matchOption(q.options, 'Company website') || matchOption(q.options, 'Job board') || '') : 'Company careers page'), fromBank('how_heard') ? 'bank' : 'default');
     else if (['notice_period', 'salary', 'current_salary', 'experience_years', 'current_company', 'current_title', 'accessibility'].includes(cat)) set(fromBank(cat) || '', 'bank');
@@ -328,6 +332,10 @@ export async function autofillPayload(pageUrl) {
     fields: pack.questions.map((q) => ({ id: q.id, label: q.label, type: q.type, category: q.answer.category, value: q.answer.value, options: q.options || [], needsYou: !!q.answer.needsYou, required: !!q.required })),
     profile: { first_name: me.first_name, last_name: me.last_name, full_name: me.full_name, email: me.email, phone: me.phone, linkedin: me.linkedin, website: me.website, location: me.location },
     categories: CATEGORIES.map(([k, re]) => [k, re.source]),
+    // Answers he gave before, with their question: the extension matches a new form's question against these.
+    // Region- or company-specific ones (work_auth:india, sponsorship:abroad, previous:<company>) stay with the pack, which knows the role.
+    bank: (await many(`SELECT category, answer, question FROM application_answers WHERE question <> '' AND category NOT LIKE '%:%'`))
+      .map((b) => ({ category: b.category, question: b.question, value: b.answer })),
     resume: resume.pdf ? { filename: resume.pdf.filename, label: resume.label, base64: Buffer.from(resume.pdf.pdf).toString('base64') } : null,
     resumeNote: resume.pdf ? null : 'No Studio PDF yet — export your resume once from the Resume Studio.',
     needsYou: pack.needsYou,

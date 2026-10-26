@@ -82,6 +82,15 @@
       }
       if (score >= 0.6) f = best;
     }
+    // 2b. A question he answered before on another form (his answer bank).
+    if (!f && label && pack.bank?.length) {
+      let best = null; let score = 0;
+      for (const b of pack.bank) {
+        const s = similar(label, b.question);
+        if (s > score) { score = s; best = b; }
+      }
+      if (score >= 0.6 && best.value) return { value: best.value, category: best.category, needsYou: false, synthetic: true };
+    }
     // 3. The kind of question (LinkedIn, phone…) from his profile.
     if (!f && label) {
       const cat = (pack.categories.find(([, re]) => new RegExp(re, 'i').test(label)) || [])[0];
