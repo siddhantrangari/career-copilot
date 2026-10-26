@@ -340,7 +340,8 @@ TAILORED RESUME (current ATS match ${score}/100)
 ${resumeText}
 ${known.length ? `\nALREADY ANSWERED BY HIM (do not ask again): ${known.join(', ')}\n` : ''}
 Find the JD's important requirements and keywords the resume does not show. For each:
-- if his history or confirmed answers already prove it but the resume doesn't say it → a "rewrite" (reword one existing line to use the JD's term; no new facts);
+- if his history or confirmed answers already prove it but the resume doesn't say it → a "rewrite": reword one existing line to use the JD's term. The rewrite may only restate facts already in that line or in his history — it must not add a practice, scope, team, SLA or tool (e.g. "unit-tested", "24×7", "cross-functional", "on-call") that is not already stated there;
+- a requirement goes EITHER to a question OR to a rewrite, never both — if a rewrite would need a fact he has not confirmed, it is a question;
 - if only he can say whether he has it → a "question": a short yes/no question that asks where and how if yes;
 - if he clearly lacks it (history says no) → leave it out.
 At most 6 questions and 6 rewrites, most valuable first. "must" = required in the JD, "nice" = preferred.

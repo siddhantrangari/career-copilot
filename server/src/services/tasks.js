@@ -806,7 +806,11 @@ export async function atsGaps(payload = {}) {
   const p = atsGapsPrompt({ resumeText: v.tailored_text, jobDescription: v.job_description, candidate: await candidateBlock(), score: v.match_score, known });
   const out = await chatJson({ kind: 'ats-gaps', companyId: v.company_id, system: p.system, user: p.user, maxTokens: 4_000, input: { resumeId: v.id } });
   const questions = (out.questions || []).filter((q) => q?.keyword && q?.question && !known.some((k) => k.toLowerCase() === String(q.keyword).toLowerCase())).slice(0, 6);
-  const rewrites = (out.rewrites || []).filter((r) => r?.from && r?.to && v.tailored_text.includes(String(r.from).trim().slice(0, 40))).slice(0, 6);
+  // A rewording that touches a topic still asked as a question would claim it before he answers: drop it.
+  const topic = (k) => new Set(String(k || '').toLowerCase().replace(/×/g, 'x').split(/[^a-z0-9+#.]+/).filter((w) => w.length > 2 && !['and', 'the', 'with', 'for', 'practices', 'experience'].includes(w)));
+  const asked = questions.map((q) => topic(q.keyword));
+  const overlaps = (r) => { const t = topic(`${r.keyword} ${r.to}`); return asked.some((a) => [...a].filter((w) => t.has(w)).length >= Math.min(2, a.size)); };
+  const rewrites = (out.rewrites || []).filter((r) => r?.from && r?.to && v.tailored_text.includes(String(r.from).trim().slice(0, 40)) && !overlaps(r)).slice(0, 6);
   return { resumeId: v.id, company: v.company_name, role: v.job_title, score: v.match_score, target: ATS_TARGET,
     summary: out.summary || '', questions, rewrites, estimatedScoreAfter: out.estimatedScoreAfter || null };
 }
