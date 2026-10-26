@@ -33,6 +33,8 @@ export const config = {
 
   ai: {
     // Failover chain, highest priority first.
+    // Fact-check model: a different family from the writer catches different slips.
+    verifyModel: process.env.VERIFY_MODEL || 'google/gemini-3-flash',
     order: (process.env.AI_PROVIDER_ORDER || 'mesh,openai')
       .split(',')
       .map((s) => s.trim())
@@ -41,7 +43,9 @@ export const config = {
 
     mesh: {
       apiKey: process.env.MESH_API_KEY || '',
-      model: process.env.MESH_MODEL || 'anthropic/claude-sonnet-4-6',
+      // Writing model for every task that doesn't name its own: Claude Haiku 5.5 is
+      // ~30x cheaper than Sonnet 4.6 ($0.10/$0.50 vs $3/$15 per 1M tokens).
+      model: process.env.MESH_MODEL || 'anthropic/claude-haiku-5.5',
       baseUrl: process.env.MESH_BASE_URL || 'https://api.meshapi.ai/v1',
     },
 
@@ -56,7 +60,7 @@ export const config = {
 
     openai: {
       apiKey: process.env.OPENAI_API_KEY || '',
-      model: process.env.OPENAI_MODEL || 'gpt-5.6-sol',
+      model: process.env.OPENAI_MODEL || 'gpt-5.6-luna',
       baseUrl: process.env.OPENAI_BASE_URL || 'https://api.openai.com/v1',
     },
   },

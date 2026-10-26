@@ -1,5 +1,5 @@
 import { config } from '../config.js';
-import { AiError } from './ai.js';
+import { AiError, logRun } from './ai.js';
 
 /**
  * Text to speech for the interviewer's voice.
@@ -112,11 +112,14 @@ export async function speak(text, { voiceId, model, timeoutMs = 30_000 } = {}) {
 
   try {
     // Paid-for credits first, then the cheap gateway voice.
+    const started = Date.now();
     if (config.tts.provider === 'elevenlabs' || config.tts.provider === 'auto') {
       const direct = await elevenLabsDirect(text, { voiceId, signal: controller.signal });
-      if (direct) return direct;
+      if (direct) { logVoice(direct, text, started); return direct; }
     }
-    return await meshTts(text, { model, signal: controller.signal });
+    const out = await meshTts(text, { model, signal: controller.signal });
+    if (out) logVoice(out, text, started);
+    return out;
   } catch (err) {
     if (err.name === 'AbortError') {
       console.warn('[tts] timed out — browser voice will be used');
@@ -127,6 +130,19 @@ export async function speak(text, { voiceId, model, timeoutMs = 30_000 } = {}) {
   } finally {
     clearTimeout(timer);
   }
+}
+
+/**
+ * Every spoken line goes in the AI usage log like any model call: the gateway
+ * bills voice by the character, and it used to be invisible in the spend
+ * totals. ElevenLabs direct is on his own plan, so it is logged at $0.
+ */
+function logVoice(out, text, started) {
+  const model = String(out.provider || '').replace(/^mesh:/, '');
+  const chars = text.length;
+  const rate = out.provider === 'elevenlabs-direct' ? 0 : (TTS_RATES[model] ?? TTS_RATES['x-ai/tts-v1']);
+  logRun({ kind: 'interview-voice', model: model || 'tts', ok: true, durationMs: Date.now() - started,
+    tokensIn: chars, costUsd: Number(((chars / 1000) * rate).toFixed(6)), input: { chars } }).catch(() => {});
 }
 
 /** Per-1k-character rates, for the cost meter shown in the UI. */

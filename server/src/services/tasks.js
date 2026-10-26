@@ -380,7 +380,7 @@ const blockingOf = (issues) => issues.filter((i) => ['critical', 'moderate'].inc
 
 async function checkResume(text, candidate, meta) {
   const check = verifyResumePrompt({ tailoredResume: text, candidate });
-  const v = await chatJson({ kind: 'verify-resume', companyId: meta.companyId, system: check.system, user: check.user, maxTokens: 6_000, input: meta.input });
+  const v = await chatJson({ kind: 'verify-resume', model: config.ai.verifyModel, companyId: meta.companyId, system: check.system, user: check.user, maxTokens: 6_000, input: meta.input });
   const issues = Array.isArray(v.issues) ? v.issues : [];
   const blocking = blockingOf(issues);
   return { ...v, issues, clean: issues.length === 0, safeToSend: blocking.length === 0, blockingCount: blocking.length };

@@ -279,6 +279,26 @@ export async function buildDigest(now = new Date()) {
     const gj = await import('./google-jobs.js');
     if (gj.googleJobsReady()) searchUsage = gj.usageLine(await gj.searchUsage());
   } catch { searchUsage = null; }
+  // AI spend from the usage log (estimates at published rates): yesterday, this month, what drove it.
+  let aiSpend = null;
+  try {
+    const tz = config.digest.timeZone;
+    const s = await one(
+      `SELECT
+         COALESCE(sum(cost_usd) FILTER (WHERE created_at >= (date_trunc('day', now() AT TIME ZONE $1) - interval '1 day') AT TIME ZONE $1
+                                          AND created_at < date_trunc('day', now() AT TIME ZONE $1) AT TIME ZONE $1), 0)::float AS yesterday,
+         count(*) FILTER (WHERE created_at >= (date_trunc('day', now() AT TIME ZONE $1) - interval '1 day') AT TIME ZONE $1
+                            AND created_at < date_trunc('day', now() AT TIME ZONE $1) AT TIME ZONE $1)::int AS calls,
+         COALESCE(sum(cost_usd) FILTER (WHERE created_at >= date_trunc('month', now() AT TIME ZONE $1) AT TIME ZONE $1), 0)::float AS month,
+         COALESCE(sum(cost_usd) FILTER (WHERE created_at >= now() - interval '7 days'), 0)::float / 7 AS daily_avg
+       FROM ai_runs`, [tz]);
+    const top = await many(
+      `SELECT kind, sum(cost_usd)::float AS cost FROM ai_runs
+       WHERE created_at >= (date_trunc('day', now() AT TIME ZONE $1) - interval '1 day') AT TIME ZONE $1
+         AND created_at < date_trunc('day', now() AT TIME ZONE $1) AT TIME ZONE $1
+       GROUP BY kind HAVING sum(cost_usd) > 0 ORDER BY 2 DESC LIMIT 3`, [tz]);
+    aiSpend = { ...s, top };
+  } catch { aiSpend = null; }
   let plan = null;
   try {
     const { outreachPlan, progressLine } = await import('./targets.js');
@@ -289,6 +309,7 @@ export async function buildDigest(now = new Date()) {
     generatedAt: now.toISOString(),
     date: localDate(now),
     searchUsage,
+    aiSpend,
     plan,
     interviews: interviewsFrom(tracked, now),
     jobs: { items: jobs, total },
@@ -402,6 +423,12 @@ export function renderDigest(d, now = new Date(d.generatedAt)) {
   // the rest in one tap without anything reading those sites automatically.
   sections.push([`🔎 <b>Today on the web</b>: ${dailySearches().map((s) => link(s.url, s.label)).join(' · ')}`]
     .concat(d.searchUsage ? [`   Google Jobs searches: ${esc(d.searchUsage)}`] : []));
+
+  if (d.aiSpend) {
+    const a = d.aiSpend; const $ = (n) => `$${Number(n || 0).toFixed(2)}`;
+    sections.push([`🤖 <b>AI spend</b>: yesterday ${$(a.yesterday)} (${a.calls} calls) · this month ${$(a.month)} · 7-day avg ${$(a.daily_avg)}/day` +
+      (a.top?.length ? `\n   Top: ${a.top.map((t) => `${esc(t.kind)} ${$(t.cost)}`).join(' · ')}` : '')]);
+  }
 
   sections.push([link(app, 'Open Career Copilot')]);
 

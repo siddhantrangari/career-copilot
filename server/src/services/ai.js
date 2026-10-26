@@ -115,7 +115,7 @@ export function parseJson(raw, fallback = null) {
 
 export async function logRun({
   kind, companyId, model, ok, error, durationMs, input, output,
-  tokensIn = 0, tokensOut = 0, cachedIn = 0, sessionId,
+  tokensIn = 0, tokensOut = 0, cachedIn = 0, sessionId, costUsd,
 }) {
   try {
     await pool.query(
@@ -126,7 +126,7 @@ export async function logRun({
         kind, companyId || null, model || 'unknown', ok, error || null, durationMs,
         input ? JSON.stringify(input) : null,
         output ? JSON.stringify(output) : null,
-        tokensIn, tokensOut, estimateCost(model, tokensIn, tokensOut, cachedIn),
+        tokensIn, tokensOut, costUsd ?? estimateCost(model, tokensIn, tokensOut, cachedIn),
         sessionId || null, cachedIn || 0,
       ],
     );
@@ -142,6 +142,10 @@ export async function logRun({
  */
 const RATES = {
   'anthropic/claude-sonnet-4-6': { in: 3, out: 15, cached: 0.30 },
+  'anthropic/claude-haiku-5.5': { in: 0.10, out: 0.50, cached: 0.01 },
+  'anthropic/claude-sonnet-5.5': { in: 2, out: 10, cached: 0.10 },
+  'google/gemini-3-flash': { in: 0.50, out: 3, cached: 0.05 },
+  'gpt-5.6-luna': { in: 0.20, out: 1.20, cached: 0.02 },
   'openai/gpt-5.6-luna': { in: 0.20, out: 1.20, cached: 0.02 },
   'openai/gpt-5.6-terra': { in: 2.00, out: 12.00, cached: 0.20 },
   'openai/gpt-5.6-sol': { in: 4.00, out: 20.00, cached: 0.40 },
@@ -164,11 +168,19 @@ export function estimateCost(model, tokensIn, tokensOut, cachedIn = 0) {
 }
 
 /** One attempt against one provider. */
+/** OpenAI direct takes only its own models, without the gateway's "openai/" prefix; anything else falls back to its default. */
+function providerModel(provider, model) {
+  if (!model) return provider.model;
+  if (provider.name !== 'openai') return model;
+  const bare = model.replace(/^openai\//, '');
+  return /^(gpt|o\d)/i.test(bare) ? bare : provider.model;
+}
+
 async function callProvider(provider, { messages, json, maxTokens, timeoutMs, model }) {
   const payload = provider.buildPayload({
     // A per-call model override lets cheap, latency-sensitive work (live
     // interview turns) use a small model without changing the chain.
-    model: model || provider.model,
+    model: providerModel(provider, model),
     messages,
     maxTokens: maxTokens || config.ai.maxTokens,
     json,
