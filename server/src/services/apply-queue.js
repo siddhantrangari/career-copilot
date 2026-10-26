@@ -4,7 +4,7 @@ import { addToList } from './company-detail.js';
 
 /**
  * The Apply queue: the next roles worth applying to, at volume (his target
- * is 20–100 a day), best first.
+ * is 30–45 a day: abroad 15–20, India 10–15, remote 5–10), best first.
  *
  * Eligible = Bangalore/Bengaluru, remote that is open to India, or abroad
  * with evidence the employer will move him: visa sponsorship or relocation

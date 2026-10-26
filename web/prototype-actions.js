@@ -2612,20 +2612,34 @@
   var SHOWN = 6;
   var data = null;
 
-  var KIND = { connections: 'connection_request', dms: 'dm', applications: 'application', posts: 'post', referrals: 'referral_ask' };
-  var STEP = { connections: [1, 5], dms: [1, 5], applications: [1], posts: [1], referrals: [1] };
+  var KIND = { connections: 'connection_request', dms: 'dm', applications: 'application', posts: 'post', referrals: 'referral_ask',
+    abroad: null, india: null, remote: null, mocks: null };
+  var STEP = { connections: [1, 5], dms: [1, 5], applications: [1], posts: [1], referrals: [1], abroad: [], india: [], remote: [], mocks: [] };
+  // The split meters count roles marked applied; each opens its own queue tab.
+  var SCOPE = { abroad: 'abroad', india: 'bangalore', remote: 'remote' };
+  var LINK = 'float:right;color:#9fd3ff;cursor:pointer;text-transform:none;letter-spacing:0';
 
   function meter(k, m) {
     var pct = m.target ? Math.min(100, Math.round(m.done / m.target * 100)) : 0;
     return '<div class="td-m' + (m.done >= m.target ? ' hit' : '') + '"><div class="l">' + esc(m.label) +
       (k === 'posts' ? ' <a data-post="1" style="float:right;color:#9fd3ff;cursor:pointer;text-transform:none;letter-spacing:0" title="Draft today’s post in your LinkedIn rules">✍️ Draft</a>' : '') +
-      (k === 'applications' ? ' <a data-queue="1" style="float:right;color:#9fd3ff;cursor:pointer;text-transform:none;letter-spacing:0" title="The next roles to apply to, best first">🚀 Queue</a>' : '') + '</div>' +
+      (k === 'applications' ? ' <a data-queue="1" style="' + LINK + '" title="The next roles to apply to, best first">🚀 Queue</a>' : '') +
+      (SCOPE[k] ? ' <a data-queue="' + SCOPE[k] + '" style="' + LINK + '" title="Open the queue on this tab">🚀</a>' : '') +
+      (k === 'mocks' ? ' <a href="/interview.html" style="' + LINK + '" title="Open the Interview Room">🎙 Practice</a>' : '') + '</div>' +
       '<div class="n">' + m.done + ' <span>/ ' + m.target + (m.stretch ? ' · stretch ' + m.stretch : '') + (m.done >= m.target ? ' ✓' : '') + '</span></div>' +
       '<div class="td-bar"><i style="width:' + pct + '%"></i></div>' +
       '<div class="b">' + STEP[k].map(function (n) { return '<button type="button" data-log="' + k + '" data-n="' + n + '">+' + n + '</button>'; }).join('') + '</div></div>';
   }
 
   function action(a, i) {
+    if (a.type === 'apply_plan' || a.type === 'mock') {
+      return '<div class="td-a"><div class="i">' + a.icon + '</div><div class="t"><div><b>' + esc(a.title) + '</b></div>' +
+        '<div style="margin-top:2px">→ ' + esc(a.detail) + '</div></div><div class="ab">' +
+        (a.type === 'mock'
+          ? '<a href="/interview.html" title="Open the Interview Room">🎙 Start a mock</a>'
+          : '<button type="button" data-queue="' + esc(a.scope) + '" title="Open the Apply queue on this tab">🚀 Open queue</button>') +
+        '</div></div>';
+    }
     var tag = a.priority ? '<span class="td-tag" style="color:#fbbf24">⭐ PRIORITY</span>' : '';
     var role = a.role ? (a.url ? '<a target="_blank" rel="noopener" style="color:#9fd3ff" href="' + esc(a.url) + '">' + esc(a.role) + '</a>' : esc(a.role)) : '';
     return '<div class="td-a' + (a.priority ? ' prio' : '') + '"><div class="i">' + a.icon + '</div><div class="t">' +
@@ -2659,7 +2673,9 @@
     var w = data && data.week;
     var weekLine = !w ? 'Loading…'
       : 'This week: <b>' + w.connections.done + '/' + w.connections.target + '</b> connections · <b>' + w.dms.done + '/' + w.dms.target + '</b> DMs · <b>' +
-        w.applications.done + '/' + w.applications.target + '</b> applications · <b>' + w.referrals.done + '/' + w.referrals.target + '</b> referral asks · <b>' +
+        w.applications.done + '/' + w.applications.target + '</b> applications (abroad ' + w.abroad.done + '/' + w.abroad.target +
+        ', India ' + w.india.done + '/' + w.india.target + ', remote ' + w.remote.done + '/' + w.remote.target + ') · <b>' +
+        w.mocks.done + '/' + w.mocks.target + '</b> mocks · <b>' + w.referrals.done + '/' + w.referrals.target + '</b> referral asks · <b>' +
         w.calls.done + '/' + w.calls.target + '–' + w.calls.stretch + '</b> calls';
     var html = '<div class="td-head" data-toggle="1"><strong style="font-size:14px">📅 Today</strong>' +
       '<span class="td-week">' + weekLine + '</span>' +
@@ -2710,7 +2726,7 @@
     if ((b = el.closest('[data-open]'))) { window.openTrack(b.getAttribute('data-open')); return; }
     if (el.closest('[data-more]')) { more = !more; render(); return; }
     if (el.closest('[data-triage]')) { if (window.ccTriage) window.ccTriage(); return; }
-    if (el.closest('[data-queue]')) { if (window.ccApplyQueue) window.ccApplyQueue(); return; }
+    if ((b = el.closest('[data-queue]'))) { if (window.ccApplyQueue) window.ccApplyQueue(b.getAttribute('data-queue') === '1' ? null : b.getAttribute('data-queue')); return; }
     if ((b = el.closest('[data-tailor]'))) { if (window.ccTailor) window.ccTailor(b); return; }
     if ((b = el.closest('[data-guide]'))) { if (window.ccGuidedApply) window.ccGuidedApply(b.getAttribute('data-guide')); return; }
     if ((b = el.closest('[data-applied]'))) {
@@ -3214,7 +3230,7 @@
 })();
 
 /* ────────────────────────────────────────────────────────────────────
- * Apply queue: the next roles to apply to, at volume (20–100 a day).
+ * Apply queue: the next roles to apply to, at volume (30–45 a day: abroad 15–20, India 10–15, remote 5–10).
  *
  * Bangalore, remote open to India, and abroad with visa sponsorship or
  * relocation stated in the JD (Gulf counts), ranked by fit, then hiring
@@ -3313,7 +3329,8 @@
     }).catch(function (err) { b.disabled = false; window.alert(err.message); });
   };
 
-  window.ccApplyQueue = function () {
+  window.ccApplyQueue = function (scope) {
+    if (scope) { st.scope = scope; st.limit = 40; }
     var m = document.getElementById('cc-queue');
     if (!m) {
       m = document.createElement('div');

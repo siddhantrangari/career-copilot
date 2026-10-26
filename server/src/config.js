@@ -164,9 +164,14 @@ export const config = {
     daily: {
       connections: int(process.env.DAILY_CONNECTIONS, 50),
       dms: int(process.env.DAILY_DMS, 10),
-      applications: int(process.env.DAILY_APPLICATIONS, 20), applicationsStretch: int(process.env.DAILY_APPLICATIONS_STRETCH, 100),
+      applications: int(process.env.DAILY_APPLICATIONS, 30), applicationsStretch: int(process.env.DAILY_APPLICATIONS_STRETCH, 45),
       posts: int(process.env.DAILY_POSTS, 1),
       referrals: int(process.env.DAILY_REFERRALS, 3),
+      // Applications by where the role is: [minimum, stretch] each day.
+      abroad: [int(process.env.DAILY_APPLY_ABROAD, 15), int(process.env.DAILY_APPLY_ABROAD_STRETCH, 20)],
+      india: [int(process.env.DAILY_APPLY_INDIA, 10), int(process.env.DAILY_APPLY_INDIA_STRETCH, 15)],
+      remote: [int(process.env.DAILY_APPLY_REMOTE, 5), int(process.env.DAILY_APPLY_REMOTE_STRETCH, 10)],
+      mocks: int(process.env.DAILY_MOCK_INTERVIEWS, 1),
     },
     weeklyConnections: int(process.env.OUTREACH_WEEKLY_CONNECTIONS, int(process.env.DAILY_CONNECTIONS, 50) * 5),
     weeklyCalls: int(process.env.OUTREACH_WEEKLY_CALLS, 5),

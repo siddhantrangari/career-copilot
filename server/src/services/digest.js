@@ -233,7 +233,7 @@ export function followUpsFrom(tracked, contacts, now, { snoozed = new Set(), lim
     const activity = t.activity_at ? new Date(t.activity_at) : null;
     const created = new Date(t.created_at);
     const roles = rolesOf(t.notes);
-    // Quick applications from the Apply queue (20–100 a day) would bury the
+    // Quick applications from the Apply queue (30–45 a day) would bury the
     // nudges that matter; they get one only at a priority company.
     const appliedRoles = roles.filter((r) => r.stage === 'applied' && (!r.quick || t.priority));
 
@@ -310,6 +310,17 @@ export function renderDigest(d, now = new Date(d.generatedAt)) {
   const sections = [];
 
   sections.push([`☀️ <b>Morning digest · ${esc(fmtDay(now))}</b>`]);
+
+  // The day's plan, every morning: applications by place, and a mock round.
+  const g = config.targets.daily;
+  sections.push([
+    '🎯 <b>Today\'s plan</b>',
+    `• Apply to <b>${g.abroad[0]}–${g.abroad[1]}</b> abroad roles (visa sponsorship / relocation)`,
+    `• Apply to <b>${g.india[0]}–${g.india[1]}</b> India roles (Bangalore)`,
+    `• Apply to <b>${g.remote[0]}–${g.remote[1]}</b> remote roles open to India`,
+    `• Practice <b>${g.mocks}</b> mock interview — ${link(`${app}/interview.html`, 'Interview Room')}`,
+    `  ${link(app, 'Apply queue')} has each tab ready`,
+  ]);
 
   const { upcoming, undated } = d.interviews;
   if (upcoming.length || undated.length) {

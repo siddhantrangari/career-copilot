@@ -48,7 +48,8 @@ export async function buildWeeklyReview(now = new Date()) {
   lines.push('<b>Against your Daily System</b>');
   const rows = [
     ['Connection requests', w.connections], ['DMs', w.dms], ['Applications', w.applications],
-    ['Referral asks', w.referrals], ['LinkedIn posts', w.posts],
+    ['· abroad (visa / relocation)', w.abroad], ['· India', w.india], ['· remote', w.remote],
+    ['Referral asks', w.referrals], ['LinkedIn posts', w.posts], ['Mock interviews', w.mocks],
   ];
   for (const [label, m] of rows) {
     lines.push(`${m.done >= m.target ? '✅' : '▫️'} ${esc(label)}: <b>${m.done}/${m.target}</b>${m.stretch ? ` (stretch ${m.stretch})` : ''} ${bar(m.done, m.target)}`);

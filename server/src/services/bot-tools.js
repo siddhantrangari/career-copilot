@@ -1135,7 +1135,7 @@ const TOOLS = [
   ['get_navigator', 'His evidence-based target niche, strengths and title aliases.', S({}), getNavigator],
   ['run_navigator', 'Regenerate the target niche and title aliases from his profile.', S({ confirmedByUser: { type: 'boolean' } }, ['confirmedByUser']), runNavigatorTool],
   ['send_digest_now', "Send today's digest now.", S({}), sendDigestNow],
-  ['get_apply_queue', 'The next roles to apply to, best first (target 20–100 a day): Bangalore, remote open to India, abroad with visa sponsorship / relocation in the JD (Gulf counts). With jobIds for mark_applied.', S({ scope: { type: 'string', enum: ['all', 'bangalore', 'remote', 'abroad'] }, minFit: int, limit: int }), getApplyQueue],
+  ['get_apply_queue', 'The next roles to apply to, best first (daily target: abroad 15–20, India 10–15, remote 5–10): Bangalore, remote open to India, abroad with visa sponsorship / relocation in the JD (Gulf counts). With jobIds for mark_applied.', S({ scope: { type: 'string', enum: ['all', 'bangalore', 'remote', 'abroad'] }, minFit: int, limit: int }), getApplyQueue],
   ['mark_applied', 'Mark a discovered role applied (adds it to his pipeline; counts toward today). Only when he says he applied.', S({ jobId: str() }, ['jobId']), markAppliedTool],
   ['skip_role', 'Hide a role from the queue as not for me (reversible).', S({ jobId: str() }, ['jobId']), skipRoleTool],
   ['get_apply_pack', 'Guided apply for one role: the form\'s real questions with answers prepared from his profile and answer bank, the ones that need him, the apply link, and his Studio resume PDF (sent as a file). Never submits — he does.', S({ jobId: str() }, ['jobId']), getApplyPack],

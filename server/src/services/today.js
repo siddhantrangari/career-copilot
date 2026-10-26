@@ -2,6 +2,7 @@ import { many, one } from '../db/pool.js';
 import { config } from '../config.js';
 import { pipeline, interviewsFrom, followUpsFrom, parseLooseDate } from './digest.js';
 import { listTargets, nextAction } from './targets.js';
+import { regionOf } from './apply-queue.js';
 
 /**
  * The "Today" board: his Daily System made live.
@@ -12,6 +13,11 @@ import { listTargets, nextAction } from './targets.js';
  * (IST). The action list is what to do next, most time-sensitive first, each
  * with why this company and why this role. Marking an action done logs it
  * and hides it for the rest of the day.
+ *
+ * Applications are also split by where the role is — abroad (visa /
+ * relocation), India, remote — each with its own daily range, and a mock
+ * interview a day. Until a range or the mock is met it stays at the top of
+ * the action list.
  */
 
 const tz = () => config.digest.timeZone;
@@ -44,7 +50,8 @@ async function countsSince(since) {
        (SELECT COALESCE(sum(count), 0) FROM outreach_activity WHERE kind = 'referral_ask' AND at >= $1)
          + (SELECT count(*) FROM connections WHERE status = 'ref' AND COALESCE(status_changed_at, created_at) >= $1) AS referrals,
        (SELECT COALESCE(sum(count), 0) FROM outreach_activity WHERE kind = 'call' AND at >= $1)
-         + (SELECT count(*) FROM connections WHERE status = 'call' AND COALESCE(status_changed_at, created_at) >= $1) AS calls`,
+         + (SELECT count(*) FROM connections WHERE status = 'call' AND COALESCE(status_changed_at, created_at) >= $1) AS calls,
+       (SELECT count(*) FROM interview_sessions WHERE started_at >= $1 AND status <> 'abandoned') AS mocks`,
     [since],
   );
   return Object.fromEntries(Object.entries(r).map(([k, v]) => [k, Number(v)]));
@@ -89,22 +96,61 @@ export function applicationsSince(tracked, logged, since) {
   return roles.size + extra + unkeyed;
 }
 
+/**
+ * Applications in the window by where the role is. A role applied from the
+ * queue carries its posting's location; one added by hand goes by its
+ * company's region (EU and Gulf are abroad) or a "remote" / India word in its
+ * title. +1 presses name no role, so they count only in the total.
+ */
+export async function applicationsByPlace(tracked, since) {
+  const out = { abroad: 0, india: 0, remote: 0 };
+  const counted = new Set();
+  const jobs = await many(
+    `SELECT id, location FROM jobs WHERE app_status = 'applied' AND app_status_at >= $1 AND COALESCE(engagement, 'fte') = 'fte'`,
+    [since],
+  );
+  for (const j of jobs) {
+    counted.add(j.id);
+    const p = regionOf(j.location);
+    if (p in out) out[p] += 1;
+  }
+  for (const t of tracked) {
+    for (const r of rolesOf(t.notes)) {
+      if (r.jobId || (r.stage !== 'applied' && !r.appliedAt)) continue; // queue roles are counted from the job above
+      const d = parseLooseDate(r.appliedAt);
+      if (!d || d < since) continue;
+      const p = /\bremote\b/i.test(r.title) ? 'remote'
+        : /\b(india|bangalore|bengaluru)\b/i.test(r.title) ? 'india'
+        : t.region === 'eu' || t.region === 'gulf' ? 'abroad' : null;
+      if (p) out[p] += 1;
+    }
+  }
+  return out;
+}
+
 export async function buildToday(now = new Date()) {
   const { day, week } = await boundaries();
   const g = config.targets;
   const [tracked, logged, cToday, cWeek] = await Promise.all([
-    many(`SELECT t.company_id, t.stage, t.notes, t.stage_changed_at, c.name AS company
+    many(`SELECT t.company_id, t.stage, t.notes, t.stage_changed_at, c.name AS company, c.region
           FROM tracked_companies t JOIN companies c ON c.id = t.company_id`),
     many(`SELECT at, count, note FROM outreach_activity WHERE kind = 'application' AND at >= $1`, [week]),
     countsSince(day), countsSince(week),
   ]);
-  const targets = (c, mult) => ({
+  const [pToday, pWeek] = await Promise.all([applicationsByPlace(tracked, day), applicationsByPlace(tracked, week)]);
+  const split = (p, k, mult, label) => ({ done: p[k], target: g.daily[k][0] * mult, stretch: g.daily[k][1] * mult, label });
+  const targets = (c, mult, p) => ({
     connections: { done: c.connections, target: g.daily.connections * mult, label: 'Connection requests' },
     dms: { done: c.dms, target: g.daily.dms * mult, label: 'DMs to HMs / peers' },
     applications: { done: applicationsSince(tracked, logged, mult === 1 ? day : week), target: g.daily.applications * mult, stretch: g.daily.applicationsStretch * mult, label: 'Applications' },
     posts: { done: c.posts, target: g.daily.posts * mult, label: 'LinkedIn posts' },
     referrals: { done: c.referrals, target: g.daily.referrals * mult, label: 'Referral asks' },
+    abroad: split(p, 'abroad', mult, 'Abroad · visa / relocation'),
+    india: split(p, 'india', mult, 'India · Bangalore'),
+    remote: split(p, 'remote', mult, 'Remote'),
+    mocks: { done: c.mocks, target: g.daily.mocks * mult, label: 'Mock interviews' },
   });
+  const todayT = targets(cToday, 1, pToday);
 
   // Actions already marked done today.
   const doneKeys = new Set((await many(
@@ -130,6 +176,24 @@ export async function buildToday(now = new Date()) {
       prepId: prep?.id || null, prepAt: prep?.created_at || null,
       role: i.role, title: `Interview ${i.at.toLocaleString('en-IN', { timeZone: tz(), weekday: 'short', hour: 'numeric', minute: '2-digit' })}`,
       detail: prep ? 'Re-read your prep guide, then run a mock round' : 'Build the prep guide (how they interview for this role), then a mock round', logKind: 'action_done' });
+  }
+
+  // The day's application split and a mock round: on the list until met.
+  for (const [k, scope, icon, what] of [
+    ['abroad', 'abroad', '✈️', 'abroad roles with visa sponsorship or relocation'],
+    ['india', 'bangalore', '🇮🇳', 'India roles (Bangalore)'],
+    ['remote', 'remote', '🌐', 'remote roles open to India'],
+  ]) {
+    const m = todayT[k];
+    if (m.done >= m.target) continue;
+    actions.push({ key: key('plan', k), type: 'apply_plan', icon, scope, company: '',
+      title: `Apply to ${m.target - m.done}–${m.stretch - m.done} more ${what}`,
+      detail: `${m.done} of ${m.target}–${m.stretch} done today` });
+  }
+  if (todayT.mocks.done < todayT.mocks.target) {
+    actions.push({ key: key('plan', 'mock'), type: 'mock', icon: '🎙', company: '',
+      title: 'Practice a mock interview',
+      detail: 'One round today — a company in your pipeline, or a general screening round' });
   }
 
   // 2. Follow-ups due (DM day 4, applications quiet 7 days) — the two oldest.
@@ -168,8 +232,8 @@ export async function buildToday(now = new Date()) {
 
   return {
     date: now.toISOString(),
-    today: targets(cToday, 1),
-    week: { ...targets(cWeek, 5), calls: { done: cWeek.calls, target: g.weeklyCalls, stretch: g.weeklyCallsStretch, label: 'Calls' } },
+    today: todayT,
+    week: { ...targets(cWeek, 5, pWeek), calls: { done: cWeek.calls, target: g.weeklyCalls, stretch: g.weeklyCallsStretch, label: 'Calls' } },
     actions: actions.slice(0, 10),
     priorityTargets: (await one(`SELECT count(*)::int AS n FROM company_targets WHERE priority`))?.n || 0,
     followUpsDue: followUpsFrom(pipe.tracked, pipe.contacts, now, { snoozed: pipe.snoozed }).total,
