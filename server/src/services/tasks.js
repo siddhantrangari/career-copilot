@@ -330,7 +330,11 @@ export function applyDocumentRules(text) {
     .replace(/Vertex AI\s*\(Vertex AI\)/g, 'Vertex AI')
     .replace(/Bangalore, India,\s*India/g, 'Bangalore, India')
     .replace(/mentored 5\+ (engineers|developers|junior engineers)/gi, (m) => `${m[0] === 'M' ? 'M' : 'm'}entored 5+ junior developers`)
-    .split('\n').map(fixRoleLocation).join('\n');
+    .split('\n').map(fixRoleLocation).join('\n')
+    // His contact details are fixed facts — a model must never "tidy" them.
+    .replace(/(https?:\/\/)?(www\.)?linkedin\.com\/in\/[A-Za-z0-9_-]+\/?/g, (m) => (m.startsWith('http') ? 'https://' : '') + 'linkedin.com/in/siddhant-rangari')
+    .replace(/siddhant\.?rangari@gmail\.com/gi, 'siddhantrangari@gmail.com')
+    .replace(/\+?91[\s-]*8668[\s-]*988[\s-]*485/g, '+91 86689 88485');
 }
 
 // Where each role was, by employer — a role header's last field is put back if the model moved it.

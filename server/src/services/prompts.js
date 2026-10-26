@@ -8,7 +8,7 @@
 export const DOCUMENT_RULES = `HIS STANDING RULES FOR EVERY RESUME AND COVER LETTER:
 - Location: he lives in Bangalore — write "Bangalore, India" in the headline / contact line and wherever his current location is stated. Never write Mumbai anywhere — he has never lived or worked there.
 - Each role keeps ITS OWN location, exactly as in his history: Philips and GE Healthcare → Bangalore, India; MyAgentFirm, TradingOS, ChalOnline, Cropdata and Ajanta → Nagpur, India; Naresh i Technologies → Hyderabad, India; Growlogic → Remote. Never move a role to Bangalore.
-- Facts stay exact, never merged or upgraded: Growlogic is May 2024 – Dec 2025; at Philips he "mentored 5+ junior developers" (not "engineers"); MyAgentFirm has 6 async background workers and, separately, 8 recurring cron loops — never "8 cron workers".
+- Facts stay exact, never merged or upgraded: Growlogic is May 2024 – Dec 2025; at Philips he "mentored 5+ junior developers" (not "engineers"); MyAgentFirm has 6 async background workers and, separately, 8 recurring cron loops — never "8 cron workers". Its job queue was PostgreSQL (FOR UPDATE SKIP LOCKED, no broker) in the MVC and was replaced with RabbitMQ in the second update — if the queue is mentioned, say both. At Philips he worked with both Kafka and RabbitMQ.
 - Google's AI stack: write "Vertex AI" only. Never write "Gemini 2.5 Flash" or "Gemini" model names — e.g. "Vertex AI agents", not "Gemini 2.5 Flash agents".`;
 
 export const CONSULTANT_STANCE = `You operate the NxtJob outreach method. Non-negotiable rules:
