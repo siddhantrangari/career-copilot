@@ -2712,5 +2712,239 @@
     "desc": "Cloud-native serverless PostgreSQL architecture.",
     "apply": "https://jobs.lever.co/neon",
     "dsa": false
+  },
+  {
+    "id": "wonderful",
+    "name": "Wonderful",
+    "region": "eu",
+    "roles": [
+      "fde",
+      "ai"
+    ],
+    "pay": "≈€90–140k (est.)",
+    "desc": "Enterprise AI agent platform; raised $150M in H1 2026. Hiring Forward Deployed Engineers in Germany and the Netherlands (41 engineering roles open). Checked 26 Oct 2026.",
+    "apply": "https://jobs.ashbyhq.com/wonderful",
+    "dsa": false
+  },
+  {
+    "id": "parloa",
+    "name": "Parloa",
+    "region": "eu",
+    "roles": [
+      "fde",
+      "ai"
+    ],
+    "pay": "$130–160k (US FDE band)",
+    "desc": "Berlin conversational-AI agents; $350M Series D in 2026. Forward Deployed Engineers in Berlin HQ (24 engineering roles). Checked 26 Oct 2026.",
+    "apply": "https://jobs.ashbyhq.com/parloa",
+    "dsa": false
+  },
+  {
+    "id": "langdock",
+    "name": "Langdock",
+    "region": "eu",
+    "roles": [
+      "fde",
+      "ai",
+      "fs"
+    ],
+    "pay": "€80–140k + equity",
+    "desc": "Berlin enterprise AI workspace. Forward Deployed and Product Engineers in Berlin; some roles mention relocation/visa. Checked 26 Oct 2026.",
+    "apply": "https://jobs.ashbyhq.com/langdock",
+    "dsa": false
+  },
+  {
+    "id": "hcompany",
+    "name": "H Company",
+    "region": "eu",
+    "roles": [
+      "fde",
+      "ai",
+      "fs"
+    ],
+    "pay": "≈€90–150k (est.)",
+    "desc": "Paris AI-agents lab. Senior Full Stack and Forward Deployed Engineers, hybrid Paris/London. Checked 26 Oct 2026.",
+    "apply": "https://jobs.ashbyhq.com/hcompany",
+    "dsa": false
+  },
+  {
+    "id": "wayve",
+    "name": "Wayve",
+    "region": "eu",
+    "roles": [
+      "ai",
+      "fs"
+    ],
+    "pay": "£/$ high — US bands $310–460k",
+    "desc": "London embodied-AI / autonomous driving. 120 engineering roles; almost all mention visa or relocation support. Checked 26 Oct 2026.",
+    "apply": "https://jobs.ashbyhq.com/wayve",
+    "dsa": false
+  },
+  {
+    "id": "physicsx",
+    "name": "PhysicsX",
+    "region": "eu",
+    "roles": [
+      "ai",
+      "fs"
+    ],
+    "pay": "≈£90–150k (est.)",
+    "desc": "London AI for engineering simulation; raised $300M in 2026. 31 engineering roles, all mention visa/relocation. Checked 26 Oct 2026.",
+    "apply": "https://job-boards.greenhouse.io/physicsx",
+    "dsa": false
+  },
+  {
+    "id": "helsing",
+    "name": "Helsing",
+    "region": "eu",
+    "roles": [
+      "ai",
+      "fs",
+      "fde"
+    ],
+    "pay": "≈€90–160k (est.)",
+    "desc": "Munich defence AI; ~$1.8B raised 2026. 96 engineering roles, most mention visa/relocation — some roles need security clearance or EU/NATO citizenship, check each. Checked 26 Oct 2026.",
+    "apply": "https://job-boards.greenhouse.io/helsing",
+    "dsa": false
+  },
+  {
+    "id": "celonis",
+    "name": "Celonis",
+    "region": "eu",
+    "roles": [
+      "ai",
+      "fs",
+      "se"
+    ],
+    "pay": "≈€85–140k (est.)",
+    "desc": "Munich process-mining / AI decacorn. 136 engineering roles (also Bangalore office); ~50 mention visa/relocation. Checked 26 Oct 2026.",
+    "apply": "https://job-boards.greenhouse.io/celonis",
+    "dsa": false
+  },
+  {
+    "id": "doctolib",
+    "name": "Doctolib",
+    "region": "eu",
+    "roles": [
+      "ai",
+      "fs"
+    ],
+    "pay": "≈€70–110k (est.)",
+    "desc": "Paris/Berlin health-tech. Senior AI / ML (LLM) Engineers; ~30 engineering roles mention relocation/visa. Checked 26 Oct 2026.",
+    "apply": "https://jobs.ashbyhq.com/doctolib",
+    "dsa": false
+  },
+  {
+    "id": "adyen",
+    "name": "Adyen",
+    "region": "eu",
+    "roles": [
+      "fs",
+      "se"
+    ],
+    "pay": "≈€80–130k (est.)",
+    "desc": "Amsterdam payments. 70 engineering roles; ~27 mention visa/relocation (Dutch highly-skilled migrant route). Checked 26 Oct 2026.",
+    "apply": "https://job-boards.greenhouse.io/adyen",
+    "dsa": false
+  },
+  {
+    "id": "monzo",
+    "name": "Monzo",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "≈£85–130k (est.)",
+    "desc": "London digital bank. 21 engineering roles, most mention visa sponsorship (UK Skilled Worker). Checked 26 Oct 2026.",
+    "apply": "https://job-boards.greenhouse.io/monzo",
+    "dsa": false
+  },
+  {
+    "id": "adjoe",
+    "name": "adjoe",
+    "region": "eu",
+    "roles": [
+      "fs",
+      "ai"
+    ],
+    "pay": "≈€70–100k (est.)",
+    "desc": "Hamburg ad-tech (Applike Group). Senior Go backend / data roles; nearly all mention relocation and visa support. Checked 26 Oct 2026.",
+    "apply": "https://jobs.ashbyhq.com/adjoe",
+    "dsa": false
+  },
+  {
+    "id": "qonto",
+    "name": "Qonto",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "≈€70–110k (est.)",
+    "desc": "Paris business-banking scaleup. Senior/Staff Go backend, remote-friendly; most mention relocation. Checked 26 Oct 2026.",
+    "apply": "https://jobs.ashbyhq.com/qonto",
+    "dsa": false
+  },
+  {
+    "id": "legora",
+    "name": "Legora",
+    "region": "eu",
+    "roles": [
+      "ai",
+      "fs",
+      "fde"
+    ],
+    "pay": "$237–370k (US bands)",
+    "desc": "Stockholm legal-AI, hyper-growth (300+ roles). Senior Software / Platform Engineers in Stockholm & Malmö. Checked 26 Oct 2026.",
+    "apply": "https://jobs.ashbyhq.com/legora",
+    "dsa": false
+  },
+  {
+    "id": "encord",
+    "name": "Encord",
+    "region": "eu",
+    "roles": [
+      "ai",
+      "fs"
+    ],
+    "pay": "$180–230k (US band)",
+    "desc": "London AI data infrastructure. Senior Full-Stack Engineers in London. Checked 26 Oct 2026.",
+    "apply": "https://jobs.ashbyhq.com/encord",
+    "dsa": false
+  },
+  {
+    "id": "getyourguide",
+    "name": "GetYourGuide",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "≈€75–110k (est.)",
+    "desc": "Berlin/Zurich travel marketplace — long-standing visa sponsor for engineers. Checked 26 Oct 2026.",
+    "apply": "https://job-boards.greenhouse.io/getyourguide",
+    "dsa": false
+  },
+  {
+    "id": "sumup",
+    "name": "SumUp",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "≈€70–100k (est.)",
+    "desc": "Berlin/EU fintech. 43 engineering roles across Europe; some mention relocation. Checked 26 Oct 2026.",
+    "apply": "https://job-boards.greenhouse.io/sumup",
+    "dsa": false
+  },
+  {
+    "id": "raisin",
+    "name": "Raisin",
+    "region": "eu",
+    "roles": [
+      "fs"
+    ],
+    "pay": "≈€70–100k (est.)",
+    "desc": "Berlin savings-platform fintech. Engineering roles mention visa/relocation support. Checked 26 Oct 2026.",
+    "apply": "https://job-boards.greenhouse.io/raisin",
+    "dsa": false
   }
 ]

@@ -152,7 +152,27 @@ export function portalSearchLinks(role = 'AI Engineer', location = 'Bangalore') 
     { name: 'Wellfound', url: `https://wellfound.com/role/l/${slug(role)}/${slug(loc)}` },
     // Luxembourg's government job board: employers there hire from abroad, and
     // software development is on the 2026 shortage list (no labour market test).
-    { name: '★ Work in Luxembourg (gov board)', url: `https://jobs.workinluxembourg.com/offers?q=${q(role)}&page=0` },  ];
+    { name: '★ Work in Luxembourg (gov board)', url: `https://jobs.workinluxembourg.com/offers?q=${q(role)}&page=0` },
+    ...abroadBoardLinks(role),
+  ];
+}
+
+/**
+ * Europe boards where employers expect to sponsor or relocate, plus LinkedIn
+ * across the EU with "visa sponsorship" in the search.
+ */
+export function abroadBoardLinks(role = 'AI Engineer') {
+  const gtj = /\b(ai|ml|llm|genai)\b/i.test(role) ? 'AI' : /full[- ]?stack/i.test(role) ? 'Fullstack' : /back[- ]?end/i.test(role) ? 'Backend' : 'all';
+  return [
+    { name: '✈️ LinkedIn · EU, visa sponsorship', url: `https://www.linkedin.com/jobs/search/?keywords=${q(`${role} visa sponsorship`)}&location=European%20Union&f_TPR=r604800` },
+    { name: '✈️ Relocate.me (relocation jobs)', url: 'https://relocate.me/international-jobs' },
+    { name: '✈️ Arbeitnow · visa sponsorship', url: 'https://www.arbeitnow.com/jobs-with-visa-sponsorship' },
+    { name: '✈️ Berlin Startup Jobs', url: `https://berlinstartupjobs.com/?s=${q(role)}` },
+    { name: '✈️ GermanTechJobs', url: `https://germantechjobs.de/jobs/${gtj}/all` },
+    { name: '✈️ English Jobs Germany', url: `https://englishjobs.de/in/germany?q=${q(role)}` },
+    { name: '✈️ Landing.jobs (EU)', url: `https://landing.jobs/jobs?q=${q(role)}` },
+    { name: '✈️ XING', url: `https://www.xing.com/jobs/search?keywords=${q(role)}` },
+  ];
 }
 
 /** His standing searches, for the digest: one boolean search per target role. */

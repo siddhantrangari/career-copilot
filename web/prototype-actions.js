@@ -858,19 +858,35 @@
       '<div style="display:flex;gap:7px">' +
       '<button class="btn" id="cc-agent-log" type="button">Agent log</button>' +
       '<button class="btn pri" id="cc-scan" type="button">Scan now</button>' +
-      '</div></div><div id="cc-feed-body" style="margin-top:14px"></div>';
+      '</div></div><div id="cc-feed-tabs" class="tabs" style="margin-top:12px;display:flex;gap:6px;flex-wrap:wrap"></div>' +
+      '<div id="cc-feed-body" style="margin-top:10px"></div>';
 
     host.insertBefore(panel, host.firstChild);
 
     var body = document.getElementById('cc-feed-body');
+    var tabs = document.getElementById('cc-feed-tabs');
+    var feedPlace = '';
+    var PLACES = [['', 'All'], ['india', '🇮🇳 India'], ['remote', '🌐 Remote'], ['abroad', '✈️ Abroad']];
+    tabs.addEventListener('click', function (e) {
+      var b = e.target.closest('[data-place]');
+      if (!b) return;
+      feedPlace = b.getAttribute('data-place');
+      renderJobs();
+    });
 
     function renderJobs() {
       body.innerHTML = '<p class="cc-muted">Loading roles…</p>';
-      api('/jobs/discovered?limit=60&minRelevance=50&sort=best')
+      api('/jobs/discovered?limit=60&minRelevance=50&sort=best&counts=true' + (feedPlace ? '&place=' + feedPlace : ''))
         .then(function (d) {
           var jobs = d.jobs || [];
+          var c = d.counts || {};
+          tabs.innerHTML = PLACES.map(function (p) {
+            var n = p[0] ? c[p[0]] : null;
+            return '<button class="btn' + (feedPlace === p[0] ? ' pri' : '') + '" data-place="' + p[0] + '" type="button">' +
+              p[1] + (n != null ? ' (' + n + ')' : '') + '</button>';
+          }).join('');
           if (!jobs.length) {
-            body.innerHTML = '<p class="cc-muted">Nothing found yet. Hit “Scan now”.</p>';
+            body.innerHTML = '<p class="cc-muted">' + (feedPlace ? 'No roles in this tab yet.' : 'Nothing found yet. Hit “Scan now”.') + '</p>';
             return;
           }
           document.getElementById('cc-feed-sub').textContent =

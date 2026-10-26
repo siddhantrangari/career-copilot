@@ -82,6 +82,14 @@ export function classifyRole({ location = '', description = '', flags = null }) 
     label: visa === 'yes' ? 'Abroad — visa sponsorship' : reloc === 'yes' ? 'Abroad — relocation support' : visa === 'no' ? 'Abroad — no sponsorship' : 'Abroad — sponsorship not stated' };
 }
 
+/** India, remote or abroad — for the job feed's tabs. Location only, no JD. */
+export function regionOf(location) {
+  const { place } = classifyRole({ location });
+  if (place === 'bangalore' || place === 'india_other') return 'india';
+  if (place === 'remote' || place === 'remote_locked') return 'remote';
+  return place === 'abroad' ? 'abroad' : 'unknown';
+}
+
 const SCOPES = ['all', 'bangalore', 'remote', 'abroad'];
 
 /**

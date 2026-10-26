@@ -208,7 +208,7 @@ const EXCLUDE = new RegExp([
 
 const DSA_SIGNALS = /leetcode|data structures and algorithms|algorithmic (interview|assessment)|hackerrank|codesignal|competitive programming/i;
 
-const LOCATION_OK = /remote|hybrid|onsite|on-site|emea|europe|london|berlin|amsterdam|munich|paris|dublin|madrid|lisbon|zurich|stockholm|luxembourg|dubai|abu dhabi|uae|riyadh|saudi|doha|qatar|singapore|tokyo|sydney|toronto|vancouver|san francisco|sf|bay area|new york|nyc|seattle|austin|boston|chicago|india|bangalore|bengaluru|bengalore|anywhere|global|worldwide|us|united states|uk|united kingdom/i;
+const LOCATION_OK = /remote|hybrid|onsite|on-site|emea|europe|london|berlin|amsterdam|munich|paris|dublin|madrid|lisbon|zurich|stockholm|luxembourg|hamburg|malmö|malmo|barcelona|milan|copenhagen|helsinki|vienna|warsaw|prague|tallinn|dubai|abu dhabi|uae|riyadh|saudi|doha|qatar|singapore|tokyo|sydney|toronto|vancouver|san francisco|sf|bay area|new york|nyc|seattle|austin|boston|chicago|india|bangalore|bengaluru|bengalore|anywhere|global|worldwide|us|united states|uk|united kingdom/i;
 
 /**
  * In India he targets Bangalore only, or remote. A role placed in any other

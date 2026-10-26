@@ -1,6 +1,7 @@
 import { many, one } from '../db/pool.js';
 import { listJobs, agentRuns, agentRun, latestPostings } from '../services/discovery.js';
 import { createJob } from '../services/jobs.js';
+import { regionOf } from '../services/apply-queue.js';
 import { chatJson } from '../services/ai.js';
 import { candidateBlock } from '../services/context.js';
 import { gigProposalPrompt } from '../services/prompts.js';
@@ -27,22 +28,28 @@ const detectDsa = (text = '') => {
 export default async function jobRoutes(app) {
   app.addHook('onRequest', app.auth);
 
-  /** Discovered jobs, newest posting first. */
+  /**
+   * Discovered jobs, newest posting first. place = india | remote | abroad
+   * narrows to one tab; counts per tab come from the same 300 newest.
+   */
   app.get('/discovered', async (request) => {
     const q = request.query || {};
-    return {
-      jobs: await listJobs({
-        limit: parseInt(q.limit ?? '100', 10) || 100,
-        companyId: q.companyId,
-        includeClosed: q.includeClosed === 'true',
-        minRelevance: parseInt(q.minRelevance ?? '40', 10) || 40,
-        favouritesOnly: q.favourites === 'true',
-        kind: ['gigs', 'fte', 'all'].includes(q.kind) ? q.kind : 'fte',
-        appStatus: q.status || null,
-        source: q.source || null,
-        sort: q.sort || 'recent',
-      }),
-    };
+    const limit = parseInt(q.limit ?? '100', 10) || 100;
+    const place = ['india', 'remote', 'abroad'].includes(q.place) ? q.place : null;
+    const jobs = (await listJobs({
+      limit: place || q.counts === 'true' ? 300 : limit,
+      companyId: q.companyId,
+      includeClosed: q.includeClosed === 'true',
+      minRelevance: parseInt(q.minRelevance ?? '40', 10) || 40,
+      favouritesOnly: q.favourites === 'true',
+      kind: ['gigs', 'fte', 'all'].includes(q.kind) ? q.kind : 'fte',
+      appStatus: q.status || null,
+      source: q.source || null,
+      sort: q.sort || 'recent',
+    })).map((j) => ({ ...j, place: regionOf(j.location) }));
+    const counts = { india: 0, remote: 0, abroad: 0 };
+    for (const j of jobs) if (counts[j.place] != null) counts[j.place] += 1;
+    return { jobs: (place ? jobs.filter((j) => j.place === place) : jobs).slice(0, limit), counts };
   });
 
   // ── Freelance gigs ──────────────────────────────────────────────────
