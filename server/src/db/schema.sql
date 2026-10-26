@@ -669,3 +669,16 @@ CREATE TABLE IF NOT EXISTS autofill_keys (
   created_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
   revoked_at  TIMESTAMPTZ
 );
+
+-- His answers to "have you used X?" questions raised when a tailored resume
+-- scores low on a JD's keywords. A "yes" (with where/how, in his words) is as
+-- true as his history from then on — tailoring and the fact-checker read it;
+-- a "no" is never claimed. One row per skill, updated in place.
+CREATE TABLE IF NOT EXISTS confirmed_skills (
+  skill       TEXT PRIMARY KEY,             -- lower(trim(label))
+  label       TEXT NOT NULL,
+  has         BOOLEAN NOT NULL,
+  detail      TEXT NOT NULL DEFAULT '',     -- where and how he used it
+  source      TEXT NOT NULL DEFAULT '',     -- which resume raised it
+  updated_at  TIMESTAMPTZ NOT NULL DEFAULT now()
+);

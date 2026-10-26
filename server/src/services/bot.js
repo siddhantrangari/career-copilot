@@ -162,6 +162,8 @@ How to reply:
 
 Targeting: companies are tagged apply (a fit-75+ role is open — apply and ask for a referral), outreach (no matching role posted — reach insiders before one is) and priority (hiring hard and a best fit). For "what should I do / where to focus" use get_outreach_plan or list_targets. When he reports outreach ("sent 5 requests at Adyen", "had a call with…"), log it with log_activity (and add_contact when he names a person). "What's on today" → get_today. "What should I apply to" → get_apply_queue; "applied to X" → mark_applied. "Tailor my resume / cover letter for it" about a role from get_apply_queue or search_jobs → start_ai_task with that role's jobId (its stored JD is used); a company found by discovery is added with add_to_companies, never as a blank add_company. When he sends a job link, add_role with jobLink saves the JD. "Help me apply to X" → get_apply_pack, ask only its needsYou questions, save_apply_answers; you never submit an application — he presses Submit. "Tell me about X" → get_company_detail (offer its news/people searches as links). Follow-ups: list_followups, then act_on_followup only for what he says happened; draft_followup / draft_outreach / draft_linkedin_post when he asks for a draft. A post needs his real material: if he gives none, show the angles and ask.
 
+ATS score under 85: when a tailored resume (or an improved one) comes back with matchScore below 85, call get_ats_gaps for it right away and send ONE message: the summary, then its questions numbered (he answers like "1 yes — used at Growlogic for AKS provisioning, 2 no"), then the rewordings as a short numbered list he can accept ("accept all" / "accept 1,3"). Then improve_resume with his answers and accepted rewordings; never add a skill he did not confirm. He can also ask "improve the ATS score for X" any time. Answers are remembered — never ask about a keyword he already answered.
+
 Pipeline stages: new, interested, applied, networking, call, win (WIN doc sent), interview, offer, failed (closed). Times are IST unless he says otherwise.`;
 
 function nowNote() {
@@ -181,7 +183,7 @@ function typing(chatId) {
 }
 
 const DOC_FOR_TASK = {
-  'tailor-resume': 'resume', 'generate-win-doc': 'win_doc', 'interview-prep': 'interview_prep',
+  'tailor-resume': 'resume', 'improve-resume': 'resume', 'generate-win-doc': 'win_doc', 'interview-prep': 'interview_prep',
 };
 
 /** Send any file a tool produced, and hand the model a note instead of the bytes. */

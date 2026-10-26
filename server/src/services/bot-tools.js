@@ -534,6 +534,31 @@ async function getJobDetail({ jobId, company, title } = {}) {
     jobDescription: jd.slice(0, 3200) + (jd.length > 3200 ? '…' : '') };
 }
 
+/** The resume version to work on: by id, else his latest for that company (and role). */
+async function resumeFor({ resumeId, company, role }) {
+  if (resumeId) return resumeId;
+  if (!company) throw new ToolError('resumeId or company is required');
+  const r = await one(
+    `SELECT id FROM resume_versions WHERE lower(company_name) = lower($1) OR company_id = (SELECT id FROM companies WHERE lower(name) = lower($1) LIMIT 1)
+     ORDER BY ($2::text IS NOT NULL AND job_title ILIKE '%' || $2 || '%') DESC, created_at DESC LIMIT 1`, [company, role || null]);
+  if (!r) throw new ToolError(`No tailored resume for ${company} yet — tailor one first.`);
+  return r.id;
+}
+
+/** Why a tailored resume scores under 85 on its JD: questions for him, rewordings to accept. */
+async function getAtsGaps(args = {}) {
+  const { atsGaps } = await import('./tasks.js');
+  try { return await atsGaps({ resumeId: await resumeFor(args) }); } catch (err) { throw new ToolError(err.message); }
+}
+
+/** His answers → a new, fact-checked, re-scored version (background; the PDF link arrives when done). */
+async function improveResumeTool({ resumeId, company, role, answers = [], rewrites = [], instructions }) {
+  const id = await resumeFor({ resumeId, company, role });
+  const job = await createJob('improve-resume', { resumeId: id, answers, rewrites, instructions });
+  await audit('improve_resume', { resumeId: id, answers, rewrites: rewrites.length, instructions }, null, null, { taskId: job.id });
+  return { taskId: job.id, task: 'improve_resume', status: 'started — the improved resume and its new score will arrive here', typicalDuration: '~1–2 min' };
+}
+
 async function getTask({ taskId }) {
   const j = await getJob(taskId);
   if (!j) throw new ToolError('Task not found');
@@ -1179,6 +1204,12 @@ const TOOLS = [
   ['list_documents', 'Resumes, WIN docs, interview preps, mock interviews (ids).', S({ company: companyArg, type: { type: 'string', enum: DOC_TYPES } }), listDocuments],
   ['get_document', 'Send a document as a file (default), "text" excerpt, or WIN doc as "pptx". A resume is sent as the Resume Studio\'s own PDF (id "master" = master resume); if the Studio has not exported it yet you get openToExport — give him that link, and the PDF arrives in the chat once he opens it.', S({ type: { type: 'string', enum: DOC_TYPES }, id: str(), format: { type: 'string', enum: ['file', 'text', 'pptx'] } }, ['type', 'id']), getDocument],
   ['get_profile', 'His profile and achievement bank (real results and metrics) — the facts for any short answer or message you write.', S({}), getProfile],
+  ['get_ats_gaps', 'Why a tailored resume scores low on its JD: a summary, yes/no questions only he can answer (keyword, question, closest experience) and rewordings of lines he already has. By resumeId, or company (+ role) for his latest.', S({ resumeId: str(), company: companyArg, role: str() }), getAtsGaps],
+  ['improve_resume', 'Make a better version from his answers: answers = [{keyword, has, detail}] (detail = where and how, his words), rewrites = the ones he accepted [{from, to}]. Answers are remembered for future resumes. Starts a background task; the new score and PDF link arrive when done.', S({
+    resumeId: str(), company: companyArg, role: str(), instructions: str(),
+    answers: { type: 'array', items: { type: 'object', properties: { keyword: str(), has: bool, detail: str() }, required: ['keyword', 'has'] } },
+    rewrites: { type: 'array', items: { type: 'object', properties: { from: str(), to: str() }, required: ['from', 'to'] } },
+  }), improveResumeTool],
   ['get_job', 'One role in full: its JD, fit, why-line and link — for writing a form answer or hiring-team message for it.', S({ jobId: str(), company: companyArg, title: str() }), getJobDetail],
   ['get_ai_task', 'Status of a background task.', S({ taskId: str() }, ['taskId']), getTask],
   ['track_company', 'Start tracking a company.', S({ company: companyArg, stage: stageArg }, ['company']), trackCompany],

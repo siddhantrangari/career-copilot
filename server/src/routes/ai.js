@@ -26,6 +26,7 @@ export default async function aiRoutes(app) {
   syncRoute('/generate-win-doc', 'generate-win-doc');
   syncRoute('/tailor-resume', 'tailor-resume');
   syncRoute('/refine-resume', 'refine-resume');
+  syncRoute('/ats-gaps', 'ats-gaps');
   syncRoute('/cover-letter', 'cover-letter');
   syncRoute('/refine-cover-letter', 'refine-cover-letter');
   syncRoute('/cold-email', 'cold-email');

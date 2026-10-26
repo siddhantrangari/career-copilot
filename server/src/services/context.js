@@ -17,10 +17,11 @@ export async function loadCandidateContext({ tags = [], limit = 12 } = {}) {
     ? achievements
     : await many('SELECT * FROM achievements ORDER BY id LIMIT $1', [limit]);
 
-  return { profile, achievements: pool };
+  const confirmed = await many(`SELECT label, has, detail FROM confirmed_skills ORDER BY updated_at`).catch(() => []);
+  return { profile, achievements: pool, confirmed };
 }
 
-export function renderCandidateBlock({ profile, achievements }) {
+export function renderCandidateBlock({ profile, achievements, confirmed = [] }) {
   if (!profile) return 'No candidate profile configured.';
 
   const skills = profile.skills || {};
@@ -67,7 +68,13 @@ MASTER RESUME
 ${profile.master_resume}
 
 ACHIEVEMENT BANK (CAR format — use these as the proof behind every claim)
-${stories}`;
+${stories}${confirmed.some((c) => c.has) ? `
+
+CONFIRMED BY HIM (his answers to resume questions — as true as the history above; use only where and how he says)
+${confirmed.filter((c) => c.has).map((c) => `- ${c.label}: ${c.detail || 'yes'}`).join('\n')}` : ''}${confirmed.some((c) => !c.has) ? `
+
+NOT HIS EXPERIENCE (he said no — never claim these)
+${confirmed.filter((c) => !c.has).map((c) => `- ${c.label}`).join('\n')}` : ''}`;
 }
 
 /** Convenience: context block in one call. */

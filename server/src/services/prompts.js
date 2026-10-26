@@ -322,6 +322,38 @@ ${resumeText}
 Return JSON exactly: { "tailoredResumeText": "the shortened resume in markdown" }`,
 });
 
+/**
+ * Why a tailored resume scores low against its JD, and what would raise it:
+ * questions for what only he can confirm, rewordings for what he already did.
+ */
+export const atsGapsPrompt = ({ resumeText, jobDescription, candidate, score, known = [] }) => ({
+  system: `You are an ATS and recruiter-screening expert. You find why a tailored resume scores low against a job description and what would honestly raise it. Never suggest claiming experience the candidate does not have. Return valid JSON only.`,
+  user: `${DOCUMENT_RULES}
+
+CANDIDATE (source of truth)
+${candidate}
+
+JOB DESCRIPTION
+${jobDescription}
+
+TAILORED RESUME (current ATS match ${score}/100)
+${resumeText}
+${known.length ? `\nALREADY ANSWERED BY HIM (do not ask again): ${known.join(', ')}\n` : ''}
+Find the JD's important requirements and keywords the resume does not show. For each:
+- if his history or confirmed answers already prove it but the resume doesn't say it → a "rewrite" (reword one existing line to use the JD's term; no new facts);
+- if only he can say whether he has it → a "question": a short yes/no question that asks where and how if yes;
+- if he clearly lacks it (history says no) → leave it out.
+At most 6 questions and 6 rewrites, most valuable first. "must" = required in the JD, "nice" = preferred.
+
+Return JSON exactly:
+{
+  "summary": "one sentence: the main reason the score is low",
+  "questions": [ { "keyword": "Terraform", "importance": "must|nice", "question": "Have you used Terraform? If yes, at which company and for what?", "closestExperience": "what in his history comes nearest" } ],
+  "rewrites": [ { "keyword": "...", "from": "exact current line from the resume", "to": "the reworded line", "why": "which JD requirement it now matches" } ],
+  "estimatedScoreAfter": 0
+}`,
+});
+
 export const refineResumePrompt = ({
   companyName,
   jobTitle,

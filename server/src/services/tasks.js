@@ -12,6 +12,7 @@ import {
   refineResumePrompt,
   verifyResumePrompt,
   condenseResumePrompt,
+  atsGapsPrompt,
   DOCUMENT_RULES,
   coverLetterPrompt,
   coverLetterLength,
@@ -788,6 +789,64 @@ async function jobDiscovery(payload) {
 }
 
 /** Everything the job runner is allowed to execute. */
+// ── ATS score under 85: what's missing, his answers, a better version ──
+export const ATS_TARGET = 85;
+
+async function resumeVersion(resumeId) {
+  const v = await one(`SELECT * FROM resume_versions WHERE id = $1`, [resumeId]);
+  if (!v) throw new AiError('Resume version not found', 404);
+  if (!v.job_description?.trim()) throw new AiError('This version has no saved job description to score against', 400);
+  return v;
+}
+
+/** The JD keywords a version misses: questions only he can answer, rewordings of what he already did. */
+export async function atsGaps(payload = {}) {
+  const v = await resumeVersion(payload.resumeId);
+  const known = (await many(`SELECT label FROM confirmed_skills`)).map((r) => r.label);
+  const p = atsGapsPrompt({ resumeText: v.tailored_text, jobDescription: v.job_description, candidate: await candidateBlock(), score: v.match_score, known });
+  const out = await chatJson({ kind: 'ats-gaps', companyId: v.company_id, system: p.system, user: p.user, maxTokens: 4_000, input: { resumeId: v.id } });
+  const questions = (out.questions || []).filter((q) => q?.keyword && q?.question && !known.some((k) => k.toLowerCase() === String(q.keyword).toLowerCase())).slice(0, 6);
+  const rewrites = (out.rewrites || []).filter((r) => r?.from && r?.to && v.tailored_text.includes(String(r.from).trim().slice(0, 40))).slice(0, 6);
+  return { resumeId: v.id, company: v.company_name, role: v.job_title, score: v.match_score, target: ATS_TARGET,
+    summary: out.summary || '', questions, rewrites, estimatedScoreAfter: out.estimatedScoreAfter || null };
+}
+
+/**
+ * His answers in, a new version out. Each answer is remembered (a "yes" with
+ * where/how becomes part of his verified history for every later resume; a
+ * "no" is never claimed), then the resume is refined with only those facts
+ * and the rewordings he accepted, fact-checked and re-scored. The earlier
+ * version is kept.
+ */
+export async function improveResume(payload = {}, ctx = {}) {
+  const v = await resumeVersion(payload.resumeId);
+  const answers = (payload.answers || []).filter((a) => a?.keyword && typeof a.has === 'boolean');
+  for (const a of answers) {
+    await query(
+      `INSERT INTO confirmed_skills (skill, label, has, detail, source) VALUES (lower(trim($1)), $1, $2, $3, $4)
+       ON CONFLICT (skill) DO UPDATE SET has = EXCLUDED.has, detail = EXCLUDED.detail, source = EXCLUDED.source, updated_at = now()`,
+      [String(a.keyword).trim().slice(0, 80), a.has, String(a.detail || '').trim().slice(0, 400), `${v.company_name} — ${v.job_title}`.slice(0, 160)],
+    );
+  }
+  const yes = answers.filter((a) => a.has);
+  const no = answers.filter((a) => !a.has);
+  const rewrites = (payload.rewrites || []).filter((r) => r?.from && r?.to);
+  if (!yes.length && !rewrites.length && !payload.instructions) throw new AiError('Nothing to change: no confirmed skills, rewrites or instructions', 400);
+  const feedback = [
+    'Raise this resume\'s ATS match for the job description using ONLY the following. Keep it to two A4 pages; trim weaker lines to make room.',
+    yes.length ? `He confirmed (add each in the role he names, in his own terms, using the JD's keyword):\n${yes.map((a) => `- ${a.keyword}: ${a.detail || 'yes'}`).join('\n')}` : '',
+    no.length ? `He does NOT have (never claim): ${no.map((a) => a.keyword).join(', ')}` : '',
+    rewrites.length ? `Apply these rewordings exactly:\n${rewrites.map((r) => `- "${r.from}" → "${r.to}"`).join('\n')}` : '',
+    payload.instructions ? `His instructions: ${payload.instructions}` : '',
+  ].filter(Boolean).join('\n\n');
+  const r = await refineResume({
+    companyId: v.company_id, companyName: v.company_name, jobTitle: v.job_title, jobDescription: v.job_description,
+    currentResumeText: v.tailored_text, feedback,
+  });
+  return { ...r, previousId: v.id, scoreBefore: v.match_score, scoreAfter: Math.round(r.resume?.matchScore || 0), target: ATS_TARGET,
+    remembered: { confirmed: yes.map((a) => a.keyword), notHis: no.map((a) => a.keyword) }, companyName: v.company_name, jobTitle: v.job_title };
+}
+
 export const TASKS = {
   'job-discovery': jobDiscovery,
   'india-discovery': indiaDiscovery,
@@ -806,6 +865,8 @@ export const TASKS = {
   'generate-win-doc': generateWinDoc,
   'tailor-resume': tailorResume,
   'refine-resume': refineResume,
+  'ats-gaps': atsGaps,
+  'improve-resume': improveResume,
   'cover-letter': generateCoverLetter,
   'refine-cover-letter': refineCoverLetter,
   'cold-email': coldEmail,

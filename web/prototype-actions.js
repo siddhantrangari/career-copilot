@@ -3553,3 +3553,89 @@
   sync();
   document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'visible') sync(); });
 })();
+
+/**
+ * Improve ATS score — for a tailored resume under 85.
+ *
+ * Shows why it scores low on its JD: yes/no questions only he can answer
+ * (with where and how), and rewordings of lines he already has. His answers
+ * are remembered for every later resume; a "no" is never claimed. Improving
+ * makes a new, fact-checked, re-scored version (the old one stays) and
+ * hands its id back to the Studio to open.
+ */
+(function () {
+  'use strict';
+  var CC = window.__CC__;
+  if (!CC) return;
+  var esc = CC.esc;
+
+  window.ccImproveAts = function (resumeId, onDone) {
+    var m = document.createElement('div');
+    m.style.cssText = 'position:fixed;inset:0;z-index:9999;background:rgba(5,8,14,.72);display:flex;align-items:flex-start;justify-content:center;overflow:auto;padding:24px 12px';
+    m.innerHTML = '<div id="cc-ats" style="background:#141822;border:1px solid #232a38;border-radius:14px;max-width:760px;width:100%;padding:18px 20px;color:#e7ecf3;font:13px/1.5 -apple-system,BlinkMacSystemFont,Segoe UI,sans-serif">' +
+      '<div style="display:flex;justify-content:space-between;align-items:center"><strong style="font-size:15px">🎯 Improve ATS score</strong><button type="button" data-x="1" style="background:none;border:0;color:#9fb0c8;font-size:18px;cursor:pointer">✕</button></div>' +
+      '<div id="cc-ats-body" style="margin-top:10px;color:#9fb0c8">Reading the job description against your resume…</div></div>';
+    document.body.appendChild(m);
+    var body = m.querySelector('#cc-ats-body');
+    var gaps = null;
+    m.addEventListener('click', function (e) { if (e.target === m || e.target.closest('[data-x]')) m.remove(); });
+
+    function render() {
+      var q = gaps.questions || []; var rw = gaps.rewrites || [];
+      body.innerHTML =
+        '<div style="color:#e7ecf3">' + esc(gaps.company || '') + ' — ' + esc(gaps.role || '') + ' · now <b>' + (gaps.score || 0) + '</b> / target ' + gaps.target +
+        (gaps.estimatedScoreAfter ? ' · could reach ~<b>' + gaps.estimatedScoreAfter + '</b>' : '') + '</div>' +
+        (gaps.summary ? '<div style="margin-top:4px">' + esc(gaps.summary) + '</div>' : '') +
+        (q.length ? '<div style="margin-top:14px;font-weight:700;color:#e7ecf3">Only you can answer these</div>' + q.map(function (x, i) {
+          return '<div style="margin-top:10px;padding:10px;border:1px solid #232a38;border-radius:10px" data-q="' + i + '">' +
+            '<div><b>' + esc(x.keyword) + '</b> <span style="font-size:11px;color:' + (x.importance === 'must' ? '#ffb020' : '#7c8ba3') + '">' + (x.importance === 'must' ? 'required' : 'preferred') + '</span></div>' +
+            '<div style="margin-top:2px;color:#cfd8e6">' + esc(x.question) + '</div>' +
+            (x.closestExperience ? '<div style="font-size:11px;color:#7c8ba3;margin-top:2px">Closest in your history: ' + esc(x.closestExperience) + '</div>' : '') +
+            '<div style="margin-top:6px;display:flex;gap:12px;align-items:center;flex-wrap:wrap">' +
+            '<label><input type="radio" name="has' + i + '" value="yes"> Yes</label><label><input type="radio" name="has' + i + '" value="no"> No</label><label><input type="radio" name="has' + i + '" value="" checked> Skip</label></div>' +
+            '<input type="text" data-detail="' + i + '" placeholder="If yes: where and how — e.g. Growlogic, provisioned AKS clusters" style="margin-top:6px;width:100%;box-sizing:border-box;background:#0f131b;border:1px solid #2a3344;border-radius:8px;color:#e7ecf3;padding:7px 9px">' +
+            '</div>';
+        }).join('') : '<div style="margin-top:12px">No questions — every gap is either covered by your history or not yours to claim.</div>') +
+        (rw.length ? '<div style="margin-top:16px;font-weight:700;color:#e7ecf3">Rewordings of what you already did</div>' + rw.map(function (x, i) {
+          return '<label style="display:block;margin-top:8px;padding:9px;border:1px solid #232a38;border-radius:10px;cursor:pointer"><input type="checkbox" data-rw="' + i + '" checked> <b>' + esc(x.keyword || '') + '</b>' +
+            '<div style="font-size:12px;color:#7c8ba3;margin-top:3px;text-decoration:line-through">' + esc(x.from) + '</div><div style="font-size:12px;color:#cfd8e6">' + esc(x.to) + '</div></label>';
+        }).join('') : '') +
+        '<div style="margin-top:14px;font-weight:700;color:#e7ecf3">Anything else?</div>' +
+        '<textarea id="cc-ats-note" rows="2" placeholder="Optional — e.g. lead with the Kafka work, drop ChalOnline" style="margin-top:6px;width:100%;box-sizing:border-box;background:#0f131b;border:1px solid #2a3344;border-radius:8px;color:#e7ecf3;padding:7px 9px"></textarea>' +
+        '<div style="margin-top:12px;display:flex;gap:8px;align-items:center"><button type="button" id="cc-ats-go" style="background:#3b82f6;color:#fff;border:0;border-radius:8px;padding:8px 14px;font-weight:700;cursor:pointer">✨ Improve resume</button>' +
+        '<span style="font-size:11px;color:#7c8ba3">Your answers are remembered for future resumes. A new version is made; this one stays.</span></div>' +
+        '<div id="cc-ats-out" style="margin-top:10px"></div>';
+      m.querySelector('#cc-ats-go').addEventListener('click', improve);
+    }
+
+    function improve() {
+      var answers = [];
+      (gaps.questions || []).forEach(function (x, i) {
+        var pick = m.querySelector('input[name="has' + i + '"]:checked');
+        var v = pick ? pick.value : '';
+        if (v) answers.push({ keyword: x.keyword, has: v === 'yes', detail: (m.querySelector('[data-detail="' + i + '"]').value || '').trim() });
+      });
+      var rewrites = (gaps.rewrites || []).filter(function (x, i) { var c = m.querySelector('[data-rw="' + i + '"]'); return c && c.checked; })
+        .map(function (x) { return { from: x.from, to: x.to }; });
+      var note = (m.querySelector('#cc-ats-note').value || '').trim();
+      var out = m.querySelector('#cc-ats-out');
+      if (!answers.some(function (a) { return a.has; }) && !rewrites.length && !note) { out.innerHTML = '<span style="color:#ffb020">Answer at least one "Yes", tick a rewording, or add an instruction.</span>'; return; }
+      var btn = m.querySelector('#cc-ats-go'); btn.disabled = true;
+      CC.runJob('improve-resume', { resumeId: resumeId, answers: answers, rewrites: rewrites, instructions: note }, function (s) { btn.textContent = 'Improving… ' + s + 's'; })
+        .then(function (r) {
+          var v = (r.resume && r.resume.verification) || {};
+          out.innerHTML = '<div style="padding:10px;border-radius:10px;background:#0f1a12;border:1px solid #1f4d2b">Score <b>' + r.scoreBefore + ' → ' + r.scoreAfter + '</b>' +
+            (r.scoreAfter < r.target ? ' — still under ' + r.target + '; run Improve again to see what is left.' : ' ✓') +
+            '<div style="margin-top:4px">' + (v.safeToSend === false ? '⚠️ ' + (v.blockingCount || 0) + ' claim(s) need review' : '🛡️ Fact-check passed') + '</div>' +
+            '<button type="button" id="cc-ats-open" style="margin-top:8px;background:#22c55e;color:#06110a;border:0;border-radius:8px;padding:7px 12px;font-weight:700;cursor:pointer">Open the new version</button></div>';
+          btn.textContent = '✨ Improve resume';
+          m.querySelector('#cc-ats-open').addEventListener('click', function () { m.remove(); if (onDone) onDone(r.id, r); });
+        })
+        .catch(function (e) { btn.disabled = false; btn.textContent = '✨ Improve resume'; out.innerHTML = '<span style="color:#ff8787">' + esc(e.message) + '</span>'; });
+    }
+
+    CC.runJob('ats-gaps', { resumeId: resumeId }, function (s) { body.textContent = 'Reading the job description against your resume… ' + s + 's'; })
+      .then(function (g) { gaps = g; render(); })
+      .catch(function (e) { body.innerHTML = '<span style="color:#ff8787">' + esc(e.message) + '</span>'; });
+  };
+})();

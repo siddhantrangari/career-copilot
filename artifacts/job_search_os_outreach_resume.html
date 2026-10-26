@@ -2649,6 +2649,20 @@ function updateAuditDisplay(data){
   const badge = document.getElementById('auditScoreBadge');
   if (badge) badge.textContent = `Match: ${data.matchScore || 0}/100`;
 
+  // Under 85: questions and rewordings that raise the score (a new version; this one stays).
+  let atsBox = document.getElementById('atsImproveBox');
+  if (!atsBox && badge) {
+    atsBox = document.createElement('div');
+    atsBox.id = 'atsImproveBox';
+    atsBox.style.marginTop = '6px';
+    badge.insertAdjacentElement('afterend', atsBox);
+  }
+  if (atsBox) {
+    atsBox.innerHTML = data.id && (data.matchScore || 0) < 85 && window.ccImproveAts
+      ? `<button class="btn" type="button" onclick="openAtsImprove()" title="Answer a few questions to raise the ATS match">🎯 Improve ATS score (${data.matchScore || 0} → 85+)</button>`
+      : '';
+  }
+
   const banner = document.getElementById('factCheckBanner');
   const v = data.verification || {};
   if (banner) {
@@ -3108,6 +3122,24 @@ function exportRequestedPdfOnce(){
   loadSavedResume(want);
   appendChatMessage('ai', `Exporting the PDF for ${r.company_name || 'this resume'} (${r.job_title || 'role'}) — it will be sent to Telegram.`);
   downloadPdfForVersion(want);
+}
+
+// ── ATS improvement ──
+function openAtsImprove(){
+  if (!currentTailoredResume || !currentTailoredResume.id || !window.ccImproveAts) return;
+  window.ccImproveAts(currentTailoredResume.id, onAtsImproved);
+}
+
+function onAtsImproved(newId, r){
+  const api = window.__CC__ && window.__CC__.api;
+  if (!api) return;
+  api('/resumes/' + newId).then((d) => {
+    const row = d.resume;
+    savedResumesList = [row, ...savedResumesList.filter(x => x.id !== row.id)];
+    loadSavedResume(newId);
+    appendChatMessage('ai', `🎯 ATS match ${r.scoreBefore} → ${r.scoreAfter}. This is the improved version — the earlier one is still in your library.`);
+    if (typeof refreshSavedResumes === 'function') refreshSavedResumes();
+  }).catch((e) => appendChatMessage('ai', `Could not open the new version: ${e.message}`));
 }
 
 // ── SAVED RESUMES LIBRARY ──
