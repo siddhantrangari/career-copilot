@@ -205,7 +205,7 @@
     "id": "growlogic-aks",
     "title": "Azure AKS Microservices Platform",
     "company": "Growlogic Technologies (Eeko.ai)",
-    "period": "Apr 2024 – Jul 2025",
+    "period": "May 2024 – Dec 2025",
     "challenge": "Eeko.ai needed to move from a monolith to a scalable microservices architecture on Azure to serve a growing SMB customer base across subscription plans.",
     "action": "Designed and delivered six Spring Boot microservices (masterdata, design-processing, design-rendering, event-processing, subscription, notification) on Azure AKS with Azure MySQL and Blob Storage, plus a WhatsApp Business API notification pipeline built on Spring Batch.",
     "result": "The platform handled concurrent design generation and notification delivery across customers, with zero-downtime deployments via an ArgoCD GitOps pipeline.",

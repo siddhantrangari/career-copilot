@@ -12,7 +12,9 @@ import {
   refineResumePrompt,
   verifyResumePrompt,
   condenseResumePrompt,
+  DOCUMENT_RULES,
   coverLetterPrompt,
+  coverLetterLength,
   refineCoverLetterPrompt,
   coldEmailPrompt,
   callPrepPrompt,
@@ -325,7 +327,26 @@ export function applyDocumentRules(text) {
     .replace(/Gemini\s*2\.5\s*Flash/gi, 'Vertex AI')
     .replace(/Vertex AI(\s*(?:·|,|\/)\s*Vertex AI)+/g, 'Vertex AI')
     .replace(/Vertex AI\s*\(Vertex AI\)/g, 'Vertex AI')
-    .replace(/Bangalore, India,\s*India/g, 'Bangalore, India');
+    .replace(/Bangalore, India,\s*India/g, 'Bangalore, India')
+    .replace(/mentored 5\+ (engineers|developers|junior engineers)/gi, (m) => `${m[0] === 'M' ? 'M' : 'm'}entored 5+ junior developers`)
+    .split('\n').map(fixRoleLocation).join('\n');
+}
+
+// Where each role was, by employer — a role header's last field is put back if the model moved it.
+const ROLE_PLACES = [
+  [/MyAgentFirm|TradingOS|ChalOnline|Cropdata|Ajanta/i, 'Nagpur, India'],
+  [/Naresh\s*i/i, 'Hyderabad, India'],
+  [/Philips|GE Healthcare/i, 'Bangalore, India'],
+  [/Growlogic/i, 'Remote'],
+];
+function fixRoleLocation(line) {
+  const parts = line.split('|');
+  if (parts.length < 3) return line;
+  const place = ROLE_PLACES.find(([re]) => re.test(parts.slice(0, -1).join('|')));
+  const last = parts[parts.length - 1];
+  if (!place || !/india|bangalore|bengaluru|nagpur|hyderabad|remote|mumbai/i.test(last)) return line;
+  parts[parts.length - 1] = last.replace(/[^*]+/, (t) => ` ${place[1]}${t.endsWith(' ') ? ' ' : ''}`).replace(/\s+(\*+)$/, '$1');
+  return parts.join('|');
 }
 
 // ── Resume length: two A4 pages ─────────────────────────────────────────
@@ -351,6 +372,43 @@ export async function fitResumeLength(text, { companyId, kind = 'condense-resume
     console.warn('[fitResumeLength] condense failed:', err.message);
   }
   return { text, words, condensed: false };
+}
+
+// ── Fact-check, and one correction pass when it finds real errors ─────
+const blockingOf = (issues) => issues.filter((i) => ['critical', 'moderate'].includes(i.severity));
+
+async function checkResume(text, candidate, meta) {
+  const check = verifyResumePrompt({ tailoredResume: text, candidate });
+  const v = await chatJson({ kind: 'verify-resume', companyId: meta.companyId, system: check.system, user: check.user, maxTokens: 6_000, input: meta.input });
+  const issues = Array.isArray(v.issues) ? v.issues : [];
+  const blocking = blockingOf(issues);
+  return { ...v, issues, clean: issues.length === 0, safeToSend: blocking.length === 0, blockingCount: blocking.length };
+}
+
+/**
+ * A resume with critical or moderate errors used to reach him with a
+ * "don't send yet" list to fix by hand. Now the checker's own corrections
+ * are applied once (nothing else may change) and the result re-checked; he
+ * sees only what is still wrong after that.
+ */
+export async function verifyAndCorrect(text, candidate, meta) {
+  try {
+    let verification = await checkResume(text, candidate, meta);
+    if (!verification.blockingCount) return { text, verification };
+    const fixes = blockingOf(verification.issues).map((i, n) => `${n + 1}. "${i.claim}" — ${i.problem}. Correct to: ${i.correction}`).join('\n');
+    const out = await chatJson({
+      kind: 'correct-resume', companyId: meta.companyId, maxTokens: 8_000, input: meta.input,
+      system: 'You correct factual errors in a resume. Apply exactly the listed corrections and change nothing else — same sections, wording, order and markdown. Return valid JSON only.',
+      user: `${DOCUMENT_RULES}\n\nCORRECTIONS\n${fixes}\n\nRESUME\n${text}\n\nReturn JSON: { "tailoredResumeText": "the corrected resume in markdown" }`,
+    });
+    const fixed = applyDocumentRules(String(out.tailoredResumeText || ''));
+    if (wordCount(fixed) < 400 || roleLines(fixed) < roleLines(text)) return { text, verification };
+    const found = verification.blockingCount;
+    verification = await checkResume(fixed, candidate, meta);
+    return { text: fixed, verification: { ...verification, autoCorrected: found } };
+  } catch (err) {
+    return { text, verification: { clean: null, issues: [], verdict: `Verification unavailable: ${err.message}` } };
+  }
 }
 
 // ── Tailored resume (+ fact-check pass) ───────────────────────────────
@@ -392,33 +450,9 @@ export async function tailorResume(payload = {}, ctx = {}) {
 
   // A hallucinated bullet only surfaces in the interview — audit before saving.
   if (result.tailoredResumeText && verify !== false) {
-    const check = verifyResumePrompt({ tailoredResume: result.tailoredResumeText, candidate });
-    try {
-      const verification = await chatJson({
-        kind: 'verify-resume',
-        companyId: company?.id,
-        system: check.system,
-        user: check.user,
-        maxTokens: 6_000,
-        input: { companyName: name, jobTitle },
-      });
-
-      const issues = Array.isArray(verification.issues) ? verification.issues : [];
-      const blocking = issues.filter((i) => ['critical', 'moderate'].includes(i.severity));
-
-      result.verification = {
-        ...verification,
-        issues,
-        clean: issues.length === 0,
-        safeToSend: blocking.length === 0,
-        blockingCount: blocking.length,
-      };
-    } catch (err) {
-      result.verification = {
-        clean: null, issues: [],
-        verdict: `Verification unavailable: ${err.message}`,
-      };
-    }
+    const done = await verifyAndCorrect(result.tailoredResumeText, candidate, { companyId: company?.id, input: { companyName: name, jobTitle } });
+    result.tailoredResumeText = done.text;
+    result.verification = done.verification;
   }
 
   let saved = null;
@@ -494,34 +528,9 @@ export async function refineResume(payload = {}) {
 
   // Verification pass
   if (result.tailoredResumeText && verify !== false) {
-    const check = verifyResumePrompt({ tailoredResume: result.tailoredResumeText, candidate });
-    try {
-      const verification = await chatJson({
-        kind: 'verify-resume',
-        companyId: company?.id,
-        system: check.system,
-        user: check.user,
-        maxTokens: 6_000,
-        input: { companyName: name, jobTitle },
-      });
-
-      const issues = Array.isArray(verification.issues) ? verification.issues : [];
-      const blocking = issues.filter((i) => ['critical', 'moderate'].includes(i.severity));
-
-      result.verification = {
-        ...verification,
-        issues,
-        clean: issues.length === 0,
-        safeToSend: blocking.length === 0,
-        blockingCount: blocking.length,
-      };
-    } catch (err) {
-      result.verification = {
-        clean: null,
-        issues: [],
-        verdict: `Verification unavailable: ${err.message}`,
-      };
-    }
+    const done = await verifyAndCorrect(result.tailoredResumeText, candidate, { companyId: company?.id, input: { companyName: name, jobTitle } });
+    result.tailoredResumeText = done.text;
+    result.verification = done.verification;
   }
 
   let savedId = resumeId || null;
@@ -565,11 +574,14 @@ export async function generateCoverLetter(payload = {}, ctx = {}) {
   const name = company?.name || payload.companyName || 'Target Company';
 
   const candidate = await candidateBlock();
+  const ask = instructions || comments || '';
+  const length = coverLetterLength(ask, payload.length);
   const prompt = coverLetterPrompt({
     companyName: name,
     jobTitle: jobTitle || 'Senior Full-Stack & AI Engineer',
     jobDescription: jobDescription || '',
-    instructions: instructions || comments || '',
+    instructions: ask,
+    length,
     candidate,
   });
 
@@ -582,7 +594,16 @@ export async function generateCoverLetter(payload = {}, ctx = {}) {
     input: { companyName: name, jobTitle },
   });
 
+  if (length === 'short' && wordCount(result?.coverLetterText) > 160) {
+    const out = await chatJson({
+      kind: 'shorten-cover-letter', companyId: company?.id, maxTokens: 1_500, input: { companyName: name, jobTitle },
+      system: 'You shorten a cover note. Keep only true facts already in it; no header, date or address block. Return valid JSON only.',
+      user: `HIS REQUEST: ${ask || 'a short note'}\n\nCut this to what he asked (default 3–5 sentences, at most 130 words), starting "Hi ${name} team," and ending "Best regards, Siddhant Rangari".\n\n${result.coverLetterText}\n\nReturn JSON: { "coverLetterText": "..." }`,
+    }).catch(() => null);
+    if (out?.coverLetterText && wordCount(out.coverLetterText) < wordCount(result.coverLetterText)) result.coverLetterText = out.coverLetterText;
+  }
   if (result?.coverLetterText) result.coverLetterText = applyDocumentRules(result.coverLetterText);
+  result.length = length;
   return {
     coverLetter: result,
     companyName: name,

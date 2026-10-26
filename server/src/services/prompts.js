@@ -6,7 +6,9 @@
 
 /** His standing edits to every resume and cover letter — saves him fixing them by hand. */
 export const DOCUMENT_RULES = `HIS STANDING RULES FOR EVERY RESUME AND COVER LETTER:
-- Location: he lives in Bangalore. Write "Bangalore, India" wherever his location appears. Never write Mumbai anywhere — he has never lived or worked there.
+- Location: he lives in Bangalore — write "Bangalore, India" in the headline / contact line and wherever his current location is stated. Never write Mumbai anywhere — he has never lived or worked there.
+- Each role keeps ITS OWN location, exactly as in his history: Philips and GE Healthcare → Bangalore, India; MyAgentFirm, TradingOS, ChalOnline, Cropdata and Ajanta → Nagpur, India; Naresh i Technologies → Hyderabad, India; Growlogic → Remote. Never move a role to Bangalore.
+- Facts stay exact, never merged or upgraded: Growlogic is May 2024 – Dec 2025; at Philips he "mentored 5+ junior developers" (not "engineers"); MyAgentFirm has 6 async background workers and, separately, 8 recurring cron loops — never "8 cron workers".
 - Google's AI stack: write "Vertex AI" only. Never write "Gemini 2.5 Flash" or "Gemini" model names — e.g. "Vertex AI agents", not "Gemini 2.5 Flash agents".`;
 
 export const CONSULTANT_STANCE = `You operate the NxtJob outreach method. Non-negotiable rules:
@@ -468,7 +470,18 @@ Return JSON exactly in this shape:
 `,
 });
 
-export const coverLetterPrompt = ({ companyName, jobTitle, jobDescription, candidate, instructions }) => ({
+/** "short" when he asks for a brief note (a LinkedIn field, "3-5 sentences", "100 words"), else the one-page letter. */
+export function coverLetterLength(instructions = '', length = '') {
+  if (['short', 'standard'].includes(length)) return length;
+  return /\b(short|brief|concise|quick|linkedin|message|note)\b|\b\d{1,2}\s*(-|to|–)?\s*\d{0,2}\s*sentences?\b|\b\d{2,3}\s*words?\b/i.test(instructions) ? 'short' : 'standard';
+}
+
+const SHORT_LETTER = (companyName) => `2. FORMAT — SHORT NOTE (his request decides the length; default 3–5 sentences, 70–130 words):
+   - No header, date, addressee block, "RE:" line or bullets — it goes into a form field or message box as is.
+   - Start "Hi ${companyName} team," then: why this role, 1–2 of his verified achievements that match the JD (with their real metric), and that he can join immediately.
+   - End with one line: "Best regards, Siddhant Rangari".`;
+
+export const coverLetterPrompt = ({ companyName, jobTitle, jobDescription, candidate, instructions, length }) => ({
   system: `${CONSULTANT_STANCE}
 
 You are an expert executive technical career consultant drafting a compelling, consultant-grade Cover Letter for a Senior Full-Stack & AI Engineer candidate.
@@ -487,14 +500,14 @@ ${jobTitle || 'Senior Full-Stack & AI Engineer'}
 
 JOB DESCRIPTION:
 ${jobDescription || '(none provided — reason from target company and target role)'}
-${instructions ? `\nUSER SPECIFIC GUIDANCE:\n${instructions}\n` : ''}
+${instructions ? `\nHIS REQUEST (overrides any default length or format below):\n${instructions}\n` : ''}
 
 COVER LETTER CRAFTING REQUIREMENTS:
 1. VOICE & TONE:
    - Senior, confident, consultative, and authentic. No generic clichés ("I am writing to eagerly apply for...", "I believe I am the ideal candidate for this opening...").
    - Lead with immediate technical value and direct alignment with what this company solves.
 
-2. STRUCTURE (SINGLE-PAGE LETTER — 320 TO 420 WORDS TOTAL):
+${coverLetterLength(instructions, length) === 'short' ? SHORT_LETTER(companyName) : `2. STRUCTURE (SINGLE-PAGE LETTER — 320 TO 420 WORDS TOTAL):
    - Header:
      # SIDDHANT RANGARI
      Senior Full-Stack & AI Engineer | siddhantrangari@gmail.com | +91 86689 88485 | linkedin.com/in/siddhant-rangari • siddhantrangari.com • Bangalore, India
@@ -516,7 +529,7 @@ COVER LETTER CRAFTING REQUIREMENTS:
    - Sign-off:
      Sincerely,
 
-     Siddhant Rangari
+     Siddhant Rangari`}
 
 3. CRITICAL JSON FORMATTING:
    Return valid JSON only in this exact structure:

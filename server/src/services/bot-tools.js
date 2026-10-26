@@ -824,7 +824,7 @@ async function startAiTask(args) {
   const payloads = {
     research: { companyId: c?.id, roleName: roleTitle, force: Boolean(force) },
     tailor_resume: { companyId: c?.id, companyName: c?.name, jobTitle: roleTitle, jobDescription: jd, instructions },
-    cover_letter: { companyId: c?.id, companyName: c?.name, jobTitle: roleTitle, jobDescription: jd, instructions },
+    cover_letter: { companyId: c?.id, companyName: c?.name, jobTitle: roleTitle, jobDescription: jd, instructions, length: args.length },
     outreach_messages: { companyId: c?.id, roleName: roleTitle, messageType: 'all' },
     cold_email: { companyId: c?.id, roleName: roleTitle, recipient: contactName },
     call_prep: { companyId: c?.id, contactName },
@@ -1180,7 +1180,7 @@ const TOOLS = [
   ['start_ai_task', 'Background AI task; result is messaged when done. Costs money: only when his message asks for it or agrees to your offer. Resume/cover letter use the saved JD unless jobDescription (text or URL) is given.', S({
     task: { type: 'string', enum: Object.keys(TASK_KINDS) },
     confirmedByUser: { type: 'boolean', description: 'true only if his latest message asks for this task or says yes to it' },
-    company: companyArg, role: str(), jobDescription: str(), jobId: str('discovered job id, e.g. from get_apply_queue — its stored JD is used'), instructions: str(), contactName: str(),
+    company: companyArg, role: str(), jobDescription: str(), jobId: str('discovered job id, e.g. from get_apply_queue — its stored JD is used'), instructions: str('his own words for what he wants, e.g. "short, 3-5 sentences for the LinkedIn form"'), length: { type: 'string', enum: ['short', 'standard'], description: 'cover_letter: short = a 3-5 sentence note for a form field or message; standard = one-page letter' }, contactName: str(),
     problems: { type: 'array', items: { type: 'string' } }, topic: str(), round: { type: 'string', enum: ROUNDS }, force: bool,
   }, ['task', 'confirmedByUser']), startAiTask],
   ['web_search_links', 'Google boolean searches (past week by default) across LinkedIn, Naukri, Instahyre, foundit, Indeed, Wellfound, Cutshort, Hirist, ATS boards and careers pages, plus the portals\' own search pages. Links he opens. Offer when search_jobs is thin or he asks to search the web.', S({ query: str('role'), location: str(), period: { type: 'string', enum: ['day', 'week', 'month'] } }), webSearchLinks],
