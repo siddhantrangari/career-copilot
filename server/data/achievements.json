@@ -313,7 +313,7 @@
     "company": "AnnaRakshak AI (Google Build with AI hackathon)",
     "period": "Sep 2026",
     "challenge": "District agriculture offices detect crop-price collapses manually, taking 85-170 minutes from anomaly to a verification-ready report — far too slow to protect farmers from a crash already underway.",
-    "action": "Built a deterministic anomaly detector over public AGMARKNET mandi prices (flagging moves of +/-40% against the median of the previous 30 prices), then layered three Gemini 2.5 Flash agents via Google ADK — investigation, evidence review, coordination — with read-only tools that draft case summaries, field-verification tasks and Marathi/English farmer notices but cannot change case state or send anything. Enforced role-based approvals, evidence-confirmed hypotheses, auto-superseded drafts, and an append-only audit log that records denied attempts.",
+    "action": "Built a deterministic anomaly detector over public AGMARKNET mandi prices (flagging moves of +/-40% against the median of the previous 30 prices), then layered three Vertex AI agents via Google ADK — investigation, evidence review, coordination — with read-only tools that draft case summaries, field-verification tasks and Marathi/English farmer notices but cannot change case state or send anything. Enforced role-based approvals, evidence-confirmed hypotheses, auto-superseded drafts, and an append-only audit log that records denied attempts.",
     "result": "Cut detection-to-verification-ready-report from an estimated 85-170 minutes to about a minute, and caught a real -42.1% tomato price crash at APMC Nagpur on 16 Sep 2026.",
     "metrics": [
       "85-170 min to ~1 min",
@@ -322,7 +322,6 @@
     ],
     "skills": [
       "Google ADK",
-      "Gemini 2.5 Flash",
       "Vertex AI",
       "Python",
       "FastAPI",

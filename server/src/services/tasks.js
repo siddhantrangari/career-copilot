@@ -308,6 +308,26 @@ export async function ensureJdText(rawJd, rawTitle, onStep = () => {}) {
   return { jd, title, autoFetched };
 }
 
+// ── His standing edits, applied to every resume and cover letter ──────
+/**
+ * The prompts carry these rules too; this pass makes them hold when the
+ * model slips. Bangalore is where he lives (never Mumbai); Google's stack is
+ * written as Vertex AI only.
+ */
+export function applyDocumentRules(text) {
+  if (!text) return text;
+  return String(text)
+    .replace(/Bangalore\s*\/\s*Mumbai|Mumbai\s*\/\s*Bangalore/gi, 'Bangalore')
+    .replace(/\bMumbai\b/g, 'Bangalore')
+    .replace(/Gemini\s*2\.5\s*Flash\s*(?:\/|\(|·|,)\s*Vertex AI\)?/gi, 'Vertex AI')
+    .replace(/Vertex AI\s*(?:\/|\(|·|,)\s*Gemini\s*2\.5\s*Flash\)?/gi, 'Vertex AI')
+    .replace(/\s*\(\s*Gemini\s*2\.5\s*Flash\s*\)/gi, '')
+    .replace(/Gemini\s*2\.5\s*Flash/gi, 'Vertex AI')
+    .replace(/Vertex AI(\s*(?:·|,|\/)\s*Vertex AI)+/g, 'Vertex AI')
+    .replace(/Vertex AI\s*\(Vertex AI\)/g, 'Vertex AI')
+    .replace(/Bangalore, India,\s*India/g, 'Bangalore, India');
+}
+
 // ── Resume length: two A4 pages ─────────────────────────────────────────
 const RESUME_MAX_WORDS = 790;
 const wordCount = (t) => String(t || '').trim().split(/\s+/).filter(Boolean).length;
@@ -365,8 +385,8 @@ export async function tailorResume(payload = {}, ctx = {}) {
   });
 
   if (result.tailoredResumeText) {
-    const fit = await fitResumeLength(result.tailoredResumeText, { companyId: company?.id });
-    result.tailoredResumeText = fit.text;
+    const fit = await fitResumeLength(applyDocumentRules(result.tailoredResumeText), { companyId: company?.id });
+    result.tailoredResumeText = applyDocumentRules(fit.text);
     result.length = { words: fit.words, condensedFrom: fit.from || null };
   }
 
@@ -467,8 +487,8 @@ export async function refineResume(payload = {}) {
   });
 
   if (result.tailoredResumeText) {
-    const fit = await fitResumeLength(result.tailoredResumeText, { companyId: company?.id });
-    result.tailoredResumeText = fit.text;
+    const fit = await fitResumeLength(applyDocumentRules(result.tailoredResumeText), { companyId: company?.id });
+    result.tailoredResumeText = applyDocumentRules(fit.text);
     result.length = { words: fit.words, condensedFrom: fit.from || null };
   }
 
@@ -562,6 +582,7 @@ export async function generateCoverLetter(payload = {}, ctx = {}) {
     input: { companyName: name, jobTitle },
   });
 
+  if (result?.coverLetterText) result.coverLetterText = applyDocumentRules(result.coverLetterText);
   return {
     coverLetter: result,
     companyName: name,
@@ -603,6 +624,7 @@ export async function refineCoverLetter(payload = {}) {
     input: { companyName: name, jobTitle, feedback: userFeedback },
   });
 
+  if (result?.coverLetterText) result.coverLetterText = applyDocumentRules(result.coverLetterText);
   return {
     coverLetter: result,
     companyName: name,

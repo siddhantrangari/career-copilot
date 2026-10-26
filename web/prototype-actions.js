@@ -359,7 +359,7 @@
     },
     indians: function (n) {
       return 'Hi [Name] — noticed you\'re at ' + n + ' and thought I\'d reach out. I\'m a senior ' +
-        'full-stack + AI engineer from Mumbai (ex-Philips) exploring global roles. Would love to ' +
+        'full-stack + AI engineer in Bangalore (ex-Philips) exploring global roles. Would love to ' +
         'hear about your experience there — happy to keep it to 15 minutes!';
     },
   };

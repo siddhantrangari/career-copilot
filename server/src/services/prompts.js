@@ -4,6 +4,11 @@
  * having genuine conversations about business problems."
  */
 
+/** His standing edits to every resume and cover letter — saves him fixing them by hand. */
+export const DOCUMENT_RULES = `HIS STANDING RULES FOR EVERY RESUME AND COVER LETTER:
+- Location: he lives in Bangalore. Write "Bangalore, India" wherever his location appears. Never write Mumbai anywhere — he has never lived or worked there.
+- Google's AI stack: write "Vertex AI" only. Never write "Gemini 2.5 Flash" or "Gemini" model names — e.g. "Vertex AI agents", not "Gemini 2.5 Flash agents".`;
+
 export const CONSULTANT_STANCE = `You operate the NxtJob outreach method. Non-negotiable rules:
 - The candidate is a consultant validating hypotheses about a company's real problems — never a job seeker asking for a chance.
 - Every claim must be backed by a specific project from the candidate's achievement bank, with its real metric.
@@ -205,6 +210,8 @@ ${candidate}
 PRODUCE:
 1. A tailored resume in clean markdown — same verified history, but with the summary rewritten specifically for this target role and bullets selected and re-worded to mirror the JD's language and priorities${instructions ? ' and adhering strictly to the user instructions' : ''}. Lead each bullet with a strong action verb and keep every real metric.
 
+${DOCUMENT_RULES}
+
 CANDIDATE HEADLINE & TITLE ACCURACY (DO NOT OVERCLAIM SENIORITY):
 - The candidate's verified identity is Senior Full-Stack & AI Engineer (12+ Years).
 - Even if the target job title is 'Principal Software Engineer', do NOT claim 'Principal' as the candidate's personal headline/banner!
@@ -303,6 +310,8 @@ How to cut, in this order:
 4. Summary: 3 sentences. Technical skills: 3–4 lines.
 5. Drop any "Selected achievements", "Open to" or repeated section.
 
+${DOCUMENT_RULES}
+
 Keep exactly: every employer and role header line (title | company | dates | location), every section header, education, the name and contact lines, the markdown format ('## ' sections, '- ' bullets, '**bold**' metrics, 'Key Stack:' lines), and every real metric you keep.
 
 RESUME
@@ -358,6 +367,8 @@ INDEPENDENT ENGINEERING PROJECTS GROUPING & NAMING (MANDATORY & PERMANENT):
   * Founding Engineer (Co-Founder) | ChalOnline | Jan 2026 – Feb 2026 | Nagpur, India
 - Location for all three projects MUST be 'Nagpur, India', NEVER 'Bangalore'.
 - MyAgentFirm title MUST be 'Founding Engineer — MyAgentFirm (Co-Founder)'!
+
+${DOCUMENT_RULES}
 
 CANDIDATE HEADLINE & TITLE ACCURACY (DO NOT OVERCLAIM SENIORITY):
 - The candidate's verified identity is Senior Full-Stack & AI Engineer (12+ Years).
@@ -463,7 +474,9 @@ export const coverLetterPrompt = ({ companyName, jobTitle, jobDescription, candi
 You are an expert executive technical career consultant drafting a compelling, consultant-grade Cover Letter for a Senior Full-Stack & AI Engineer candidate.
 Absolute rule: never invent experience, employers, dates, or metrics. You may only select, re-word, and emphasize from what is verified in the candidate's master history and CAR achievement bank. Return valid JSON only.`,
 
-  user: `CANDIDATE BACKGROUND:
+  user: `${DOCUMENT_RULES}
+
+CANDIDATE BACKGROUND:
 ${candidate}
 
 TARGET COMPANY:
@@ -529,7 +542,9 @@ export const refineCoverLetterPrompt = ({
 You are an expert executive career consultant refining an existing tailored cover letter based on user feedback.
 Absolute rule: never invent experience or metrics. Keep all real metrics. Return valid JSON only.`,
 
-  user: `CANDIDATE BACKGROUND:
+  user: `${DOCUMENT_RULES}
+
+CANDIDATE BACKGROUND:
 ${candidate}
 
 TARGET COMPANY: ${companyName}

@@ -341,7 +341,7 @@ Is [specific challenge] something your team is actively working through? Would l
     <div class="stitle">STEP 2C — Peer / Referral DM (Indian engineers at target company)</div>
     <div class="sbody">Hi [Name], I came across your profile while researching [Company]'s engineering team — [genuine observation about their work].
 
-I'm a senior full-stack + AI engineer from Mumbai (ex-Philips Innovation Campus, 12 years) exploring global roles. [Company] is high on my list. Would love to hear about your experience there — what the engineering culture is like, what kind of problems the team is solving.
+I'm a senior full-stack + AI engineer in Bangalore (ex-Philips Innovation Campus, 12 years) exploring global roles. [Company] is high on my list. Would love to hear about your experience there — what the engineering culture is like, what kind of problems the team is solving.
 
 Open to a 15-minute chat? No agenda, genuinely just want to learn from someone on the inside.</div>
     <button class="btn" onclick="copyP(this)">Copy</button>
@@ -1079,7 +1079,7 @@ function openNet(id){
      msg:`Hi [Name] — I'm a senior full-stack + AI engineer (ex-Philips, 12+ years) actively exploring opportunities at ${c.name}. Would love to connect and learn about any upcoming roles.`},
     {e:'🇮🇳',label:'Indians at this company',sub:'Easiest warm referral — fellow Indians always reply faster',
      url:`https://www.linkedin.com/search/results/people/?keywords=${encodeURIComponent(c.name)}&currentCompany=%5B%22${encodeURIComponent(c.name)}%22%5D&geoUrn=%5B%22${geoIndia}%22%5D`,
-     msg:`Hi [Name] — noticed you're at ${c.name} and thought I'd reach out. I'm a senior full-stack + AI engineer from Mumbai (ex-Philips) exploring global roles. Would love to hear about your experience there — happy to keep it to 15 minutes!`},
+     msg:`Hi [Name] — noticed you're at ${c.name} and thought I'd reach out. I'm a senior full-stack + AI engineer in Bangalore (ex-Philips) exploring global roles. Would love to hear about your experience there — happy to keep it to 15 minutes!`},
   ];
 
   document.getElementById('netTitle').textContent=`Network at ${c.name} · ${locLabel}`;
@@ -1212,14 +1212,14 @@ function addCompany(){
 // ── RESUME STUDIO ENGINE ──
 const DEFAULT_MASTER_RESUME = `# SIDDHANT RANGARI
 Senior Full-Stack & AI Engineer | Forward Deployed Engineer | 12+ Years
-siddhantrangari@gmail.com • +91 86689 88485 • linkedin.com/in/siddhant-rangari • siddhantrangari.com • Bangalore / Mumbai
+siddhantrangari@gmail.com • +91 86689 88485 • linkedin.com/in/siddhant-rangari • siddhantrangari.com • Bangalore, India
 
 ## PROFESSIONAL SUMMARY
 Senior Full-Stack & AI Engineer with 12+ years of end-to-end product delivery across healthcare enterprise systems and multi-tenant AI SaaS platforms. Delivered real-time clinical monitoring platforms at Philips Innovation Campus and GE Healthcare. Spent the last 8 months independently building and shipping three production systems from 0→1 — a multi-agent AI platform (MyAgentFirm) with LLM failover routing and MCP integrations, a fintech data-infrastructure platform (TradingOS), and a creator SaaS platform (ChalOnline). Fluent across the full stack — Java Spring Boot, Node.js/Fastify, React 18, Python, Docker, Kubernetes — with hands-on cloud architecture on Azure AKS and AWS. Open to Forward Deployed Engineer, Senior AI Engineer, and Staff Full-Stack roles.
 
 ## TECHNICAL SKILLS
 - **Languages & Frameworks:** Java (Spring Boot, Spring Cloud, Microservices), Node.js (Fastify, Express), Python, TypeScript, React 18, Next.js
-- **AI & LLM Engineering:** LangChain, Google ADK, Gemini 2.5 Flash / Vertex AI, Multi-Agent Systems, RAG pipelines, Prompt Engineering, LLM routing & failover (DeepInfra, Groq, Together AI, Ollama/LLaMA 3), MCP (Model Context Protocol)
+- **AI & LLM Engineering:** LangChain, Google ADK, Vertex AI, Multi-Agent Systems, RAG pipelines, Prompt Engineering, LLM routing & failover (DeepInfra, Groq, Together AI, Ollama/LLaMA 3), MCP (Model Context Protocol)
 - **Infrastructure & Cloud:** Docker, Kubernetes (AKS, EKS), AWS (S3, EMR, CloudWatch), Azure (AKS, MySQL, Blob Storage), Nginx, ArgoCD, GitHub Actions, Kafka, ELK Stack, Prometheus, Grafana, OpenTelemetry
 - **Databases & Storage:** PostgreSQL, MySQL, Redis, TimescaleDB, Firestore, VectorDB, Cloudflare R2, AWS S3
 - **Integrations:** Meta Marketing API, Twilio (Voice + WhatsApp), WhatsApp Business API, Razorpay, Firebase Auth
@@ -1266,7 +1266,7 @@ Founding Engineer (Co-Founder) | ChalOnline | Jan 2026 – Feb 2026 | Nagpur, In
 - Built creator SaaS platform end-to-end on VPS with PostgreSQL, Redis, and Razorpay; identified and remediated database port exposure via SSH tunneling.
 
 AI Engineer | AnnaRakshak AI (Google "Build with AI" Hackathon) | Sep 2026
-- Built crop-price anomaly detector over public mandi prices with 3 Gemini 2.5 Flash agents with Google ADK on Google Cloud Run and Vertex AI.
+- Built crop-price anomaly detector over public mandi prices with 3 Vertex AI agents with Google ADK on Google Cloud Run and Vertex AI.
 
 ## EDUCATION & CERTIFICATIONS
 - Diploma in Computer Technology | Late Vasantdada Polytechnic | 2016
@@ -1274,7 +1274,7 @@ AI Engineer | AnnaRakshak AI (Google "Build with AI" Hackathon) | Sep 2026
 
 const DEFAULT_MASTER_COVER_LETTER = `# SIDDHANT RANGARI
 **Senior Full-Stack & AI Systems Engineer**
-Bangalore / Mumbai, India · +91 86689 88485 · siddhantrangari@gmail.com · linkedin.com/in/siddhant-rangari · siddhantrangari.com
+Bangalore, India · +91 86689 88485 · siddhantrangari@gmail.com · linkedin.com/in/siddhant-rangari · siddhantrangari.com
 
 October 24, 2026
 
