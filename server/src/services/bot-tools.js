@@ -552,9 +552,9 @@ async function getAtsGaps(args = {}) {
 }
 
 /** His answers → a new, fact-checked, re-scored version (background; the PDF link arrives when done). */
-async function improveResumeTool({ resumeId, company, role, answers = [], rewrites = [], instructions }) {
+async function improveResumeTool({ resumeId, company, role, answers = [], rewrites = [], instructions, unconfirmed = [] }) {
   const id = await resumeFor({ resumeId, company, role });
-  const job = await createJob('improve-resume', { resumeId: id, answers, rewrites, instructions });
+  const job = await createJob('improve-resume', { resumeId: id, answers, rewrites, instructions, unconfirmed });
   await audit('improve_resume', { resumeId: id, answers, rewrites: rewrites.length, instructions }, null, null, { taskId: job.id });
   return { taskId: job.id, task: 'improve_resume', status: 'started — the improved resume and its new score will arrive here', typicalDuration: '~1–2 min' };
 }
@@ -1207,6 +1207,7 @@ const TOOLS = [
   ['get_ats_gaps', 'Why a tailored resume scores low on its JD: a summary, yes/no questions only he can answer (keyword, question, closest experience) and rewordings of lines he already has. By resumeId, or company (+ role) for his latest.', S({ resumeId: str(), company: companyArg, role: str() }), getAtsGaps],
   ['improve_resume', 'Make a better version from his answers: answers = [{keyword, has, detail}] (detail = where and how, his words), rewrites = the ones he accepted [{from, to}]. Answers are remembered for future resumes. Starts a background task; the new score and PDF link arrive when done.', S({
     resumeId: str(), company: companyArg, role: str(), instructions: str(),
+    unconfirmed: { type: 'array', items: { type: 'string' }, description: 'keywords from get_ats_gaps questions he skipped or did not answer yes — never to be claimed' },
     answers: { type: 'array', items: { type: 'object', properties: { keyword: str(), has: bool, detail: str() }, required: ['keyword', 'has'] } },
     rewrites: { type: 'array', items: { type: 'object', properties: { from: str(), to: str() }, required: ['from', 'to'] } },
   }), improveResumeTool],

@@ -835,11 +835,14 @@ export async function improveResume(payload = {}, ctx = {}) {
   const yes = answers.filter((a) => a.has);
   const no = answers.filter((a) => !a.has);
   const rewrites = (payload.rewrites || []).filter((r) => r?.from && r?.to);
+  // Questions he skipped: the refine must not slip them in as wording.
+  const unconfirmed = (payload.unconfirmed || []).map(String).filter((k) => !yes.some((a) => a.keyword.toLowerCase() === k.toLowerCase())).slice(0, 12);
   if (!yes.length && !rewrites.length && !payload.instructions) throw new AiError('Nothing to change: no confirmed skills, rewrites or instructions', 400);
   const feedback = [
     'Raise this resume\'s ATS match for the job description using ONLY the following. Keep it to two A4 pages; trim weaker lines to make room.',
     yes.length ? `He confirmed (add each in the role he names, in his own terms, using the JD's keyword):\n${yes.map((a) => `- ${a.keyword}: ${a.detail || 'yes'}`).join('\n')}` : '',
     no.length ? `He does NOT have (never claim): ${no.map((a) => a.keyword).join(', ')}` : '',
+    unconfirmed.length ? `Still unconfirmed — do not claim, imply or hint at these anywhere (no "24×7", "unit-tested", "cross-functional"-style wording for them): ${unconfirmed.join(', ')}` : '',
     rewrites.length ? `Apply these rewordings exactly:\n${rewrites.map((r) => `- "${r.from}" → "${r.to}"`).join('\n')}` : '',
     payload.instructions ? `His instructions: ${payload.instructions}` : '',
   ].filter(Boolean).join('\n\n');

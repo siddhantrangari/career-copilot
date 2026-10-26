@@ -3621,7 +3621,9 @@
       var out = m.querySelector('#cc-ats-out');
       if (!answers.some(function (a) { return a.has; }) && !rewrites.length && !note) { out.innerHTML = '<span style="color:#ffb020">Answer at least one "Yes", tick a rewording, or add an instruction.</span>'; return; }
       var btn = m.querySelector('#cc-ats-go'); btn.disabled = true;
-      CC.runJob('improve-resume', { resumeId: resumeId, answers: answers, rewrites: rewrites, instructions: note }, function (s) { btn.textContent = 'Improving… ' + s + 's'; })
+      var unconfirmed = (gaps.questions || []).map(function (x) { return x.keyword; })
+        .filter(function (k) { return !answers.some(function (a) { return a.has && a.keyword === k; }); });
+      CC.runJob('improve-resume', { resumeId: resumeId, answers: answers, rewrites: rewrites, instructions: note, unconfirmed: unconfirmed }, function (s) { btn.textContent = 'Improving… ' + s + 's'; })
         .then(function (r) {
           var v = (r.resume && r.resume.verification) || {};
           out.innerHTML = '<div style="padding:10px;border-radius:10px;background:#0f1a12;border:1px solid #1f4d2b">Score <b>' + r.scoreBefore + ' → ' + r.scoreAfter + '</b>' +
