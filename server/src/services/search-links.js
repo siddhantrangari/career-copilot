@@ -129,6 +129,8 @@ export function googleBooleanLinks(role = 'AI Engineer', location = 'Bangalore',
     ['Abroad · visa sponsorship', '("visa sponsorship" OR "sponsor visas" OR "visa support")'],
     ['Abroad · relocation support', '("relocation support" OR "relocation assistance" OR "relocation package")'],
     ['Gulf · Dubai, Abu Dhabi, Riyadh, Doha', '(Dubai OR "Abu Dhabi" OR Riyadh OR Doha)'],
+    ['★ Luxembourg · visa, relocation or remote', 'Luxembourg ("visa sponsorship" OR "relocation" OR "remote")'],
+    ['★ Sydney · visa, relocation or remote', 'Sydney ("visa sponsorship" OR "relocation" OR "remote")'],
     ['Remote · worldwide / APAC', '("remote" ("worldwide" OR "anywhere" OR APAC OR "work from anywhere"))'],
   ];
   for (const [name, expr] of abroad) {
@@ -148,7 +150,9 @@ export function portalSearchLinks(role = 'AI Engineer', location = 'Bangalore') 
     { name: 'foundit', url: `https://www.foundit.in/srp/results?query=${q(role)}&locations=${q(loc)}` },
     { name: 'Indeed India', url: `https://in.indeed.com/jobs?q=${q(role)}&l=${q(loc)}&fromage=7` },
     { name: 'Wellfound', url: `https://wellfound.com/role/l/${slug(role)}/${slug(loc)}` },
-  ];
+    // Luxembourg's government job board: employers there hire from abroad, and
+    // software development is on the 2026 shortage list (no labour market test).
+    { name: '★ Work in Luxembourg (gov board)', url: `https://jobs.workinluxembourg.com/offers?q=${q(role)}&page=0` },  ];
 }
 
 /** His standing searches, for the digest: one boolean search per target role. */
@@ -164,6 +168,7 @@ export function dailySearches() {
     { label: 'AI Engineer', url: google(plain('AI Engineer'), 'day') },
     { label: 'Full Stack', url: google(plain('Full Stack'), 'day') },
     { label: 'Forward Deployed', url: google(plain('Forward Deployed'), 'day') },
+    { label: '★ Luxembourg gov board', url: 'https://jobs.workinluxembourg.com/offers?q=developer&page=0' },
   ];
 }
 

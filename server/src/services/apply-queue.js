@@ -12,6 +12,9 @@ import { addToList } from './company-detail.js';
  * work visa as standard). Other Indian cities are out; abroad without that
  * evidence and region-locked remote are hidden unless asked for.
  *
+ * Luxembourg and Sydney are his preferred abroad cities: a role there that
+ * offers visa sponsorship, relocation or remote work goes to the top.
+ *
  * Order: fit first, then the company's hiring signals, then freshness.
  * Marking a role applied records it on the job and as a role in his
  * pipeline (flagged `quick`, so follow-up nudges stay for the ones that
@@ -24,6 +27,8 @@ const REMOTE = /\b(remote|work from home|wfh|anywhere|distributed)\b/i;
 const OPEN_REGION = /\b(india|apac|asia|anywhere|worldwide|global|any location|all locations)\b/i;
 const LOCKED_REGION = /\b(us|usa|u\.s\.|united states|canada|uk|united kingdom|europe|eu|emea|germany|france|spain|netherlands|poland|ireland|portugal|latam|brazil|mexico|australia|americas|north america|new york|san francisco|london|berlin)\b/i;
 const GULF = /\b(dubai|abu dhabi|uae|united arab emirates|riyadh|saudi|ksa|doha|qatar|bahrain|kuwait|muscat|oman)\b/i;
+// Preferred abroad cities — top of the queue when the employer will move him or lets him work remote.
+const PREFERRED = /\b(luxembourg|sydney)\b/i;
 const OTHER_INDIA = /\b(mumbai|pune|hyderabad|chennai|delhi|gurgaon|gurugram|noida|kolkata|ahmedabad|kochi|jaipur|chandigarh|coimbatore|indore|thiruvananthapuram|trivandrum)\b/i;
 
 const VISA_YES = /(visa sponsorship (is )?(available|provided|offered|supported)|we (can |will |do |are able to )?sponsor|sponsor(ing|ship)? (of |for )?(work |employment )?(visas?|permits?)|offer(s|ing)? (visa )?sponsorship|sponsorship (is )?available|blue card|h-?1b (sponsorship|transfer)|skilled worker visa)/i;
@@ -54,6 +59,14 @@ export function classifyRole({ location = '', description = '', flags = null }) 
     : visa === 'no' ? snippet(jd, VISA_NO) : null;
 
   if (BLR.test(loc)) return { place: 'bangalore', eligible: true, visa, reloc, evidence, label: 'Bangalore' };
+  const pref = PREFERRED.exec(loc);
+  if (pref && visa !== 'no') {
+    const city = pref[1][0].toUpperCase() + pref[1].slice(1).toLowerCase();
+    if (visa === 'yes' || reloc === 'yes') {
+      return { place: 'abroad', eligible: true, preferred: true, visa, reloc, evidence, label: `★ ${city} — ${visa === 'yes' ? 'visa sponsorship' : 'relocation support'}` };
+    }
+    if (REMOTE.test(loc) && !f.locked) return { place: 'remote', eligible: true, preferred: true, visa, reloc, evidence, label: `★ ${city} — remote` };
+  }
   if (REMOTE.test(loc)) {
     if (INDIA.test(loc) || OPEN_REGION.test(loc)) return { place: 'remote', eligible: true, visa, reloc, evidence, label: 'Remote (open to India)' };
     if (LOCKED_REGION.test(loc)) return { place: 'remote_locked', eligible: false, visa, reloc, evidence, label: 'Remote, region-locked' };
@@ -119,14 +132,15 @@ export async function applyQueue({ scope = 'all', minFit = 70, limit = 40, showU
     if (!(c.eligible || (showUnverified && unverified))) continue;
     if (s !== 'all' && c.place !== s) continue;
     const ageDays = r.posted ? Math.max(0, (now - new Date(r.posted).getTime()) / 86_400_000) : 30;
-    // Fit leads; hiring signals and freshness break ties; a stated move helps abroad.
+    // Fit leads; hiring signals and freshness break ties; a stated move helps abroad;
+    // Luxembourg / Sydney with a way in jump to the top.
     const score = (r.fit_score ?? Math.min(r.relevance, 60)) + (r.hiring_score || 0) * 0.15 + (r.priority ? 5 : 0)
-      + Math.max(0, 7 - ageDays) * 0.6 + (c.visa === 'yes' || c.reloc === 'yes' ? 2 : 0);
+      + Math.max(0, 7 - ageDays) * 0.6 + (c.visa === 'yes' || c.reloc === 'yes' ? 2 : 0) + (c.preferred ? 30 : 0);
     out.push({
       id: r.id, title: r.title, url: r.url, location: r.location, source: r.source, company: r.company, companyId: r.company_id,
       fit: r.fit_score, whyRole: r.why_role, whyCompany: r.why_company, posted: r.posted,
       tag: r.tag, priority: !!r.priority, hiring: r.hiring_score, rank: r.rank, whyNow: r.why_now, targetKey: r.target_key,
-      place: c.place, placeLabel: c.label, visa: c.visa, relocation: c.reloc, evidence: null, unverified, score: Math.round(score * 10) / 10,
+      place: c.place, placeLabel: c.label, preferred: !!c.preferred, visa: c.visa, relocation: c.reloc, evidence: null, unverified, score: Math.round(score * 10) / 10,
     });
   }
   out.sort((a, b) => b.score - a.score);

@@ -208,7 +208,7 @@ const EXCLUDE = new RegExp([
 
 const DSA_SIGNALS = /leetcode|data structures and algorithms|algorithmic (interview|assessment)|hackerrank|codesignal|competitive programming/i;
 
-const LOCATION_OK = /remote|hybrid|onsite|on-site|emea|europe|london|berlin|amsterdam|munich|paris|dublin|madrid|lisbon|zurich|stockholm|dubai|abu dhabi|uae|riyadh|saudi|doha|qatar|singapore|tokyo|sydney|toronto|vancouver|san francisco|sf|bay area|new york|nyc|seattle|austin|boston|chicago|india|bangalore|bengaluru|bengalore|anywhere|global|worldwide|us|united states|uk|united kingdom/i;
+const LOCATION_OK = /remote|hybrid|onsite|on-site|emea|europe|london|berlin|amsterdam|munich|paris|dublin|madrid|lisbon|zurich|stockholm|luxembourg|dubai|abu dhabi|uae|riyadh|saudi|doha|qatar|singapore|tokyo|sydney|toronto|vancouver|san francisco|sf|bay area|new york|nyc|seattle|austin|boston|chicago|india|bangalore|bengaluru|bengalore|anywhere|global|worldwide|us|united states|uk|united kingdom/i;
 
 /**
  * In India he targets Bangalore only, or remote. A role placed in any other
@@ -224,7 +224,7 @@ export const outsideIndiaTarget = (location = '') =>
 
 // A trailing "- Zagreb, Croatia" / "(Remote)" / "| Bangalore" names a place,
 // not a different job: Speechify posted one role 173 times that way.
-const PLACE_HINT = /\b(remote|hybrid|onsite|on-site|usa|us|uk|united states|united kingdom|india|germany|france|spain|italy|canada|mexico|brazil|argentina|colombia|chile|netherlands|belgium|denmark|sweden|norway|finland|croatia|serbia|romania|bulgaria|greece|poland|portugal|ireland|switzerland|austria|czech(ia| republic)?|hungary|turkey|israel|egypt|nigeria|kenya|south africa|singapore|japan|korea|china|taiwan|philippines|vietnam|indonesia|malaysia|thailand|australia|new zealand|uae|dubai|saudi arabia|qatar|emea|apac|latam|europe|americas|bangalore|bengaluru|hyderabad|pune|mumbai|delhi|london|berlin|munich|paris|madrid|barcelona|lisbon|dublin|zurich|stockholm|warsaw|new york|nyc|san francisco|sf|bay area|seattle|austin|boston|chicago|toronto|vancouver|amsterdam|tel aviv|tokyo|sydney)\b|,\s*[A-Z]{2}\b/i;
+const PLACE_HINT = /\b(remote|hybrid|onsite|on-site|usa|us|uk|united states|united kingdom|india|germany|france|spain|italy|canada|mexico|brazil|argentina|colombia|chile|netherlands|belgium|denmark|sweden|norway|finland|croatia|serbia|romania|bulgaria|greece|poland|portugal|ireland|switzerland|austria|czech(ia| republic)?|hungary|turkey|israel|egypt|nigeria|kenya|south africa|singapore|japan|korea|china|taiwan|philippines|vietnam|indonesia|malaysia|thailand|australia|new zealand|uae|dubai|saudi arabia|qatar|emea|apac|latam|europe|americas|bangalore|bengaluru|hyderabad|pune|mumbai|delhi|london|berlin|munich|paris|madrid|barcelona|lisbon|dublin|zurich|stockholm|warsaw|new york|nyc|san francisco|sf|bay area|seattle|austin|boston|chicago|toronto|vancouver|amsterdam|luxembourg|tel aviv|tokyo|sydney)\b|,\s*[A-Z]{2}\b/i;
 
 /** The title with any trailing location suffix removed, for de-duplication. */
 export function titleKey(title = '') {

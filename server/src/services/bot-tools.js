@@ -252,8 +252,10 @@ const PLACES = [
   // In India he targets Bangalore or remote only (other cities score 0 in discovery).
   { words: ['india', 'indian'], re: 'india|bangalore|bengaluru|bengalore' },
   { words: ['remote'], re: 'remote|anywhere|worldwide' },
-  { words: ['europe', 'eu', 'emea'], re: 'europe|emea|\\meu\\M|london|berlin|amsterdam|paris|dublin|madrid|lisbon|munich|zurich|stockholm|warsaw' },
+  { words: ['europe', 'eu', 'emea'], re: 'europe|emea|\\meu\\M|london|berlin|amsterdam|paris|dublin|madrid|lisbon|munich|zurich|stockholm|warsaw|luxembourg' },
   { words: ['uae', 'dubai', 'gulf'], re: 'dubai|abu dhabi|uae|united arab emirates|riyadh|saudi|doha|qatar' },
+  { words: ['luxembourg', 'lux'], re: 'luxembourg' },
+  { words: ['sydney', 'australia'], re: 'sydney|australia' },
   { words: ['uk', 'london'], re: 'london|united kingdom|\\muk\\M' },
   { words: ['us', 'usa'], re: 'united states|\\musa?\\M|new york|san francisco|seattle|austin|boston' },
 ];
