@@ -145,6 +145,7 @@ const RATES = {
   'anthropic/claude-haiku-5.5': { in: 0.10, out: 0.50, cached: 0.01 },
   'anthropic/claude-sonnet-5.5': { in: 2, out: 10, cached: 0.10 },
   'google/gemini-3-flash': { in: 0.50, out: 3, cached: 0.05 },
+  'google/gemini-3-flash-preview': { in: 0.50, out: 3, cached: 0.05 },
   'gpt-5.6-luna': { in: 0.20, out: 1.20, cached: 0.02 },
   'openai/gpt-5.6-luna': { in: 0.20, out: 1.20, cached: 0.02 },
   'openai/gpt-5.6-terra': { in: 2.00, out: 12.00, cached: 0.20 },

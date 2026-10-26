@@ -34,7 +34,13 @@ export const config = {
   ai: {
     // Failover chain, highest priority first.
     // Fact-check model: a different family from the writer catches different slips.
-    verifyModel: process.env.VERIFY_MODEL || 'google/gemini-3-flash',
+    verifyModel: process.env.VERIFY_MODEL || 'google/gemini-3-flash-preview',
+    // One fixed scorer for every resume version, so ATS scores compare across models and edits.
+    scorerModel: process.env.SCORER_MODEL || 'openai/gpt-5.6-luna',
+    // Optional stronger writer just for resumes (e.g. anthropic/claude-sonnet-5.5) — the AI report says when.
+    tailorModel: process.env.TAILOR_MODEL || null,
+    // Gateway cap per month, for pace warnings in the AI report.
+    monthlyBudget: Number(process.env.AI_MONTHLY_BUDGET) || 25,
     order: (process.env.AI_PROVIDER_ORDER || 'mesh,openai')
       .split(',')
       .map((s) => s.trim())

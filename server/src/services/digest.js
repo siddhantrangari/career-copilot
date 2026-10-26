@@ -297,7 +297,9 @@ export async function buildDigest(now = new Date()) {
        WHERE created_at >= (date_trunc('day', now() AT TIME ZONE $1) - interval '1 day') AT TIME ZONE $1
          AND created_at < date_trunc('day', now() AT TIME ZONE $1) AT TIME ZONE $1
        GROUP BY kind HAVING sum(cost_usd) > 0 ORDER BY 2 DESC LIMIT 3`, [tz]);
-    aiSpend = { ...s, top };
+    const { aiReport } = await import('./ai-monitor.js');
+    const report = await aiReport({ days: 30 });
+    aiSpend = { ...s, top, advice: report.recommendations.filter((r) => r.level !== 'ok') };
   } catch { aiSpend = null; }
   let plan = null;
   try {
@@ -427,7 +429,8 @@ export function renderDigest(d, now = new Date(d.generatedAt)) {
   if (d.aiSpend) {
     const a = d.aiSpend; const $ = (n) => `$${Number(n || 0).toFixed(2)}`;
     sections.push([`🤖 <b>AI spend</b>: yesterday ${$(a.yesterday)} (${a.calls} calls) · this month ${$(a.month)} · 7-day avg ${$(a.daily_avg)}/day` +
-      (a.top?.length ? `\n   Top: ${a.top.map((t) => `${esc(t.kind)} ${$(t.cost)}`).join(' · ')}` : '')]);
+      (a.top?.length ? `\n   Top: ${a.top.map((t) => `${esc(t.kind)} ${$(t.cost)}`).join(' · ')}` : '') +
+      (a.advice || []).map((r) => `\n   ${r.level === 'act' ? '⚠️' : '👀'} ${esc(r.text)}`).join('')]);
   }
 
   sections.push([link(app, 'Open Career Copilot')]);

@@ -8,7 +8,8 @@
 export const DOCUMENT_RULES = `HIS STANDING RULES FOR EVERY RESUME AND COVER LETTER:
 - Location: he lives in Bangalore — write "Bangalore, India" in the headline / contact line and wherever his current location is stated. Never write Mumbai anywhere — he has never lived or worked there.
 - Each role keeps ITS OWN location, exactly as in his history: Philips and GE Healthcare → Bangalore, India; MyAgentFirm, TradingOS, ChalOnline, Cropdata and Ajanta → Nagpur, India; Naresh i Technologies → Hyderabad, India; Growlogic → Remote. Never move a role to Bangalore.
-- Facts stay exact, never merged or upgraded: Growlogic is May 2024 – Dec 2025; at Philips he "mentored 5+ junior developers" (not "engineers"); MyAgentFirm has 6 async background workers and, separately, 8 recurring cron loops — never "8 cron workers". Its job queue was PostgreSQL (FOR UPDATE SKIP LOCKED, no broker) in the MVC and was replaced with RabbitMQ in the second update — if the queue is mentioned, say both. At Philips he worked with both Kafka and RabbitMQ.
+- Resumes are written without "I", "my" or "me" — summary and bullets start with the fact or a verb. (Cover letters and messages use the first person.)
+- Facts stay exact, never merged or upgraded: Growlogic is May 2024 – Dec 2025; at Philips he "mentored 5+ junior developers" (keep the "5+"; not "engineers"); MyAgentFirm has 6 async background workers and, separately, 8 recurring cron loops — never "8 cron workers". Its job queue was PostgreSQL (FOR UPDATE SKIP LOCKED, no broker) in the MVC and was replaced with RabbitMQ in the second update — if the queue is mentioned, say both. At Philips he worked with both Kafka and RabbitMQ.
 - Google's AI stack: write "Vertex AI" only. Never write "Gemini 2.5 Flash" or "Gemini" model names — e.g. "Vertex AI agents", not "Gemini 2.5 Flash agents".`;
 
 export const CONSULTANT_STANCE = `You operate the NxtJob outreach method. Non-negotiable rules:
@@ -353,6 +354,29 @@ Return JSON exactly:
   "rewrites": [ { "keyword": "...", "from": "exact current line from the resume", "to": "the reworded line", "why": "which JD requirement it now matches" } ],
   "estimatedScoreAfter": 0
 }`,
+});
+
+/**
+ * One fixed ATS scorer for every resume and every version, so scores compare:
+ * the writing model's own match score is self-assessed and shifts with the
+ * model and the prompt (84 → 81 on an improvement that only added matches).
+ */
+export const scoreResumePrompt = ({ resumeText, jobDescription }) => ({
+  system: `You are an applicant-tracking system scoring a resume against a job description. Score strictly and consistently: the same resume and JD always get the same score. Return valid JSON only.`,
+  user: `JOB DESCRIPTION
+${jobDescription}
+
+RESUME
+${resumeText}
+
+Score 0-100:
+- 50 points: required qualifications and keywords the resume shows (exact or clear equivalent), weighted by how central they are;
+- 20 points: preferred qualifications shown;
+- 15 points: years and seniority against what the JD asks;
+- 15 points: recent, relevant evidence with real metrics.
+Count only what the resume states — not what the candidate might have.
+
+Return JSON exactly: { "score": 0, "matched": ["keyword"], "missing": ["keyword"] }`,
 });
 
 export const refineResumePrompt = ({

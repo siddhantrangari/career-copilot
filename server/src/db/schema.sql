@@ -682,3 +682,12 @@ CREATE TABLE IF NOT EXISTS confirmed_skills (
   source      TEXT NOT NULL DEFAULT '',     -- which resume raised it
   updated_at  TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+
+-- ATS scores from one fixed scorer, per finished resume task, so versions and
+-- writing models compare (the writer's own match score is self-assessed).
+CREATE TABLE IF NOT EXISTS resume_scores (
+  job_id      UUID PRIMARY KEY,               -- ai_jobs.id of the tailor / refine / improve task
+  score       INTEGER NOT NULL,
+  scorer      TEXT NOT NULL,
+  created_at  TIMESTAMPTZ NOT NULL DEFAULT now()
+);

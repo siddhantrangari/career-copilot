@@ -62,6 +62,19 @@ export async function buildWeeklyReview(now = new Date()) {
     lines.push(`<i>Short on ${esc(misses.slice(0, 3).join(', '))} — volume is what turns into calls. Block the first hour tomorrow for it.</i>`);
   }
 
+  // AI quality and cost, by the model writing resumes, against the Sonnet baseline.
+  try {
+    const { aiReport } = await import('./ai-monitor.js');
+    const a = await aiReport({ days: 30 });
+    lines.push('');
+    lines.push(`<b>AI — quality and cost</b> (writer ${esc(a.writer)}, fact-check ${esc(a.verifier)})`);
+    for (const q of a.quality.filter((x) => x.writer !== 'unknown')) {
+      lines.push(`• ${esc(q.model)}: ${q.resumes} resumes · match ${q.avg_match ?? '–'} · fact-check ${q.pass_pct ?? '–'}% · corrected ${q.corrected_pct}% · ${q.avg_words} words · $${q.cost_per_resume}/resume`);
+    }
+    lines.push(`• Spend: $${a.health.month_to_date.toFixed(2)} this month of $${a.monthlyBudget} · $${a.health.daily_avg_7d.toFixed(2)}/day (7-day)`);
+    for (const r of a.recommendations) lines.push(`${r.level === 'act' ? '⚠️' : r.level === 'watch' ? '👀' : '✅'} ${esc(r.text)}`);
+  } catch { /* the review goes out without it */ }
+
   lines.push('');
   lines.push(`<b>Moved this week</b>${moved.length ? '' : ': nothing changed stage'}`);
   for (const m of moved) lines.push(`• ${esc(m.name)} → ${esc(STAGE_LABEL[m.stage] || m.stage)}`);

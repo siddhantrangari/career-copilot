@@ -559,6 +559,12 @@ async function improveResumeTool({ resumeId, company, role, answers = [], rewrit
   return { taskId: job.id, task: 'improve_resume', status: 'started — the improved resume and its new score will arrive here', typicalDuration: '~1–2 min' };
 }
 
+/** How the AI is doing: cost and resume quality by model vs the Sonnet baseline, spend vs budget, what to do. */
+async function getAiReport({ days = 30 } = {}) {
+  const { aiReport } = await import('./ai-monitor.js');
+  return aiReport({ days: Math.min(Math.max(Number(days) || 30, 1), 90) });
+}
+
 async function getTask({ taskId }) {
   const j = await getJob(taskId);
   if (!j) throw new ToolError('Task not found');
@@ -1211,6 +1217,7 @@ const TOOLS = [
     answers: { type: 'array', items: { type: 'object', properties: { keyword: str(), has: bool, detail: str() }, required: ['keyword', 'has'] } },
     rewrites: { type: 'array', items: { type: 'object', properties: { from: str(), to: str() }, required: ['from', 'to'] } },
   }), improveResumeTool],
+  ['get_ai_report', 'AI usage and quality: spend (24h, month vs budget), resume quality by writing model (match, fact-check pass rate, corrections, words, cost per resume) vs the Sonnet baseline, and recommendations.', S({ days: int }), getAiReport],
   ['get_job', 'One role in full: its JD, fit, why-line and link — for writing a form answer or hiring-team message for it.', S({ jobId: str(), company: companyArg, title: str() }), getJobDetail],
   ['get_ai_task', 'Status of a background task.', S({ taskId: str() }, ['taskId']), getTask],
   ['track_company', 'Start tracking a company.', S({ company: companyArg, stage: stageArg }, ['company']), trackCompany],

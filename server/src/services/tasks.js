@@ -13,6 +13,7 @@ import {
   verifyResumePrompt,
   condenseResumePrompt,
   atsGapsPrompt,
+  scoreResumePrompt,
   DOCUMENT_RULES,
   coverLetterPrompt,
   coverLetterLength,
@@ -379,6 +380,26 @@ export async function fitResumeLength(text, { companyId, kind = 'condense-resume
   return { text, words, condensed: false };
 }
 
+// ── ATS score: one scorer, the same way for every version ─────────────
+export async function atsScore(text, jobDescription, meta = {}) {
+  if (!text?.trim() || !jobDescription?.trim()) return null;
+  try {
+    const p = scoreResumePrompt({ resumeText: text, jobDescription });
+    const out = await chatJson({ kind: 'ats-score', model: config.ai.scorerModel, companyId: meta.companyId, system: p.system, user: p.user, maxTokens: 1_200, input: meta.input });
+    const score = Math.round(Number(out.score));
+    return Number.isFinite(score) ? { score: Math.max(0, Math.min(100, score)), matched: out.matched || [], missing: out.missing || [] } : null;
+  } catch { return null; }
+}
+
+/** Replace the writer's self-assessed match score with the fixed scorer's (kept as selfScore). */
+async function scoreInto(result, jobDescription, meta) {
+  const s = await atsScore(result.tailoredResumeText, jobDescription, meta);
+  if (!s) return;
+  result.selfScore = result.matchScore;
+  result.matchScore = s.score;
+  result.scoredBy = config.ai.scorerModel;
+}
+
 // ── Fact-check, and one correction pass when it finds real errors ─────
 const blockingOf = (issues) => issues.filter((i) => ['critical', 'moderate'].includes(i.severity));
 
@@ -440,6 +461,7 @@ export async function tailorResume(payload = {}, ctx = {}) {
 
   const result = await chatJson({
     kind: 'tailor-resume',
+    model: config.ai.tailorModel || undefined,
     companyId: company?.id,
     system: prompt.system,
     user: prompt.user,
@@ -459,6 +481,7 @@ export async function tailorResume(payload = {}, ctx = {}) {
     result.tailoredResumeText = done.text;
     result.verification = done.verification;
   }
+  if (result.tailoredResumeText) await scoreInto(result, jobDescription, { companyId: company?.id, input: { companyName: name } });
 
   let saved = null;
   if (save) {
@@ -518,6 +541,7 @@ export async function refineResume(payload = {}) {
 
   const result = await chatJson({
     kind: 'refine-resume',
+    model: config.ai.tailorModel || undefined,
     companyId: company?.id,
     system: prompt.system,
     user: prompt.user,
@@ -537,6 +561,7 @@ export async function refineResume(payload = {}) {
     result.tailoredResumeText = done.text;
     result.verification = done.verification;
   }
+  if (result.tailoredResumeText) await scoreInto(result, activeJd, { companyId: company?.id, input: { companyName: name } });
 
   let savedId = resumeId || null;
   if (resumeId) {
@@ -850,11 +875,12 @@ export async function improveResume(payload = {}, ctx = {}) {
     rewrites.length ? `Apply these rewordings exactly:\n${rewrites.map((r) => `- "${r.from}" → "${r.to}"`).join('\n')}` : '',
     payload.instructions ? `His instructions: ${payload.instructions}` : '',
   ].filter(Boolean).join('\n\n');
+  const before = await atsScore(v.tailored_text, v.job_description, { companyId: v.company_id, input: { resumeId: v.id } });
   const r = await refineResume({
     companyId: v.company_id, companyName: v.company_name, jobTitle: v.job_title, jobDescription: v.job_description,
     currentResumeText: v.tailored_text, feedback,
   });
-  return { ...r, previousId: v.id, scoreBefore: v.match_score, scoreAfter: Math.round(r.resume?.matchScore || 0), target: ATS_TARGET,
+  return { ...r, previousId: v.id, scoreBefore: before?.score ?? v.match_score, scoreAfter: Math.round(r.resume?.matchScore || 0), target: ATS_TARGET,
     remembered: { confirmed: yes.map((a) => a.keyword), notHis: no.map((a) => a.keyword) }, companyName: v.company_name, jobTitle: v.job_title };
 }
 
