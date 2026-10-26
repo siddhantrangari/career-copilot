@@ -517,8 +517,21 @@ export async function documentFiles(type, id) {
 
 async function getProfile() {
   const p = await one('SELECT full_name, headline, email, location, linkedin, website, summary, target_roles FROM profile LIMIT 1');
-  const achievements = await many('SELECT id, title, company, result FROM achievements ORDER BY created_at');
+  const achievements = await many('SELECT id, title, company, period, result, metrics FROM achievements ORDER BY created_at');
   return { profile: p, achievements };
+}
+
+/** One role in full — its JD for short answers and messages he asks for. */
+async function getJobDetail({ jobId, company, title } = {}) {
+  if (!jobId && !(company && title)) throw new ToolError('jobId, or company and title, is required');
+  const hit = await discoveredJob({ jobId, companyName: company, title });
+  if (!hit) throw new ToolError(`No discovered role for ${jobId || `${company} / ${title}`}. Ask him for the job link or JD.`);
+  const j = await one(
+    `SELECT j.id, j.title, j.url, j.location, j.fit_score, j.why_role, j.app_status, COALESCE(c.name, j.company_name) AS company, j.description
+     FROM jobs j LEFT JOIN companies c ON c.id = j.company_id WHERE j.id = $1`, [hit.id]);
+  const jd = String(j.description || '').replace(/<[^>]+>/g, ' ').replace(/&nbsp;/g, ' ').replace(/\s+/g, ' ').trim();
+  return { jobId: j.id, company: j.company, title: j.title, location: j.location, url: j.url, fit: j.fit_score, whyRole: j.why_role, applied: j.app_status || undefined,
+    jobDescription: jd.slice(0, 3200) + (jd.length > 3200 ? '…' : '') };
 }
 
 async function getTask({ taskId }) {
@@ -1165,7 +1178,8 @@ const TOOLS = [
   ['get_followups_and_interviews', 'Interviews in 7 days, follow-ups due, new jobs not yet in a digest.', S({}), getFollowupsAndInterviews],
   ['list_documents', 'Resumes, WIN docs, interview preps, mock interviews (ids).', S({ company: companyArg, type: { type: 'string', enum: DOC_TYPES } }), listDocuments],
   ['get_document', 'Send a document as a file (default), "text" excerpt, or WIN doc as "pptx". A resume is sent as the Resume Studio\'s own PDF (id "master" = master resume); if the Studio has not exported it yet you get openToExport — give him that link, and the PDF arrives in the chat once he opens it.', S({ type: { type: 'string', enum: DOC_TYPES }, id: str(), format: { type: 'string', enum: ['file', 'text', 'pptx'] } }, ['type', 'id']), getDocument],
-  ['get_profile', 'His profile and achievement bank.', S({}), getProfile],
+  ['get_profile', 'His profile and achievement bank (real results and metrics) — the facts for any short answer or message you write.', S({}), getProfile],
+  ['get_job', 'One role in full: its JD, fit, why-line and link — for writing a form answer or hiring-team message for it.', S({ jobId: str(), company: companyArg, title: str() }), getJobDetail],
   ['get_ai_task', 'Status of a background task.', S({ taskId: str() }, ['taskId']), getTask],
   ['track_company', 'Start tracking a company.', S({ company: companyArg, stage: stageArg }, ['company']), trackCompany],
   ['set_stage', 'Move a company or one role to a stage (sets applied date when moving to applied).', S({ company: companyArg, stage: stageArg, role: str('role title') }, ['company', 'stage']), setStage],
