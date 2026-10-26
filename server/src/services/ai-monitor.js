@@ -121,8 +121,9 @@ export function recommend(quality, health) {
     } else {
       out.push({ level: 'ok', text: `${current.model} is holding up: ${current.resumes} resumes, match ${current.avg_match} vs Sonnet ${base.avg_match}, fact-check ${current.pass_pct}% vs ${base.pass_pct}%, $${current.cost_per_resume}/resume vs $${base.cost_per_resume}.` });
     }
-  } else if (current) {
-    out.push({ level: 'watch', text: `${current.model}: ${current.resumes} of ${MIN_SAMPLE} resumes needed before comparing with Sonnet.` });
+  } else {
+    const name = writer.replace(/^(openai|anthropic|google)\//, '');
+    out.push({ level: 'watch', text: `${name}: ${current?.resumes || 0} of ${MIN_SAMPLE} resumes so far — the comparison with Sonnet (ATS ${base?.avg_match ?? '–'}, fact-check ${base?.pass_pct ?? '–'}%, $${base?.cost_per_resume ?? '–'}/resume) starts at ${MIN_SAMPLE}.` });
   }
 
   const budget = config.ai.monthlyBudget;
