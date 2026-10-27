@@ -55,8 +55,18 @@ function startDigest(log) {
       log.error(`[weekly-review] failed: ${err.message}`);
     }
   };
-  setTimeout(() => { check(); weekly(); }, 90_000);
-  digestTimer = setInterval(() => { check(); weekly(); }, 5 * 60_000);
+  // Today-board tasks whose reminder time has passed: one Telegram nudge each.
+  const reminders = async () => {
+    try {
+      const { sendDueReminders } = await import('./today-tasks.js');
+      const n = await sendDueReminders();
+      if (n) log.info(`[tasks] reminded ${n}`);
+    } catch (err) {
+      log.error(`[tasks] reminder failed: ${err.message}`);
+    }
+  };
+  setTimeout(() => { check(); weekly(); reminders(); }, 90_000);
+  digestTimer = setInterval(() => { check(); weekly(); reminders(); }, 5 * 60_000);
   const { hour, minute, timeZone, telegram } = config.digest;
   log.info(
     `[digest] daily at ${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')} ${timeZone}` +

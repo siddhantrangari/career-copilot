@@ -1,3 +1,4 @@
+import { addTask } from '../services/today-tasks.js';
 import { many } from '../db/pool.js';
 import { outreachPlan, listTargets, loadNavigator, logActivity, ACTIVITY_KINDS } from '../services/targets.js';
 import { buildToday } from '../services/today.js';
@@ -82,6 +83,16 @@ export default async function targetRoutes(app) {
 
   /** The Today board: daily targets with live counts, this week, and today's actions. */
   app.get('/today', async () => buildToday());
+
+  /** Add a to-do to the Today board: { title, detail?, company?, url?, remindAt? }. */
+  app.post('/tasks', async (request, reply) => {
+    try {
+      return { task: await addTask(request.body || {}) };
+    } catch (err) {
+      if (err.statusCode === 400) return reply.code(400).send({ error: err.message });
+      throw err;
+    }
+  });
 
   /** Log an outreach action, e.g. { company, kind: 'connection_request', count: 5 }. */
   app.post('/activity', async (request, reply) => {

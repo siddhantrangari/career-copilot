@@ -3,6 +3,7 @@ import { config } from '../config.js';
 import { pipeline, interviewsFrom, followUpsFrom, parseLooseDate } from './digest.js';
 import { listTargets, nextAction } from './targets.js';
 import { regionOf } from './apply-queue.js';
+import { openTasks } from './today-tasks.js';
 
 /**
  * The "Today" board: his Daily System made live.
@@ -178,6 +179,12 @@ export async function buildToday(now = new Date()) {
       detail: prep ? 'Re-read your prep guide, then run a mock round' : 'Build the prep guide (how they interview for this role), then a mock round', logKind: 'action_done' });
   }
 
+  // Tasks he added himself stay at the top until marked done (any day).
+  for (const t of await openTasks()) {
+    actions.push({ key: `task:${t.id}`, type: 'task', icon: '📌', company: t.company_name || '',
+      title: t.title, detail: t.detail || '', url: t.url || null, logKind: 'action_done' });
+  }
+
   // The day's application split and a mock round: on the list until met.
   for (const [k, scope, icon, what] of [
     ['abroad', 'abroad', '✈️', 'abroad roles with visa sponsorship or relocation'],
@@ -234,7 +241,7 @@ export async function buildToday(now = new Date()) {
     date: now.toISOString(),
     today: todayT,
     week: { ...targets(cWeek, 5, pWeek), calls: { done: cWeek.calls, target: g.weeklyCalls, stretch: g.weeklyCallsStretch, label: 'Calls' } },
-    actions: actions.slice(0, 10),
+    actions: actions.slice(0, 10 + actions.filter((a) => a.type === 'task').length),
     priorityTargets: (await one(`SELECT count(*)::int AS n FROM company_targets WHERE priority`))?.n || 0,
     followUpsDue: followUpsFrom(pipe.tracked, pipe.contacts, now, { snoozed: pipe.snoozed }).total,
   };

@@ -2643,7 +2643,9 @@
     var tag = a.priority ? '<span class="td-tag" style="color:#fbbf24">⭐ PRIORITY</span>' : '';
     var role = a.role ? (a.url ? '<a target="_blank" rel="noopener" style="color:#9fd3ff" href="' + esc(a.url) + '">' + esc(a.role) + '</a>' : esc(a.role)) : '';
     return '<div class="td-a' + (a.priority ? ' prio' : '') + '"><div class="i">' + a.icon + '</div><div class="t">' +
-      '<div><b data-detail-name="' + esc(a.company) + '" style="cursor:pointer;text-decoration:underline dotted" title="Everything about this company">' + esc(a.company) + '</b>' + tag + ' · ' + esc(a.title) + '</div>' +
+      (a.company
+        ? '<div><b data-detail-name="' + esc(a.company) + '" style="cursor:pointer;text-decoration:underline dotted" title="Everything about this company">' + esc(a.company) + '</b>' + tag + ' · ' + esc(a.title) + '</div>'
+        : '<div><b>' + esc(a.title) + '</b></div>') +
       (role ? '<div style="margin-top:2px">' + role + '</div>' : '') +
       (a.detail ? '<div style="margin-top:2px">→ ' + esc(a.detail) + '</div>' : '') +
       (a.whyCompany ? '<div class="w" title="' + esc(a.whyCompany) + '">💡 Why this company: ' + esc(a.whyCompany) + '</div>' : '') +
@@ -2655,7 +2657,7 @@
       (a.type === 'apply' && a.jobId ? '<button type="button" data-tailor="' + esc(a.jobId) + '" data-co="' + esc(a.company) + '" data-role="' + esc(a.role || '') + '" data-url="' + esc(a.url || '') + '" title="Tailor your resume to this role first">📄 Tailor</button>' : '') +
       (a.type === 'interview' && a.prepId ? '<a href="/interview.html?prep=' + esc(a.prepId) + '" title="Your prep guide">📘 Prep guide</a>' : '') +
       (a.type === 'interview' && a.companyId ? '<a href="/interview.html?company=' + encodeURIComponent(a.companyId) + (a.role ? '&role=' + encodeURIComponent(a.role) : '') + '" title="' + (a.prepId ? 'Run a mock round' : 'Build the prep guide, then run a mock round') + '">' + (a.prepId ? '🎙 Mock' : '🧠 Prep & mock') + '</a>' : '') +
-      (a.url && a.type === 'follow_up' ? '<a target="_blank" rel="noopener" href="' + esc(a.url) + '">Open ↗</a>' : '') +
+      (a.url && (a.type === 'follow_up' || a.type === 'task') ? '<a target="_blank" rel="noopener" href="' + esc(a.url) + '">Open ↗</a>' : '') +
       (a.type === 'outreach' ? '<button type="button" data-detail-name="' + esc(a.company) + '" title="People to reach, news, and DM drafts">👥 People</button>' : '') +
       (a.companyId && typeof window.openTrack === 'function' ? '<button type="button" data-open="' + esc(a.companyId) + '">Track</button>' : '') +
       (a.type === 'apply' && a.jobId
@@ -2665,7 +2667,7 @@
           '<button type="button" class="ok" data-fact="sent" data-fk="' + esc(a.fkey) + '" title="You followed up — the clock restarts">✓ Sent</button>' +
           '<button type="button" data-fact="snooze" data-fk="' + esc(a.fkey) + '" title="Waiting on them — hide for 7 days">💤 7d</button>' +
           '<button type="button" data-fact="close" data-fk="' + esc(a.fkey) + '" title="It is over — moves to Closed, history kept">✕ Close</button>'
-        : '<button type="button" class="ok" data-done="' + i + '" title="Mark done — logs it and hides it for today">Done ✓</button>') +
+        : '<button type="button" class="ok" data-done="' + i + '" title="' + (a.type === 'task' ? 'Mark done — removes the task' : 'Mark done — logs it and hides it for today') + '">Done ✓</button>') +
       '</div></div>';
   }
 
@@ -2693,7 +2695,7 @@
             (more ? 'Show fewer' : 'Show ' + (data.actions.length - SHOWN) + ' more actions') + '</a>' : '')
         : '<p class="cc-muted" style="margin:10px 0 0">Nothing urgent left today — send connection requests to your Outreach companies.</p>';
       html += '<div class="td-foot"><span>Targets from your Daily System · ⭐ Priority → Apply → Outreach · ' + data.priorityTargets + ' priority companies</span>' +
-        '<span>' + (data.followUpsDue ? '<a data-triage="1">📬 Triage ' + data.followUpsDue + ' follow-ups →</a> · ' : '') + '<a data-all="1">All target companies →</a></span></div>';
+        '<span><a data-addtask="1" title="Add your own to-do to this board">＋ Task</a> · ' + (data.followUpsDue ? '<a data-triage="1">📬 Triage ' + data.followUpsDue + ' follow-ups →</a> · ' : '') + '<a data-all="1">All target companies →</a></span></div>';
     }
     box.innerHTML = html;
   }
@@ -2725,6 +2727,14 @@
     }
     if ((b = el.closest('[data-open]'))) { window.openTrack(b.getAttribute('data-open')); return; }
     if (el.closest('[data-more]')) { more = !more; render(); return; }
+    if (el.closest('[data-addtask]')) {
+      var title = window.prompt('New task for the Today board:');
+      if (title && title.trim()) {
+        api('/targets/tasks', { method: 'POST', body: { title: title.trim() } }).then(load)
+          .catch(function (err) { window.alert(err.message); });
+      }
+      return;
+    }
     if (el.closest('[data-triage]')) { if (window.ccTriage) window.ccTriage(); return; }
     if ((b = el.closest('[data-queue]'))) { if (window.ccApplyQueue) window.ccApplyQueue(b.getAttribute('data-queue') === '1' ? null : b.getAttribute('data-queue')); return; }
     if ((b = el.closest('[data-tailor]'))) { if (window.ccTailor) window.ccTailor(b); return; }

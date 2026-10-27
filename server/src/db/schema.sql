@@ -691,3 +691,22 @@ CREATE TABLE IF NOT EXISTS resume_scores (
   scorer      TEXT NOT NULL,
   created_at  TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+
+-- One-off to-dos he adds himself ("finish Celonis Academy, then apply"). They
+-- sit on the Today board until marked done; done is logged in
+-- outreach_activity as action:task:<id>, so these rows are never updated or
+-- deleted. remind_at sends one Telegram nudge; sends are logged below.
+CREATE TABLE IF NOT EXISTS today_tasks (
+  id            BIGSERIAL PRIMARY KEY,
+  title         TEXT NOT NULL,
+  detail        TEXT NOT NULL DEFAULT '',
+  company_name  TEXT NOT NULL DEFAULT '',
+  url           TEXT NOT NULL DEFAULT '',
+  remind_at     TIMESTAMPTZ,
+  created_at    TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS today_task_reminders (
+  task_id   BIGINT PRIMARY KEY REFERENCES today_tasks (id) ON DELETE RESTRICT,
+  sent_at   TIMESTAMPTZ NOT NULL DEFAULT now()
+);
