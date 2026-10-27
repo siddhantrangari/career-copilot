@@ -2824,7 +2824,7 @@
     if (el.closest('[data-triage]')) { if (window.ccTriage) window.ccTriage(); return; }
     if ((b = el.closest('[data-queue]'))) { if (window.ccApplyQueue) window.ccApplyQueue(b.getAttribute('data-queue') === '1' ? null : b.getAttribute('data-queue')); return; }
     if ((b = el.closest('[data-tailor]'))) { if (window.ccTailor) window.ccTailor(b); return; }
-    if ((b = el.closest('[data-guide]'))) { if (window.ccGuidedApply) window.ccGuidedApply(b.getAttribute('data-guide')); return; }
+    if ((b = el.closest('[data-guide]'))) { if (window.ccGuidedTab) window.ccGuidedTab(b.getAttribute('data-guide')); return; }
     if ((b = el.closest('[data-applied]'))) {
       b.disabled = true;
       api('/targets/apply-queue/applied', { method: 'POST', body: { jobId: b.getAttribute('data-applied') } })
@@ -3413,16 +3413,29 @@
       .catch(function (e) { m.innerHTML = '<div class="cd"><div class="cc-bad">' + esc(e.message) + '</div></div>'; });
   }
 
-  /** Tailor: make sure the company is in his list, then open the Studio with the role and its link. */
+  /**
+   * Tailor: make sure the company is in his list, then open the Studio with
+   * the role and its link in a new tab, so the queue stays where it was. The
+   * tab is opened inside the click (browsers block it after an await) and
+   * pointed at the Studio once the company is added.
+   */
   window.ccTailor = function (b) {
+    var tab = window.open('about:blank', '_blank');
     b.disabled = true;
     api('/targets/company/add', { method: 'POST', body: { name: b.getAttribute('data-co') } }).then(function (r) {
-      if (typeof window.openCompanyStudio === 'function') {
-        window.openCompanyStudio(null, r.companyId, b.getAttribute('data-role'), 'resume', null, b.getAttribute('data-url') || '');
-      } else {
-        window.location.href = '/outreach.html?tab=resume&companyId=' + encodeURIComponent(r.companyId) + '&role=' + encodeURIComponent(b.getAttribute('data-role') || '');
-      }
-    }).catch(function (err) { b.disabled = false; window.alert(err.message); });
+      var url = '/outreach.html?tab=resume&mode=resume&companyId=' + encodeURIComponent(r.companyId) +
+        '&company=' + encodeURIComponent(b.getAttribute('data-co') || '') +
+        '&role=' + encodeURIComponent(b.getAttribute('data-role') || '') +
+        (b.getAttribute('data-url') ? '&jd=' + encodeURIComponent(b.getAttribute('data-url')) : '');
+      b.disabled = false;
+      if (tab) tab.location.href = url; else window.location.href = url;
+    }).catch(function (err) { if (tab) tab.close(); b.disabled = false; window.alert(err.message); });
+  };
+
+  /** Guided apply in its own tab: the main page opens it from ?guide=<jobId>. */
+  window.ccGuidedTab = function (jobId) {
+    var tab = window.open('/?guide=' + encodeURIComponent(jobId), '_blank');
+    if (!tab && window.ccGuidedApply) window.ccGuidedApply(jobId);
   };
 
   window.ccApplyQueue = function (scope) {
@@ -3443,7 +3456,7 @@
         if (el.closest('[data-more]')) { st.limit += 40; load(m); return; }
         if (el.closest('[data-detail-name]')) return;
         if ((b = el.closest('[data-tailor]'))) { window.ccTailor(b); return; }
-        if ((b = el.closest('[data-guide]'))) { if (window.ccGuidedApply) window.ccGuidedApply(b.getAttribute('data-guide')); return; }
+        if ((b = el.closest('[data-guide]'))) { if (window.ccGuidedTab) window.ccGuidedTab(b.getAttribute('data-guide')); return; }
         if ((b = el.closest('[data-ap]')) || (b = el.closest('[data-skip]'))) {
           var applied = b.hasAttribute('data-ap');
           var id = b.getAttribute(applied ? 'data-ap' : 'data-skip');
@@ -3610,6 +3623,16 @@
     }
     load(m, jobId, false);
   };
+
+  // Opened from a Guided button in another tab: start it, then drop the
+  // param so a reload doesn't reopen it.
+  var guideId = new URLSearchParams(window.location.search).get('guide');
+  if (guideId) {
+    var here = new URL(window.location.href);
+    here.searchParams.delete('guide');
+    history.replaceState(null, '', here);
+    window.ccGuidedApply(guideId);
+  }
 })();
 
 /**

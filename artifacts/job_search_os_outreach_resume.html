@@ -3436,7 +3436,8 @@ function checkTailorPrefill() {
 
     let company = (prefill && prefill.companyName) || qCompany || '';
     const role = (prefill && prefill.role) || qRole || '';
-    let jdText = (prefill && prefill.jdText) || '';
+    // A new tab gets no sessionStorage handoff, so the job link can come as ?jd=.
+    let jdText = (prefill && prefill.jdText) || u.searchParams.get('jd') || '';
     const companyId = (prefill && prefill.companyId) || qCompanyId || '';
     const roleId = (prefill && prefill.roleId) || qRoleId || '';
     const mode = (prefill && prefill.mode) || qMode || 'resume';
