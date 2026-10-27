@@ -207,30 +207,31 @@ async function callProvider(provider, { messages, json, maxTokens, timeoutMs, mo
     }
 
     const data = await res.json();
+    const usage = data.usage || {};
+    // Read before any check: a cut-off or empty answer is still billed, and
+    // the caller logs it as a failed attempt so spend matches the invoice.
+    const billed = {
+      provider: provider.name,
+      model: payload.model,
+      tokensIn: usage.prompt_tokens || usage.input_tokens || 0,
+      tokensOut: usage.completion_tokens || usage.output_tokens || 0,
+      cachedIn: usage.prompt_tokens_details?.cached_tokens || 0,
+    };
     const choice = data.choices?.[0];
     const content = choice?.message?.content?.trim();
-    if (!content) throw new AiError(`${provider.name} returned an empty completion`);
+    if (!content) throw Object.assign(new AiError(`${provider.name} returned an empty completion`), { billed });
 
     // A truncated completion is the usual cause of "not valid JSON" — surface
     // it as itself rather than letting it fail later as a parse error.
     const finishReason = choice.finish_reason || choice.stop_reason || null;
     if (finishReason === 'length' || finishReason === 'max_tokens') {
-      throw new AiError(
+      throw Object.assign(new AiError(
         `${provider.name} hit the output token limit (finish_reason=${finishReason}) — ` +
         'the response was cut off mid-JSON. Raise maxTokens for this endpoint.',
-      );
+      ), { billed });
     }
 
-    const usage = data.usage || {};
-    return {
-      content,
-      provider: provider.name,
-      model: payload.model,
-      finishReason,
-      tokensIn: usage.prompt_tokens || usage.input_tokens || 0,
-      tokensOut: usage.completion_tokens || usage.output_tokens || 0,
-      cachedIn: usage.prompt_tokens_details?.cached_tokens || 0,
-    };
+    return { content, finishReason, ...billed };
   } catch (err) {
     if (err.name === 'AbortError') throw new AiError(`${provider.name} timed out`, 504);
     throw err instanceof AiError ? err : new AiError(`${provider.name} failed: ${err.message}`);
@@ -251,16 +252,31 @@ export async function chat(messages, { json = false, maxTokens, timeoutMs = 240_
   }
 
   const failures = [];
+  const wasted = []; // attempts that failed after the provider billed them
   for (const provider of providers) {
     try {
-      return await callProvider(provider, { messages, json, maxTokens, timeoutMs, model });
+      const res = await callProvider(provider, { messages, json, maxTokens, timeoutMs, model });
+      return { ...res, wasted };
     } catch (err) {
       failures.push(`${provider.name}: ${err.message}`);
+      if (err.billed) wasted.push({ ...err.billed, error: err.message });
       console.warn(`[ai] ${provider.name} failed, trying next — ${err.message}`);
     }
   }
 
-  throw new AiError(`All AI providers failed → ${failures.join(' | ')}`);
+  throw Object.assign(new AiError(`All AI providers failed → ${failures.join(' | ')}`), { wasted });
+}
+
+/** One failed row per billed-but-failed attempt, so logged spend matches the provider's bill. */
+async function logWasted(wasted, { kind, companyId, input, sessionId }) {
+  for (const w of wasted || []) {
+    await logRun({
+      kind, companyId, model: w.model, ok: false,
+      error: `${w.provider} attempt billed then failed: ${w.error}`.slice(0, 500),
+      durationMs: 0, input, output: null,
+      tokensIn: w.tokensIn, tokensOut: w.tokensOut, cachedIn: w.cachedIn, sessionId,
+    });
+  }
 }
 
 /** chat() plus JSON parsing and an ai_runs audit row. */
@@ -279,6 +295,7 @@ export async function chatJson({
       { json: true, maxTokens, model },
     );
     usedModel = res.model;
+    await logWasted(res.wasted, { kind, companyId, input, sessionId });
 
     const parsed = parseJson(res.content);
     if (!parsed) {
@@ -301,6 +318,7 @@ export async function chatJson({
       durationMs: Date.now() - started, input, output: null,
       tokensIn: res?.tokensIn, tokensOut: res?.tokensOut, cachedIn: res?.cachedIn, sessionId,
     });
+    if (!res) await logWasted(err.wasted, { kind, companyId, input, sessionId });
     throw err;
   }
 }
@@ -318,10 +336,12 @@ export async function chatText({ kind, companyId, system, user, maxTokens, input
       { maxTokens },
     );
     model = res.model;
+    await logWasted(res.wasted, { kind, companyId, input });
 
     await logRun({
       kind, companyId, model, ok: true,
       durationMs: Date.now() - started, input, output: { text: res.content },
+      tokensIn: res.tokensIn, tokensOut: res.tokensOut, cachedIn: res.cachedIn,
     });
     return res.content;
   } catch (err) {
@@ -329,6 +349,7 @@ export async function chatText({ kind, companyId, system, user, maxTokens, input
       kind, companyId, model, ok: false, error: err.message,
       durationMs: Date.now() - started, input, output: null,
     });
+    await logWasted(err.wasted, { kind, companyId, input });
     throw err;
   }
 }
