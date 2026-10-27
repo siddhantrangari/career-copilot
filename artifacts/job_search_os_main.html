@@ -499,7 +499,7 @@ Format as a numbered table.</div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
           <div class="fr">
             <label>Pipeline Stage</label>
-            <select id="tStage">
+            <select id="tStage" onchange="onPipelineStageChange()">
               <option value="new">New</option><option value="interested">Interested (Target / Shortlisted)</option><option value="applied">Applied</option><option value="networking">Networking</option>
               <option value="call">Call Scheduled/Done</option><option value="win">WIN Doc Sent</option>
               <option value="interview">Interview</option><option value="offer">Offer 🎉</option><option value="failed">Closed</option>
@@ -5069,6 +5069,19 @@ function onActiveRoleStageChange() {
   }
 }
 window.onActiveRoleStageChange = onActiveRoleStageChange;
+
+// "Pipeline Stage" on a card with roles: the column follows its roles, so a
+// change here used to be overwritten on save and the card never moved. Apply
+// it to the role being viewed instead, so both dropdowns agree and Save moves
+// the card (to the furthest-along role's stage).
+function onPipelineStageChange() {
+  if (!currentTrackRoles.length) return; // no roles: the dropdown is the stage itself
+  if (!currentTrackRoles[currentActiveRoleIdx]) currentActiveRoleIdx = 0;
+  const roleStage = document.getElementById('tRoleStage');
+  if (roleStage) roleStage.value = document.getElementById('tStage').value;
+  onActiveRoleStageChange();
+}
+window.onPipelineStageChange = onPipelineStageChange;
 
 function toggleActiveRolePrimary() {
   const isPrimary = document.getElementById('tRolePrimary')?.checked || false;
