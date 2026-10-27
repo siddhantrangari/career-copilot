@@ -66,36 +66,52 @@ const key = (...parts) => parts.map((p) => String(p || '').toLowerCase().trim())
  * Track — so both are reduced to a company:role key and merged. A company
  * moved to "applied" with no roles counts once unless a role there is
  * already counted. +1 presses carry no key and are added as they are.
+ * Returns the items behind the count, so the Today card can list them.
  */
-export function applicationsSince(tracked, logged, since) {
-  const roles = new Set();       // company:role
+export function applicationItems(tracked, logged, since) {
+  const roles = new Map();       // company:role → item
   const companies = new Set();   // companies with a counted role
-  const companyOnly = new Set(); // applied with no role named
-  const addRole = (company, role) => { roles.add(key(company, role)); companies.add(key(company)); };
-  let unkeyed = 0;
+  const companyOnly = new Map(); // applied with no role named
+  const addRole = (company, role, item) => {
+    const k = key(company, role);
+    if (!roles.has(k)) roles.set(k, item);
+    companies.add(key(company));
+  };
+  const presses = [];
 
-  for (const a of logged) {
-    if (new Date(a.at) < since) continue;
-    const m = /^action:apply:(.*)$/.exec(a.note || '');
-    if (!m) { unkeyed += a.count; continue; }
-    const [company, ...role] = m[1].split(':');
-    addRole(company, role.join(':'));
-  }
+  // Tracked roles first: they carry the real names and the card to open.
   for (const t of tracked) {
     const rs = rolesOf(t.notes);
     if (rs.length) {
       for (const r of rs) {
         if (r.stage !== 'applied' && !r.appliedAt) continue;
         const d = parseLooseDate(r.appliedAt);
-        if (d && d >= since) addRole(t.company, r.title);
+        if (d && d >= since) {
+          addRole(t.company, r.title, { title: t.company, detail: r.title, companyId: t.company_id, roleId: r.id || null, url: r.jobLink || null, at: d });
+        }
       }
     } else if (t.stage === 'applied' && t.stage_changed_at && new Date(t.stage_changed_at) >= since) {
-      companyOnly.add(key(t.company));
+      companyOnly.set(key(t.company), { title: t.company, detail: 'Moved to Applied', companyId: t.company_id, at: new Date(t.stage_changed_at) });
     }
   }
-  const extra = [...companyOnly].filter((c) => !companies.has(c)).length;
-  return roles.size + extra + unkeyed;
+  const idOf = new Map(tracked.map((t) => [key(t.company), t]));
+  for (const a of logged) {
+    if (new Date(a.at) < since) continue;
+    const m = /^action:apply:(.*)$/.exec(a.note || '');
+    if (!m) {
+      presses.push({ title: 'Logged with +1', detail: `${a.count} application${a.count === 1 ? '' : 's'}, no role named`, count: a.count, at: new Date(a.at) });
+      continue;
+    }
+    const [company, ...role] = m[1].split(':');
+    const t = idOf.get(key(company));
+    addRole(company, role.join(':'), { title: t?.company || company, detail: role.join(':') || 'Apply action marked done', companyId: t?.company_id || null, at: new Date(a.at) });
+  }
+  const extra = [...companyOnly].filter(([c]) => !companies.has(c)).map(([, item]) => item);
+  const items = [...roles.values(), ...extra, ...presses].sort((x, y) => y.at - x.at);
+  return { items, count: roles.size + extra.length + presses.reduce((n, p) => n + p.count, 0) };
 }
+
+export const applicationsSince = (tracked, logged, since) => applicationItems(tracked, logged, since).count;
 
 /**
  * Applications in the window by where the role is. A role applied from the
@@ -103,17 +119,22 @@ export function applicationsSince(tracked, logged, since) {
  * company's region (EU and Gulf are abroad) or a "remote" / India word in its
  * title. +1 presses name no role, so they count only in the total.
  */
-export async function applicationsByPlace(tracked, since) {
-  const out = { abroad: 0, india: 0, remote: 0 };
-  const counted = new Set();
+export async function applicationsByPlaceItems(tracked, since) {
+  const out = { abroad: [], india: [], remote: [] };
   const jobs = await many(
-    `SELECT id, location FROM jobs WHERE app_status = 'applied' AND app_status_at >= $1 AND COALESCE(engagement, 'fte') = 'fte'`,
+    `SELECT j.id, j.title, j.location, j.url, j.app_status_at, COALESCE(c.name, j.company_name) AS company, COALESCE(j.company_id, c.id) AS company_id
+     FROM jobs j LEFT JOIN companies c ON c.id = j.company_id
+     WHERE j.app_status = 'applied' AND j.app_status_at >= $1 AND COALESCE(j.engagement, 'fte') = 'fte'`,
     [since],
   );
+  const roleOfJob = new Map();
+  for (const t of tracked) for (const r of rolesOf(t.notes)) if (r.jobId) roleOfJob.set(r.jobId, r.id);
   for (const j of jobs) {
-    counted.add(j.id);
     const p = regionOf(j.location);
-    if (p in out) out[p] += 1;
+    if (p in out) {
+      out[p].push({ title: j.company || 'Unknown company', detail: `${j.title}${j.location ? ` · ${j.location}` : ''}`,
+        companyId: j.company_id || null, roleId: roleOfJob.get(j.id) || null, url: j.url || null, at: new Date(j.app_status_at) });
+    }
   }
   for (const t of tracked) {
     for (const r of rolesOf(t.notes)) {
@@ -123,18 +144,79 @@ export async function applicationsByPlace(tracked, since) {
       const p = /\bremote\b/i.test(r.title) ? 'remote'
         : /\b(india|bangalore|bengaluru)\b/i.test(r.title) ? 'india'
         : t.region === 'eu' || t.region === 'gulf' ? 'abroad' : null;
-      if (p) out[p] += 1;
+      if (p) out[p].push({ title: t.company, detail: r.title, companyId: t.company_id, roleId: r.id || null, url: r.jobLink || null, at: d });
     }
   }
+  for (const k of Object.keys(out)) out[k].sort((x, y) => y.at - x.at);
   return out;
+}
+
+export async function applicationsByPlace(tracked, since) {
+  const items = await applicationsByPlaceItems(tracked, since);
+  return Object.fromEntries(Object.entries(items).map(([k, v]) => [k, v.length]));
+}
+
+const TRACKED_SQL = `SELECT t.company_id, t.stage, t.notes, t.stage_changed_at, c.name AS company, c.region
+                     FROM tracked_companies t JOIN companies c ON c.id = t.company_id`;
+
+/** Outreach rows and contacts behind one of the activity counts in countsSince. */
+async function outreachItems(kinds, statuses, since, { newContacts = false } = {}) {
+  const logged = await many(
+    `SELECT a.at, a.count, a.kind, a.note, a.company_id, COALESCE(c.name, a.company_name) AS company
+     FROM outreach_activity a LEFT JOIN companies c ON c.id = a.company_id
+     WHERE a.kind = ANY($1) AND a.at >= $2 ORDER BY a.at DESC`,
+    [kinds, since],
+  );
+  const contacts = await many(
+    `SELECT n.name, n.role, n.status, n.linkedin_url, n.company_id, c.name AS company,
+            ${newContacts ? 'n.created_at' : 'COALESCE(n.status_changed_at, n.created_at)'} AS at
+     FROM connections n JOIN companies c ON c.id = n.company_id
+     WHERE ${newContacts ? 'n.created_at >= $1' : 'n.status = ANY($2) AND COALESCE(n.status_changed_at, n.created_at) >= $1'}
+     ORDER BY at DESC`,
+    newContacts ? [since] : [since, statuses],
+  );
+  return [
+    ...contacts.map((n) => ({ title: n.name || 'Contact', detail: [n.role, n.company].filter(Boolean).join(' · '),
+      companyId: n.company_id, url: n.linkedin_url || null, at: new Date(n.at) })),
+    ...logged.map((a) => ({ title: a.company || 'Logged with +1', detail: `${a.count} × ${a.kind.replace(/_/g, ' ')}${a.note && !a.note.startsWith('action:') ? ` · ${a.note}` : ''}`,
+      companyId: a.company_id || null, count: a.count, at: new Date(a.at) })),
+  ].sort((x, y) => y.at - x.at);
+}
+
+/**
+ * The items behind one Today meter, for today or this week — the same
+ * sources countsSince and the application counters use.
+ */
+export async function todayDetails(kind, range = 'day') {
+  const { day, week } = await boundaries();
+  const since = range === 'week' ? week : day;
+  if (kind === 'applications' || ['abroad', 'india', 'remote'].includes(kind)) {
+    const tracked = await many(TRACKED_SQL);
+    if (kind !== 'applications') return (await applicationsByPlaceItems(tracked, since))[kind];
+    const logged = await many(`SELECT at, count, note FROM outreach_activity WHERE kind = 'application' AND at >= $1`, [since]);
+    return applicationItems(tracked, logged, since).items;
+  }
+  if (kind === 'connections') return outreachItems(['connection_request'], [], since, { newContacts: true });
+  if (kind === 'dms') return outreachItems(['dm', 'follow_up'], ['dm', 'fu1', 'fu2', 'fu3'], since);
+  if (kind === 'referrals') return outreachItems(['referral_ask'], ['ref'], since);
+  if (kind === 'calls') return outreachItems(['call'], ['call'], since);
+  if (kind === 'posts') return outreachItems(['post'], [], since);
+  if (kind === 'mocks') {
+    const rows = await many(
+      `SELECT id, company_id, company_name, role_title, round, status, started_at FROM interview_sessions
+       WHERE started_at >= $1 AND status <> 'abandoned' ORDER BY started_at DESC`, [since],
+    );
+    return rows.map((r) => ({ title: r.company_name || 'Mock interview', detail: [r.role_title, `${r.round} round`, r.status].filter(Boolean).join(' · '),
+      companyId: r.company_id || null, url: `/interview.html?session=${r.id}`, at: new Date(r.started_at) }));
+  }
+  throw Object.assign(new Error(`kind must be one of applications, abroad, india, remote, connections, dms, referrals, calls, posts, mocks`), { statusCode: 400 });
 }
 
 export async function buildToday(now = new Date()) {
   const { day, week } = await boundaries();
   const g = config.targets;
   const [tracked, logged, cToday, cWeek] = await Promise.all([
-    many(`SELECT t.company_id, t.stage, t.notes, t.stage_changed_at, c.name AS company, c.region
-          FROM tracked_companies t JOIN companies c ON c.id = t.company_id`),
+    many(TRACKED_SQL),
     many(`SELECT at, count, note FROM outreach_activity WHERE kind = 'application' AND at >= $1`, [week]),
     countsSince(day), countsSince(week),
   ]);

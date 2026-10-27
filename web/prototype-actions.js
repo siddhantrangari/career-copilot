@@ -2561,6 +2561,25 @@
     '#cc-today .td-m .l{font-size:10.5px;color:#9aa6b8;text-transform:uppercase;letter-spacing:.04em}' +
     '#cc-today .td-m .n{font-size:17px;font-weight:800;color:#e7ecf3;margin:2px 0 4px}' +
     '#cc-today .td-m .n span{font-size:11px;color:#7c8ba3;font-weight:600}' +
+    '#cc-today .td-m .n[data-dk]{cursor:pointer}' +
+    '#cc-today .td-m .n[data-dk]:hover{color:#9fd3ff}' +
+    '#cc-dd{position:fixed;inset:0;z-index:10000;background:rgba(6,8,12,.72);display:flex;align-items:center;justify-content:center;padding:16px}' +
+    '#cc-dd .dd-box{width:min(560px,100%);max-height:80vh;display:flex;flex-direction:column;background:#141822;border:1px solid #232a38;border-radius:14px;box-shadow:0 28px 70px rgba(0,0,0,.6)}' +
+    '#cc-dd .dd-head{display:flex;align-items:center;gap:8px;padding:14px 16px;border-bottom:1px solid #232a38}' +
+    '#cc-dd .dd-head b{flex:1;font-size:14px;color:#e7ecf3}' +
+    '#cc-dd .dd-tabs button{font-size:11px;padding:3px 9px;background:#1a2030;border:1px solid #2a3244;color:#c9d4e3;border-radius:6px;cursor:pointer}' +
+    '#cc-dd .dd-tabs button.on{border-color:#38d9a9;color:#38d9a9}' +
+    '#cc-dd .dd-x{background:none;border:0;color:#9aa6b8;font-size:18px;cursor:pointer;padding:0 4px}' +
+    '#cc-dd .dd-list{overflow-y:auto;padding:8px 16px 14px}' +
+    '#cc-dd .dd-i{display:flex;gap:10px;align-items:flex-start;padding:9px 0;border-bottom:1px solid #1d2331}' +
+    '#cc-dd .dd-i:last-child{border-bottom:0}' +
+    '#cc-dd .dd-t{flex:1;min-width:0;font-size:12.5px;color:#c9d4e3}' +
+    '#cc-dd .dd-t b{color:#e7ecf3}' +
+    '#cc-dd .dd-t .w{font-size:11px;color:#7c8ba3;margin-top:2px}' +
+    '#cc-dd .dd-b{display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end;flex:none}' +
+    '#cc-dd .dd-b a,#cc-dd .dd-b button{font-size:10.5px;padding:3px 8px;background:#1a2030;border:1px solid #2a3244;color:#c9d4e3;border-radius:6px;cursor:pointer;text-decoration:none}' +
+    '#cc-dd .dd-empty{color:#7c8ba3;font-size:12px;padding:14px 0}' +
+    '.kcard.cc-flash{outline:2px solid #38d9a9;outline-offset:2px;transition:outline-color 1.6s}' +
     '#cc-today .td-bar{height:4px;background:#232a38;border-radius:3px;overflow:hidden}' +
     '#cc-today .td-bar i{display:block;height:100%;background:#38d9a9}' +
     '#cc-today .td-m.hit .td-bar i{background:#fbbf24}' +
@@ -2626,10 +2645,76 @@
       (k === 'applications' ? ' <a data-queue="1" style="' + LINK + '" title="The next roles to apply to, best first">🚀 Queue</a>' : '') +
       (SCOPE[k] ? ' <a data-queue="' + SCOPE[k] + '" style="' + LINK + '" title="Open the queue on this tab">🚀</a>' : '') +
       (k === 'mocks' ? ' <a href="/interview.html" style="' + LINK + '" title="Open the Interview Room">🎙 Practice</a>' : '') + '</div>' +
-      '<div class="n">' + m.done + ' <span>/ ' + m.target + (m.stretch ? ' · stretch ' + m.stretch : '') + (m.done >= m.target ? ' ✓' : '') + '</span></div>' +
+      '<div class="n" data-dk="' + k + '" title="See which ones">' + m.done + ' <span>/ ' + m.target + (m.stretch ? ' · stretch ' + m.stretch : '') + (m.done >= m.target ? ' ✓' : '') + '</span></div>' +
       '<div class="td-bar"><i style="width:' + pct + '%"></i></div>' +
       '<div class="b">' + STEP[k].map(function (n) { return '<button type="button" data-log="' + k + '" data-n="' + n + '">+' + n + '</button>'; }).join('') + '</div></div>';
   }
+
+  // ── What is behind a number ───────────────────────────────────
+  // Clicking a meter's count lists the applications, contacts or sessions
+  // it is made of, each with a way back to its card in the pipeline.
+  var LABEL = { connections: 'Connection requests', dms: 'DMs to HMs / peers', applications: 'Applications', posts: 'LinkedIn posts',
+    referrals: 'Referral asks', abroad: 'Applications · abroad', india: 'Applications · India', remote: 'Applications · remote',
+    mocks: 'Mock interviews', calls: 'Calls' };
+  var dd = null;
+
+  function when(at, range) {
+    var d = new Date(at);
+    return range === 'week'
+      ? d.toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short' })
+      : d.toLocaleTimeString('en-IN', { hour: 'numeric', minute: '2-digit' });
+  }
+
+  function showInPipeline(companyId) {
+    if (typeof window.showTab === 'function') window.showTab('pipeline');
+    setTimeout(function () {
+      var card = document.querySelector('.kcard[data-company-id="' + (window.CSS && CSS.escape ? CSS.escape(companyId) : companyId) + '"]');
+      if (!card) return;
+      card.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
+      card.classList.add('cc-flash');
+      setTimeout(function () { card.classList.remove('cc-flash'); }, 2200);
+    }, 60);
+  }
+
+  function closeDetails() { if (dd) { dd.remove(); dd = null; } }
+
+  function openDetails(kind, range) {
+    closeDetails();
+    dd = document.createElement('div');
+    dd.id = 'cc-dd';
+    dd.innerHTML = '<div class="dd-box" role="dialog" aria-modal="true"><div class="dd-head"><b>' + esc(LABEL[kind] || kind) + '</b>' +
+      '<span class="dd-tabs"><button type="button" data-range="day"' + (range === 'day' ? ' class="on"' : '') + '>Today</button> ' +
+      '<button type="button" data-range="week"' + (range === 'week' ? ' class="on"' : '') + '>This week</button></span>' +
+      '<button type="button" class="dd-x" data-close="1" title="Close">×</button></div><div class="dd-list"><div class="dd-empty">Loading…</div></div></div>';
+    document.body.appendChild(dd);
+    var list = dd.querySelector('.dd-list');
+    dd.addEventListener('click', function (e) {
+      var b = e.target.closest('[data-range],[data-close],[data-card],[data-pipe]');
+      if (e.target === dd || (b && b.hasAttribute('data-close'))) { closeDetails(); return; }
+      if (!b) return;
+      if (b.hasAttribute('data-range')) { openDetails(kind, b.getAttribute('data-range')); return; }
+      var id = b.getAttribute('data-card') || b.getAttribute('data-pipe');
+      closeDetails();
+      if (b.hasAttribute('data-pipe')) { showInPipeline(id); return; }
+      if (typeof window.openTrack === 'function') window.openTrack(id, b.getAttribute('data-role') || undefined);
+    });
+    api('/targets/today/details?kind=' + encodeURIComponent(kind) + '&range=' + range).then(function (d) {
+      if (!dd) return;
+      var items = d.items || [];
+      list.innerHTML = items.length ? items.map(function (x) {
+        var tracked = x.companyId && typeof window.openTrack === 'function';
+        return '<div class="dd-i"><div class="dd-t"><b>' + esc(x.title) + '</b>' +
+          (x.detail ? '<div>' + esc(x.detail) + '</div>' : '') +
+          '<div class="w">' + esc(when(x.at, range)) + '</div></div><div class="dd-b">' +
+          (tracked ? '<button type="button" data-card="' + esc(x.companyId) + '"' + (x.roleId ? ' data-role="' + esc(x.roleId) + '"' : '') + ' title="Open this company’s card">📊 Open card</button>' +
+            '<button type="button" data-pipe="' + esc(x.companyId) + '" title="Show the card on the Pipeline board">📍 Pipeline</button>' : '') +
+          (x.url ? '<a target="_blank" rel="noopener" href="' + esc(x.url) + '">Open ↗</a>' : '') +
+          '</div></div>';
+      }).join('') : '<div class="dd-empty">Nothing ' + (range === 'week' ? 'this week' : 'today') + ' yet.</div>';
+    }).catch(function (err) { if (dd) list.innerHTML = '<div class="dd-empty">Could not load: ' + esc(err.message) + '</div>'; });
+  }
+
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeDetails(); });
 
   function action(a, i) {
     if (a.type === 'apply_plan' || a.type === 'mock') {
@@ -2712,6 +2797,7 @@
     var el = e.target.closest ? e.target : null;
     if (!el) return;
     var b;
+    if ((b = el.closest('[data-dk]'))) { openDetails(b.getAttribute('data-dk'), 'day'); return; }
     if ((b = el.closest('[data-log]'))) {
       b.disabled = true;
       log({ kind: KIND[b.getAttribute('data-log')], count: Number(b.getAttribute('data-n')) })

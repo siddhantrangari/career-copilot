@@ -1,7 +1,7 @@
 import { addTask } from '../services/today-tasks.js';
 import { many } from '../db/pool.js';
 import { outreachPlan, listTargets, loadNavigator, logActivity, ACTIVITY_KINDS } from '../services/targets.js';
-import { buildToday } from '../services/today.js';
+import { buildToday, todayDetails } from '../services/today.js';
 import { companyDetail, addToList, draftOutreach } from '../services/company-detail.js';
 import { buildWeeklyReview, sendWeeklyReview } from '../services/weekly-review.js';
 import { listFollowups, actOnFollowup, draftNudge } from '../services/followups.js';
@@ -83,6 +83,17 @@ export default async function targetRoutes(app) {
 
   /** The Today board: daily targets with live counts, this week, and today's actions. */
   app.get('/today', async () => buildToday());
+
+  /** What is behind one Today number: ?kind=applications|india|connections|…&range=day|week. */
+  app.get('/today/details', async (request, reply) => {
+    try {
+      const { kind, range } = request.query || {};
+      return { kind, range: range === 'week' ? 'week' : 'day', items: await todayDetails(kind, range === 'week' ? 'week' : 'day') };
+    } catch (err) {
+      if (err.statusCode === 400) return reply.code(400).send({ error: err.message });
+      throw err;
+    }
+  });
 
   /** Add a to-do to the Today board: { title, detail?, company?, url?, remindAt? }. */
   app.post('/tasks', async (request, reply) => {
