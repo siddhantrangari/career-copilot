@@ -1,4 +1,5 @@
 import { many, one, query } from '../db/pool.js';
+import { companyStageFor } from './role-stage.js';
 import { config } from '../config.js';
 import { createJob, getJob } from './jobs.js';
 import { buildDigest, runDigest } from './digest.js';
@@ -600,9 +601,8 @@ async function setStage(args) {
     changes.push(`role "${target.title}": ${target.stage || 'new'} → ${stage}`);
     target.stage = stage;
     if (stage === 'applied' && !target.appliedAt) target.appliedAt = today();
-    // The web app mirrors the primary role's stage onto the company.
-    const primary = roles.find((x) => x.isPrimary) || roles[0];
-    if (primary === target) companyStage = stage;
+    // The company sits in the column of its furthest-along role.
+    companyStage = companyStageFor(roles, t.stage);
   } else {
     companyStage = stage;
   }
@@ -633,8 +633,8 @@ async function addRole(args) {
     isPrimary: roles.length === 0,
   };
   roles.push(role);
-  await query('UPDATE tracked_companies SET notes = $2, stage = CASE WHEN $3 THEN $4 ELSE stage END, updated_at = now() WHERE company_id = $1',
-    [c.id, joinNotes(text, roles), role.isPrimary, stage]);
+  await query('UPDATE tracked_companies SET notes = $2, stage = $3, updated_at = now() WHERE company_id = $1',
+    [c.id, joinNotes(text, roles), companyStageFor(roles, t.stage)]);
   await audit('add_role', args, c.id, null, roleView(role));
   return { company: c.name, changed: `added role "${title}" at stage ${stage}${role.isPrimary ? ' (primary)' : ''}`,
     jobDescription: jd ? `saved (${jd.jdText.length} chars, from the ${jd.source === 'discovered' ? 'discovered posting' : 'job page'})` : (jobLink ? 'not readable from the link — ask him to paste the JD' : 'none — ask for the job link or JD') };

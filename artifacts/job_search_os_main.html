@@ -5062,11 +5062,9 @@ function onActiveRoleStageChange() {
       const el = document.getElementById('tRoleAppliedAt');
       if (el) el.value = currentTrackRoles[currentActiveRoleIdx].appliedAt;
     }
-    // Sync main stage if primary
-    if (currentTrackRoles[currentActiveRoleIdx].isPrimary) {
-      const mainStage = document.getElementById('tStage');
-      if (mainStage) mainStage.value = stage;
-    }
+    // The company stage follows the furthest-along role.
+    const mainStage = document.getElementById('tStage');
+    if (mainStage) mainStage.value = companyStageForRoles(currentTrackRoles);
     renderTrackRoleTabs();
   }
 }
@@ -5216,6 +5214,13 @@ function saveConn(){
   saveTr();renderConnList(tracked[id].connections);closeM('connModal');
 }
 
+function companyStageForRoles(roles){
+  const order=['new','interested','applied','networking','call','win','interview','offer'];
+  const open=roles.map(r=>r.stage||'new').filter(s=>s!=='failed');
+  if(!open.length) return 'failed';
+  return open.reduce((best,s)=>order.indexOf(s)>order.indexOf(best)?s:best,'new');
+}
+
 function saveTrack(){
   const id=document.getElementById('trackId').value;
   if(!id) return;
@@ -5234,8 +5239,12 @@ function saveTrack(){
   // 3. Save full multi-role collection
   tracked[id].roles = currentTrackRoles;
 
-  // 4. Update overall pipeline tracking status & single-role backwards compatibility
-  tracked[id].stage = primaryRole.stage || document.getElementById('tStage')?.value || 'new';
+  // 4. Update overall pipeline tracking status & single-role backwards compatibility.
+  // The company sits in the column of its furthest-along role (closed roles
+  // ignored; closed only when every role is) — same rule as the server's role-stage.js.
+  tracked[id].stage = currentTrackRoles.length
+    ? companyStageForRoles(currentTrackRoles)
+    : (document.getElementById('tStage')?.value || 'new');
   tracked[id].roleTitle = primaryRole.title || '';
   tracked[id].pay = primaryRole.pay || '';
   tracked[id].jobLink = primaryRole.jobLink || '';

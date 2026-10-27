@@ -1,4 +1,5 @@
 import { one, many, query } from '../db/pool.js';
+import { companyStageFor } from './role-stage.js';
 import { chatJson } from './ai.js';
 import { candidateBlock } from './context.js';
 import { CONSULTANT_STANCE } from './prompts.js';
@@ -75,8 +76,8 @@ export async function actOnFollowup(key, action, { days = 7, as = null } = {}) {
       const role = item.role ? roles.find((r) => (r.title || '') === item.role) : null;
       if (role) {
         role.stage = 'failed';
-        // The company closes only when every role there is closed.
-        if (roles.every((r) => r.stage === 'failed')) stage = 'failed';
+        // The company follows its furthest open role, closing only when all are closed.
+        stage = companyStageFor(roles, stage);
       } else {
         stage = 'failed';
       }
