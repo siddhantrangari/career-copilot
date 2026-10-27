@@ -157,8 +157,65 @@
     }).join('');
   }).catch(function () { $('history').textContent = 'Could not load.'; });
 
+  // ── FDE drills ─────────────────────────────────────────────────
+  // Each drill is a customer situation the interviewer role-plays, with one
+  // constraint left out of the brief so discovery is actually tested.
+  var FDE_DRILLS = [
+    { id: 'p2p', title: 'Process mining: late invoice payments',
+      skill: 'Discovery + value maths',
+      scenario: 'You are Lucia, Head of Procurement Operations at a mid-size Spanish manufacturer. Invoices are paid late and you lose early-payment discounts; you suspect approvals are the bottleneck but have no proof. About 4,000 invoices a month. Hidden constraint: your SAP data can only be extracted nightly, never live. Objection to raise: "IT will never give an outside tool access to SAP."' },
+    { id: 'tickets', title: 'AI agent for support-ticket triage',
+      skill: 'Scoping a POC',
+      scenario: 'You are Marco, VP Customer Support at a European logistics SaaS. 9,000 tickets a month, first response takes 14 hours, and you want "an AI agent that handles tickets". Hidden constraint: customer data must not leave the EU, and legal must approve any model provider. Push him to promise full automation in a month.' },
+    { id: 'demo', title: 'Demo to a non-technical buyer',
+      skill: 'Demo storyline',
+      scenario: 'You are Priya, Head of Marketing at a 40-person D2C brand. You are not technical. Ask him to demo an AI system he has built (for example MyAgentFirm) as if you were buying it. Interrupt any jargon. Hidden constraint: you care only about cutting agency spend on ad creatives. Objection: "This looks like every other AI tool."' },
+    { id: 'tried-ai', title: '"We tried AI and it failed"',
+      skill: 'Objection handling',
+      scenario: 'You are Thomas, CFO of an insurance broker. A chatbot pilot last year gave wrong answers to customers and was switched off, and you are sceptical of anything with AI in the name. Hidden constraint: the failed pilot had no human review step and no evaluation set. Make him earn a small paid pilot.' },
+    { id: 'failed-poc', title: 'POC missed its target',
+      skill: 'Ownership under pressure',
+      scenario: 'You are Anna, an operations director whose team ran his document-extraction POC. He promised 90% field accuracy; production shows 62% on real scanned invoices, and your boss is asking why you backed this. You are angry. Hidden detail: about a third of the documents are low-quality phone photos that were never in the test set.' },
+    { id: 'say-no', title: 'Out-of-scope request by Friday',
+      skill: 'Saying no, product feedback',
+      scenario: 'You are Javier, a key-account customer two weeks into a deployment. You demand a custom integration with your in-house ERP by Friday for a board demo, and hint you will escalate to his CEO. Hidden constraint: the ERP has no API, only CSV exports. Test whether he offers a smaller version that still delivers value and routes the rest to the product team.' },
+  ];
+
+  var pendingScenario = '';
+
+  function drillDoneAt(id) {
+    try { return localStorage.getItem('cc_fde_drill_' + id); } catch (e) { return null; }
+  }
+
+  function renderDrills() {
+    $('fdeDrills').innerHTML = FDE_DRILLS.map(function (d) {
+      var done = drillDoneAt(d.id);
+      return '<div class="drill"><div><b>' + esc(d.title) + '</b>' +
+        (done ? ' <span class="done">✓ last run ' + esc(done) + '</span>' : '') +
+        '<span class="hint">Skill: ' + esc(d.skill) + '</span></div>' +
+        '<button class="btn" type="button" data-drill="' + esc(d.id) + '">Run drill →</button></div>';
+    }).join('');
+  }
+  renderDrills();
+
+  $('fdeDrills').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-drill]');
+    if (!b) return;
+    var d = FDE_DRILLS.filter(function (x) { return x.id === b.getAttribute('data-drill'); })[0];
+    if (!d) return;
+    $('round').value = 'fde';
+    $('duration').value = '15';
+    if (!$('role').value.trim()) $('role').value = 'Forward Deployed Engineer';
+    pendingScenario = d.scenario;
+    try { localStorage.setItem('cc_fde_drill_' + d.id, new Date().toISOString().slice(0, 10)); } catch (err) {}
+    renderDrills();
+    $('startBtn').click();
+  });
+
   $('startBtn').addEventListener('click', function () {
     var btn = $('startBtn');
+    var scenario = pendingScenario;
+    pendingScenario = '';
     recordMode = $('record').value;
     btn.disabled = true;
     $('setupHint').textContent = 'Reading the JD, your WIN doc and the research…';
@@ -171,6 +228,7 @@
         round: $('round').value,
         durationMin: parseInt($('duration').value, 10),
         jobDescription: $('jd').value.trim(),
+        scenario: scenario || undefined,
       },
     })
       .then(function (d) {

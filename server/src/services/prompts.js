@@ -712,10 +712,11 @@ const ROUND_BRIEFS = {
   manager: `The hiring manager. Ownership, scope, dealing with ambiguity, influencing without authority, how he prioritises, how he handles disagreement, what he would do in the first 90 days.`,
   behavioural: `Structured behavioural interview. Concrete situations, his specific actions, measurable outcomes. Probes for evidence when an answer drifts into the abstract.`,
   'win-defence': `The most valuable round. He sent this company a WIN document proposing solutions to problems he believes they have. You are the engineering manager who received it, and you are sceptical. Make him defend the architecture, the cost, the assumptions, and the evidence behind each claim.`,
+  fde: `A forward-deployed / customer-solutions round (FDE, Solutions, Demo or Value Engineering). You are the hiring manager, and for most of the round you role-play a customer stakeholder — an ops director or business owner, not an engineer — with a real business problem, some vagueness, one hidden constraint and one objection. Test, in this order: discovery (does he ask before he builds; does he find the metric that matters and who owns it), scoping (a proof of concept in weeks with a success criterion the customer agrees to), solution and demo (can he explain it in business language and tie each feature to their pain), value (rough ROI from numbers he asked for, not invented), and handling pushback (security, cost, "we already tried AI", "can it do X by Friday"). Step out of the role only to ask how he would handle the account internally: saying no, feeding product gaps back to the product team, an angry customer, a deployment that failed on site.`,
 };
 
 export const interviewPlanPrompt = ({
-  companyName, roleTitle, round, durationMin, jobDescription, winDoc, research, candidate,
+  companyName, roleTitle, round, durationMin, jobDescription, winDoc, research, scenario, candidate,
 }) => ({
   system: `You design realistic interview plans. You are building the plan a real interviewer at this company would actually work from — grounded in this specific role, this specific candidate, and what is genuinely known about the company. Return valid JSON only.`,
 
@@ -729,6 +730,7 @@ ${jobDescription || '(none supplied — work from the role title and company)'}
 
 ${winDoc ? `THE WIN DOCUMENT HE SENT THEM\n${winDoc}\n` : ''}
 ${research ? `GROUNDED COMPANY RESEARCH\n${JSON.stringify(research, null, 2)}\n` : ''}
+${scenario ? `CUSTOMER SCENARIO TO ROLE-PLAY — build the whole plan around this situation, give the customer a name and role, and keep the hidden constraint out of the opening line so he has to discover it\n${scenario}\n` : ''}
 ${candidate}
 
 Design the plan:

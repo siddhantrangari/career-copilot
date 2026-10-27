@@ -167,6 +167,31 @@
     color: #ffd08a; font-size: 12px;
   }
   #timeUp.show { display: block; }
+
+  /* FDE training panel */
+  .fde summary { cursor: pointer; list-style: none; display: flex; flex-direction: column; gap: 2px; }
+  .fde summary::-webkit-details-marker { display: none; }
+  .fde summary strong::before { content: '▸ '; color: var(--ac); }
+  .fde[open] summary strong::before { content: '▾ '; }
+  .fde h4 { font-size: 13px; margin: 20px 0 8px; color: var(--t1); }
+  .fde p, .fde li { color: var(--t2); font-size: 13px; }
+  .fde ol, .fde ul { margin: 4px 0; padding-left: 20px; }
+  .fde-t { width: 100%; border-collapse: collapse; font-size: 12.5px; margin-bottom: 8px; }
+  .fde-t td { padding: 7px 9px; border-top: 1px solid var(--line); color: var(--t2); vertical-align: top; }
+  .fde-t td:last-child { white-space: nowrap; }
+  .fde-t td:nth-child(2):last-child { white-space: normal; }
+  .fde-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; }
+  .fde-grid > div { background: var(--panel2); border: 1px solid var(--line); border-radius: 10px; padding: 11px 13px; }
+  .fde-grid p { margin: 6px 0 0; }
+  .drill {
+    display: flex; gap: 12px; align-items: flex-start; flex-wrap: wrap;
+    background: var(--panel2); border: 1px solid var(--line); border-radius: 10px;
+    padding: 11px 13px; margin-bottom: 8px;
+  }
+  .drill > div { flex: 1; min-width: 220px; }
+  .drill b { font-size: 13px; }
+  .drill .hint { display: block; margin-top: 2px; }
+  .drill .done { color: var(--g); font-size: 11px; font-weight: 700; }
 </style>
 </head>
 <body>
@@ -203,6 +228,7 @@
             <option value="manager">Hiring manager — scope &amp; ownership</option>
             <option value="behavioural">Behavioural — STAR evidence</option>
             <option value="win-defence">WIN defence — defend your proposal</option>
+            <option value="fde">Forward deployed — customer role-play</option>
           </select>
         </div>
         <div>
@@ -250,6 +276,64 @@
       <div class="costnote" id="prepProgress" style="display:none"></div>
       <div id="prepTrace" class="panel" style="display:none;margin-top:10px;background:var(--panel2);max-height:44vh;overflow-y:auto"></div>
     </div>
+
+    <!-- ── FDE training ─────────────────────────────────────── -->
+    <details class="panel fde" id="fdeTraining">
+      <summary>
+        <strong>Forward Deployed Engineer training</strong>
+        <span class="hint">Customer-focused solutions: FDE, Solutions, Demo and Value Engineering roles</span>
+      </summary>
+
+      <h4>1 · What these interviews actually test</h4>
+      <p class="hint" style="margin:0 0 8px">Not "can you code". They test whether a customer would trust you in the room, and whether you build the thing that moves their number.</p>
+      <ol>
+        <li><b>Discovery</b> — you ask before you build. You find the metric that matters, who owns it and what it costs them today.</li>
+        <li><b>Scoping</b> — you turn a vague ask into a proof of concept in 2–4 weeks with a success criterion the customer signs off.</li>
+        <li><b>Solution &amp; demo</b> — you explain it in their language and tie every feature to a pain they told you.</li>
+        <li><b>Value</b> — rough ROI from numbers you asked for. Never invented.</li>
+        <li><b>Pushback &amp; ownership</b> — security, cost, "we tried AI and it failed", saying no, feeding gaps back to product, a deployment that broke on site.</li>
+      </ol>
+
+      <h4>2 · The "3+ years in Value / Applied AI / Solution / Demo Eng" question</h4>
+      <p>Count honestly. Only customer-facing or applied-AI work counts:</p>
+      <table class="fde-t">
+        <tr><td>Growlogic / Eeko.ai — freelance Solutions Architect, client-facing</td><td>Apr 2024 – Jul 2025</td><td>~15 mo</td></tr>
+        <tr><td>ChalOnline, TradingOS, MyAgentFirm — shipped applied AI to real users</td><td>Aug 2025 – Aug 2026</td><td>~13 mo</td></tr>
+        <tr><td>GE Healthcare — device ↔ EMR integrations in hospital settings (adjacent)</td><td>Sep 2020 – Jun 2021</td><td>~10 mo</td></tr>
+      </table>
+      <p>That is <b>~2.3 years strict</b>, or ~3 years if GE's integration work counts. On a form, pick the bracket that matches the strict number when you can. Choose "3+" only when you can defend it out loud like this:</p>
+      <div class="model-answer">"My product-adjacent time is about two and a half years. Fifteen months as a freelance solutions architect for Eeko.ai, where I took the founders' requirements and delivered their whole Azure platform. Then a year shipping three AI products end to end, where I was the engineer, the demo and the support desk. Before that, ten years of engineering, including hospital integrations at GE. So I bring deep build skills and real customer exposure, not a pure pre-sales background."</div>
+
+      <h4>3 · Five frameworks to rehearse</h4>
+      <div class="fde-grid">
+        <div><b>Discovery (ask these first)</b>
+          <ul><li>What happens today, step by step?</li><li>Which number gets worse when this goes wrong, and who is measured on it?</li><li>What have you already tried?</li><li>Where does the data live, and who can give me access?</li><li>What would make this a success in 30 days?</li></ul></div>
+        <div><b>POC scope (one sentence)</b>
+          <p>"In <i>N</i> weeks we connect <i>data source</i>, automate <i>one workflow</i> for <i>one team</i>, and succeed if <i>metric</i> moves from <i>X</i> to <i>Y</i>. Out of scope: …"</p></div>
+        <div><b>Demo storyline</b>
+          <ol><li>Their pain, in their words</li><li>Today's process (the "before")</li><li>Live: one workflow, end to end</li><li>The number it changes</li><li>The next step you want</li></ol></div>
+        <div><b>Value maths (out loud)</b>
+          <p>volume × time saved × cost per hour, plus errors avoided × cost per error. Example: 4,000 invoices/month × 6 min saved ≈ 400 hours/month. Say "rough, from your numbers", and get them to confirm.</p></div>
+        <div><b>Objections — A.C.E.C.</b>
+          <p><b>A</b>cknowledge → <b>C</b>larify ("what happened last time?") → <b>E</b>vidence (a real story or a small test) → <b>C</b>onfirm ("does that address it?")</p></div>
+        <div><b>Saying no</b>
+          <p>"Not by Friday, and here's why. What I can do by Friday is X, which gets you most of the value. Y goes to the product team with your use case attached."</p></div>
+      </div>
+
+      <h4>4 · Your real stories, mapped to FDE questions</h4>
+      <table class="fde-t">
+        <tr><td><b>"Tell me about taking a customer from requirement to production"</b></td><td>Eeko.ai: founders' brief → 6 Spring Boot services on AKS, ArgoCD zero-downtime deploys, WhatsApp delivery with zero missed sends.</td></tr>
+        <tr><td><b>"Integrating into a customer's messy systems"</b></td><td>GE: monitoring hardware ↔ EMR ↔ clinical UI, protocol transformation, where data errors are life-critical. MyAgentFirm MCP: per-user Gmail, Calendar, GitHub, Notion, Slack, Postgres.</td></tr>
+        <tr><td><b>"Tie your work to a business outcome"</b></td><td>Philips: Kafka → S3 decoupling, 70% faster dashboard load for clinicians. Observability stack, 30–40% lower MTTR.</td></tr>
+        <tr><td><b>"An AI system failing in front of users"</b></td><td>MyAgentFirm: LLM failover DeepInfra → Groq → Together AI; credits auto-refunded when a worker fails.</td></tr>
+        <tr><td><b>"Building trust when money is involved"</b></td><td>Atomic credit ledger: 11 pricing tiers, zero double-spend, full audit trail.</td></tr>
+        <tr><td><b>Honest gap</b></td><td>No quota-carrying pre-sales and no enterprise buyer committees. Say it, then pivot: "What I have done is be the only engineer facing the customer: I scoped it, built it and supported it."</td></tr>
+      </table>
+
+      <h4>5 · Drills — one a day, 15 minutes each</h4>
+      <p class="hint" style="margin:0 0 8px">Each drill starts a voice mock with the company selected above. The interviewer plays the customer and keeps one constraint hidden for you to find. The feedback report then grades discovery, scoping, value and pushback.</p>
+      <div id="fdeDrills"></div>
+    </details>
 
     <div class="panel">
       <h3 style="margin:0 0 8px;font-size:14px">Past interviews</h3>

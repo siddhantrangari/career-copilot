@@ -23,7 +23,7 @@ import {
  * short, frequent and latency-sensitive.
  */
 
-export const ROUNDS = ['screening', 'technical', 'manager', 'behavioural', 'win-defence'];
+export const ROUNDS = ['screening', 'technical', 'manager', 'behavioural', 'win-defence', 'fde'];
 
 const renderTranscript = (turns) =>
   turns
@@ -51,7 +51,7 @@ async function loadCompanyArtefacts(companyId) {
 export async function startInterview(payload = {}) {
   const {
     companyId, companyName, roleTitle, round = 'screening',
-    durationMin = 30, jobDescription,
+    durationMin = 30, jobDescription, scenario,
   } = payload;
 
   if (!ROUNDS.includes(round)) {
@@ -85,6 +85,8 @@ export async function startInterview(payload = {}) {
     jobDescription: jd,
     winDoc: winDoc?.markdown,
     research: company?.research,
+    // A drill from the FDE training panel: the customer situation to role-play.
+    scenario: typeof scenario === 'string' ? scenario.trim().slice(0, 2000) : '',
     candidate,
   });
 
