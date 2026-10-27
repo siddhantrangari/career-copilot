@@ -1,7 +1,9 @@
 import { many, one } from '../db/pool.js';
 
 /** The candidate profile + CAR bank, formatted for prompt injection. */
-export async function loadCandidateContext({ tags = [], limit = 12 } = {}) {
+// The whole story bank by default (it is small); a cap of 12 silently dropped
+// every story after the twelfth alphabetically. Short prompts pass their own limit.
+export async function loadCandidateContext({ tags = [], limit = 50 } = {}) {
   const profile = await one('SELECT * FROM profile WHERE id = $1', ['siddhant']);
 
   const achievements = tags.length

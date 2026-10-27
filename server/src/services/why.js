@@ -69,7 +69,7 @@ const clean = (s, n) => String(s || '').replace(/\s+/g, ' ').trim().slice(0, n);
 
 /** Profile small enough to resend with every batch: no resume body, no CAR narrative. */
 async function compactCandidate() {
-  const { profile, achievements } = await loadCandidateContext({ limit: 14 });
+  const { profile, achievements } = await loadCandidateContext({ limit: 50 });
   if (!profile) throw new Error('No candidate profile configured');
   const skills = Object.entries(profile.skills || {})
     .filter(([k, v]) => !['constraints', 'gap_answer'].includes(k) && Array.isArray(v))
