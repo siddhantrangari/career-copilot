@@ -198,6 +198,20 @@
   }
   renderDrills();
 
+  // Launched from the FDE Lab: a discovery role-play with that day's business,
+  // which is not a company in his pipeline, so it goes by name.
+  var labQs = new URLSearchParams(location.search);
+  var labCase = labQs.get('lab') ? {
+    day: labQs.get('lab'), company: labQs.get('company') || '', role: labQs.get('role') || '', scenario: labQs.get('scenario') || '',
+  } : null;
+  if (labCase) {
+    $('round').value = 'fde';
+    $('duration').value = '15';
+    $('role').value = 'Forward Deployed Engineer';
+    $('setupHint').textContent = 'FDE Lab day ' + labCase.day + ': the interviewer plays the ' + labCase.role + ' of ' +
+      labCase.company + '. Press Start mock interview.';
+  }
+
   $('fdeDrills').addEventListener('click', function (e) {
     var b = e.target.closest('[data-drill]');
     if (!b) return;
@@ -214,7 +228,7 @@
 
   $('startBtn').addEventListener('click', function () {
     var btn = $('startBtn');
-    var scenario = pendingScenario;
+    var scenario = pendingScenario || (labCase && labCase.scenario) || '';
     pendingScenario = '';
     recordMode = $('record').value;
     btn.disabled = true;
@@ -223,7 +237,8 @@
     api('/interview/start', {
       method: 'POST',
       body: {
-        companyId: $('company').value,
+        companyId: labCase ? undefined : $('company').value,
+        companyName: labCase ? labCase.company : undefined,
         roleTitle: $('role').value.trim(),
         round: $('round').value,
         durationMin: parseInt($('duration').value, 10),
@@ -1262,7 +1277,7 @@
   var qs = new URLSearchParams(location.search);
 
   // Launched from a company card: preselect it and pull the role through.
-  if (qs.get('company') && !qs.get('session')) {
+  if (qs.get('company') && !qs.get('session') && !qs.get('lab')) {
     var wantCompany = qs.get('company');
     var wantRole = qs.get('role') || '';
     var applyPrefill = function () {

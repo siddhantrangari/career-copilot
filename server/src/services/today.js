@@ -4,6 +4,7 @@ import { pipeline, interviewsFrom, followUpsFrom, parseLooseDate } from './diges
 import { listTargets, nextAction } from './targets.js';
 import { regionOf } from './apply-queue.js';
 import { openTasks } from './today-tasks.js';
+import { currentLabDay } from './fde-lab.js';
 
 /**
  * The "Today" board: his Daily System made live.
@@ -283,6 +284,13 @@ export async function buildToday(now = new Date()) {
     actions.push({ key: key('plan', 'mock'), type: 'mock', icon: '🎙', company: '',
       title: 'Practice a mock interview',
       detail: 'One round today — a company in your pipeline, or a general screening round' });
+  }
+
+  // His FDE Lab: today's day until all six steps are ticked.
+  const lab = await currentLabDay().catch(() => null);
+  if (lab) {
+    push({ key: key('lab', lab.day), type: 'lab', icon: '🧪', company: '', title: `FDE Lab · day ${lab.day} of 30`,
+      detail: `${lab.done} of 6 steps done · about 2 hours`, url: `/fde-lab.html#day-${lab.day}`, logKind: 'action_done' });
   }
 
   // 2. Follow-ups due (DM day 4, applications quiet 7 days) — the two oldest.

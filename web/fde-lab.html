@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FDE Lab — Career Copilot</title>
+<link rel="stylesheet" href="/bridge.css">
+<style>
+  :root {
+    --bg: #0b0d12; --panel: #141822; --panel2: #0f131b; --line: #232a38;
+    --t1: #e7ecf3; --t2: #a9b6c9; --t3: #7c8ba3;
+    --ac: #4a7cff; --g: #3ddc84; --y: #ffb020; --r: #ff6b6b;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--t1);
+    font: 14px/1.6 -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    padding-top: 34px;
+  }
+  a { color: #9fd3ff; }
+  .wrap { max-width: 1240px; margin: 0 auto; padding: 20px 18px 80px; display: grid; grid-template-columns: 250px 1fr; gap: 18px; }
+  .head { grid-column: 1 / -1; }
+  h1 { font-size: 20px; margin: 0 0 4px; }
+  .sub { color: var(--t3); font-size: 13px; }
+  .bar { height: 6px; background: var(--line); border-radius: 4px; overflow: hidden; margin-top: 10px; max-width: 420px; }
+  .bar i { display: block; height: 100%; background: var(--g); }
+
+  .days { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 8px; align-self: start; position: sticky; top: 46px; max-height: calc(100vh - 60px); overflow-y: auto; }
+  .days .wk { font-size: 10.5px; text-transform: uppercase; letter-spacing: .06em; color: var(--t3); padding: 8px 8px 4px; }
+  .days button { display: flex; gap: 8px; align-items: center; width: 100%; text-align: left; background: none; border: 0; color: var(--t2); padding: 6px 8px; border-radius: 8px; cursor: pointer; font: inherit; font-size: 12.5px; }
+  .days button:hover { background: var(--panel2); }
+  .days button.on { background: #1e2635; color: #fff; }
+  .days .n { flex: none; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: var(--panel2); border: 1px solid var(--line); font-size: 11px; font-weight: 700; }
+  .days .n.done { background: rgba(61,220,132,.15); border-color: rgba(61,220,132,.5); color: var(--g); }
+  .days .n.part { border-color: rgba(255,176,32,.6); color: var(--y); }
+  .days .t { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+  .main { min-width: 0; }
+  .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 16px 18px; margin-bottom: 14px; }
+  .meta { font-size: 11.5px; color: var(--t3); text-transform: uppercase; letter-spacing: .05em; }
+  .main h2 { font-size: 19px; margin: 4px 0 6px; }
+  .main h3 { font-size: 14px; margin: 0 0 8px; display: flex; align-items: center; gap: 8px; }
+  .main h3 .grow { flex: 1; }
+  .main p, .main li { color: var(--t2); font-size: 13px; }
+  .main ul, .main ol { margin: 4px 0; padding-left: 20px; }
+
+  .loop { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 8px; }
+  .step { background: var(--panel2); border: 1px solid var(--line); border-radius: 10px; padding: 9px 11px; display: flex; gap: 9px; align-items: flex-start; cursor: pointer; }
+  .step.done { border-color: rgba(61,220,132,.45); }
+  .step input { margin-top: 3px; accent-color: var(--g); }
+  .step b { display: block; font-size: 12.5px; color: var(--t1); }
+  .step span { font-size: 11.5px; color: var(--t3); }
+
+  .people { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 8px; }
+  .person { background: var(--panel2); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; font-size: 12.5px; color: var(--t2); }
+  .person b { color: var(--t1); }
+  .hidden-c { margin-top: 6px; }
+  .hidden-c .blur { filter: blur(5px); user-select: none; }
+
+  pre.copy { white-space: pre-wrap; background: var(--panel2); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; font: 12.5px/1.55 ui-monospace, SFMono-Regular, Menlo, monospace; color: #cfd8e6; margin: 0; max-height: 420px; overflow-y: auto; }
+  .btn { padding: 6px 12px; border-radius: 8px; border: 1px solid #2a3243; background: #1b2130; color: var(--t1); font: inherit; font-weight: 600; font-size: 12px; cursor: pointer; text-decoration: none; display: inline-block; }
+  .btn:hover { border-color: var(--ac); }
+  .btn.pri { background: var(--ac); border-color: var(--ac); color: #fff; }
+  .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  .src { background: var(--panel2); border: 1px solid var(--line); border-radius: 10px; padding: 9px 12px; margin-bottom: 6px; font-size: 12.5px; color: var(--t2); }
+  .src b { color: var(--t1); }
+
+  label.f { display: block; font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--t3); margin: 10px 0 4px; }
+  textarea, input[type=text] { width: 100%; padding: 9px 11px; background: var(--panel2); border: 1px solid #2a3243; border-radius: 9px; color: var(--t1); font: inherit; font-size: 13px; }
+  textarea { min-height: 110px; resize: vertical; }
+  .saved { font-size: 11.5px; color: var(--g); }
+  details.panel > summary { cursor: pointer; font-weight: 700; font-size: 14px; list-style: none; }
+  details.panel > summary::-webkit-details-marker { display: none; }
+  details.panel > summary::before { content: '▸ '; color: var(--ac); }
+  details.panel[open] > summary::before { content: '▾ '; }
+  .rules { font-size: 12px; color: var(--t3); margin-top: 8px; }
+
+  @media (max-width: 860px) {
+    .wrap { grid-template-columns: 1fr; }
+    .days { position: static; max-height: none; display: flex; overflow-x: auto; gap: 4px; padding: 6px; }
+    .days .wk { display: none; }
+    .days button { flex: none; width: auto; }
+    .days .t { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div id="cc-nav" style="position:fixed;top:0;left:0;right:0;z-index:9997;display:flex;gap:2px;
+     padding:6px 14px;background:rgba(10,13,18,.92);backdrop-filter:blur(8px);
+     border-bottom:1px solid #232a38;font:600 12px -apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif">
+  <a href="/" data-short="Companies" style="padding:5px 12px;border-radius:7px;color:#a9b6c9;text-decoration:none">Companies &amp; Pipeline</a>
+  <a href="/outreach.html" data-short="Studio" style="padding:5px 12px;border-radius:7px;color:#a9b6c9;text-decoration:none">Outreach &amp; Resume</a>
+  <a href="/interview.html" data-short="Interview" style="padding:5px 12px;border-radius:7px;color:#a9b6c9;text-decoration:none">Interview Room</a>
+  <a href="/fde-lab.html" data-short="FDE Lab" style="padding:5px 12px;border-radius:7px;background:#1e2635;color:#fff;text-decoration:none">FDE Lab</a>
+</div>
+
+<div class="wrap">
+  <div class="head">
+    <h1>FDE Lab — 30 days, 30 businesses</h1>
+    <div class="sub">Every day: a real business problem on real public data, a C-level discovery call, a value estimate, a build, a video and a post. About 2 hours a day.</div>
+    <div class="bar"><i id="bar" style="width:0%"></i></div>
+    <div class="sub" id="progressText" style="margin-top:4px"></div>
+  </div>
+  <nav class="days" id="days"></nav>
+  <main class="main" id="main"><div class="panel">Loading…</div></main>
+</div>
+
+<script src="/bridge.js"></script>
+<script src="/fde-lab-data-1.js"></script>
+<script src="/fde-lab-data-2.js"></script>
+<script src="/fde-lab.js"></script>
+</body>
+</html>

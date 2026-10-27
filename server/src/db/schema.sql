@@ -710,3 +710,24 @@ CREATE TABLE IF NOT EXISTS today_task_reminders (
   task_id   BIGINT PRIMARY KEY REFERENCES today_tasks (id) ON DELETE RESTRICT,
   sent_at   TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+
+-- FDE Lab: his 30-day practice programme. Insert-only — ticking or unticking
+-- a step adds a row and the latest row wins; notes and links work the same
+-- way, so history is kept and nothing is updated or deleted.
+CREATE TABLE IF NOT EXISTS fde_lab_steps (
+  id     BIGSERIAL PRIMARY KEY,
+  day    INTEGER NOT NULL CHECK (day BETWEEN 1 AND 30),
+  step   TEXT NOT NULL,
+  done   BOOLEAN NOT NULL,
+  at     TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS fde_lab_steps_day_idx ON fde_lab_steps (day, step, at DESC);
+
+CREATE TABLE IF NOT EXISTS fde_lab_notes (
+  id     BIGSERIAL PRIMARY KEY,
+  day    INTEGER NOT NULL CHECK (day BETWEEN 1 AND 30),
+  kind   TEXT NOT NULL CHECK (kind IN ('notes', 'video', 'post', 'repo')),
+  value  TEXT NOT NULL DEFAULT '',
+  at     TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS fde_lab_notes_day_idx ON fde_lab_notes (day, kind, at DESC);

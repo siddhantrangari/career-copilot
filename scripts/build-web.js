@@ -30,6 +30,7 @@ const NAV = `
   <a href="/" data-short="Companies" style="padding:4px 12px;border-radius:6px;color:#a9b6c9;text-decoration:none">Companies &amp; Pipeline</a>
   <a href="/outreach.html" data-short="Studio" style="padding:4px 12px;border-radius:6px;color:#a9b6c9;text-decoration:none">Outreach &amp; Studio</a>
   <a href="/interview.html" data-short="Interview" style="padding:4px 12px;border-radius:6px;color:#a9b6c9;text-decoration:none">Interview Room</a>
+  <a href="/fde-lab.html" data-short="FDE Lab" style="padding:4px 12px;border-radius:6px;color:#a9b6c9;text-decoration:none">FDE Lab</a>
 </div>
 <script>
   (function () {
@@ -94,12 +95,18 @@ async function build() {
   await fs.copyFile(path.join(ROOT, 'web/prototype-actions.js'), path.join(OUT, 'prototype-actions.js'));
   await fs.copyFile(path.join(ROOT, 'web/interview.html'), path.join(OUT, 'interview.html'));
   await fs.copyFile(path.join(ROOT, 'web/interview.js'), path.join(OUT, 'interview.js'));
+  for (const f of ['fde-lab.html', 'fde-lab.js', 'fde-lab-data-1.js', 'fde-lab-data-2.js']) {
+    await fs.copyFile(path.join(ROOT, 'web', f), path.join(OUT, f));
+  }
 
   const v = {
     bridgeJs: await hashOf(path.join(ROOT, 'web/bridge.js')),
     bridgeCss: await hashOf(path.join(ROOT, 'web/bridge.css')),
     actions: await hashOf(path.join(ROOT, 'web/prototype-actions.js')),
     interviewJs: await hashOf(path.join(ROOT, 'web/interview.js')),
+    labJs: await hashOf(path.join(ROOT, 'web/fde-lab.js')),
+    labData1: await hashOf(path.join(ROOT, 'web/fde-lab-data-1.js')),
+    labData2: await hashOf(path.join(ROOT, 'web/fde-lab-data-2.js')),
   };
 
   // The interview page references its assets directly, so version those too.
@@ -109,6 +116,16 @@ async function build() {
     .replace('"/interview.js"', `"/interview.js?v=${v.interviewJs}"`)
     .replace('<head>', `<head>\n<script>window.CC_ASSET_VERSION=${JSON.stringify(v.actions)};</script>`);
   await fs.writeFile(path.join(OUT, 'interview.html'), interviewHtml);
+
+  // The FDE Lab page, versioned the same way.
+  const labHtml = (await fs.readFile(path.join(OUT, 'fde-lab.html'), 'utf8'))
+    .replace('/bridge.css"', `/bridge.css?v=${v.bridgeCss}"`)
+    .replace('"/bridge.js"', `"/bridge.js?v=${v.bridgeJs}"`)
+    .replace('"/fde-lab-data-1.js"', `"/fde-lab-data-1.js?v=${v.labData1}"`)
+    .replace('"/fde-lab-data-2.js"', `"/fde-lab-data-2.js?v=${v.labData2}"`)
+    .replace('"/fde-lab.js"', `"/fde-lab.js?v=${v.labJs}"`)
+    .replace('<head>', `<head>\n<script>window.CC_ASSET_VERSION=${JSON.stringify(v.actions)};</script>`);
+  await fs.writeFile(path.join(OUT, 'fde-lab.html'), labHtml);
 
   for (const page of PAGES) {
     let html = await fs.readFile(path.join(ROOT, page.src), 'utf8');

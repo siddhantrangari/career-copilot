@@ -2742,7 +2742,7 @@
       (a.type === 'apply' && a.jobId ? '<button type="button" data-tailor="' + esc(a.jobId) + '" data-co="' + esc(a.company) + '" data-role="' + esc(a.role || '') + '" data-url="' + esc(a.url || '') + '" title="Tailor your resume to this role first">📄 Tailor</button>' : '') +
       (a.type === 'interview' && a.prepId ? '<a href="/interview.html?prep=' + esc(a.prepId) + '" title="Your prep guide">📘 Prep guide</a>' : '') +
       (a.type === 'interview' && a.companyId ? '<a href="/interview.html?company=' + encodeURIComponent(a.companyId) + (a.role ? '&role=' + encodeURIComponent(a.role) : '') + '" title="' + (a.prepId ? 'Run a mock round' : 'Build the prep guide, then run a mock round') + '">' + (a.prepId ? '🎙 Mock' : '🧠 Prep & mock') + '</a>' : '') +
-      (a.url && (a.type === 'follow_up' || a.type === 'task') ? '<a target="_blank" rel="noopener" href="' + esc(a.url) + '">Open ↗</a>' : '') +
+      (a.url && (a.type === 'follow_up' || a.type === 'task' || a.type === 'lab') ? '<a target="_blank" rel="noopener" href="' + esc(a.url) + '">Open ↗</a>' : '') +
       (a.type === 'outreach' ? '<button type="button" data-detail-name="' + esc(a.company) + '" title="People to reach, news, and DM drafts">👥 People</button>' : '') +
       (a.companyId && typeof window.openTrack === 'function' ? '<button type="button" data-open="' + esc(a.companyId) + '">Track</button>' : '') +
       (a.type === 'apply' && a.jobId
