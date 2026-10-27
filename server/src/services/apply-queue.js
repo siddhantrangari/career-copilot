@@ -211,8 +211,10 @@ export async function markApplied(jobId, { tailored = false } = {}) {
     role = { id: `role-${Date.now()}`, title: job.title, stage: 'applied', pay: '', jobLink: job.url, jdText: '', appliedAt: appliedOn(),
       interviewAt: '', outreachSent: '', notes: '', isPrimary: roles.length === 0, quick: !tailored, jobId };
     roles.push(role);
-  } else if (STAGE_ORDER.indexOf(role.stage || 'new') < STAGE_ORDER.indexOf('applied')) {
-    role.stage = 'applied';
+  } else {
+    // Never move a role backwards (networking stays networking), but always
+    // record when he applied and from which posting, or the day's count misses it.
+    if (STAGE_ORDER.indexOf(role.stage || 'new') < STAGE_ORDER.indexOf('applied')) role.stage = 'applied';
     role.appliedAt = role.appliedAt || appliedOn();
     role.jobId = role.jobId || jobId;
   }
