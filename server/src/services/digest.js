@@ -99,10 +99,15 @@ export function parseLooseDate(value) {
     if (month < 1 || month > 12 || day < 1 || day > 31) return null;
     return new Date(Date.UTC(y, month - 1, day, 6, 30)); // midday IST
   }
-  const t = Date.parse(s); // "24 Oct 2026" — parsed as local midnight, so re-anchor to midday IST
+  // "27 Oct" with no year parses as 2001. Older bot entries were saved that
+  // way, so take the current year — or last year if that lands in the future.
+  const hasYear = !/^(\d{1,2}\s+[a-z]{3,}\.?|[a-z]{3,}\.?\s+\d{1,2})$/i.test(s); // "27 Oct" / "Oct 27"
+  const t = Date.parse(hasYear ? s : `${s} ${new Date().getFullYear()}`); // "24 Oct 2026" — parsed as local midnight, so re-anchor to midday IST
   if (Number.isNaN(t)) return null;
   const local = new Date(t);
-  return new Date(Date.UTC(local.getFullYear(), local.getMonth(), local.getDate(), 6, 30));
+  const d = new Date(Date.UTC(local.getFullYear(), local.getMonth(), local.getDate(), 6, 30));
+  if (!hasYear && d.getTime() > Date.now() + 86_400_000) d.setUTCFullYear(d.getUTCFullYear() - 1);
+  return d;
 }
 
 function rolesOf(notes) {

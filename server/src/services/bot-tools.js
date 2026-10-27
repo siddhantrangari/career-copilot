@@ -26,8 +26,9 @@ const clip = (s, n) => {
   const t = String(s ?? '');
   return t.length > n ? `${t.slice(0, n)}…` : t;
 };
+// With the year: "27 Oct" alone parses as 2001, so the role never counts as applied today.
 const today = () => new Intl.DateTimeFormat('en-IN', {
-  timeZone: config.digest.timeZone, day: 'numeric', month: 'short',
+  timeZone: config.digest.timeZone, day: 'numeric', month: 'short', year: 'numeric',
 }).format(new Date());
 
 // ── Lookups ───────────────────────────────────────────────────────────
