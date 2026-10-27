@@ -34,18 +34,28 @@ export const HARD_GAPS = [
   { gap: 'Python as the main language (years of Python, Django/Flask)', cap: 55,
     re: '(\\d+\\+?\\s*(years|yrs)[^.]{0,50}\\mpython\\M|\\mpython\\M[^.]{0,25}\\d+\\+?\\s*(years|yrs)|(strong|expert|advanced|deep|extensive|excellent|solid|proven|mastery)[^.]{0,30}\\mpython\\M|\\mpython\\M (expertise|mastery|expert)|(experience|proficien|expert|hands-on|must|strong|knowledge)[^.]{0,60}\\m(django|flask)\\M)',
     unless: '\\mjava\\M' },
+  // Machine learning roles by title (ML engineer, MLOps, data/applied/research scientist);
+  // a software, backend, full-stack, forward-deployed or solutions title that mentions AI/ML is left alone.
+  { gap: 'Machine learning role (ML engineering, MLOps, data science)', cap: 55, field: 'title',
+    re: '(machine learning|\\mml\\M|\\mmlops\\M|ml ops|data scien|applied scien|research (scien|engineer)|deep learning|computer vision)',
+    unless: '(software engineer|backend|full.?stack|forward deployed|solutions)' },
+  // ...and by requirement: ML/deep learning experience, MLOps, model training or fine-tuning, computer vision.
+  // A bare "AI/ML" is left alone — LLM application roles say it too.
+  { gap: 'Machine learning experience (ML/deep learning, MLOps, model training)', cap: 55,
+    re: '(\\d+\\+?\\s*(years|yrs)[^.]{0,40}(machine learning|deep learning)|(experience|proficien|expert|strong|hands-on|background|degree|track record)[^.]{0,40}(machine learning|deep learning|\\mmlops\\M|model (training|development|fine-tuning)|computer vision|statistical model))' },
 ];
 
-/** Cap fit and note the gap on open roles whose JD requires what he lacks. */
+/** Cap fit and note the gap on open roles whose JD (or title, for field: 'title') requires what he lacks. */
 export async function applyHardGaps() {
   let capped = 0;
   for (const g of HARD_GAPS) {
+    const col = g.field === 'title' ? 'title' : 'description';
     const r = await query(
       `UPDATE jobs SET fit_score = LEAST(fit_score, $1),
               why_role = CASE WHEN why_role IS NULL OR why_role = '' THEN 'Gap: ' || $2
                               ELSE why_role || '; gap: ' || $2 END
-       WHERE closed_at IS NULL AND fit_score > $1 AND description ~* $3
-         AND ($4::text IS NULL OR description !~* $4)`,
+       WHERE closed_at IS NULL AND fit_score > $1 AND ${col} ~* $3
+         AND ($4::text IS NULL OR ${col} !~* $4)`,
       [g.cap, g.gap, g.re, g.unless || null],
     );
     capped += r.rowCount || 0;
@@ -71,7 +81,7 @@ async function compactCandidate() {
 Headline: ${profile.headline}
 Target roles: ${(profile.target_roles || []).join(', ')}
 Targets: Bangalore/Bengaluru or remote in India; EU remote; Gulf; global remote. Avoids DSA/LeetCode-style interviews.
-Has NOT worked with: PyTorch, TensorFlow, JAX or training ML models (he builds LLM applications — agents, RAG, MCP — not models); C#/.NET; Django or Flask. Python is a secondary language for him (FastAPI services, data pipelines) — his main stack is Java/Spring Boot, React and Node.js.
+Has NOT worked with: machine learning engineering — PyTorch, TensorFlow, JAX, training or fine-tuning models, MLOps, computer vision, data science (he builds LLM applications — agents, RAG, MCP — not models); C#/.NET; Django or Flask. Python is a secondary language for him (FastAPI services, data pipelines) — his main stack is Java/Spring Boot, React and Node.js.
 Summary: ${clean(profile.summary, 500)}
 Skills:
 ${skills}
@@ -92,7 +102,7 @@ Also give "fit", an integer 0-100 for how well this role suits him, from the sam
 - 85-100: one of his target role types, most required skills proven in his work, location acceptable.
 - 70-84: target role type, many skills proven, one or two real gaps.
 - 50-69: adjacent role, or several gaps in required skills.
-- 30-49: major gap in core stack or domain (e.g. a language or platform he has never used). A JD that requires PyTorch/TensorFlow/ML model training, a C#/.NET backend, or Python as the main language (years of Python, strong/expert Python, Django/Flask) with no Java option, is at most 55.
+- 30-49: major gap in core stack or domain (e.g. a language or platform he has never used). A machine learning role (ML engineer, MLOps, data/applied/research scientist), a JD that requires ML/deep-learning experience, PyTorch/TensorFlow, model training or fine-tuning, a C#/.NET backend, or Python as the main language (years of Python, strong/expert Python, Django/Flask) with no Java option, is at most 55.
 - 0-29: not his field (mobile-native, hardware/firmware, sales, pure research).
 Location: Bangalore/Bengaluru, India-remote, EU-remote, Gulf and global remote are acceptable; other on-site cities lower fit by 10-20. Title only (no JD): at most 60.
 ${RULES.replace('{"id":"<id>","why":"<line>"}', '{"id":"<id>","why":"<line>","fit":<0-100>}')}`
