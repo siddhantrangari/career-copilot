@@ -32,10 +32,10 @@ const PREFERRED = /\b(luxembourg|sydney)\b/i;
 const OTHER_INDIA = /\b(mumbai|pune|hyderabad|chennai|delhi|gurgaon|gurugram|noida|kolkata|ahmedabad|kochi|jaipur|chandigarh|coimbatore|indore|thiruvananthapuram|trivandrum)\b/i;
 
 const VISA_YES = /(visa sponsorship (is )?(available|provided|offered|supported)|we (can |will |do |are able to )?sponsor|sponsor(ing|ship)? (of |for )?(work |employment )?(visas?|permits?)|offer(s|ing)? (visa )?sponsorship|sponsorship (is )?available|blue card|h-?1b (sponsorship|transfer)|skilled worker visa)/i;
-const VISA_NO = /((not|unable to|cannot|can't|won't|will not|do not|don't|no) (be able to )?(provide |offer |support )?(visa |immigration )?sponsor|sponsorship (is )?not (available|provided|offered)|without (the need for )?(visa )?sponsorship|must (already )?(have|hold|be) (the )?(legal |unrestricted )?(right|authori[sz]ed|eligible) to work|no visa)/i;
+const VISA_NO = /((not|unable to|cannot|can't|won't|will not|do not|don't|no) (currently )?(be )?(able to )?(provide |offer |support )?(visa |immigration )?sponsor|sponsorship (is )?not (available|provided|offered)|without (the need for )?(visa )?sponsorship|must (already )?(have|hold|be) (the )?(legal |unrestricted )?(right|authori[sz]ed|eligible) to work|no visa)/i;
 const RELOC_YES = /(relocation (assistance|support|package|bonus|allowance|stipend|benefits?|is (available|provided|offered))|(help|assist|support)(s|ing)? (you |with )?(relocat|moving)|relocation to .{2,40} (is )?(provided|supported|available)|we (will |can )?relocate|open to relocation)/i;
 const LOCKED_JD = /(must (be )?(located|based|reside) in|only (open|available) to candidates in)/i;
-const RELOC_NO = /(no relocation|relocation (is )?not (available|provided|offered|supported)|not (offer|provide|support)(ing)? relocation)/i;
+const RELOC_NO = /(no relocation|relocation ((assistance|support|package|benefits?) )?(is |are )?not (available|provided|offered|supported)|not (offer|provide|support)(ing)? relocation)/i;
 
 /** One sentence around the match, so he can see the evidence. */
 function snippet(text, re) {
