@@ -29,6 +29,11 @@ export const HARD_GAPS = [
     re: '((experience|proficien|expert|familiar|knowledge|must|hands-on|skills|background).{0,80}(pytorch|tensorflow|\\mjax\\M|\\mkeras\\M|scikit-learn|sklearn)|train(ing)? (ml|machine learning|deep learning) models)' },
   // .NET backends; a JD that also takes Java is left alone.
   { gap: 'C#/.NET backend', cap: 50, re: '(\\mc#|asp\\.net|\\.net (core|framework)|\\mdotnet\\M)', unless: '\\mjava\\M' },
+  // Python as the main language: years of it, "strong/expert Python", or Django/Flask.
+  // He uses Python on the side (FastAPI, data pipelines); a JD that also takes Java is left alone.
+  { gap: 'Python as the main language (years of Python, Django/Flask)', cap: 55,
+    re: '(\\d+\\+?\\s*(years|yrs)[^.]{0,50}\\mpython\\M|\\mpython\\M[^.]{0,25}\\d+\\+?\\s*(years|yrs)|(strong|expert|advanced|deep|extensive|excellent|solid|proven|mastery)[^.]{0,30}\\mpython\\M|\\mpython\\M (expertise|mastery|expert)|(experience|proficien|expert|hands-on|must|strong|knowledge)[^.]{0,60}\\m(django|flask)\\M)',
+    unless: '\\mjava\\M' },
 ];
 
 /** Cap fit and note the gap on open roles whose JD requires what he lacks. */
@@ -66,7 +71,7 @@ async function compactCandidate() {
 Headline: ${profile.headline}
 Target roles: ${(profile.target_roles || []).join(', ')}
 Targets: Bangalore/Bengaluru or remote in India; EU remote; Gulf; global remote. Avoids DSA/LeetCode-style interviews.
-Has NOT worked with: PyTorch, TensorFlow, JAX or training ML models (he builds LLM applications — agents, RAG, MCP — not models); C#/.NET.
+Has NOT worked with: PyTorch, TensorFlow, JAX or training ML models (he builds LLM applications — agents, RAG, MCP — not models); C#/.NET; Django or Flask. Python is a secondary language for him (FastAPI services, data pipelines) — his main stack is Java/Spring Boot, React and Node.js.
 Summary: ${clean(profile.summary, 500)}
 Skills:
 ${skills}
@@ -87,7 +92,7 @@ Also give "fit", an integer 0-100 for how well this role suits him, from the sam
 - 85-100: one of his target role types, most required skills proven in his work, location acceptable.
 - 70-84: target role type, many skills proven, one or two real gaps.
 - 50-69: adjacent role, or several gaps in required skills.
-- 30-49: major gap in core stack or domain (e.g. a language or platform he has never used). A JD that requires PyTorch/TensorFlow/ML model training, or a C#/.NET backend, is at most 55.
+- 30-49: major gap in core stack or domain (e.g. a language or platform he has never used). A JD that requires PyTorch/TensorFlow/ML model training, a C#/.NET backend, or Python as the main language (years of Python, strong/expert Python, Django/Flask) with no Java option, is at most 55.
 - 0-29: not his field (mobile-native, hardware/firmware, sales, pure research).
 Location: Bangalore/Bengaluru, India-remote, EU-remote, Gulf and global remote are acceptable; other on-site cities lower fit by 10-20. Title only (no JD): at most 60.
 ${RULES.replace('{"id":"<id>","why":"<line>"}', '{"id":"<id>","why":"<line>","fit":<0-100>}')}`
