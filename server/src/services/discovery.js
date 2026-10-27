@@ -16,6 +16,11 @@ import { cleanJdText } from './autofill.js';
  */
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+// Keep the whole posting. Benefits such as visa sponsorship and relocation sit
+// near the end, and a 4,000-character cap cut them off, so abroad roles that
+// do sponsor were filed as "sponsorship not stated". Prompts that read the JD
+// take their own short slice.
+const MAX_JD = 20000;
 const UA = 'career-copilot/1.0 (personal job search tool)';
 
 // ── The three board APIs, normalised to one shape ─────────────────────
@@ -28,7 +33,7 @@ const BOARDS = {
       url: j.absolute_url,
       location: j.location?.name || '',
       postedAt: j.updated_at || j.first_published || null,
-      description: cleanJdText(j.content || '').slice(0, 4000),
+      description: cleanJdText(j.content || '').slice(0, MAX_JD),
     })),
   },
   lever: {
@@ -39,7 +44,7 @@ const BOARDS = {
       url: j.hostedUrl,
       location: j.categories?.location || '',
       postedAt: j.createdAt ? new Date(j.createdAt).toISOString() : null,
-      description: cleanJdText(j.descriptionPlain || j.description || '').slice(0, 4000),
+      description: cleanJdText(j.descriptionPlain || j.description || '').slice(0, MAX_JD),
     })),
   },
   ashby: {
@@ -50,7 +55,7 @@ const BOARDS = {
       url: j.jobUrl || j.applyUrl,
       location: j.location || '',
       postedAt: j.publishedAt || null,
-      description: cleanJdText(j.descriptionPlain || j.descriptionHtml || '').slice(0, 4000),
+      description: cleanJdText(j.descriptionPlain || j.descriptionHtml || '').slice(0, MAX_JD),
     })),
   },
 
@@ -66,7 +71,7 @@ const BOARDS = {
       url: j.url || j.application_url,
       location: [j.city, j.country].filter(Boolean).join(', '),
       postedAt: j.published_on || null,
-      description: cleanJdText(j.description || '').slice(0, 4000),
+      description: cleanJdText(j.description || '').slice(0, MAX_JD),
     })),
   },
   recruitee: {
@@ -77,7 +82,7 @@ const BOARDS = {
       url: j.careers_url || j.careers_apply_url,
       location: [j.city, j.country].filter(Boolean).join(', '),
       postedAt: j.published_at || null,
-      description: cleanJdText(j.description || '').slice(0, 4000),
+      description: cleanJdText(j.description || '').slice(0, MAX_JD),
     })),
   },
   smartrecruiters: {
@@ -350,6 +355,9 @@ export async function runDiscovery({ trigger = 'manual', companyIds = null, minR
                posted_at = COALESCE(EXCLUDED.posted_at, jobs.posted_at),
                relevance = EXCLUDED.relevance,
                matched_roles = EXCLUDED.matched_roles,
+               -- Refresh a description that was stored cut short; never replace it with a shorter one.
+               description = CASE WHEN length(EXCLUDED.description) > length(COALESCE(jobs.description, ''))
+                                  THEN EXCLUDED.description ELSE jobs.description END,
                seen_at = now(),
                closed_at = NULL
              RETURNING (xmax = 0) AS inserted, dismissed`,
