@@ -48,7 +48,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);min-heig
 .jwhy{font-size:10.5px;color:#9fd3ff;white-space:normal;margin-top:2px;line-height:1.4}
 .pay{font-family:'JetBrains Mono';font-size:11px;font-weight:600;color:var(--g);background:rgba(56,217,169,.1);padding:2px 7px;border-radius:4px}
 /* KANBAN */
-.kanban{display:grid;grid-template-columns:repeat(9,minmax(160px,1fr));gap:10px;overflow-x:auto;padding-bottom:12px}
+.kanban{display:grid;grid-template-columns:repeat(10,minmax(160px,1fr));gap:10px;overflow-x:auto;padding-bottom:12px}
 .kcol{background:var(--s1);border:1px solid var(--bd);border-radius:8px;min-height:380px;display:flex;flex-direction:column;transition:border-color .15s,background .15s,box-shadow .15s}
 .kcol.drag-over{border-color:#38bdf8!important;background:rgba(56,189,248,.07)!important;box-shadow:0 0 0 2px rgba(56,189,248,.25),inset 0 0 20px rgba(56,189,248,.05)!important}
 .khead{padding:10px 12px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--bd);user-select:none}
@@ -116,7 +116,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);min-heig
 .ptable tr:hover td{background:rgba(255,255,255,.02)}
 .stage{font-size:10px;font-weight:600;padding:2px 8px;border-radius:10px;white-space:nowrap}
 .s-new{background:rgba(79,142,247,.15);color:var(--ac)}.s-interested{background:rgba(251,146,60,.18);color:#fb923c}.s-applied{background:rgba(56,189,248,.18);color:#38bdf8}.s-networking{background:rgba(247,201,72,.15);color:var(--y)}
-.s-call{background:rgba(181,123,238,.15);color:var(--p)}.s-win{background:rgba(56,217,169,.15);color:var(--g)}
+.s-call{background:rgba(181,123,238,.15);color:var(--p)}.s-win{background:rgba(56,217,169,.15);color:var(--g)}.s-screening{background:rgba(167,139,250,.16);color:#a78bfa}
 .s-interview{background:rgba(255,107,107,.15);color:var(--r)}.s-offer{background:rgba(56,217,169,.3);color:#fff}
 .s-failed{background:rgba(74,85,120,.3);color:var(--t3)}
 /* CONNECTIONS */
@@ -205,7 +205,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);min-heig
     <select id="pf" onchange="renderPipeline()" style="background:var(--s2);border:1px solid var(--bd);border-radius:5px;padding:5px 8px;color:var(--t);font-size:12px;font-family:inherit">
       <option value="all">All Stages</option>
       <option value="new">New</option><option value="interested">Interested</option><option value="applied">Applied</option><option value="networking">Networking</option>
-      <option value="call">Call</option><option value="win">WIN Sent</option>
+      <option value="call">Call</option><option value="win">WIN Sent</option><option value="screening">Screening / Assignment</option>
       <option value="interview">Interview</option><option value="offer">Offer</option><option value="failed">Closed</option>
     </select>
     <div class="vtog">
@@ -390,7 +390,7 @@ Format as a numbered table.</div>
               <option value="applied">Applied</option>
               <option value="networking">Networking</option>
               <option value="call">Call Scheduled/Done</option>
-              <option value="win">WIN Doc Sent</option>
+              <option value="win">WIN Doc Sent</option><option value="screening">Screening / Assignment</option>
               <option value="interview">Interview</option>
               <option value="offer">Offer 🎉</option>
               <option value="failed">Closed</option>
@@ -501,7 +501,7 @@ Format as a numbered table.</div>
             <label>Pipeline Stage</label>
             <select id="tStage" onchange="onPipelineStageChange()">
               <option value="new">New</option><option value="interested">Interested (Target / Shortlisted)</option><option value="applied">Applied</option><option value="networking">Networking</option>
-              <option value="call">Call Scheduled/Done</option><option value="win">WIN Doc Sent</option>
+              <option value="call">Call Scheduled/Done</option><option value="win">WIN Doc Sent</option><option value="screening">Screening / Assignment</option>
               <option value="interview">Interview</option><option value="offer">Offer 🎉</option><option value="failed">Closed</option>
             </select>
           </div>
@@ -561,7 +561,7 @@ Format as a numbered table.</div>
           <option value="fu1">Follow-up 1 Sent</option>
           <option value="fu2">Follow-up 2 Sent</option>
           <option value="fu3">Follow-up 3 Sent</option>
-          <option value="win">WIN Doc Shared</option>
+          <option value="win">WIN Doc Shared</option><option value="screening">Screening / Assignment</option>
           <option value="call">Call Discussion Done</option>
           <option value="ref">Referred 🎉</option>
           <option value="ab">Abandoned</option>
@@ -3418,8 +3418,8 @@ const COS=[
   }
 ];
 const RL={fde:'FDE',ai:'AI Eng',fs:'Full-Stack',se:'Solutions Eng'};
-const SC={new:'s-new',interested:'s-interested',applied:'s-applied',networking:'s-networking',call:'s-call',win:'s-win',interview:'s-interview',offer:'s-offer',failed:'s-failed'};
-const SL={new:'New',interested:'Interested',applied:'Applied',networking:'Networking',call:'Call',win:'WIN Sent',interview:'Interview',offer:'Offer 🎉',failed:'Closed'};
+const SC={new:'s-new',interested:'s-interested',applied:'s-applied',networking:'s-networking',call:'s-call',win:'s-win',screening:'s-screening',interview:'s-interview',offer:'s-offer',failed:'s-failed'};
+const SL={new:'New',interested:'Interested',applied:'Applied',networking:'Networking',call:'Call',win:'WIN Sent',screening:'Screening',interview:'Interview',offer:'Offer 🎉',failed:'Closed'};
 const CONN_STATUS={req:'Connection Req',dm:'DM Sent',reply:'Reply ✓',fu1:'Follow-up 1',fu2:'Follow-up 2',fu3:'Follow-up 3',win:'WIN Shared',call:'Call Done',ref:'Referred 🎉',ab:'Abandoned'};
 const CONN_CSS={req:'cs-req',dm:'cs-dm',reply:'cs-reply',fu1:'cs-fu',fu2:'cs-fu',fu3:'cs-fu',win:'cs-win',call:'cs-call',ref:'cs-ref',ab:'cs-ab'};
 
@@ -4065,7 +4065,7 @@ function getCompanyTrackedRoles(companyId) {
       jobLink: primaryLink,
       jdText: primaryJd,
       jdFile: tr.jdFile || (c && c.jdFile) || null,
-      appliedAt: (['applied','networking','call','win','interview','offer'].includes(tr.stage)) ? (tr.appliedAt || tr.updated || 'Logged') : '',
+      appliedAt: (['applied','networking','call','win','screening','interview','offer'].includes(tr.stage)) ? (tr.appliedAt || tr.updated || 'Logged') : '',
       outreachSent: tr.msgs || '',
       notes: tr.notes || '',
       tailoredResumeId: tr.tailoredResumeId || null,
@@ -4394,7 +4394,7 @@ function renderTable(all,filter='all'){
             <div style="display:flex;flex-direction:column;gap:4px;margin-top:4px">
               ${roles.map(r => {
                 const docs = getRoleDocuments(c.id, r);
-                const stageColor = {new:'var(--ac)',interested:'#fb923c',applied:'#38bdf8',networking:'var(--y)',call:'var(--p)',win:'var(--g)',interview:'var(--r)',offer:'var(--g)',failed:'var(--t3)'}[r.stage || 'new'] || 'var(--ac)';
+                const stageColor = {new:'var(--ac)',interested:'#fb923c',applied:'#38bdf8',networking:'var(--y)',call:'var(--p)',win:'var(--g)',screening:'#a78bfa',interview:'var(--r)',offer:'var(--g)',failed:'var(--t3)'}[r.stage || 'new'] || 'var(--ac)';
                 const hasRes = !!docs.resume;
                 const resScore = docs.resume ? (docs.resume.match_score || docs.resume.matchScore || 90) : 0;
                 const hasCl = !!docs.coverLetter;
@@ -4447,8 +4447,8 @@ function renderTable(all,filter='all'){
 }
 
 function renderKanban(all,filter='all'){
-  const stages=['new','interested','applied','networking','call','win','interview','offer','failed'];
-  const colors={new:'var(--ac)',interested:'#fb923c',applied:'#38bdf8',networking:'var(--y)',call:'var(--p)',win:'var(--g)',interview:'var(--r)',offer:'var(--g)',failed:'var(--t3)'};
+  const stages=['new','interested','applied','networking','call','win','screening','interview','offer','failed'];
+  const colors={new:'var(--ac)',interested:'#fb923c',applied:'#38bdf8',networking:'var(--y)',call:'var(--p)',win:'var(--g)',screening:'#a78bfa',interview:'var(--r)',offer:'var(--g)',failed:'var(--t3)'};
   const board=document.getElementById('kanbanBoard');
   const cache = window.__CC_BADGE_CACHE__ || {};
 
@@ -4491,7 +4491,7 @@ function renderKanban(all,filter='all'){
           <div class="kcard-roles-box" onclick="event.stopPropagation()">
             ${roles.map(r => {
               const docs = getRoleDocuments(c.id, r);
-              const stageColor = {new:'var(--ac)',interested:'#fb923c',applied:'#38bdf8',networking:'var(--y)',call:'var(--p)',win:'var(--g)',interview:'var(--r)',offer:'var(--g)',failed:'var(--t3)'}[r.stage || 'new'] || 'var(--ac)';
+              const stageColor = {new:'var(--ac)',interested:'#fb923c',applied:'#38bdf8',networking:'var(--y)',call:'var(--p)',win:'var(--g)',screening:'#a78bfa',interview:'var(--r)',offer:'var(--g)',failed:'var(--t3)'}[r.stage || 'new'] || 'var(--ac)';
               const hasRes = !!docs.resume;
               const resScore = docs.resume ? (docs.resume.match_score || docs.resume.matchScore || 90) : 0;
               const hasCl = !!docs.coverLetter;
@@ -4797,7 +4797,7 @@ function renderTrackRoleTabs() {
 
   tabsContainer.innerHTML = currentTrackRoles.map((r, idx) => {
     const isActive = (idx === currentActiveRoleIdx);
-    const stageColor = {new:'var(--ac)',interested:'#fb923c',applied:'#38bdf8',networking:'var(--y)',call:'var(--p)',win:'var(--g)',interview:'var(--r)',offer:'var(--g)',failed:'var(--t3)'}[r.stage || 'new'] || 'var(--ac)';
+    const stageColor = {new:'var(--ac)',interested:'#fb923c',applied:'#38bdf8',networking:'var(--y)',call:'var(--p)',win:'var(--g)',screening:'#a78bfa',interview:'var(--r)',offer:'var(--g)',failed:'var(--t3)'}[r.stage || 'new'] || 'var(--ac)';
     return `
       <button type="button" class="track-role-tab ${isActive ? 'active' : ''}" onclick="switchTrackActiveRole(${idx})">
         ${r.isPrimary ? '<span style="color:#f59e0b" title="Primary Role">★</span>' : ''}
@@ -5228,7 +5228,7 @@ function saveConn(){
 }
 
 function companyStageForRoles(roles){
-  const order=['new','interested','applied','networking','call','win','interview','offer'];
+  const order=['new','interested','applied','networking','call','win','screening','interview','offer'];
   const open=roles.map(r=>r.stage||'new').filter(s=>s!=='failed');
   if(!open.length) return 'failed';
   return open.reduce((best,s)=>order.indexOf(s)>order.indexOf(best)?s:best,'new');

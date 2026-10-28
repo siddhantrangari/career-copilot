@@ -12,7 +12,7 @@ import { nextAction } from './targets.js';
  * he opens (news, funding, layoffs, India expansion, interviews, people).
  */
 
-const STAGE_ORDER = ['new', 'interested', 'applied', 'networking', 'call', 'win', 'interview', 'offer'];
+const STAGE_ORDER = ['new', 'interested', 'applied', 'networking', 'call', 'win', 'screening', 'interview', 'offer'];
 
 function rolesOf(notes) {
   const m = String(notes || '').match(/<!--CC_ROLES:([\s\S]*?)-->/);

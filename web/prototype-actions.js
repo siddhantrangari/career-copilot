@@ -1830,7 +1830,7 @@
   }
 
   // ── Drag a company between pipeline columns ─────────────────────────
-  var STAGES = ['new', 'interested', 'applied', 'networking', 'call', 'win', 'interview', 'offer', 'failed'];
+  var STAGES = ['new', 'interested', 'applied', 'networking', 'call', 'win', 'screening', 'interview', 'offer', 'failed'];
 
   function wireBoard() {
     // Native drag-and-drop is cleanly integrated into renderKanban() with
@@ -1954,10 +1954,10 @@
 (function () {
   'use strict';
 
-  var STAGES = ['new', 'interested', 'applied', 'networking', 'call', 'win', 'interview', 'offer', 'failed'];
+  var STAGES = ['new', 'interested', 'applied', 'networking', 'call', 'win', 'screening', 'interview', 'offer', 'failed'];
   var STAGE_LABELS = {
     new: 'New', interested: 'Interested', applied: 'Applied', networking: 'Networking', call: 'Call',
-    win: 'WIN Sent', interview: 'Interview', offer: 'Offer 🎉', failed: 'Closed',
+    win: 'WIN Sent', screening: 'Screening', interview: 'Interview', offer: 'Offer 🎉', failed: 'Closed',
   };
 
   function favSet() { return window.__CC_FAVOURITES__ || new Set(); }
@@ -2910,7 +2910,7 @@
     var d = Math.floor((Date.now() - new Date(iso).getTime()) / 86400000);
     return d <= 0 ? 'today' : d === 1 ? 'yesterday' : d < 30 ? d + 'd ago' : Math.floor(d / 30) + 'mo ago';
   }
-  var STAGE = { new: 'New', interested: 'Interested', applied: 'Applied', networking: 'Networking', call: 'Call', win: 'WIN doc', interview: 'Interview', offer: 'Offer', failed: 'Closed' };
+  var STAGE = { new: 'New', interested: 'Interested', applied: 'Applied', networking: 'Networking', call: 'Call', win: 'WIN doc', screening: 'Screening', interview: 'Interview', offer: 'Offer', failed: 'Closed' };
   var REGION = { eu: 'Europe', gulf: 'Gulf', global: 'Global remote', global_onsite: 'Global on-site', in_remote: 'India remote', blr_onsite: 'Bangalore on-site', blr_hybrid: 'Bangalore hybrid', india: 'India' };
   var CONN = { req: 'Request sent', dm: 'DM sent', reply: 'Replied', fu1: 'Follow-up 1', fu2: 'Follow-up 2', fu3: 'Follow-up 3', win: 'WIN doc', call: 'Call', ref: 'Referral', ab: 'No reply' };
 

@@ -4,7 +4,7 @@
  * is still Interested. Closed (failed) roles are ignored; the company closes
  * only when every role is closed.
  */
-const ORDER = ['new', 'interested', 'applied', 'networking', 'call', 'win', 'interview', 'offer'];
+const ORDER = ['new', 'interested', 'applied', 'networking', 'call', 'win', 'screening', 'interview', 'offer'];
 
 export function companyStageFor(roles, fallback = 'new') {
   if (!Array.isArray(roles) || !roles.length) return fallback;

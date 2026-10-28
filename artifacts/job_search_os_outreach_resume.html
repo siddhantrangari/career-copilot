@@ -66,7 +66,7 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans
 .pipe-table tr:hover td{background:rgba(255,255,255,.02)}
 .stage{font-size:10px;font-weight:600;padding:2px 8px;border-radius:10px;white-space:nowrap}
 .s-new{background:rgba(79,142,247,.15);color:var(--ac)}.s-int-job{background:rgba(251,146,60,.18);color:#fb923c}.s-app{background:rgba(56,189,248,.18);color:#38bdf8}.s-net{background:rgba(247,201,72,.15);color:var(--y)}
-.s-call{background:rgba(181,123,238,.15);color:var(--p)}.s-win{background:rgba(56,217,169,.15);color:var(--g)}
+.s-call{background:rgba(181,123,238,.15);color:var(--p)}.s-win{background:rgba(56,217,169,.15);color:var(--g)}.s-screening{background:rgba(167,139,250,.16);color:#a78bfa}
 .s-int{background:rgba(255,107,107,.15);color:var(--r)}.s-off{background:rgba(56,217,169,.3);color:#fff}
 .s-fail{background:rgba(74,85,120,.3);color:var(--t3)}
 /* SCRIPTS */
@@ -865,7 +865,7 @@ Now with family settled and a year of intensive AI engineering behind me, I'm re
           <option value="applied">Applied — Application submitted</option>
           <option value="networking">Networking — Connected with people</option>
           <option value="call">Call Scheduled / Had call</option>
-          <option value="win">WIN Doc Prepared & Sent</option>
+          <option value="win">WIN Doc Prepared & Sent</option><option value="screening">Screening / Assignment</option>
           <option value="interview">Interview Scheduled / In Progress</option>
           <option value="offer">Offer Received 🎉</option>
           <option value="failed">Closed — Not progressing</option>
@@ -943,8 +943,8 @@ const COMPANIES = [
 ];
 
 const ROLE_LABELS = {fde:'FDE',ai:'AI Eng',fs:'Full-Stack',se:'Solutions Eng'};
-const STAGE_CSS = {new:'s-new',interested:'s-int-job',applied:'s-app',networking:'s-net',call:'s-call',win:'s-win',interview:'s-int',offer:'s-off',failed:'s-fail'};
-const STAGE_LABELS = {new:'New',interested:'Interested',applied:'Applied',networking:'Networking',call:'Call',win:'WIN Sent',interview:'Interview',offer:'Offer 🎉',failed:'Closed'};
+const STAGE_CSS = {new:'s-new',interested:'s-int-job',applied:'s-app',networking:'s-net',call:'s-call',win:'s-win',screening:'s-screening',interview:'s-int',offer:'s-off',failed:'s-fail'};
+const STAGE_LABELS = {new:'New',interested:'Interested',applied:'Applied',networking:'Networking',call:'Call',win:'WIN Sent',screening:'Screening',interview:'Interview',offer:'Offer 🎉',failed:'Closed'};
 
 // ── STORAGE ──
 function load(k){try{return JSON.parse(localStorage.getItem(k)||'null')}catch{return null}}

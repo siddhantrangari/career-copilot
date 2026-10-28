@@ -353,7 +353,7 @@ export const progressLine = (p) =>
 export async function nextAction(t) {
   if (t.tag === 'apply') {
     const role = t.best_role ? `"${t.best_role}"${t.best_fit ? ` (fit ${t.best_fit})` : ''}` : 'the best-fit role';
-    if (['applied', 'networking', 'call', 'win', 'interview'].includes(t.pipeline_stage)) {
+    if (['applied', 'networking', 'call', 'win', 'screening', 'interview'].includes(t.pipeline_stage)) {
       return t.contacts ? `Applied — ask your contact there for a referral on ${role}` : `Applied — find someone there to refer you for ${role}`;
     }
     return `Apply to ${role} and ask for a referral`;

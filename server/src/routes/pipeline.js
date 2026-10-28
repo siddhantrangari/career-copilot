@@ -1,6 +1,6 @@
 import { many, one } from '../db/pool.js';
 
-const STAGES = ['new', 'interested', 'applied', 'networking', 'call', 'win', 'interview', 'offer', 'failed'];
+const STAGES = ['new', 'interested', 'applied', 'networking', 'call', 'win', 'screening', 'interview', 'offer', 'failed'];
 
 export default async function pipelineRoutes(app) {
   app.addHook('onRequest', app.auth);

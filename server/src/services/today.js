@@ -302,7 +302,7 @@ export async function buildToday(now = new Date()) {
   const apply = await listTargets({ tag: 'apply', limit: 12 });
   let applyCount = 0; let referralCount = 0;
   for (const t of apply) {
-    const applied = ['applied', 'networking', 'call', 'win', 'interview', 'offer'].includes(t.pipeline_stage) || t.best_role_status === 'applied';
+    const applied = ['applied', 'networking', 'call', 'win', 'screening', 'interview', 'offer'].includes(t.pipeline_stage) || t.best_role_status === 'applied';
     if (applied ? referralCount >= 2 : applyCount >= 3) continue;
     push({
       key: key(applied ? 'referral' : 'apply', t.name, t.best_role), type: applied ? 'referral' : 'apply',

@@ -191,7 +191,7 @@ function splitNotes(notes) {
   return { roles: Array.isArray(roles) ? roles : [], text: raw.replace(/<!--CC_ROLES:[\s\S]*?-->/g, '').trim() };
 }
 const joinNotes = (text, roles) => (roles.length ? `${text}${text ? '\n\n' : ''}<!--CC_ROLES:${JSON.stringify(roles)}-->` : text);
-const STAGE_ORDER = ['new', 'interested', 'applied', 'networking', 'call', 'win', 'interview', 'offer'];
+const STAGE_ORDER = ['new', 'interested', 'applied', 'networking', 'call', 'win', 'screening', 'interview', 'offer'];
 
 /** Applied: on the job, and as a role in his pipeline. Idempotent. */
 export async function markApplied(jobId, { tailored = false } = {}) {

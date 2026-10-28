@@ -24,7 +24,7 @@ CREATE INDEX IF NOT EXISTS companies_region_idx ON companies (region);
 CREATE TABLE IF NOT EXISTS tracked_companies (
   company_id    TEXT PRIMARY KEY REFERENCES companies (id) ON DELETE RESTRICT,
   user_id       TEXT NOT NULL DEFAULT 'siddhant',
-  stage         TEXT NOT NULL DEFAULT 'new',      -- new|interested|applied|networking|call|win|interview|offer|failed
+  stage         TEXT NOT NULL DEFAULT 'new',      -- new|interested|applied|networking|call|win|screening|interview|offer|failed
   win_status    TEXT NOT NULL DEFAULT 'none',     -- none|drafted|sent
   msgs          TEXT NOT NULL DEFAULT '',         -- free-text outreach log from the prototype
   jd            TEXT NOT NULL DEFAULT '',

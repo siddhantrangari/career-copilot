@@ -15,7 +15,7 @@ const esc = (s) => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').
 const SEND_AT = 19 * 60; // 19:00 local, Sunday
 const STAGE_LABEL = {
   new: 'New', interested: 'Interested', applied: 'Applied', networking: 'Networking', call: 'Call',
-  win: 'WIN doc', interview: 'Interview', offer: 'Offer', failed: 'Closed',
+  win: 'WIN doc', screening: 'Screening', interview: 'Interview', offer: 'Offer', failed: 'Closed',
 };
 
 const bar = (done, target) => {
