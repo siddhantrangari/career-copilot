@@ -1791,8 +1791,18 @@ function triggerStudioJdFetch() {
 window.triggerStudioJdFetch = triggerStudioJdFetch;
 
 let isFetchingJd = false;
-async function fetchJdDetailsIntoStudio(url) {
-  if (!url || isFetchingJd) return null;
+let jdFetchInFlight = null; // { url, promise } — so Tailor waits on a fetch already running
+function fetchJdDetailsIntoStudio(url) {
+  if (!url) return Promise.resolve(null);
+  if (jdFetchInFlight) {
+    return jdFetchInFlight.url === url ? jdFetchInFlight.promise : Promise.resolve(null);
+  }
+  const promise = runJdFetch(url);
+  jdFetchInFlight = { url, promise };
+  promise.finally(() => { jdFetchInFlight = null; });
+  return promise;
+}
+async function runJdFetch(url) {
   const targetUrl = url.trim();
   if (!/^https?:\/\/\S+/i.test(targetUrl)) return null;
 
@@ -1826,9 +1836,16 @@ async function fetchJdDetailsIntoStudio(url) {
         body: { url: targetUrl }
       });
     } else {
+      // The bridge isn't wired yet (e.g. auto-fetch on page load), so send the
+      // login token ourselves or the server answers 401.
+      const headers = { 'Content-Type': 'application/json' };
+      try {
+        const token = localStorage.getItem('cc_token');
+        if (token) headers.Authorization = 'Bearer ' + token;
+      } catch (e) {}
       const res = await fetch('/api/extract-jd', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify({ url: targetUrl })
       });
       result = await res.json();
