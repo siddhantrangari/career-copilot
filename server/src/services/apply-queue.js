@@ -135,13 +135,23 @@ export async function applyQueue({ scope = 'all', minFit = 70, limit = 40, showU
 
   // Roles already applied (or further) in his tracker, by company + title.
   const done = new Set();
-  for (const t of await many(`SELECT t.company_id, c.name, t.notes FROM tracked_companies t JOIN companies c ON c.id = t.company_id WHERE t.notes LIKE '%CC_ROLES%'`)) {
-    for (const r of splitNotes(t.notes).roles) {
-      if (STAGE_ORDER.indexOf(r.stage || 'new') >= STAGE_ORDER.indexOf('applied') || r.stage === 'failed') {
+  const isDone = (stage) => STAGE_ORDER.indexOf(stage || 'new') >= STAGE_ORDER.indexOf('applied') || stage === 'failed';
+  // Older entries name the roles he applied to only in the notes text
+  // ("APPLIED 28 Oct to ... Staff AI Engineer"): company -> those notes.
+  const notesOnly = new Map();
+  // Companies he marked Interested rank a little higher.
+  const interested = new Set();
+  for (const t of await many(`SELECT t.company_id, c.name, t.notes, t.stage FROM tracked_companies t JOIN companies c ON c.id = t.company_id`)) {
+    const { roles, text } = splitNotes(t.notes);
+    for (const r of roles) {
+      if (isDone(r.stage)) {
         done.add(roleKey(t.name, r.title));
         if (r.jobId) done.add(r.jobId);
       }
     }
+    const co = roleKey(t.name, '').split('|')[0];
+    if (!roles.length && isDone(t.stage) && text) notesOnly.set(co, ` ${roleKey('', text).split('|')[1]} `);
+    if (t.stage === 'interested') interested.add(co);
   }
   // Skipped or applied once is handled for every posting of that role:
   // a repost under a new ID, or the same role in another city.
@@ -159,6 +169,8 @@ export async function applyQueue({ scope = 'all', minFit = 70, limit = 40, showU
   for (const r of rows) {
     const key = roleKey(r.company, r.title);
     if (done.has(r.id) || done.has(key)) continue;
+    const [co, base] = key.split('|');
+    if (base && notesOnly.has(co) && notesOnly.get(co).includes(` ${base} `)) continue;
     const c = classifyRole({ location: r.location, flags: { visaNo: r.visa_no, visaYes: r.visa_yes, relocNo: r.reloc_no, relocYes: r.reloc_yes, locked: r.locked } });
     const unverified = c.place === 'abroad' && !c.eligible && c.visa !== 'no';
     if ((c.eligible || unverified) && !counted.has(`${key}|${c.place}`)) {
@@ -173,7 +185,7 @@ export async function applyQueue({ scope = 'all', minFit = 70, limit = 40, showU
     const ageDays = r.posted ? Math.max(0, (now - new Date(r.posted).getTime()) / 86_400_000) : 30;
     // Fit leads; hiring signals and freshness break ties; a stated move helps abroad;
     // Luxembourg / Sydney with a way in jump to the top.
-    const score = (r.fit_score ?? Math.min(r.relevance, 60)) + (r.hiring_score || 0) * 0.15 + (r.priority ? 5 : 0)
+    const score = (r.fit_score ?? Math.min(r.relevance, 60)) + (r.hiring_score || 0) * 0.15 + (r.priority ? 5 : 0) + (interested.has(co) ? 3 : 0)
       + Math.max(0, 7 - ageDays) * 0.6 + (c.visa === 'yes' || c.reloc === 'yes' ? 2 : 0) + (c.preferred ? 30 : 0);
     out.push({
       id: r.id, title: r.title, url: r.url, location: r.location, source: r.source, company: r.company, companyId: r.company_id,

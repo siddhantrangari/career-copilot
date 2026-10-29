@@ -3616,10 +3616,14 @@ function renderCards(filter) {
     return;
   }
 
-  // ⭐ Priority first, then Apply, then Outreach, then the rest; by target rank within each.
+  // ⭐ Priority first, then companies he marked Interested, then Apply, then
+  // Outreach, then the rest; by target rank, then best-fitting opening.
   const group = (t) => !t ? 0 : t.priority ? (t.tag === 'apply' ? 4 : 3) : t.tag === 'apply' ? 2 : t.tag === 'outreach' ? 1 : 0;
-  list.sort((a, b) => group(b.target) - group(a.target)
-    || ((a.target && a.target.rank) || 1e9) - ((b.target && b.target.rank) || 1e9));
+  const prio = (c) => (c.target && c.target.priority ? 2 : 0) + (tracked[c.id] && tracked[c.id].stage === 'interested' ? 1 : 0);
+  const bestFit = (c) => Math.max(0, ...(((cache[c.id] || {}).jobs) || []).map(j => Number(j.fit_score) || 0));
+  list.sort((a, b) => prio(b) - prio(a) || group(b.target) - group(a.target)
+    || ((a.target && a.target.rank) || 1e9) - ((b.target && b.target.rank) || 1e9)
+    || bestFit(b) - bestFit(a));
 
   grid.innerHTML = list.map(c => {
     const tr = tracked[c.id];
@@ -5639,7 +5643,15 @@ function openingStatus(companyId, job) {
   const norm = s => String(s || '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
   const r = roles.find(x => (job.id && x.jobId === job.id) || (x.jobLink && job.url && x.jobLink === job.url)) ||
     roles.find(x => norm(x.title) && norm(x.title) === norm(job.title));
-  if (!r) return { applied: false };
+  if (!r) {
+    // Older entries name the applied roles only in the notes text.
+    const t = tracked[companyId];
+    const base = norm(String(job.title || '').replace(/\s*\((remote|hybrid|onsite|on-site|[^)]*(india|bangalore|bengaluru)[^)]*)\)\s*$/i, ''));
+    if (t && !roles.length && OPENING_DONE.includes(t.stage) && base && (' ' + norm(t.notes) + ' ').includes(' ' + base + ' ')) {
+      return { applied: true, stage: t.stage, resume: false, letter: false };
+    }
+    return { applied: false };
+  }
   return { applied: OPENING_DONE.includes(r.stage || 'new'), stage: r.stage || 'new', resume: !!r.tailoredResumeId, letter: !!r.coverLetterId };
 }
 window.openingStatus = openingStatus;
