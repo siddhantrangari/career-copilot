@@ -3643,15 +3643,24 @@ function renderCards(filter) {
           ${directJobs.length ? `
             <div style="margin-top:6px;padding:6px 8px;background:rgba(0,0,0,.25);border:1px solid var(--bd);border-radius:6px;font-size:11px">
               <div style="font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px;font-weight:600">Direct Openings:</div>
-              ${directJobs.slice(0, 3).map(j => `
-                <div style="display:flex;justify-content:space-between;align-items:center;padding:3px 0;border-bottom:1px solid rgba(255,255,255,.05);gap:6px">
-                  <div style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1">
-                    <span style="color:var(--t);font-weight:500">${j.title}</span>
-                    <span style="color:var(--t3);font-size:10px"> · ${j.location || "Remote"}</span>
+              ${directJobs.slice(0, 3).map(j => {
+                const st = openingStatus(c.id, j);
+                return `
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:3px 0;border-bottom:1px solid rgba(255,255,255,.05);gap:6px;flex-wrap:wrap">
+                  <div style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;min-width:120px">
+                    <span style="color:var(--t);font-weight:500">${esc(j.title)}</span>
+                    <span style="color:var(--t3);font-size:10px"> · ${esc(j.location || "Remote")}</span>
+                    ${st.resume ? '<span title="Tailored resume saved for this role" style="font-size:10px;margin-left:4px">📄</span>' : ''}${st.letter ? '<span title="Cover letter saved for this role" style="font-size:10px;margin-left:2px">✉️</span>' : ''}
                   </div>
-                  <a href="${j.url}" target="_blank" rel="noopener" class="btn ac" style="font-size:10px;padding:2px 7px;flex-shrink:0">Apply Direct ↗</a>
-                </div>
-              `).join("")}
+                  <div style="display:flex;gap:4px;flex-shrink:0">
+                    <a href="${j.url}" target="_blank" rel="noopener" class="btn ac" style="font-size:10px;padding:2px 7px">Apply Direct ↗</a>
+                    <button type="button" class="btn" style="font-size:10px;padding:2px 7px;color:#93c5fd;border-color:rgba(59,130,246,.3)" onclick="openOpeningStudio(event,'${c.id}','${escAttr(j.title)}','${escAttr(j.url)}')" title="Tailor a resume for this role — opens the Studio in a new tab with the JD loaded">📄 Tailor</button>
+                    ${st.applied
+                      ? `<span class="btn" style="font-size:10px;padding:2px 7px;color:#7ee0a8;border-color:rgba(61,220,132,.35);cursor:default" title="In your pipeline as ${esc(SL[st.stage] || st.stage)}">✓ ${esc(SL[st.stage] || 'Applied')}</span>`
+                      : `<button type="button" class="btn grn" style="font-size:10px;padding:2px 7px" onclick="markOpeningApplied(event,this,'${c.id}','${escAttr(j.id)}')" title="Mark applied: tracks this role in your pipeline with its tailored resume and cover letter">✓ Applied</button>`}
+                  </div>
+                </div>`;
+              }).join("")}
             </div>
           ` : ""}
         </div>
@@ -3667,8 +3676,8 @@ function renderCards(filter) {
         <button type="button" class="btn" style="background:rgba(16,185,129,.12);color:#34d399;border-color:rgba(16,185,129,.3);font-weight:600" onclick="openCompanyWinDoc(event,'${c.id}','${escAttr(c.roleTitle||'')}')">🏆 WIN Doc</button>
         <button type="button" class="btn" style="background:rgba(251,191,36,.1);color:#fbbf24;border-color:rgba(251,191,36,.3);font-weight:600" onclick="event.stopPropagation();window.ccCompanyDetail&&window.ccCompanyDetail({id:'${c.id}'})" title="Everything about this company: roles, signals, pipeline, news and people to reach">ℹ️ Details</button>
         <button type="button" class="btn" style="background:rgba(74,124,255,.12);color:#8bb2ff;border-color:rgba(74,124,255,.3);font-weight:600" onclick="openCompanyResearch(event,'${c.id}','${escAttr(c.roleTitle||'')}')">🔍 Research</button>
-        <button type="button" class="btn" style="background:rgba(59,130,246,.12);color:#93c5fd;border-color:rgba(59,130,246,.3);font-weight:600" onclick="openCompanyStudio(event,'${c.id}','${escAttr(c.roleTitle||'')}','resume')">📄 Resume</button>
-        <button type="button" class="btn" style="background:rgba(236,72,153,.12);color:#f472b6;border-color:rgba(236,72,153,.3);font-weight:600" onclick="openCompanyStudio(event,'${c.id}','${escAttr(c.roleTitle||'')}','cover-letter')">✉️ Cover Letter</button>
+        <button type="button" class="btn" style="background:rgba(59,130,246,.12);color:#93c5fd;border-color:rgba(59,130,246,.3);font-weight:600" onclick="openCompanyStudio(event,'${c.id}','${escAttr(c.roleTitle||'')}','resume','','','${escAttr(directJobs.length ? directJobs[0].title : '')}','${escAttr(directJobs.length ? directJobs[0].url : '')}')">📄 Resume</button>
+        <button type="button" class="btn" style="background:rgba(236,72,153,.12);color:#f472b6;border-color:rgba(236,72,153,.3);font-weight:600" onclick="openCompanyStudio(event,'${c.id}','${escAttr(c.roleTitle||'')}','cover-letter','','','${escAttr(directJobs.length ? directJobs[0].title : '')}','${escAttr(directJobs.length ? directJobs[0].url : '')}')">✉️ Cover Letter</button>
         <button type="button" class="btn" onclick="openNet('${c.id}')">🤝 Network</button>
         <button type="button" class="btn grn" onclick="openTrack('${c.id}')">📊 Track</button>
         <button type="button" class="btn cc-co-dismiss" data-company="${c.id}" style="font-size:10px;color:${isDismissed ? "#7ee0a8" : "#ff8787"};border-color:rgba(255,107,107,.25)" title="${isDismissed ? "Restore company to active list" : "Mark company as not interested / hide"}">${isDismissed ? "↩ Restore" : "✕ Not for me"}</button>
@@ -5554,7 +5563,7 @@ function openCompanyCopilot(e, id, role) {
 }
 window.openCompanyCopilot = openCompanyCopilot;
 
-function openCompanyStudio(e, id, role, mode, roleId, directJd) {
+function openCompanyStudio(e, id, role, mode, roleId, directJd, fallbackRole, fallbackJd) {
   if (e) { e.preventDefault(); e.stopPropagation(); }
   mode = (mode === 'cover-letter') ? 'cover-letter' : 'resume';
   let jd = directJd || '';
@@ -5584,6 +5593,9 @@ function openCompanyStudio(e, id, role, mode, roleId, directJd) {
     }
     if (!role && tr.roleTitle) role = tr.roleTitle;
   } catch(err) {}
+  // Nothing tracked yet: tailor for the card's top opening and load its JD.
+  if (!jd && fallbackJd) { jd = fallbackJd; if (!role && fallbackRole) role = fallbackRole; }
+  if (!role && fallbackRole) role = fallbackRole;
 
   if (window.__CC__ && typeof window.__CC__.navigateToResume === 'function') {
     window.__CC__.navigateToResume(id, role || '', jd || '', mode, roleId, companyName);
@@ -5604,6 +5616,55 @@ function openCompanyStudio(e, id, role, mode, roleId, directJd) {
   window.location.href = `/outreach.html?tab=resume&mode=${encodeURIComponent(mode)}&companyId=${encodeURIComponent(id)}${compParam}&role=${encodeURIComponent(role || '')}${roleId ? '&roleId=' + encodeURIComponent(roleId) : ''}`;
 }
 window.openCompanyStudio = openCompanyStudio;
+
+/**
+ * Where one of a card's direct openings stands in his pipeline: applied (or
+ * further) and whether a tailored resume / cover letter is saved for it.
+ * Matched by job ID, then by title (the Studio and Applied both key on it).
+ */
+const OPENING_DONE = ['applied','networking','call','win','screening','interview','offer','failed'];
+function openingStatus(companyId, job) {
+  const roles = (tracked[companyId] && Array.isArray(tracked[companyId].roles)) ? tracked[companyId].roles : [];
+  const norm = s => String(s || '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+  const r = roles.find(x => (job.id && x.jobId === job.id) || (x.jobLink && job.url && x.jobLink === job.url)) ||
+    roles.find(x => norm(x.title) && norm(x.title) === norm(job.title));
+  if (!r) return { applied: false };
+  return { applied: OPENING_DONE.includes(r.stage || 'new'), stage: r.stage || 'new', resume: !!r.tailoredResumeId, letter: !!r.coverLetterId };
+}
+window.openingStatus = openingStatus;
+
+/** Tailor for one opening: Studio in a new tab, with the role and its JD link. */
+function openOpeningStudio(e, companyId, title, url) {
+  // The Studio saves the tailored resume onto his tracked role, so the
+  // company must be in his list; adding it is quick and never moves a stage.
+  if (!tracked[companyId] && window.__CC__ && window.__CC__.api) {
+    window.__CC__.api('/targets/company/add', { method: 'POST', body: { id: companyId } })
+      .then(() => window.__CC__.refreshState && window.__CC__.refreshState()).catch(() => {});
+  }
+  openCompanyStudio(e, companyId, title, 'resume', '', url);
+}
+window.openOpeningStudio = openOpeningStudio;
+
+/**
+ * Applied for one opening: the server records it on the job and as a role in
+ * his pipeline (keeping any resume / cover letter already saved for that
+ * role), then the board reloads so the card shows it.
+ */
+function markOpeningApplied(e, btn, companyId, jobId) {
+  if (e) { e.preventDefault(); e.stopPropagation(); }
+  const apiFn = window.__CC__ && window.__CC__.api;
+  if (!apiFn || !jobId) return;
+  const st = openingStatus(companyId, ((window.__CC_BADGE_CACHE__ || {})[companyId]?.jobs || []).find(j => j.id === jobId) || {});
+  btn.disabled = true; btn.textContent = 'Saving…';
+  apiFn('/targets/apply-queue/applied', { method: 'POST', body: { jobId, tailored: !!(st.resume || st.letter) } })
+    .then(r => {
+      btn.textContent = '✓ Applied';
+      btn.title = (r && r.role ? r.role + ' — ' : '') + 'tracked in your pipeline';
+      if (window.__CC__.refreshState) window.__CC__.refreshState(true);
+    })
+    .catch(err => { btn.disabled = false; btn.textContent = '✓ Applied'; alert('Could not mark applied: ' + (err.message || err)); });
+}
+window.markOpeningApplied = markOpeningApplied;
 
 function triggerTrackAiAction(action) {
   const id = document.getElementById('trackId') ? document.getElementById('trackId').value : null;

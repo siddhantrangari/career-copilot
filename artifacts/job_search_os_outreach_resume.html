@@ -2559,6 +2559,12 @@ function handleTailorSuccess(res, payload){
           }];
         }
         let targetRole = roleId ? tr.roles.find(r => r.id === roleId) : tr.roles.find(r => (r.title||'').toLowerCase() === (payload.jobTitle||'').toLowerCase());
+        // A role he hasn't tracked yet gets its own entry, so the document stays with
+        // the role it was written for (and Applied later finds it by title).
+        if (!targetRole && payload.jobTitle) {
+          targetRole = { id: roleId || ('role-' + Date.now()), title: payload.jobTitle, stage: 'new', isPrimary: false };
+          tr.roles.push(targetRole);
+        }
         if (!targetRole && tr.roles.length > 0) targetRole = tr.roles[0];
         if (targetRole) {
           targetRole.tailoredResumeId = resumeEntry.id;
@@ -2959,6 +2965,12 @@ async function triggerGenerateCoverLetter() {
             }];
           }
           let targetRole = roleId ? tr.roles.find(r => r.id === roleId) : tr.roles.find(r => (r.title||'').toLowerCase() === (payload.jobTitle||'').toLowerCase());
+          // A role he hasn't tracked yet gets its own entry, so the document stays with
+          // the role it was written for (and Applied later finds it by title).
+          if (!targetRole && payload.jobTitle) {
+            targetRole = { id: roleId || ('role-' + Date.now()), title: payload.jobTitle, stage: 'new', isPrimary: false };
+            tr.roles.push(targetRole);
+          }
           if (!targetRole && tr.roles.length > 0) targetRole = tr.roles[0];
           if (targetRole) {
             targetRole.coverLetterId = letterEntry.id;
@@ -3443,6 +3455,15 @@ function checkTailorPrefill() {
         sessionStorage.removeItem('cc_tailor_prefill');
       } catch (e) {}
     }
+    // Opened in a new tab from the board: the handoff comes via localStorage.
+    try {
+      const hand = JSON.parse(localStorage.getItem('cc_tailor_handoff') || 'null');
+      if (hand) {
+        localStorage.removeItem('cc_tailor_handoff');
+        const qId = new URL(window.location.href).searchParams.get('companyId') || '';
+        if (!prefill && Date.now() - (hand.at || 0) < 120000 && (!qId || hand.companyId === qId)) prefill = hand;
+      }
+    } catch (e) {}
 
     const u = new URL(window.location.href);
     const qCompany = u.searchParams.get('company');
@@ -3537,6 +3558,7 @@ function checkTailorPrefill() {
             if (fetched && !jdEl.value) {
               jdEl.value = cleanJdText(fetched);
               if (typeof updateJdCount === 'function') updateJdCount();
+              if (/^https?:\/\/\S+$/i.test(fetched.trim())) fetchJdDetailsIntoStudio(fetched.trim());
             }
           })
           .catch(() => {});

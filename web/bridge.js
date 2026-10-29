@@ -629,51 +629,27 @@
       mode: studioMode
     };
 
-    try {
-      sessionStorage.setItem('cc_tailor_prefill', JSON.stringify(prefillData));
-    } catch (e) {}
-
     var targetUrl = '/outreach.html?tab=resume' +
       '&mode=' + encodeURIComponent(studioMode) +
       (companyName ? '&company=' + encodeURIComponent(companyName) : '') +
       (role ? '&role=' + encodeURIComponent(role) : '') +
       (roleId ? '&roleId=' + encodeURIComponent(roleId) : '') +
-      (companyId ? '&companyId=' + encodeURIComponent(companyId) : '');
+      (companyId ? '&companyId=' + encodeURIComponent(companyId) : '') +
+      // A job link rides in the URL; the Studio fetches the JD from it on load.
+      (/^https?:\/\/\S+$/i.test(cleanJd.trim()) && cleanJd.length < 1500 ? '&jd=' + encodeURIComponent(cleanJd.trim()) : '');
 
-    // If no JD text yet but we have companyId, attempt a quick autofill fetch before redirecting
-    if (!cleanJd && companyId) {
-      var redirected = false;
-      var timer = setTimeout(function () {
-        if (!redirected) {
-          redirected = true;
-          window.location.href = targetUrl;
-        }
-      }, 350);
-
-      api('/companies/' + encodeURIComponent(companyId) + '/autofill')
-        .then(function (d) {
-          if (!redirected) {
-            clearTimeout(timer);
-            redirected = true;
-            var fetchedJd = d && d.suggested && d.suggested.jdText;
-            if (fetchedJd) {
-              prefillData.jdText = cleanJdText(fetchedJd);
-              try { sessionStorage.setItem('cc_tailor_prefill', JSON.stringify(prefillData)); } catch (e) {}
-            }
-            window.location.href = targetUrl;
-          }
-        })
-        .catch(function () {
-          if (!redirected) {
-            clearTimeout(timer);
-            redirected = true;
-            window.location.href = targetUrl;
-          }
-        });
-      return;
+    // The Studio opens in its own tab so the board stays where it was. A new
+    // tab doesn't share sessionStorage, so pasted JD text is handed over in
+    // localStorage, which the Studio reads once and clears. With no JD at
+    // all, the Studio looks the company up itself.
+    try {
+      localStorage.setItem('cc_tailor_handoff', JSON.stringify(Object.assign({ at: Date.now() }, prefillData)));
+    } catch (e) {}
+    var tab = window.open(targetUrl, '_blank');
+    if (!tab) {
+      try { sessionStorage.setItem('cc_tailor_prefill', JSON.stringify(prefillData)); } catch (e) {}
+      window.location.href = targetUrl;
     }
-
-    window.location.href = targetUrl;
   }
   window.navigateToTailorResume = navigateToTailorResume;
 
@@ -1591,6 +1567,8 @@
       pushState: pushState, scheduleSync: scheduleSync,
       openCopilot: function (id, role, act) { if (openCopilot) openCopilot(id, role, act); },
       refreshCompanies: function (id) { if (refreshCompaniesFn) return refreshCompaniesFn(id); },
+      // Pull server-side changes now (e.g. a role marked applied) instead of on the next poll.
+      refreshState: function () { refreshFromServer(); },
       navigateToResume: navigateToTailorResume,
       navigateToCoverLetter: function (id, role, jd, roleId, explicitCompanyName) { return navigateToTailorResume(id, role, jd, 'cover-letter', roleId, explicitCompanyName); },
       cleanJdText: cleanJdText,
