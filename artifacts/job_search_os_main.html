@@ -3575,11 +3575,14 @@ function renderCards(filter) {
       if (!match) return false;
     }
 
-    // Applied (or further): the company is in his pipeline, so it leaves
-    // this list of roles to apply to — except under ✓ Applied, or a search.
+    // Applied (or further) with nothing left to apply to: the company is in
+    // his pipeline, so it leaves this list — except under ✓ Applied, or a
+    // search. While any of its openings is still unapplied, it stays.
     const applied = Boolean(tracked[c.id] && OPENING_DONE.includes(tracked[c.id].stage));
+    const shown = (info && info.jobs) ? info.jobs : [];
+    const leftToApply = shown.some(j => !openingStatus(c.id, j).applied) || Number((info && info.open_jobs) || 0) > shown.length;
     if (currentF === "applied") return applied;
-    if (applied && !sq) return false;
+    if (applied && !leftToApply && !sq) return false;
 
     if (currentF === "all") return true;
     if (currentF === "priority") return Boolean(c.target && c.target.priority);
