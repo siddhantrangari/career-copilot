@@ -493,7 +493,9 @@ export async function latestPostings() {
   return many(
     `SELECT j.company_id,
             MAX(j.posted_at) AS latest_posted,
-            COUNT(*) FILTER (WHERE j.closed_at IS NULL) AS open_jobs,
+            -- Roles he has applied to are in his pipeline, not "open" for him.
+            COUNT(*) FILTER (WHERE j.closed_at IS NULL AND j.app_status IS NULL) AS open_jobs,
+            COUNT(*) FILTER (WHERE j.app_status IS NOT NULL) AS applied_jobs,
             COUNT(*) FILTER (WHERE j.closed_at IS NULL AND j.posted_at > now() - interval '14 days') AS fresh_jobs,
             COALESCE(
               (
@@ -504,6 +506,7 @@ export async function latestPostings() {
                   WHERE j2.company_id = j.company_id
                     AND j2.closed_at IS NULL
                     AND NOT j2.dismissed
+                    AND j2.app_status IS NULL
                     AND j2.relevance >= 40
                   ORDER BY COALESCE(j2.fit_score, LEAST(j2.relevance, 70)) DESC, j2.posted_at DESC NULLS LAST
                   LIMIT 5

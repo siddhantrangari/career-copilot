@@ -188,6 +188,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);min-heig
     <button class="fb" onclick="filterC('ai',this)">🤖 AI Eng</button>
     <button class="fb" onclick="filterC('fs',this)">💻 Full-Stack</button>
     <button class="fb" id="interestedFilterBtn" onclick="filterC('interested',this)" style="border-color:rgba(251,146,60,.4);color:#fb923c" title="Show companies marked as Interested">⭐ Interested</button>
+    <button class="fb" onclick="filterC('applied',this)" style="border-color:rgba(61,220,132,.4);color:#7ee0a8" title="Companies you've applied to (Applied and later stages). They leave the other lists; your pipeline has them.">✓ Applied</button>
     <button class="fb" id="openJobsToggle" onclick="toggleOpenJobsOnly(this)" style="border-color:#38d9a9;color:#38d9a9" title="Filter to companies that currently have matching open jobs">🟢 With Open Jobs</button>
     <button class="fb" id="dismissedToggle" onclick="toggleShowDismissed(this)" style="color:var(--t3)" title="Show or hide dismissed companies">Show dismissed (<span id="dismissedCount">0</span>)</button>
     <input type="search" id="coSearch" placeholder="🔎 Search companies…" oninput="searchCompanies(this.value)" style="background:var(--s2);border:1px solid var(--bd);border-radius:20px;padding:4px 11px;color:var(--t);font-size:11px;font-family:inherit;min-width:180px;outline:none">
@@ -3574,6 +3575,12 @@ function renderCards(filter) {
       if (!match) return false;
     }
 
+    // Applied (or further): the company is in his pipeline, so it leaves
+    // this list of roles to apply to — except under ✓ Applied, or a search.
+    const applied = Boolean(tracked[c.id] && OPENING_DONE.includes(tracked[c.id].stage));
+    if (currentF === "applied") return applied;
+    if (applied && !sq) return false;
+
     if (currentF === "all") return true;
     if (currentF === "priority") return Boolean(c.target && c.target.priority);
     if (currentF === "apply" || currentF === "outreach") return Boolean(c.target && c.target.tag === currentF);
@@ -3618,7 +3625,9 @@ function renderCards(filter) {
     const isDismissed = Boolean(c.dismissed || dismissedSet.has(c.id));
     const info = cache[c.id];
     const openJobs = info ? Number(info.open_jobs || 0) : 0;
-    const directJobs = (info && info.jobs) ? info.jobs : [];
+    // Roles already applied to (by job, link or title) are in his pipeline, not here.
+    const directJobs = ((info && info.jobs) ? info.jobs : []).filter(j => !openingStatus(c.id, j).applied);
+    const appliedHere = (tr && Array.isArray(tr.roles)) ? tr.roles.filter(r => OPENING_DONE.includes(r.stage || 'new')).length : 0;
     const topJobUrl = directJobs.length ? directJobs[0].url : c.apply;
 
     return `<div class="cc ${c.region}" data-company="${c.id}" style="${isDismissed ? "opacity:0.42;border-style:dashed;" : ""}">
@@ -3655,14 +3664,13 @@ function renderCards(filter) {
                   <div style="display:flex;gap:4px;flex-shrink:0">
                     <a href="${j.url}" target="_blank" rel="noopener" class="btn ac" style="font-size:10px;padding:2px 7px">Apply Direct ↗</a>
                     <button type="button" class="btn" style="font-size:10px;padding:2px 7px;color:#93c5fd;border-color:rgba(59,130,246,.3)" onclick="openOpeningStudio(event,'${c.id}','${escAttr(j.title)}','${escAttr(j.url)}')" title="Tailor a resume for this role — opens the Studio in a new tab with the JD loaded">📄 Tailor</button>
-                    ${st.applied
-                      ? `<span class="btn" style="font-size:10px;padding:2px 7px;color:#7ee0a8;border-color:rgba(61,220,132,.35);cursor:default" title="In your pipeline as ${esc(SL[st.stage] || st.stage)}">✓ ${esc(SL[st.stage] || 'Applied')}</span>`
-                      : `<button type="button" class="btn grn" style="font-size:10px;padding:2px 7px" onclick="markOpeningApplied(event,this,'${c.id}','${escAttr(j.id)}')" title="Mark applied: tracks this role in your pipeline with its tailored resume and cover letter">✓ Applied</button>`}
+                    <button type="button" class="btn" style="font-size:10px;padding:2px 7px;color:var(--t2);border-color:var(--bd)" onclick="markOpeningApplied(event,this,'${c.id}','${escAttr(j.id)}')" title="Done applying? Moves this role to your pipeline (Applied) with its tailored resume and cover letter">☐ Mark applied</button>
                   </div>
                 </div>`;
               }).join("")}
             </div>
           ` : ""}
+          ${appliedHere ? `<div style="margin-top:5px;font-size:10.5px;color:#7ee0a8;cursor:pointer" onclick="event.stopPropagation();openTrack('${c.id}')" title="Open this company's roles in your pipeline">✓ ${appliedHere} role${appliedHere > 1 ? 's' : ''} applied — in your Pipeline ›</div>` : ""}
         </div>
       ` : `
         <div style="margin:5px 0;font-size:10px;color:var(--t3);background:rgba(255,255,255,.02);border:1px dashed var(--bd);border-radius:4px;padding:3px 7px">
@@ -5622,7 +5630,7 @@ window.openCompanyStudio = openCompanyStudio;
  * further) and whether a tailored resume / cover letter is saved for it.
  * Matched by job ID, then by title (the Studio and Applied both key on it).
  */
-const OPENING_DONE = ['applied','networking','call','win','screening','interview','offer','failed'];
+var OPENING_DONE = ['applied','networking','call','win','screening','interview','offer','failed'];
 function openingStatus(companyId, job) {
   const roles = (tracked[companyId] && Array.isArray(tracked[companyId].roles)) ? tracked[companyId].roles : [];
   const norm = s => String(s || '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
@@ -5658,11 +5666,15 @@ function markOpeningApplied(e, btn, companyId, jobId) {
   btn.disabled = true; btn.textContent = 'Saving…';
   apiFn('/targets/apply-queue/applied', { method: 'POST', body: { jobId, tailored: !!(st.resume || st.letter) } })
     .then(r => {
-      btn.textContent = '✓ Applied';
-      btn.title = (r && r.role ? r.role + ' — ' : '') + 'tracked in your pipeline';
-      if (window.__CC__.refreshState) window.__CC__.refreshState(true);
+      // The role now lives in his pipeline: show it went there, then drop the row.
+      const row = btn.closest('div[style*="border-bottom"]');
+      if (row) {
+        row.innerHTML = `<div style="font-size:10.5px;color:#7ee0a8;padding:2px 0">✓ Applied — ${esc((r && r.role) || 'role')} moved to your Pipeline</div>`;
+        setTimeout(() => { row.style.transition = 'opacity .4s'; row.style.opacity = '0'; }, 1600);
+      }
+      if (window.__CC__.refreshState) window.__CC__.refreshState();
     })
-    .catch(err => { btn.disabled = false; btn.textContent = '✓ Applied'; alert('Could not mark applied: ' + (err.message || err)); });
+    .catch(err => { btn.disabled = false; btn.textContent = '☐ Mark applied'; alert('Could not mark applied: ' + (err.message || err)); });
 }
 window.markOpeningApplied = markOpeningApplied;
 
