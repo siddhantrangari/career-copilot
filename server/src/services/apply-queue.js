@@ -93,6 +93,22 @@ export function regionOf(location) {
 const SCOPES = ['all', 'bangalore', 'remote', 'abroad'];
 
 /**
+ * One key per role at a company, whatever the posting: boards repost the
+ * same role under a new ID, or once per city, and a "(Bangalore)" or
+ * "- Remote" suffix doesn't make it a different job.
+ */
+export function roleKey(company, title) {
+  const place = (s) => BLR.test(s) || INDIA.test(s) || REMOTE.test(s) || OTHER_INDIA.test(s) || LOCKED_REGION.test(s) || GULF.test(s) || PREFERRED.test(s) || /\b(hybrid|onsite|on-site)\b/i.test(s);
+  let t = String(title || '').replace(/\(([^)]*)\)/g, (m, inner) => (place(inner) ? ' ' : m)).trim();
+  for (let prev = ''; prev !== t;) {
+    prev = t;
+    t = t.replace(/\s*[-–—|,]\s*([^-–—|,]+)$/, (m, tail) => (place(tail) ? '' : m)).trim();
+  }
+  const norm = (s) => String(s || '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+  return `${norm(company)}|${norm(t)}`;
+}
+
+/**
  * Next roles to apply to. scope narrows by place; showUnverified adds
  * abroad roles that don't state sponsorship (to check by hand).
  */
@@ -122,23 +138,38 @@ export async function applyQueue({ scope = 'all', minFit = 70, limit = 40, showU
   for (const t of await many(`SELECT t.company_id, c.name, t.notes FROM tracked_companies t JOIN companies c ON c.id = t.company_id WHERE t.notes LIKE '%CC_ROLES%'`)) {
     for (const r of splitNotes(t.notes).roles) {
       if (STAGE_ORDER.indexOf(r.stage || 'new') >= STAGE_ORDER.indexOf('applied') || r.stage === 'failed') {
-        done.add(`${String(t.name).toLowerCase().trim()}|${String(r.title || '').toLowerCase().trim()}`);
+        done.add(roleKey(t.name, r.title));
         if (r.jobId) done.add(r.jobId);
       }
     }
   }
+  // Skipped or applied once is handled for every posting of that role:
+  // a repost under a new ID, or the same role in another city.
+  for (const j of await many(
+    `SELECT COALESCE(c.name, j.company_name) AS company, j.title FROM jobs j
+     LEFT JOIN companies c ON c.id = j.company_id WHERE j.dismissed OR j.app_status IS NOT NULL`,
+  )) done.add(roleKey(j.company, j.title));
 
   const now = Date.now();
   const out = [];
   const counts = { bangalore: 0, remote: 0, abroad: 0, unverifiedAbroad: 0 };
+  // Open copies of one role show once (rows come best-fit first).
+  const counted = new Set();
+  const listed = new Set();
   for (const r of rows) {
-    if (done.has(r.id) || done.has(`${String(r.company).toLowerCase().trim()}|${String(r.title).toLowerCase().trim()}`)) continue;
+    const key = roleKey(r.company, r.title);
+    if (done.has(r.id) || done.has(key)) continue;
     const c = classifyRole({ location: r.location, flags: { visaNo: r.visa_no, visaYes: r.visa_yes, relocNo: r.reloc_no, relocYes: r.reloc_yes, locked: r.locked } });
     const unverified = c.place === 'abroad' && !c.eligible && c.visa !== 'no';
-    if (c.eligible) counts[c.place] += 1;
-    if (unverified) counts.unverifiedAbroad += 1;
+    if ((c.eligible || unverified) && !counted.has(`${key}|${c.place}`)) {
+      counted.add(`${key}|${c.place}`);
+      if (c.eligible) counts[c.place] += 1;
+      if (unverified) counts.unverifiedAbroad += 1;
+    }
     if (!(c.eligible || (showUnverified && unverified))) continue;
     if (s !== 'all' && c.place !== s) continue;
+    if (listed.has(key)) continue;
+    listed.add(key);
     const ageDays = r.posted ? Math.max(0, (now - new Date(r.posted).getTime()) / 86_400_000) : 30;
     // Fit leads; hiring signals and freshness break ties; a stated move helps abroad;
     // Luxembourg / Sydney with a way in jump to the top.
